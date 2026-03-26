@@ -1,0 +1,6 @@
+{
+  "name": "claude-code-factory",
+  "description": "Extension Factory + Dev Team Factory — generates extensions and dev agents from natural language",
+  "version": "1.0.0",
+  "author": { "name": "Pete Connor" }
+}

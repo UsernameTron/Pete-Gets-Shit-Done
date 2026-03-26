@@ -1,0 +1,6 @@
+{
+  "name": "claude-mcp-ecosystem",
+  "description": "Project agent ecosystem — set up, manage, and diagnose specialist agents, plus session commands (/prime, /wrap) and agent lifecycle (/agents, /agent-setup, /agent-status, /agent-diagnose, /agent-add, /agent-remove, /agent-reset)",
+  "version": "2.0.0",
+  "author": { "name": "Pete Connor" }
+}

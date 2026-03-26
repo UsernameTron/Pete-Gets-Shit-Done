@@ -1,0 +1,111 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HAS_GIT=false; HAS_CMD=false; HAS_README=false; HAS_GITIGNORE=false; HAS_TESTS=false; HAS_AGENTS=false; HAS_TASKS=false; HAS_HANDOFF=false; HAS_CODE=false; IS_EMPTY=true; [ -d .git ] && HAS_GIT=true; [ -f CLAUDE.md ] && HAS_CMD=true; [ -f README.md ] && HAS_README=true; [ -f .gitignore ] && HAS_GITIGNORE=true; [ -d tests ] || [ -d test ] || [ -d __tests__ ] && HAS_TESTS=true; [ -d .claude/agents ] && HAS_AGENTS=true; ([ -d tasks ] || [ -d .planning ]) && HAS_TASKS=true; [ -f docs/DEVOPS-HANDOFF.md ] && HAS_HANDOFF=true; FC=$(find . -maxdepth 1 -not -name '.*' -not -name '.' 2>/dev/null | wc -l | tr -d ' '); [ \"$FC\" -gt 0 ] && IS_EMPTY=false; CC=$(find . -maxdepth 3 \\( -name '*.py' -o -name '*.js' -o -name '*.ts' -o -name '*.jsx' -o -name '*.tsx' \\) 2>/dev/null | head -5 | wc -l | tr -d ' '); [ \"$CC\" -gt 0 ] && HAS_CODE=true; echo \"{\\\"systemMessage\\\": \\\"Project scan: git=$HAS_GIT claude_md=$HAS_CMD readme=$HAS_README gitignore=$HAS_GITIGNORE tests=$HAS_TESTS agents=$HAS_AGENTS tasks=$HAS_TASKS handoff=$HAS_HANDOFF code=$HAS_CODE empty=$IS_EMPTY. If empty=true, run Phase 0 bootstrap using claude-md-management, claude-code-setup, hookify, project-guide, and subagent-concierge. If git=true but claude_md=false, run claude-md-management first. If code=true but tests=false, flag for eval-harness. If agents=true, run subagent-companion health check. If all true, run /prime.\\\"}\"",
+            "statusMessage": "Scanning project state..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); if echo \"$INPUT\" | grep -qE 'git commit' && (git branch --show-current 2>/dev/null | grep -qE '^(main|master)$'); then echo '{\"decision\":\"block\",\"reason\":\"Do not commit directly to main/master. Create a feature branch first: git checkout -b feat/your-feature\"}' >&2; exit 2; fi",
+            "statusMessage": "Checking branch safety..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); if echo \"$INPUT\" | grep -qE 'git add.*(state/|context/|\\.DS_Store|__pycache__|outputs/|\\.env[^.]|node_modules)'; then echo '{\"decision\":\"block\",\"reason\":\"Blocked: attempting to stage private/generated files. These should be in .gitignore: state/, context/, .DS_Store, __pycache__/, .env, node_modules/, outputs/\"}' >&2; exit 2; fi",
+            "statusMessage": "Checking staged files..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); if echo \"$INPUT\" | grep -q 'git commit'; then MISSING=''; [ ! -f CLAUDE.md ] && MISSING=\"$MISSING CLAUDE.md\"; [ ! -f README.md ] && MISSING=\"$MISSING README.md\"; [ ! -f docs/DEVOPS-HANDOFF.md ] && MISSING=\"$MISSING docs/DEVOPS-HANDOFF.md\"; if [ -n \"$MISSING\" ]; then echo \"{\\\"decision\\\": \\\"block\\\", \\\"reason\\\": \\\"Missing required docs:$MISSING. Create them before committing.\\\"}\" >&2; exit 2; fi; fi",
+            "statusMessage": "Checking required docs..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); if echo \"$INPUT\" | grep -q 'git commit'; then SECRETS=$(git diff --cached --diff-filter=ACM -S 'sk-ant-\\|sk-proj-\\|ghp_\\|hf_\\|api_key\\|API_KEY\\|PRIVATE_KEY\\|SECRET_KEY\\|password' 2>/dev/null | head -5); if [ -n \"$SECRETS\" ]; then echo '{\"decision\":\"block\",\"reason\":\"BLOCKED: Possible secrets/API keys detected in staged files.\"}' >&2; exit 2; fi; fi",
+            "statusMessage": "Scanning for secrets..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); if echo \"$INPUT\" | grep -q 'git add'; then NESTED=$(find . -mindepth 2 -maxdepth 3 -name '.git' -type d 2>/dev/null | head -3); if [ -n \"$NESTED\" ]; then echo '{\"decision\":\"block\",\"reason\":\"WARNING: Nested .git directories found. Remove with rm -rf path/.git\"}' >&2; exit 2; fi; fi",
+            "statusMessage": "Checking for nested repos..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); if echo \"$INPUT\" | grep -q 'git push'; then DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' '); if [ \"$DIRTY\" -gt 0 ]; then echo \"{\\\"decision\\\": \\\"block\\\", \\\"reason\\\": \\\"$DIRTY uncommitted files. Commit before pushing.\\\"}\" >&2; exit 2; fi; fi",
+            "statusMessage": "Pre-push safety check..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | grep -oE '[^ ]+\\.(py|js|ts|jsx|tsx|html|vue|svelte|md|json)' | head -1); if echo \"$FILE\" | grep -qE 'test_|_test\\.|\\.test\\.|\\.spec\\.'; then echo '{\"additionalContext\": \"Test file edited. Run test suite to verify.\"}'; elif echo \"$FILE\" | grep -qE 'SKILL\\.md'; then echo '{\"additionalContext\": \"Skill file edited. Run extension-auditor.\"}'; elif echo \"$FILE\" | grep -qE '\\.py$'; then echo '{\"additionalContext\": \"Python file edited. pyright-lsp active.\"}'; fi",
+            "statusMessage": "Checking file type..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' '); TESTS='none'; if [ -d tests ] || [ -d test ] || [ -d __tests__ ]; then TESTS='exist'; fi; TODO='missing'; if [ -f .planning/STATE.md ] || [ -f tasks/todo.md ]; then TODO='present'; fi; if [ \"$DIRTY\" -gt 0 ]; then echo \"{\\\"decision\\\": \\\"block\\\", \\\"reason\\\": \\\"$DIRTY uncommitted files. Commit or stash before stopping. Tests=$TESTS, todo=$TODO\\\"}\" && exit 2; else echo \"{\\\"decision\\\": \\\"approve\\\", \\\"reason\\\": \\\"Clean: 0 uncommitted, tests=$TESTS, todo=$TODO\\\"}\"; fi",
+            "statusMessage": "Running pre-stop checks..."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .planning/STATE.md ] || [ -f tasks/todo.md ]; then echo 'Pre-compact: task state in .planning/STATE.md or tasks/todo.md will be preserved via CLAUDE.md reload after compaction'; fi",
+            "statusMessage": "Preserving task state..."
+          }
+        ]
+      }
+    ]
+  }
+}

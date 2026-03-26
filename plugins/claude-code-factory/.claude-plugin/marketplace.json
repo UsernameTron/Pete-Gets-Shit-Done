@@ -1,0 +1,13 @@
+{
+  "name": "claude-code-factory-marketplace",
+  "owner": {
+    "name": "Pete Connor"
+  },
+  "plugins": [
+    {
+      "name": "claude-code-factory",
+      "source": "./",
+      "description": "Extension Factory + Dev Team Factory — generates extensions and dev agents from natural language"
+    }
+  ]
+}

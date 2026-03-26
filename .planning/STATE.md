@@ -1,0 +1,46 @@
+---
+gsd_state_version: 1.0
+milestone: none
+milestone_name: none
+status: between milestones
+last_updated: "2026-03-26"
+progress:
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+---
+
+# STATE -- Pete-Gets-Shit-Done Workspace
+
+## Project Reference
+
+See: .planning/PROJECT.md (updated 2026-03-26)
+
+**Shipped:** v1.1 Testing & Hardening (2026-03-26)
+**Current focus:** Between milestones -- ready for `/gsd:new-milestone`
+
+## Current Position
+
+No active milestone. All v1.1 work shipped and archived.
+
+## Open Items
+
+- [x] ~~Delete accidental `UsernameTron/Pete-Gets-Shit-Done` repo~~ Done (manual, 2026-03-26)
+- [x] ~~GSD v1.29 publish -- version bump~~ Done (PR #20)
+- [x] ~~Align plugin.json author fields -- deferred META-01~~ Done (PR #20)
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260326-j9x | Fix plugin placeholders + bump to v1.29.0 | 2026-03-26 | 983783d | [260326-j9x](./quick/260326-j9x-fix-plugin-json-placeholders-and-bump-ve/) |
+| 260326-jnx | Add governance, plugins, skill catalog to README | 2026-03-26 | 0874676 | [260326-jnx](./quick/260326-jnx-update-readme-md-with-governance-layer-s/) |
+| 260326-kaw | Merge all branches to main and confirm | 2026-03-26 | d08e9b5 | [260326-kaw](./quick/260326-kaw-merge-all-branches-to-main-and-confirm/) |
+| 260326-kym | Delete agent-teams, superpowers dirs; update MCP plugin desc | 2026-03-26 | 307bb1c | [260326-kym](./quick/260326-kym-delete-agent-teams-downloads-superpowers/) |
+
+## Session Handoff
+
+**Branch**: `chore/session-wrap-update`
+**Last action**: Deleted obsolete agent-teams and superpowers directories, updated MCP ecosystem plugin description with all 9 commands
+**Next**: `/gsd:new-milestone` or remaining deferred items

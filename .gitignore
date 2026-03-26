@@ -1,0 +1,47 @@
+node_modules/
+.DS_Store
+
+# Legacy subdirectories (pre-flatten)
+claude-code-kickstart/
+
+# Private session files
+state/
+/context/
+plugins/*/context/
+
+# Build artifacts (committed to npm, not git)
+hooks/dist/
+
+# Coverage artifacts
+coverage/
+
+# Animation assets
+animation/
+*.gif
+
+# Governance templates are tracked
+# (Root CLAUDE.md is also tracked — it's the project governance file)
+
+# Local test installs
+.claude/
+
+# Internal planning documents (STATE.md is committed; everything else is local)
+.planning/phases/
+.planning/PROJECT.md
+.planning/config.json
+.planning/research/
+reports/
+analysis/
+
+# Installed skills (other platforms)
+.github/agents/gsd-*
+.github/skills/gsd-*
+.github/get-shit-done/*
+.github/skills/get-shit-done
+.github/copilot-instructions.md
+.bg-shell/
+
+# Misc
+TO-DOS.md
+/research.claude/
+commands.html
