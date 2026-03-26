@@ -41,6 +41,8 @@ No active milestone. All v1.1 work shipped and archived.
 
 ## Session Handoff
 
-**Branch**: `chore/session-wrap-update`
-**Last action**: Deleted obsolete agent-teams and superpowers directories, updated MCP ecosystem plugin description with all 9 commands
-**Next**: `/gsd:new-milestone` or remaining deferred items
+**Branch**: `main` at `6247018` (single commit — history squashed)
+**Tags**: `v1.0`, `v1.1` pointing to `6247018`
+**History**: Squashed — all prior PRs and commits replaced by single initial commit
+**Last action**: Git history squashed to single orphan commit, all stale branches/worktrees cleaned, tags recreated
+**Next**: `/gsd:new-milestone` to start the next cycle
