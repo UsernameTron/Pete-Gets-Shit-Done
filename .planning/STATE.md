@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-status: between milestones
-last_updated: "2026-03-26"
+milestone: v1.2
+milestone_name: Agent Quality & Consolidation
+status: planning
+last_updated: "2026-04-03"
 progress:
-  total_phases: 0
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,11 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Shipped:** v1.1 Testing & Hardening (2026-03-26)
-**Current focus:** Between milestones -- ready for `/gsd:new-milestone`
+**Current focus:** v1.2 Agent Quality & Consolidation — Phase 6 planning
 
 ## Current Position
 
-No active milestone. All v1.1 work shipped and archived.
+Phase 6: Crew Assessment Fixes — planning in progress.
+Source: docs/crew-assessment-fix-prompt.md (7 priorities)
 
 ## Open Items
 
