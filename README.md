@@ -69,8 +69,8 @@ The full inventory:
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
-| Test suites | 295 |
-| Test assertions | 1,517 |
+| Test suites | 325 |
+| Test assertions | 1,671 |
 | Reference docs | 6 (CLI, skills, hooks, MCP, settings, subagents) |
 
 ## Getting Started
