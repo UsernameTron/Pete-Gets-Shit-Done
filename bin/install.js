@@ -3978,9 +3978,44 @@ function reportLocalPatches(configDir, runtime = 'claude') {
 }
 
 /**
+ * Check if a hook with the given command path is already registered for an event.
+ * Uses exact command-path comparison to avoid fragile substring matching.
+ * Part of the write-once registration contract: components register once at startup,
+ * duplicates are no-ops with warnings.
+ */
+function isHookRegistered(settings, event, commandPath) {
+  if (!settings.hooks || !settings.hooks[event]) return false;
+  return settings.hooks[event].some(entry =>
+    (entry.hooks || []).some(h => h.command && h.command === commandPath)
+  );
+}
+
+/**
+ * Validate that gsd- prefix agents in target dir are GSD-owned.
+ * Warns on collision — does not block (consumer may have legitimate overrides).
+ * Part of the type-name governance contract: gsd- prefix is reserved for core routing.
+ */
+function validateGsdPrefixAgents(targetAgentsDir, sourceAgentsDir) {
+  if (!fs.existsSync(targetAgentsDir) || !fs.existsSync(sourceAgentsDir)) return;
+  const sourceAgents = new Set(
+    fs.readdirSync(sourceAgentsDir)
+      .filter(f => f.startsWith('gsd-') && f.endsWith('.md'))
+  );
+  const targetAgents = fs.readdirSync(targetAgentsDir)
+    .filter(f => f.startsWith('gsd-') && f.endsWith('.md'));
+
+  for (const agent of targetAgents) {
+    if (!sourceAgents.has(agent)) {
+      console.log(`  ${yellow}\u26a0  Prefix collision: ${agent} uses gsd- prefix but is not a GSD core agent${reset}`);
+      console.log(`  ${yellow}     gsd- prefix is reserved for core routing. Rename to avoid conflicts.${reset}`);
+    }
+  }
+}
+
+/**
  * Merge governance hooks/permissions JSON into existing settings.json.
  * Additive only — never overwrites existing hooks or permissions.
- * Idempotent: running twice produces the same result.
+ * Idempotent: running twice produces the same result (write-once contract).
  */
 function mergeGovernanceJson(settingsPath, governanceJsonPath, label) {
   if (!fs.existsSync(governanceJsonPath)) return false;
@@ -3997,14 +4032,16 @@ function mergeGovernanceJson(settingsPath, governanceJsonPath, label) {
         settings.hooks[event] = entries;
         changed = true;
       } else {
-        // Check each entry — skip if a matching command already exists
+        // Write-once registration: skip if exact command already exists
         for (const entry of entries) {
           const commands = (entry.hooks || []).map(h => h.command || '').filter(Boolean);
-          const isDuplicate = settings.hooks[event].some(existing => {
-            const existingCmds = (existing.hooks || []).map(h => h.command || '').filter(Boolean);
-            return commands.some(cmd => existingCmds.some(ec => ec.includes(cmd.split(' ').pop())));
-          });
-          if (!isDuplicate) {
+          const isDuplicate = commands.length > 0 && commands.every(cmd =>
+            isHookRegistered(settings, event, cmd)
+          );
+          if (isDuplicate) {
+            const hookName = commands[0] ? path.basename(commands[0].replace(/"/g, '')) : 'unknown';
+            console.log(`  ${yellow}⚠${reset}  Hook already registered for ${event}: ${hookName} — skipping (write-once)`);
+          } else {
             settings.hooks[event].push(entry);
             changed = true;
           }
@@ -4494,6 +4531,9 @@ function install(isGlobal, runtime = 'claude') {
     } else {
       failures.push('agents');
     }
+
+    // Validate gsd- prefix collisions (type-name governance)
+    validateGsdPrefixAgents(agentsDest, agentsSrc);
   }
 
   // Copy CHANGELOG.md
@@ -4582,6 +4622,16 @@ function install(isGlobal, runtime = 'claude') {
     if (hasPlugins) {
       installGovernancePlugins(targetDir, src);
     }
+  } else if (runtime === 'claude' && hasNoGovernance) {
+    // Feature flag security perimeter: document exactly what's exposed
+    console.log(`\n  ${yellow}⚠  --no-governance: Governance layer SKIPPED${reset}`);
+    console.log(`  ${yellow}   The following protections are NOT installed:${reset}`);
+    console.log(`  ${yellow}   - CLAUDE.md governance template (session rules, workflow gates)${reset}`);
+    console.log(`  ${yellow}   - Context reference docs (role.md, org.md, priorities.md, metrics.md)${reset}`);
+    console.log(`  ${yellow}   - Hook-based guardrails (workflow guard, prompt guard, context monitor)${reset}`);
+    console.log(`  ${yellow}   - Permission rule enforcement (settings-permissions.json)${reset}`);
+    console.log(`  ${yellow}   - Plugin governance integration${reset}`);
+    console.log(`  ${yellow}   Run without --no-governance to install full protection.${reset}`);
   }
 
   // Scaffold project structure if requested
@@ -5136,6 +5186,8 @@ if (process.env.GSD_TEST_MODE) {
     writeManifest,
     reportLocalPatches,
     validateHookFields,
+    isHookRegistered,
+    validateGsdPrefixAgents,
     mergeGovernanceJson,
     installGovernance,
     installGovernancePlugins,
