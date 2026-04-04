@@ -28,14 +28,16 @@
 
 ### Phases
 
-- [ ] **Phase 6: Crew Assessment Fixes** - Execute all 7 crew assessment priorities: YAML fixes, agent consolidation (verification 4→1, research 2→1, validator 2→1), workflow wiring, tool-access tiers, quality sections
+- [x] **Phase 6: Crew Assessment Fixes** - Execute all 7 crew assessment priorities: YAML fixes, agent consolidation (verification 4→1, research 2→1, validator 2→1), workflow wiring, tool-access tiers, quality sections
   - **Requirements:** [CREW-01, CREW-02, CREW-03, CREW-04, CREW-05, CREW-06, CREW-07]
-  - **Plans:** 5 plans
+  - **Plans:** 5 plans (all complete)
     - [x] 06-01-PLAN.md — P1: Fix YAML parsing in 8 agents
-    - [ ] 06-02-PLAN.md — P2: Consolidate verification agents (4→1)
-    - [ ] 06-03-PLAN.md — P3+P4: Consolidate research (2→1) and validator (2→1) agents
-    - [ ] 06-04-PLAN.md — P5+P6: Wire utility agents into workflows + tool-access tiers
-    - [ ] 06-05-PLAN.md — P7: Quality sections for low-scoring agents + final verification
+    - [x] 06-02-PLAN.md — P2: Consolidate verification agents (4→1)
+    - [x] 06-03-PLAN.md — P3+P4: Consolidate research (2→1) and validator (2→1) agents
+    - [x] 06-04-PLAN.md — P5+P6: Wire utility agents into workflows + tool-access tiers
+    - [x] 06-05-PLAN.md — P7: Quality sections for low-scoring agents + final verification
+
+**Stats:** 5 plans, 7 priorities addressed, 37→29 agents (7 archived), 9 agents quality-gated.
 
 ---
-*Last updated: 2026-04-03 -- Phase 6 planned*
+*Last updated: 2026-04-04 -- Phase 6 complete*
