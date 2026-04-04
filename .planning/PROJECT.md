@@ -7,11 +7,25 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 ## Current State
 
 **Shipped:** v1.3 Security Hardening & Coverage (2026-04-04)
+**Active:** v1.4 Correctness & Robustness
 **Package:** `get-shit-done-cc` v1.29.0
 **Tests:** 260 passing (51 suites, 717ms)
 **Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
 **Agents:** 15 source, 29 global, 7 archived — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
+
+## Current Milestone: v1.4 Correctness & Robustness
+
+**Goal:** Replace silent failures with structured error handling, freeze shared state at module boundaries, resolve carried tech debt, and add timeout guards for graceful degradation.
+
+**Target features:**
+- GsdError structured error class with code, context, and cause fields
+- Audit and fix ~90 silent catch blocks across 12 files
+- deepFreeze() utility for immutable module-boundary returns
+- Tech debt cleanup: absorbed agent entries, coverage gaps, validation docs
+- Safe execution wrapper with configurable timeouts for child processes
+
+**Strategy:** Three milestones — v1.4 Correctness first (silent failures, mutable state), v1.5 Performance, v1.6 Maintainability. Architecture review scored 3.61/5.00; only Security (35% weight) was addressed in v1.3.
 
 ## Validated Requirements (v1.3)
 

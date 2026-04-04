@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: "Security Hardening & Coverage"
-status: archived
+milestone: v1.4
+milestone_name: "Correctness & Robustness"
+status: active
 last_updated: "2026-04-04"
 progress:
   total_phases: 4
-  completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,7 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Last Shipped:** v1.3 Security Hardening & Coverage (2026-04-04)
-**Next:** No active milestone. Run `/gsd:new-milestone` to start.
+**Active:** v1.4 Correctness & Robustness
+
+## Current Position
+
+Phase: 11 — Error Handling & Silent Failure Elimination
+Plan: Not started
+Status: Ready for discuss -> plan -> execute
+Last activity: 2026-04-04 — Milestone v1.4 started
+
+## Phase Status
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 11 | Error Handling & Silent Failure Elimination | Pending |
+| 12 | State Immutability & Defensive Copies | Pending |
+| 13 | Tech Debt Cleanup | Pending |
+| 14 | Timeout Guards & Graceful Degradation | Pending |
 
 ## Milestone History
 
@@ -32,5 +48,5 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.3 milestone archived — all 6 requirements validated, 260 tests passing
-**Next**: `/gsd:new-milestone` to start v1.4
+**Last action**: v1.4 milestone initialized — 4 phases, 14 requirements
+**Next**: Autonomous execution of Phase 11

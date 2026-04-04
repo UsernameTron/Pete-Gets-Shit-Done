@@ -1,0 +1,89 @@
+# Requirements: get-shit-done-cc
+
+**Defined:** 2026-04-04
+**Core Value:** Zero-dependency spec-driven development plugin for Claude Code
+
+## v1.4 Requirements
+
+Requirements for v1.4 Correctness & Robustness. Each maps to roadmap phases.
+
+### Error Handling
+
+- [ ] **CORR-01**: GsdError class in core.cjs with structured error (code, context, cause fields)
+- [ ] **CORR-02**: Audit and fix silent catch blocks across lib modules (~90 catch blocks in 12 files)
+- [ ] **CORR-03**: loadConfig() silent failures at core.cjs empty catches must log diagnostics or propagate meaningfully
+
+### State Immutability
+
+- [ ] **CORR-04**: deepFreeze() utility in core.cjs — recursive Object.freeze for plain objects and arrays
+- [ ] **CORR-05**: Freeze return values at module boundaries (loadConfig, state accessors, phase readers)
+- [ ] **CORR-06**: Verify .push() mutations in state.cjs are safe (local array building, not shared state mutation)
+
+### Timeout Guards
+
+- [ ] **CORR-07**: Safe execution wrapper in core.cjs with configurable timeout and structured error on timeout
+- [ ] **CORR-08**: Apply safe wrapper to execGit() and other high-frequency callers
+- [ ] **CORR-09**: withPlanningLock() force-acquire path must log diagnostic message explaining why lock was broken
+
+### Tech Debt
+
+- [ ] **DEBT-01**: Fix 5 agent tier label mismatches in CREW-ASSESSMENT docs
+- [ ] **DEBT-02**: Remove 5 absorbed agent entries from MODEL_PROFILES in model-profiles.cjs
+- [ ] **DEBT-03**: Raise security.cjs branch coverage from 91.11% to 95%+
+- [ ] **DEBT-04**: Wire gsd-validator-hub into at least one workflow entry point
+- [ ] **DEBT-05**: Add VALIDATION.md files for v1.3 phases (process gap from Nyquist)
+
+## Deferred (v1.5 / v1.6)
+
+### Performance (v1.5)
+
+- **PERF-01**: Streaming output for large operations
+- **PERF-02**: Cache-stable ordering for deterministic outputs
+- **PERF-03**: Lazy loading for agent definitions
+- **PERF-04**: Token estimation utilities
+
+### Maintainability (v1.6)
+
+- **MAINT-01**: Layered architecture refactoring
+- **MAINT-02**: Feature flags for experimental capabilities
+- **MAINT-03**: Skills extensibility improvements
+- **MAINT-04**: Orphaned skills audit and cleanup
+- **MAINT-05**: Skill versioning system
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Abort controller propagation | Current sync architecture doesn't benefit without async refactor (v1.5 candidate) |
+| Plugin audit and marketplace | Ecosystem-level concern, deferred to v1.6 |
+| skill-forge consolidation | Maintainability scope, deferred to v1.6 |
+| Breaking changes to GSD commands | Backward compatibility constraint |
+| New npm dependencies | Zero-dependency constraint |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CORR-01 | Phase 11 | Pending |
+| CORR-02 | Phase 11 | Pending |
+| CORR-03 | Phase 11 | Pending |
+| CORR-04 | Phase 12 | Pending |
+| CORR-05 | Phase 12 | Pending |
+| CORR-06 | Phase 12 | Pending |
+| CORR-07 | Phase 14 | Pending |
+| CORR-08 | Phase 14 | Pending |
+| CORR-09 | Phase 14 | Pending |
+| DEBT-01 | Phase 13 | Pending |
+| DEBT-02 | Phase 13 | Pending |
+| DEBT-03 | Phase 13 | Pending |
+| DEBT-04 | Phase 13 | Pending |
+| DEBT-05 | Phase 13 | Pending |
+
+**Coverage:**
+- v1.4 requirements: 14 total
+- Mapped to phases: 14
+- Unmapped: 0
+
+---
+*Requirements defined: 2026-04-04*
+*Last updated: 2026-04-04 after milestone initialization*
