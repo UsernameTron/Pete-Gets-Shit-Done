@@ -6,28 +6,49 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Shipped:** v1.3 Security Hardening & Coverage (2026-04-04)
-**Active:** v1.4 Correctness & Robustness
+**Shipped:** v1.4 Correctness & Robustness (2026-04-04)
+**Active:** v1.5 Performance
 **Package:** `get-shit-done-cc` v1.29.0
 **Tests:** 260 passing (51 suites, 717ms)
 **Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
 **Agents:** 15 source, 29 global, 7 archived — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-## Current Milestone: v1.4 Correctness & Robustness
+## Current Milestone: v1.5 Performance
 
-**Goal:** Replace silent failures with structured error handling, freeze shared state at module boundaries, resolve carried tech debt, and add timeout guards for graceful degradation.
+**Goal:** Reduce latency and resource consumption in GSD workflows through streaming output, deterministic ordering, lazy loading, and token estimation.
 
 **Target features:**
-- GsdError structured error class with code, context, and cause fields
-- Audit and fix ~90 silent catch blocks across 12 files
-- deepFreeze() utility for immutable module-boundary returns
-- Tech debt cleanup: absorbed agent entries, coverage gaps, validation docs
-- Safe execution wrapper with configurable timeouts for child processes
+- Streaming output for large operations (avoid buffering full results)
+- Cache-stable ordering for deterministic outputs across runs
+- Lazy loading for agent definitions (load on demand, not at startup)
+- Token estimation utilities for context budget management
 
-**Strategy:** Three milestones — v1.4 Correctness first (silent failures, mutable state), v1.5 Performance, v1.6 Maintainability. Architecture review scored 3.61/5.00; only Security (35% weight) was addressed in v1.3.
+**Strategy:** Three milestones — v1.4 Correctness (done), v1.5 Performance (active), v1.6 Maintainability (next). All performance utilities must be zero-dependency CommonJS — no new npm packages.
 
-## Validated Requirements (v1.3)
+## Validated Requirements (v1.4)
+
+All 14 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| CORR-01: GsdError class with code, context, cause | Phase 11 | Validated |
+| CORR-02: Silent catch block audit (~90 blocks) | Phase 11 | Validated |
+| CORR-03: loadConfig() silent failure diagnostics | Phase 11 | Validated |
+| CORR-04: deepFreeze() utility in core.cjs | Phase 12 | Validated |
+| CORR-05: Freeze returns at module boundaries | Phase 12 | Validated |
+| CORR-06: .push() mutation safety verification | Phase 12 | Validated |
+| CORR-07: safeExec wrapper with timeout support | Phase 14 | Validated |
+| CORR-08: execGit uses safeExec with timeout | Phase 14 | Validated |
+| CORR-09: Lock force-acquire diagnostics | Phase 14 | Validated |
+| DEBT-01: Agent tier label fixes | Phase 13 | Validated |
+| DEBT-02: Absorbed agent profile cleanup | Phase 13 | Validated |
+| DEBT-03: security.cjs branch coverage >= 95% | Phase 13 | Validated |
+| DEBT-04: gsd-validator-hub workflow wiring | Phase 13 | Validated |
+| DEBT-05: v1.3 VALIDATION.md gap fill | Phase 13 | Validated |
+
+<details>
+<summary><strong>v1.3 Requirements (6/6 validated)</strong></summary>
 
 All 6 requirements verified complete:
 
@@ -39,6 +60,8 @@ All 6 requirements verified complete:
 | SEC-04: __GSD_TRUNCATED__ sentinel in output fallback | Phase 8 | Validated |
 | SEC-05: Branch coverage 82.82% to 87%+ on core.cjs | Phase 9 | Validated |
 | SEC-06: Config version tracking + migration registry | Phase 10 | Validated |
+
+</details>
 
 <details>
 <summary><strong>v1.2 Requirements (7/7 validated)</strong></summary>
@@ -106,19 +129,18 @@ All 6 requirements verified complete:
 - 25 source files instrumented for coverage across lib, hooks, gsd-tools, bin, scripts
 - v1.3 added config migration system — configs auto-gain config_version on first load
 
-## Tech Debt (from v1.3 audit)
+## Tech Debt (carried into v1.5)
 
 - validateShellArg has zero production callers (library infrastructure)
 - __GSD_TRUNCATED__ sentinel has no programmatic consumer (LLM protocol marker)
-- security.cjs branch coverage 91.11% — short-circuit expressions, below 95% aspirational target
-- No VALIDATION.md files for v1.3 phases (Nyquist process gap)
-- 5 agent tier labels mismatch actual tool grants (documentation-only, from v1.2)
-- gsd-validator-hub has no workflow entry point (from v1.2)
+- GSD v1.29 publish (version bump not yet done)
+- Align plugin.json author fields with package.json (META-01)
 
 ## Deferred
 
-- GSD v1.29 publish (version bump not yet done)
-- Align plugin.json author fields with package.json (META-01)
+- Abort controller propagation (needs async refactor, v1.6 candidate)
+- Plugin audit and marketplace (ecosystem-level concern, v1.6)
+- skill-forge consolidation (maintainability scope, v1.6)
 
 ## Evolution
 
@@ -138,4 +160,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 -- v1.3 milestone shipped*
+*Last updated: 2026-04-04 -- v1.5 milestone started*

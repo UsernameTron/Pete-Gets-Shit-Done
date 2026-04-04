@@ -1,5 +1,20 @@
 # Milestones
 
+## v1.4 Correctness & Robustness (Shipped: 2026-04-04)
+
+**Phases completed:** 4 phases (11-14), 6 plans, 14 requirements
+
+**Key accomplishments:**
+
+- GsdError structured error class with code, context, cause fields — CORR-01
+- Audited and documented 92 catch blocks across 12 files with intentional annotations — CORR-02
+- deepFreeze() utility and module-boundary immutability for loadConfig/state returns — CORR-04, CORR-05
+- safeExec() wrapper with configurable timeouts, execGit refactored through it — CORR-07, CORR-08
+- Lock force-acquire diagnostics with debugLog — CORR-09
+- Tech debt cleanup: tier labels, absorbed profiles, coverage, validator wiring, validation docs — DEBT-01 through DEBT-05
+
+---
+
 ## v1.3 Security Hardening & Coverage (Shipped: 2026-04-04)
 
 **Phases completed:** 4 phases (7-10), 4 plans, 260 tests passing
