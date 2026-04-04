@@ -6,17 +6,29 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Shipped:** v1.1 Testing & Hardening (2026-03-26)
-**Package:** `get-shit-done-cc` v1.28.0
+**Shipped:** v1.2 Agent Quality & Consolidation (2026-04-04)
+**Package:** `get-shit-done-cc` v1.29.0
 **Tests:** 1,662 passing (76 unit + 39 integration added in v1.1)
 **Coverage:** 85%+ lines, 77%+ branches across 25 instrumented source files
+**Agents:** 15 source, 29 global, 7 archived — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-The repo has comprehensive test coverage, hardened CI pipeline (Linux/macOS/Windows), and integrated coverage reporting. Ready for v1.29 publish when scope allows.
+## Validated Requirements (v1.2)
 
-## Validated Requirements (v1.1)
+All 7 requirements verified complete:
 
-All 13 requirements verified complete:
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| CREW-01: Fix YAML parsing in 8 agents | Phase 6 | Validated (no changes needed) |
+| CREW-02: Consolidate verification agents (4→1) | Phase 6 | Validated |
+| CREW-03: Consolidate research agents (2→1) | Phase 6 | Validated |
+| CREW-04: Consolidate validator agents (2→1) | Phase 6 | Validated |
+| CREW-05: Wire utility agents into workflows | Phase 6 | Validated |
+| CREW-06: Tool-access tiers for all agents | Phase 6 | Validated |
+| CREW-07: Quality sections for low-scoring agents | Phase 6 | Validated |
+
+<details>
+<summary><strong>v1.1 Requirements (13/13 validated)</strong></summary>
 
 | Requirement | Phase | Outcome |
 |-------------|-------|---------|
@@ -34,6 +46,8 @@ All 13 requirements verified complete:
 | CI-02: Coverage reporting in CI | Phase 5 | Validated |
 | CI-03: Cross-platform CI passes | Phase 5 | Validated |
 
+</details>
+
 ## Constraints
 
 - **Zero dependencies**: Package must remain zero-dependency CommonJS
@@ -44,14 +58,12 @@ All 13 requirements verified complete:
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Collapse 4 phases to 1 (v1.0) | Contamination scan showed most work already done | Accepted |
-| Conditional step phrasing in governance | "if exists" preserves compatibility with non-GSD projects | Accepted |
-| `.planning/phases/` gitignored | Phase plans are local execution artifacts, not committed | By design |
-| Coverage thresholds advisory-only | Expanding scope dropped overall to ~81%; hard thresholds deferred | v1.1 Phase 2 |
-| Single script for gap analysis + baseline | Consistency between gap analysis and baseline docs | v1.1 Phase 2 |
+| 4→1 verification consolidation | Overlapping scopes unified into gsd-verifier with scope param | v1.2 Phase 6 |
+| 2→1 research consolidation | Phase/project researchers differ only in scope | v1.2 Phase 6 |
+| 2→1 validator consolidation | extension-validator + validator merged into gsd-validator-hub | v1.2 Phase 6 |
+| 3-tier tool access | Explore (read), Research (+web), Modify (+write) applied to all agents | v1.2 Phase 6 |
+| Quality threshold: 2+ missing sections | Agents missing 1 section skipped to minimize churn | v1.2 Phase 6 |
 | Integration tests use real code paths | Prior incident where mock/prod divergence masked failures | v1.1 Phase 4 |
-| base64-scan timeout exits clean (exit 0) | Incomplete scan is not a finding; prevents false positives | v1.1 Phase 5 |
-| Coverage report on Linux Node 22 only | Avoids duplicate reports across matrix jobs | v1.1 Phase 5 |
 | Advisory 80% threshold warns, never fails | Build stability over enforcement during ramp-up | v1.1 Phase 5 |
 
 ## Context
@@ -62,14 +74,20 @@ All 13 requirements verified complete:
 - Two plugin.json files exist (root and plugins/)
 - Governance templates in `governance/` define session initialization behavior
 - 3 specialist agents deployed: plugin-developer, test-runner, docs-sync
+- 15 source agents + 7 archived agents after v1.2 consolidation
 - 25 source files instrumented for coverage across lib, hooks, gsd-tools, bin, scripts
-- Integration tests validate CLI command chains, governance hook enforcement, plugin ecosystem coherence
+
+## Tech Debt (from v1.2 audit)
+
+- 5 agent tier labels mismatch actual tool grants (documentation-only, no runtime effect)
+- gsd-validator-hub has no workflow entry point
+- Global CLAUDE.md files reference absorbed agents as standalone
+- Missing SUMMARY.md files for plans 02-04 (context compaction)
 
 ## Deferred
 
 - GSD v1.29 publish (version bump not yet done)
 - Align plugin.json author fields with package.json (META-01)
-- Delete accidental `UsernameTron/Pete-Gets-Shit-Done` repo (manual)
 
 ## Evolution
 
@@ -89,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-26 -- v1.1 milestone shipped*
+*Last updated: 2026-04-04 -- v1.2 milestone shipped*
