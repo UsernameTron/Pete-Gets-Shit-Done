@@ -1,3 +1,5 @@
+<!-- ARCHIVED: Absorbed into gsd-research-orchestrator.md (scope: project) on 2026-04-03 -->
+
 ---
 name: gsd-project-researcher
 description: Researches domain ecosystem before roadmap creation. Produces files in .planning/research/ consumed during roadmap creation. Spawned by /gsd:new-project or /gsd:new-milestone orchestrators.

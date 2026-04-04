@@ -1,3 +1,4 @@
+<!-- ABSORBED into gsd-verifier.md (scope: nyquist) on 2026-04-03. Use gsd-verifier with scope parameter instead. -->
 ---
 name: gsd-nyquist-auditor
 description: Fills Nyquist validation gaps by generating tests and verifying coverage for phase requirements

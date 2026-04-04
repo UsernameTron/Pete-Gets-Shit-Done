@@ -1,3 +1,5 @@
+<!-- ARCHIVED: Absorbed into gsd-research-orchestrator.md (scope: phase) on 2026-04-03 -->
+
 ---
 name: gsd-phase-researcher
 description: Researches how to implement a phase before planning. Produces RESEARCH.md consumed by gsd-planner. Spawned by /gsd:plan-phase orchestrator.

@@ -1,3 +1,4 @@
+<!-- ABSORBED into gsd-verifier.md (scope: plan) on 2026-04-03. Use gsd-verifier with scope parameter instead. -->
 ---
 name: gsd-plan-checker
 description: Verifies plans will achieve phase goal before execution. Goal-backward analysis of plan quality. Spawned by /gsd:plan-phase orchestrator.

@@ -112,6 +112,21 @@ Milestone: $ARGUMENTS (optional — if omitted, read from .planning/STATE.md `mi
 4. Add to Completed section with today's date:
    - [x] Project finalized via /gsd:finalize ([date])
 
+## Gate 5.5: Auto-Update Project Documentation
+
+Spawn `repo-doc-architect` as a subagent to refresh project documentation before final reports:
+
+**Contract:**
+- **Input:** Project root path, CLAUDE.md path, .planning/STATE.md path
+- **Task:** Analyze codebase for documentation drift — update architecture.md and CLAUDE.md analytics/architecture sections
+- **Scope:** Medium project mode (sequential Architecture + Analytics agents)
+- **Output:** Structured JSON session summary (files created/modified, sections updated, validation errors/warnings)
+
+**Rules:**
+- If architecture.md exists and is less than 7 days old, skip architecture regeneration (analytics only)
+- If validation report contains critical errors, log them but do not block finalization
+- All generated files must be staged for the Gate 7 finalization commit
+
 ## Gate 6: Generate Reports
 
 1. Run `/gsd:stats` workflow inline — capture output

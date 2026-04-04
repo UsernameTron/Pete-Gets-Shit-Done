@@ -1,3 +1,4 @@
+<!-- ABSORBED into gsd-verifier.md (scope: integration) on 2026-04-03. Use gsd-verifier with scope parameter instead. -->
 ---
 name: gsd-integration-checker
 description: Verifies cross-phase integration and E2E flows. Checks that phases connect properly and user workflows complete end-to-end.
