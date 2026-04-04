@@ -13,7 +13,7 @@ Requirements for v1.5 Performance. Each maps to roadmap phases.
 
 ### Cache-Stable Ordering
 
-- [ ] **PERF-02**: Deterministic ordering utility in core.cjs — sort objects and arrays by stable keys so identical inputs produce identical outputs across runs, enabling cache hits on hash-based comparisons
+- [x] **PERF-02**: Deterministic ordering utility in core.cjs — sort objects and arrays by stable keys so identical inputs produce identical outputs across runs, enabling cache hits on hash-based comparisons
 
 ### Lazy Loading
 
@@ -48,7 +48,7 @@ Requirements for v1.5 Performance. Each maps to roadmap phases.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PERF-01 | Phase 15 | Complete |
-| PERF-02 | Phase 15 | Pending |
+| PERF-02 | Phase 15 | Complete |
 | PERF-03 | Phase 16 | Pending |
 | PERF-04 | Phase 16 | Pending |
 | PERF-05 | Phase 17 | Pending |
