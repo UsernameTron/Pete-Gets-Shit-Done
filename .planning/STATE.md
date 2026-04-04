@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Performance
-status: verifying
-last_updated: "2026-04-04T22:04:16.278Z"
-last_activity: 2026-04-04
+status: complete
+last_updated: "2026-04-04T23:00:00.000Z"
+last_activity: 2026-04-04 -- Phase 17 complete, all phases done, milestone ready for completion
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 6
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -19,17 +19,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Last Shipped:** v1.4 Correctness & Robustness (2026-04-04)
-**Active:** v1.5 Performance — roadmap created, ready for phase planning
+**Active:** v1.5 Performance — all 3 phases complete, milestone ready for completion
 
 ## Current Position
 
-Phase: 15 (Core Performance Primitives) — COMPLETE
-Plan: 2 of 2 (both complete)
+Phase: 17 (token-budget) — COMPLETE
 Milestone: v1.5 Performance — 3 phases (15-17), 6 plans, 6 requirements
-Status: Phase 15 complete — ready for Phase 16
-Last activity: 2026-04-04
+Status: All phases complete, milestone lifecycle pending
+Last activity: 2026-04-04 -- Phase 17 token budget system delivered
 
-Progress: [###.......] 1/3 phases | 2/6 plans
+Progress: [##########] 3/3 phases | 6/6 plans
 
 ## Milestone History
 
@@ -44,6 +43,6 @@ Progress: [###.......] 1/3 phases | 2/6 plans
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 15 complete — streamLines (Plan 01) + deterministicSort (Plan 02) delivered
-**Stopped at**: Completed 15-02-PLAN.md
-**Next**: Phase 16 planning or execution
+**Last action**: Phase 17 complete — estimateTokens (Plan 01) + budgetContext (Plan 02) delivered
+**Stopped at**: All phases complete, milestone lifecycle pending
+**Next**: Milestone audit, completion, and cleanup

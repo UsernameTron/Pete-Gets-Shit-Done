@@ -43,6 +43,8 @@ const {
   streamLines,
   deterministicSort,
   lazyRegistry,
+  estimateTokens,
+  budgetContext,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -2814,5 +2816,165 @@ describe('lazyRegistry', () => {
     assert.strictEqual(callCount, 1);
     assert.strictEqual(registry.get(), undefined);
     assert.strictEqual(callCount, 1, 'should not re-call initFn for undefined result');
+  });
+});
+
+// --- Token estimation ------------------------------------------------------------
+
+describe('estimateTokens', () => {
+  test('empty string returns 0', () => {
+    assert.strictEqual(estimateTokens(''), 0);
+  });
+
+  test('null returns 0', () => {
+    assert.strictEqual(estimateTokens(null), 0);
+  });
+
+  test('undefined returns 0', () => {
+    assert.strictEqual(estimateTokens(undefined), 0);
+  });
+
+  test('whitespace-only string returns 0', () => {
+    assert.strictEqual(estimateTokens('   \t\n  '), 0);
+  });
+
+  test('single word returns reasonable estimate', () => {
+    const result = estimateTokens('hello');
+    // 1 word * 1.3 default ratio = 1.3 -> ceil -> 2
+    assert.strictEqual(result, 2);
+  });
+
+  test('multi-word sentence returns word_count * default ratio rounded up', () => {
+    const result = estimateTokens('the quick brown fox');
+    // 4 words * 1.3 = 5.2 -> ceil -> 6
+    assert.strictEqual(result, 6);
+  });
+
+  test('model profile claude uses ratio 1.35', () => {
+    const result = estimateTokens('the quick brown fox', { model: 'claude' });
+    // 4 words * 1.35 = 5.4 -> ceil -> 6
+    assert.strictEqual(result, 6);
+  });
+
+  test('model profile code uses ratio 2.0', () => {
+    const result = estimateTokens('the quick brown fox', { model: 'code' });
+    // 4 words * 2.0 = 8.0 -> ceil -> 8
+    assert.strictEqual(result, 8);
+  });
+
+  test('default model profile works when no opts provided', () => {
+    const result = estimateTokens('the quick brown fox');
+    // Same as default: 4 * 1.3 = 5.2 -> ceil -> 6
+    assert.strictEqual(result, 6);
+  });
+
+  test('unknown model profile falls back to default ratio', () => {
+    const withUnknown = estimateTokens('the quick brown fox', { model: 'unknown-model' });
+    const withDefault = estimateTokens('the quick brown fox');
+    assert.strictEqual(withUnknown, withDefault);
+  });
+
+  test('code-like string with code profile returns higher estimate', () => {
+    const result = estimateTokens('function foo() { return bar; }', { model: 'code' });
+    // 6 words (function, foo(), {, return, bar;, }) * 2.0 = 12
+    assert.strictEqual(result, 12);
+  });
+
+  test('very long string scales linearly', () => {
+    const words = Array(1000).fill('word').join(' ');
+    const result = estimateTokens(words);
+    // 1000 words * 1.3 = 1300
+    assert.strictEqual(result, 1300);
+  });
+});
+
+// --- Context budget ---------------------------------------------------------------
+
+describe('budgetContext', () => {
+  test('empty sections array returns []', () => {
+    const result = budgetContext(100, []);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('limit of 0 returns []', () => {
+    const sections = [{ content: 'hello world', priority: 1 }];
+    const result = budgetContext(0, sections);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('single section that fits is returned', () => {
+    const sections = [{ content: 'hello world', priority: 1 }];
+    const result = budgetContext(100, sections);
+    assert.strictEqual(result.length, 1);
+    assert.strictEqual(result[0].content, 'hello world');
+    assert.strictEqual(result[0].priority, 1);
+  });
+
+  test('single section that does not fit returns []', () => {
+    const sections = [{ content: 'the quick brown fox jumps over the lazy dog', priority: 1 }];
+    // 9 words * 1.3 = 11.7 -> ceil -> 12 tokens; limit is 1
+    const result = budgetContext(1, sections);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('multiple sections all fit -- returns all sorted by priority', () => {
+    const sections = [
+      { content: 'second priority content here', priority: 2 },
+      { content: 'first priority content here', priority: 1 },
+    ];
+    const result = budgetContext(1000, sections);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0].priority, 1);
+    assert.strictEqual(result[1].priority, 2);
+  });
+
+  test('multiple sections, budget exceeded -- lower priority dropped', () => {
+    const sections = [
+      { content: 'aaa bbb ccc', priority: 1 },  // 3 words * 1.3 = 3.9 -> 4
+      { content: 'ddd eee fff', priority: 2 },  // 3 words * 1.3 = 3.9 -> 4
+      { content: 'ggg hhh iii', priority: 3 },  // 3 words * 1.3 = 3.9 -> 4
+    ];
+    // Total would be 12 tokens. Limit 8 fits priority 1 + 2 (8 tokens) but not 3.
+    const result = budgetContext(8, sections);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0].priority, 1);
+    assert.strictEqual(result[1].priority, 2);
+  });
+
+  test('sections with same priority preserve input order (stable sort)', () => {
+    const sections = [
+      { content: 'alpha content', priority: 1 },
+      { content: 'beta content', priority: 1 },
+    ];
+    const result = budgetContext(1000, sections);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0].content, 'alpha content');
+    assert.strictEqual(result[1].content, 'beta content');
+  });
+
+  test('model profile affects budget calculation', () => {
+    const sections = [
+      { content: 'aaa bbb ccc ddd', priority: 1 },  // default: 4*1.3=5.2->6, code: 4*2.0=8
+      { content: 'eee fff ggg hhh', priority: 2 },  // default: 6, code: 8
+    ];
+    const resultDefault = budgetContext(12, sections);
+    const resultCode = budgetContext(12, sections, { model: 'code' });
+    // Default: 6+6=12 fits both. Code: 8+8=16 > 12, only priority 1 fits.
+    assert.strictEqual(resultDefault.length, 2, 'default ratio fits both');
+    assert.strictEqual(resultCode.length, 1, 'code ratio fits only one');
+    assert.strictEqual(resultCode[0].priority, 1);
+  });
+
+  test('sections returned in priority order regardless of input order', () => {
+    const sections = [
+      { content: 'low priority', priority: 3 },
+      { content: 'high priority', priority: 1 },
+      { content: 'mid priority', priority: 2 },
+    ];
+    const result = budgetContext(1000, sections);
+    assert.strictEqual(result.length, 3);
+    assert.strictEqual(result[0].priority, 1);
+    assert.strictEqual(result[1].priority, 2);
+    assert.strictEqual(result[2].priority, 3);
   });
 });

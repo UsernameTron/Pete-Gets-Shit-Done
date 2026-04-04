@@ -1417,6 +1417,73 @@ function lazyRegistry(initFn) {
   };
 }
 
+// --- Token estimation -------------------------------------------------------------
+
+/**
+ * Tokens-per-word ratio profiles for different model families.
+ * Used by estimateTokens to approximate token counts without an external tokenizer.
+ */
+const TOKEN_RATIOS = {
+  default: 1.3,
+  claude: 1.35,
+  gpt: 1.3,
+  code: 2.0,
+};
+
+/**
+ * Approximate token count for a string using word-count heuristics.
+ * Splits on whitespace, counts words, multiplies by a tokens-per-word ratio
+ * selected by the optional model profile. Returns a rounded-up integer.
+ *
+ * @param {string} text - Input string to estimate tokens for
+ * @param {object} [opts] - Options
+ * @param {string} [opts.model] - Model profile name (key in TOKEN_RATIOS). Defaults to 'default'.
+ * @returns {number} Approximate token count (integer, 0 for empty/null/undefined input)
+ */
+function estimateTokens(text, opts) {
+  if (!text || typeof text !== 'string') return 0;
+  const words = text.trim().split(/\s+/);
+  if (words.length === 1 && words[0] === '') return 0;
+  const model = (opts && opts.model) || 'default';
+  const ratio = TOKEN_RATIOS[model] || TOKEN_RATIOS.default;
+  return Math.ceil(words.length * ratio);
+}
+
+// --- Context budget ---------------------------------------------------------------
+
+/**
+ * Select the highest-priority content sections that fit within a token budget.
+ * Sections are sorted by priority (lower number = higher priority, included first).
+ * Uses estimateTokens internally to measure each section's token cost.
+ *
+ * @param {number} limit - Maximum token budget (positive integer)
+ * @param {Array<{content: string, priority: number}>} sections - Content sections with priorities
+ * @param {object} [opts] - Options
+ * @param {string} [opts.model] - Model profile passed through to estimateTokens
+ * @returns {Array<{content: string, priority: number}>} Sections that fit, sorted by priority
+ */
+function budgetContext(limit, sections, opts) {
+  if (!sections || sections.length === 0 || limit <= 0) return [];
+
+  // Stable sort by priority ascending (lower number = higher priority)
+  const sorted = sections
+    .map((s, i) => ({ section: s, index: i }))
+    .sort((a, b) => a.section.priority - b.section.priority || a.index - b.index);
+
+  const result = [];
+  let remaining = limit;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const cost = estimateTokens(sorted[i].section.content, opts);
+    if (cost <= remaining) {
+      result.push(sorted[i].section);
+      remaining -= cost;
+    }
+  }
+
+  return result;
+}
+
 module.exports = {
   output,
   error,
@@ -1470,4 +1537,6 @@ module.exports = {
   streamLines,
   deterministicSort,
   lazyRegistry,
+  estimateTokens,
+  budgetContext,
 };

@@ -37,7 +37,7 @@ Plans:
 - [x] 15-01-PLAN.md -- streamLines: streaming output helper with per-line callback (Wave 1, TDD)
 - [x] 15-02-PLAN.md -- deterministicSort: cache-stable key ordering utility (Wave 2, TDD)
 
-**Status: PLANNED**
+**Status: COMPLETE**
 
 ---
 
@@ -85,13 +85,13 @@ Plans:
 
 **Depends on:** Phase 15 (core.cjs utilities pattern established)
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 17-01-PLAN.md -- Token estimation utility with model-profile heuristics (Wave 1, TDD)
-- [ ] 17-02-PLAN.md -- Context budget helper with priority-based section selection (Wave 2, TDD)
+- [x] 17-01-PLAN.md -- Token estimation utility with model-profile heuristics (Wave 1, TDD)
+- [x] 17-02-PLAN.md -- Context budget helper with priority-based section selection (Wave 2, TDD)
 
-**Status: NOT STARTED**
+**Status: COMPLETE**
 
 ---
 
@@ -108,4 +108,4 @@ Phase 16 (Lazy Loading) -------+
 Phases 15 and 16 have no cross-dependencies and can run in parallel. Phase 17 runs after Phase 15 completes (token estimation builds on the core.cjs utility pattern; context budget depends on token estimation).
 
 ---
-*Last updated: 2026-04-04 -- v1.5 Performance milestone roadmap created*
+*Last updated: 2026-04-04 -- All 3 phases complete, v1.5 Performance milestone ready for completion*
