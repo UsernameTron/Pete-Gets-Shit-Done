@@ -10,8 +10,8 @@ Requirements for v1.4 Correctness & Robustness. Each maps to roadmap phases.
 ### Error Handling
 
 - [x] **CORR-01**: GsdError class in core.cjs with structured error (code, context, cause fields)
-- [ ] **CORR-02**: Audit and fix silent catch blocks across lib modules (~90 catch blocks in 12 files)
-- [ ] **CORR-03**: loadConfig() silent failures at core.cjs empty catches must log diagnostics or propagate meaningfully
+- [x] **CORR-02**: Audit and fix silent catch blocks across lib modules (~90 catch blocks in 12 files)
+- [x] **CORR-03**: loadConfig() silent failures at core.cjs empty catches must log diagnostics or propagate meaningfully
 
 ### State Immutability
 
@@ -65,8 +65,8 @@ Requirements for v1.4 Correctness & Robustness. Each maps to roadmap phases.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CORR-01 | Phase 11 | Complete |
-| CORR-02 | Phase 11 | Pending |
-| CORR-03 | Phase 11 | Pending |
+| CORR-02 | Phase 11 | Complete |
+| CORR-03 | Phase 11 | Complete |
 | CORR-04 | Phase 12 | Pending |
 | CORR-05 | Phase 12 | Pending |
 | CORR-06 | Phase 12 | Pending |
