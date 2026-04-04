@@ -274,6 +274,21 @@ function validateShellArg(value, label) {
     throw new Error(`${label || 'Argument'}: contains potential command substitution`);
   }
 
+  // Reject shell operators and redirects
+  if (/[;|&><]/.test(value)) {
+    throw new Error(`${label || 'Argument'}: contains shell operator or redirect`);
+  }
+
+  // Reject newlines (command chaining via line breaks)
+  if (/[\n\r]/.test(value)) {
+    throw new Error(`${label || 'Argument'}: contains newline`);
+  }
+
+  // Reject tilde expansion (~user resolves to home directories)
+  if (/^~[a-zA-Z]/.test(value)) {
+    throw new Error(`${label || 'Argument'}: contains tilde expansion`);
+  }
+
   return value;
 }
 

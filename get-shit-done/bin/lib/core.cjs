@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execSync, execFileSync, spawnSync } = require('child_process');
 const { MODEL_PROFILES } = require('./model-profiles.cjs');
 
@@ -165,9 +166,14 @@ function output(result, raw, rawValue) {
     // Write to tmpfile and output the path prefixed with @file: so callers can detect it.
     if (json.length > 50000) {
       reapStaleTempFiles();
-      const tmpPath = path.join(require('os').tmpdir(), `gsd-${Date.now()}.json`);
-      fs.writeFileSync(tmpPath, json, 'utf-8');
-      data = '@file:' + tmpPath;
+      try {
+        const tmpPath = path.join(require('os').tmpdir(), `gsd-${crypto.randomBytes(8).toString('hex')}.json`);
+        fs.writeFileSync(tmpPath, json, 'utf-8');
+        data = '@file:' + tmpPath;
+      } catch (_e) {
+        // Temp file write failed — truncate with sentinel so consumers know data was lost
+        data = json.slice(0, 50000) + '\n__GSD_TRUNCATED__';
+      }
     } else {
       data = json;
     }
@@ -194,6 +200,52 @@ function safeReadFile(filePath) {
   }
 }
 
+const CONFIG_VERSION = 1;
+
+const configMigrations = [
+  {
+    from: 0, to: 1,
+    migrate(parsed, cwd) {
+      // Migrate deprecated "depth" key to "granularity" with value mapping
+      if ('depth' in parsed && !('granularity' in parsed)) {
+        const depthToGranularity = { quick: 'coarse', standard: 'standard', comprehensive: 'fine' };
+        parsed.granularity = depthToGranularity[parsed.depth] || parsed.depth;
+        delete parsed.depth;
+      }
+      // Migrate legacy "multiRepo: true" boolean → sub_repos array
+      if (parsed.multiRepo === true && !parsed.sub_repos && !parsed.planning?.sub_repos) {
+        const detected = detectSubRepos(cwd);
+        if (detected.length > 0) {
+          parsed.sub_repos = detected;
+          if (!parsed.planning) parsed.planning = {};
+          parsed.planning.commit_docs = false;
+          delete parsed.multiRepo;
+        }
+      }
+    },
+  },
+];
+
+function runConfigMigrations(parsed, cwd) {
+  let version = parsed.config_version || 0;
+  if (version >= CONFIG_VERSION) return false;
+  // Unknown future version — leave it alone
+  if (typeof version !== 'number') return false;
+
+  let migrated = false;
+  for (const m of configMigrations) {
+    if (version === m.from) {
+      try { m.migrate(parsed, cwd); } catch { /* migration error — continue with best effort */ }
+      version = m.to;
+      migrated = true;
+    }
+  }
+  if (migrated) {
+    parsed.config_version = version;
+  }
+  return migrated;
+}
+
 function loadConfig(cwd) {
   const configPath = path.join(cwd, '.planning', 'config.json');
   const defaults = {
@@ -212,39 +264,25 @@ function loadConfig(cwd) {
     brave_search: false,
     firecrawl: false,
     exa_search: false,
-    text_mode: false, // when true, use plain-text numbered lists instead of AskUserQuestion menus
+    text_mode: false,
     sub_repos: [],
-    resolve_model_ids: false, // false: return alias as-is | true: map to full Claude model ID | "omit": return '' (runtime uses its default)
-    context_window: 200000, // default 200k; set to 1000000 for Opus/Sonnet 4.6 1M models
-    phase_naming: 'sequential', // 'sequential' (default, auto-increment) or 'custom' (arbitrary string IDs)
+    resolve_model_ids: false,
+    context_window: 200000,
+    phase_naming: 'sequential',
   };
 
   try {
     const raw = fs.readFileSync(configPath, 'utf-8');
     const parsed = JSON.parse(raw);
 
-    // Migrate deprecated "depth" key to "granularity" with value mapping
-    if ('depth' in parsed && !('granularity' in parsed)) {
-      const depthToGranularity = { quick: 'coarse', standard: 'standard', comprehensive: 'fine' };
-      parsed.granularity = depthToGranularity[parsed.depth] || parsed.depth;
-      delete parsed.depth;
+    // Run versioned migrations
+    const migrated = runConfigMigrations(parsed, cwd);
+    if (migrated) {
       try { fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8'); } catch { /* intentionally empty */ }
     }
 
     // Auto-detect and sync sub_repos: scan for child directories with .git
     let configDirty = false;
-
-    // Migrate legacy "multiRepo: true" boolean → sub_repos array
-    if (parsed.multiRepo === true && !parsed.sub_repos && !parsed.planning?.sub_repos) {
-      const detected = detectSubRepos(cwd);
-      if (detected.length > 0) {
-        parsed.sub_repos = detected;
-        if (!parsed.planning) parsed.planning = {};
-        parsed.planning.commit_docs = false;
-        delete parsed.multiRepo;
-        configDirty = true;
-      }
-    }
 
     // Keep sub_repos in sync with actual filesystem
     const currentSubRepos = parsed.sub_repos || parsed.planning?.sub_repos || [];
@@ -259,7 +297,7 @@ function loadConfig(cwd) {
       }
     }
 
-    // Persist sub_repos changes (migration or sync)
+    // Persist sub_repos sync changes
     if (configDirty) {
       try { fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8'); } catch {}
     }
@@ -1227,4 +1265,7 @@ module.exports = {
   readSubdirectories,
   getAgentsDir,
   checkAgentsInstalled,
+  CONFIG_VERSION,
+  configMigrations,
+  runConfigMigrations,
 };

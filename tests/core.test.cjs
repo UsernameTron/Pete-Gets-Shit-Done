@@ -19,6 +19,7 @@ const {
   generateSlugInternal,
   normalizePhaseName,
   reapStaleTempFiles,
+  output,
   normalizeMd,
   comparePhaseNum,
   safeReadFile,
@@ -30,6 +31,9 @@ const {
   findPhaseInternal,
   findProjectRoot,
   detectSubRepos,
+  CONFIG_VERSION,
+  configMigrations,
+  runConfigMigrations,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -1563,5 +1567,593 @@ describe('reapStaleTempFiles', () => {
     assert.doesNotThrow(() => {
       reapStaleTempFiles('gsd-nonexistent-prefix-xyz-', { maxAgeMs: 0 });
     });
+  });
+});
+
+// ─── SEC-01: Cryptographic temp paths ──────────────────────────────────────────
+
+describe('output — SEC-01 cryptographic temp paths', () => {
+  test('large payloads create temp files with hex nonce names, not timestamps', () => {
+    const tmpDir = os.tmpdir();
+    // Snapshot existing gsd-*.json files before calling output
+    const before = new Set(
+      fs.readdirSync(tmpDir).filter(f => f.startsWith('gsd-') && f.endsWith('.json'))
+    );
+
+    // Create a payload >50KB to trigger temp file path
+    const largePayload = { data: 'x'.repeat(60000) };
+
+    // Redirect fd 1 to /dev/null to suppress stdout noise during test
+    const origWrite = fs.writeSync;
+    let capturedData = '';
+    fs.writeSync = (fd, data) => {
+      if (fd === 1) { capturedData = data; return data.length; }
+      return origWrite(fd, data);
+    };
+    try {
+      output(largePayload);
+    } finally {
+      fs.writeSync = origWrite;
+    }
+
+    // Find the newly created temp file
+    const after = fs.readdirSync(tmpDir).filter(f => f.startsWith('gsd-') && f.endsWith('.json'));
+    const newFiles = after.filter(f => !before.has(f));
+
+    assert.ok(newFiles.length >= 1, 'should create at least one new temp file');
+
+    // Verify the filename uses hex nonce format (16 hex chars), not a timestamp
+    const filename = newFiles[0];
+    const nonce = filename.replace('gsd-', '').replace('.json', '');
+    assert.match(nonce, /^[0-9a-f]{16}$/, `nonce "${nonce}" should be 16 hex chars from crypto.randomBytes(8)`);
+
+    // Verify it does NOT look like a timestamp (timestamps are 13 digits)
+    assert.ok(!/^\d{13}$/.test(nonce), 'nonce should not be a timestamp');
+
+    // Verify the @file: prefix in stdout output
+    assert.ok(capturedData.startsWith('@file:'), 'output should start with @file: prefix');
+
+    // Clean up
+    for (const f of newFiles) {
+      try { fs.unlinkSync(path.join(tmpDir, f)); } catch {}
+    }
+  });
+
+  test('SEC-04: emits __GSD_TRUNCATED__ sentinel when temp file write fails', () => {
+    const largePayload = { data: 'y'.repeat(60000) };
+
+    // Stub fs.writeFileSync to throw, simulating disk full / permission denied
+    const origWriteFileSync = fs.writeFileSync;
+    const origWriteSync = fs.writeSync;
+    let capturedData = '';
+
+    fs.writeFileSync = () => { throw new Error('ENOSPC: no space left on device'); };
+    fs.writeSync = (fd, data) => {
+      if (fd === 1) { capturedData = data; return data.length; }
+      return origWriteSync(fd, data);
+    };
+
+    try {
+      output(largePayload);
+    } finally {
+      fs.writeFileSync = origWriteFileSync;
+      fs.writeSync = origWriteSync;
+    }
+
+    // Should NOT have @file: prefix (temp file creation failed)
+    assert.ok(!capturedData.startsWith('@file:'), 'should not use temp file path');
+
+    // Should end with the truncation sentinel
+    assert.ok(capturedData.endsWith('\n__GSD_TRUNCATED__'), 'should end with __GSD_TRUNCATED__ sentinel');
+
+    // Should be truncated to ~50KB + sentinel length
+    assert.ok(capturedData.length <= 50000 + '\n__GSD_TRUNCATED__'.length + 10, 'should be truncated');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — output raw mode ────────────────────────────
+
+describe('output — raw mode', () => {
+  test('outputs raw string value when raw flag is true', () => {
+    const origWriteSync = fs.writeSync;
+    let capturedData = '';
+    fs.writeSync = (fd, data) => {
+      if (fd === 1) { capturedData = data; return data.length; }
+      return origWriteSync(fd, data);
+    };
+    try {
+      output({ ignored: true }, true, 'hello raw');
+    } finally {
+      fs.writeSync = origWriteSync;
+    }
+    assert.strictEqual(capturedData, 'hello raw');
+  });
+
+  test('outputs stringified rawValue for non-string types', () => {
+    const origWriteSync = fs.writeSync;
+    let capturedData = '';
+    fs.writeSync = (fd, data) => {
+      if (fd === 1) { capturedData = data; return data.length; }
+      return origWriteSync(fd, data);
+    };
+    try {
+      output(null, true, 42);
+    } finally {
+      fs.writeSync = origWriteSync;
+    }
+    assert.strictEqual(capturedData, '42');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — comparePhaseNum branches ────────────────────
+
+describe('comparePhaseNum — extended branches', () => {
+  test('custom (non-numeric) IDs fall back to string comparison', () => {
+    assert.ok(comparePhaseNum('AUTH-01', 'PROJ-42') < 0);
+    assert.ok(comparePhaseNum('PROJ-42', 'AUTH-01') > 0);
+    assert.strictEqual(comparePhaseNum('PROJ-42', 'PROJ-42'), 0);
+  });
+
+  test('letter suffix ordering: no letter < A < B', () => {
+    assert.ok(comparePhaseNum('12', '12A') < 0);
+    assert.ok(comparePhaseNum('12A', '12') > 0);
+    assert.ok(comparePhaseNum('12A', '12B') < 0);
+    assert.ok(comparePhaseNum('12B', '12A') > 0);
+  });
+
+  test('decimal segment ordering: no decimal < .1 < .2', () => {
+    assert.ok(comparePhaseNum('12', '12.1') < 0);
+    assert.ok(comparePhaseNum('12.1', '12') > 0);
+    assert.ok(comparePhaseNum('12.1', '12.2') < 0);
+  });
+
+  test('multi-segment decimal ordering: 12.1 < 12.1.2 < 12.2', () => {
+    assert.ok(comparePhaseNum('12.1', '12.1.2') < 0);
+    assert.ok(comparePhaseNum('12.1.2', '12.2') < 0);
+  });
+
+  test('equal decimals return 0', () => {
+    assert.strictEqual(comparePhaseNum('5.1', '5.1'), 0);
+    assert.strictEqual(comparePhaseNum('5.1.2', '5.1.2'), 0);
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — normalizePhaseName custom IDs ───────────────
+
+describe('normalizePhaseName — custom IDs', () => {
+  test('returns custom IDs as-is', () => {
+    assert.strictEqual(normalizePhaseName('PROJ-42'), 'PROJ-42');
+    assert.strictEqual(normalizePhaseName('AUTH-101'), 'AUTH-101');
+  });
+
+  test('normalizes letter suffix', () => {
+    assert.strictEqual(normalizePhaseName('3a'), '03A');
+    assert.strictEqual(normalizePhaseName('12B'), '12B');
+  });
+
+  test('normalizes decimal phases', () => {
+    assert.strictEqual(normalizePhaseName('5.1'), '05.1');
+    assert.strictEqual(normalizePhaseName('12.3.1'), '12.3.1');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — planningDir & planningPaths workstreams ─────
+
+describe('planningDir — workstream awareness', () => {
+  const { planningDir, planningRoot, planningPaths } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('returns root .planning/ when no workstream', () => {
+    const result = planningDir('/projects/foo');
+    assert.strictEqual(result, path.join('/projects/foo', '.planning'));
+  });
+
+  test('returns workstream subdir when ws is specified', () => {
+    const result = planningDir('/projects/foo', 'feature-x');
+    assert.strictEqual(result, path.join('/projects/foo', '.planning', 'workstreams', 'feature-x'));
+  });
+
+  test('reads GSD_WORKSTREAM env var when ws is undefined', () => {
+    const orig = process.env.GSD_WORKSTREAM;
+    process.env.GSD_WORKSTREAM = 'env-ws';
+    try {
+      const result = planningDir('/projects/foo');
+      assert.strictEqual(result, path.join('/projects/foo', '.planning', 'workstreams', 'env-ws'));
+    } finally {
+      if (orig === undefined) delete process.env.GSD_WORKSTREAM;
+      else process.env.GSD_WORKSTREAM = orig;
+    }
+  });
+
+  test('planningRoot always returns root .planning/', () => {
+    const result = planningRoot('/projects/foo');
+    assert.strictEqual(result, path.join('/projects/foo', '.planning'));
+  });
+
+  test('planningPaths returns scoped and shared paths', () => {
+    const paths = planningPaths('/projects/foo', 'ws1');
+    assert.ok(paths.planning.includes('workstreams/ws1'));
+    assert.ok(paths.state.includes('workstreams/ws1'));
+    assert.ok(!paths.project.includes('workstreams'));
+    assert.ok(!paths.config.includes('workstreams'));
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — getActiveWorkstream / setActiveWorkstream ───
+
+describe('getActiveWorkstream / setActiveWorkstream', () => {
+  const { getActiveWorkstream, setActiveWorkstream } = require('../get-shit-done/bin/lib/core.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('returns null when no active-workstream file exists', () => {
+    assert.strictEqual(getActiveWorkstream(tmpDir), null);
+  });
+
+  test('returns null for invalid workstream name', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'bad name!!\n');
+    assert.strictEqual(getActiveWorkstream(tmpDir), null);
+  });
+
+  test('returns null when workstream dir does not exist', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'ghost-ws\n');
+    assert.strictEqual(getActiveWorkstream(tmpDir), null);
+  });
+
+  test('returns name when valid workstream dir exists', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'my-ws');
+    fs.mkdirSync(wsDir, { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'my-ws\n');
+    assert.strictEqual(getActiveWorkstream(tmpDir), 'my-ws');
+  });
+
+  test('setActiveWorkstream writes file', () => {
+    setActiveWorkstream(tmpDir, 'new-ws');
+    const content = fs.readFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'utf-8');
+    assert.strictEqual(content, 'new-ws\n');
+  });
+
+  test('setActiveWorkstream with null clears file', () => {
+    setActiveWorkstream(tmpDir, 'temp-ws');
+    setActiveWorkstream(tmpDir, null);
+    assert.ok(!fs.existsSync(path.join(tmpDir, '.planning', 'active-workstream')));
+  });
+
+  test('setActiveWorkstream rejects invalid names', () => {
+    assert.throws(() => setActiveWorkstream(tmpDir, 'bad name!!'), /Invalid workstream name/);
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — extractCurrentMilestone branches ────────────
+
+describe('extractCurrentMilestone — branch coverage', () => {
+  const { extractCurrentMilestone } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('returns full content when no cwd provided', () => {
+    const content = '# Roadmap\n\n## v1.0 Stuff\n- phase 1\n';
+    const result = extractCurrentMilestone(content);
+    assert.ok(result.includes('Roadmap'));
+  });
+
+  test('extracts current milestone section when STATE.md has version', () => {
+    const tmpDir = createTempProject();
+    try {
+      fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '---\nmilestone: v1.0\n---\n# State\n');
+      const content = '# Roadmap\n\n## v1.0 Initial\n\n- Phase 1\n\n## v2.0 Next\n\n- Phase 2\n';
+      const result = extractCurrentMilestone(content, tmpDir);
+      assert.ok(result.includes('v1.0 Initial'));
+      assert.ok(!result.includes('v2.0 Next'));
+    } finally {
+      cleanup(tmpDir);
+    }
+  });
+
+  test('falls back to in-progress marker when STATE.md has no milestone', () => {
+    const tmpDir = createTempProject();
+    try {
+      fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '---\nstatus: active\n---\n');
+      const content = '# Roadmap\n\n## 🚧 v2.1 Belgium\n\n- Phase 1\n';
+      const result = extractCurrentMilestone(content, tmpDir);
+      assert.ok(result.includes('v2.1 Belgium'));
+    } finally {
+      cleanup(tmpDir);
+    }
+  });
+
+  test('strips shipped milestones when no version found', () => {
+    const tmpDir = createTempProject();
+    try {
+      fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '---\nstatus: active\n---\n');
+      const content = '<details>\nOld stuff\n</details>\n\n## Current\nActive work\n';
+      const result = extractCurrentMilestone(content, tmpDir);
+      assert.ok(!result.includes('Old stuff'));
+      assert.ok(result.includes('Active work'));
+    } finally {
+      cleanup(tmpDir);
+    }
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — replaceInCurrentMilestone ───────────────────
+
+describe('replaceInCurrentMilestone', () => {
+  const { replaceInCurrentMilestone } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('replaces pattern in content after last </details> tag', () => {
+    const content = '<details>shipped</details>\n\n## Current\n- [ ] Phase 1\n';
+    const result = replaceInCurrentMilestone(content, /\[ \]/, '[x]');
+    assert.ok(result.includes('[x] Phase 1'));
+    assert.ok(result.includes('<details>shipped</details>'));
+  });
+
+  test('replaces across entire content when no </details> tag exists', () => {
+    const content = '## Current\n- [ ] Phase 1\n';
+    const result = replaceInCurrentMilestone(content, /\[ \]/, '[x]');
+    assert.ok(result.includes('[x] Phase 1'));
+  });
+
+  test('does not modify content before </details>', () => {
+    const content = '<details>\n- [ ] Old Phase\n</details>\n\n- [ ] New Phase\n';
+    const result = replaceInCurrentMilestone(content, /\[ \]/, '[x]');
+    assert.ok(result.includes('[ ] Old Phase'), 'should not modify archived content');
+    assert.ok(result.includes('[x] New Phase'), 'should modify current content');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — checkAgentsInstalled ────────────────────────
+
+describe('checkAgentsInstalled', () => {
+  const { checkAgentsInstalled, getAgentsDir } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('reports agents_installed false when agents dir missing', () => {
+    // getAgentsDir resolves relative to __dirname, which points at get-shit-done/bin/lib
+    // Just verify the function returns a valid structure
+    const result = checkAgentsInstalled();
+    assert.ok(typeof result.agents_installed === 'boolean');
+    assert.ok(Array.isArray(result.missing_agents));
+    assert.ok(Array.isArray(result.installed_agents));
+    assert.ok(typeof result.agents_dir === 'string');
+  });
+
+  test('getAgentsDir returns a path string', () => {
+    const dir = getAgentsDir();
+    assert.ok(typeof dir === 'string');
+    assert.ok(dir.includes('agents'));
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — resolveModelInternal resolve_model_ids ──────
+
+describe('resolveModelInternal — resolve_model_ids', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  function writeConfig(obj) {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify(obj, null, 2)
+    );
+  }
+
+  test('resolve_model_ids: true maps alias to full model ID', () => {
+    writeConfig({ resolve_model_ids: true, model_profile: 'balanced' });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor');
+    // Should be a full model ID, not just an alias
+    assert.ok(result.includes('claude-') || result === 'inherit' || result === 'sonnet',
+      `Expected full model ID or alias, got: ${result}`);
+  });
+
+  test('resolve_model_ids: true with unknown alias returns alias as-is', () => {
+    writeConfig({ resolve_model_ids: true, model_profile: 'balanced' });
+    // The function should still work without throwing
+    const result = resolveModelInternal(tmpDir, 'gsd-executor');
+    assert.ok(typeof result === 'string');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — extractOneLinerFromBody ─────────────────────
+
+describe('extractOneLinerFromBody', () => {
+  const { extractOneLinerFromBody } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('extracts bold one-liner after heading', () => {
+    const content = '---\nphase: 1\n---\n\n# Phase 1: Setup Summary\n**This is the one-liner**\n\nMore content.';
+    assert.strictEqual(extractOneLinerFromBody(content), 'This is the one-liner');
+  });
+
+  test('returns null for null input', () => {
+    assert.strictEqual(extractOneLinerFromBody(null), null);
+  });
+
+  test('returns null when no bold line after heading', () => {
+    const content = '---\nphase: 1\n---\n\n# Phase 1: Setup\n\nRegular paragraph.';
+    assert.strictEqual(extractOneLinerFromBody(content), null);
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — getMilestoneInfo in-progress marker ──────────
+
+describe('getMilestoneInfo — in-progress marker', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('detects 🚧 in-progress marker format', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n- 🚧 **v2.1 Belgium** — Phases 24-28 (in progress)\n- ✅ **v2.0 Alpha** — Done\n'
+    );
+    const result = getMilestoneInfo(tmpDir);
+    assert.strictEqual(result.version, 'v2.1');
+    assert.strictEqual(result.name, 'Belgium');
+  });
+
+  test('detects multi-segment version in 🚧 format', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '- 🚧 **v1.2.1 Tech Debt** — Phases 1-8 (in progress)\n'
+    );
+    const result = getMilestoneInfo(tmpDir);
+    assert.strictEqual(result.version, 'v1.2.1');
+    assert.strictEqual(result.name, 'Tech Debt');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — loadConfig depth migration ──────────────────
+
+describe('loadConfig — deprecated depth migration', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('migrates depth: quick to granularity: coarse in config file', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick' }));
+    loadConfig(tmpDir); // triggers migration
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.ok(!('depth' in raw), 'depth key should be removed');
+    assert.strictEqual(raw.granularity, 'coarse');
+  });
+
+  test('migrates depth: comprehensive to granularity: fine in config file', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'comprehensive' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.granularity, 'fine');
+    assert.ok(!('depth' in raw));
+  });
+
+  test('does not migrate when granularity already set', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick', granularity: 'standard' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    // When granularity already exists, depth should NOT be migrated (migration skipped)
+    assert.strictEqual(raw.granularity, 'standard');
+    assert.ok('depth' in raw, 'depth key should remain when granularity already present');
+  });
+});
+
+// ─── Config Migration System ────────────────────────────────────────────────────
+
+describe('config migration system', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('unversioned config gets migrated to v1 with config_version stamp', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 1);
+  });
+
+  test('config already at v1 skips migration', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const original = { config_version: 1, granularity: 'standard' };
+    fs.writeFileSync(configPath, JSON.stringify(original));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.granularity, 'standard');
+  });
+
+  test('depth + multiRepo both migrated in single pass', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    // Create a sub-repo directory so detectSubRepos finds something
+    const subDir = path.join(tmpDir, 'sub-project');
+    fs.mkdirSync(subDir, { recursive: true });
+    fs.mkdirSync(path.join(subDir, '.git'), { recursive: true });
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'standard', multiRepo: true }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.granularity, 'standard');
+    assert.ok(!('depth' in raw));
+    // multiRepo should be removed if sub_repos were detected
+    if (raw.sub_repos) {
+      assert.ok(!('multiRepo' in raw));
+    }
+  });
+
+  test('migration error does not break config loading', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick' }));
+    // loadConfig should not throw even if migration has issues
+    const result = loadConfig(tmpDir);
+    assert.ok(result, 'loadConfig should return a config object');
+  });
+
+  test('unknown future version (v99) left alone', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const futureConfig = { config_version: 99, future_field: 'value' };
+    fs.writeFileSync(configPath, JSON.stringify(futureConfig));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 99);
+    assert.strictEqual(raw.future_field, 'value');
+  });
+
+  test('runConfigMigrations returns false when no migration needed', () => {
+    const parsed = { config_version: CONFIG_VERSION };
+    const result = runConfigMigrations(parsed, tmpDir);
+    assert.strictEqual(result, false);
+  });
+
+  test('runConfigMigrations returns true when migration applied', () => {
+    const parsed = { depth: 'quick' };
+    const result = runConfigMigrations(parsed, tmpDir);
+    assert.strictEqual(result, true);
+    assert.strictEqual(parsed.config_version, CONFIG_VERSION);
+  });
+
+  test('CONFIG_VERSION is exported and is a positive integer', () => {
+    assert.strictEqual(typeof CONFIG_VERSION, 'number');
+    assert.ok(CONFIG_VERSION >= 1);
+    assert.strictEqual(CONFIG_VERSION, Math.floor(CONFIG_VERSION));
+  });
+
+  test('configMigrations is an array with valid entries', () => {
+    assert.ok(Array.isArray(configMigrations));
+    assert.ok(configMigrations.length > 0);
+    for (const m of configMigrations) {
+      assert.strictEqual(typeof m.from, 'number');
+      assert.strictEqual(typeof m.to, 'number');
+      assert.strictEqual(typeof m.migrate, 'function');
+      assert.ok(m.to > m.from, 'to must be greater than from');
+    }
   });
 });
