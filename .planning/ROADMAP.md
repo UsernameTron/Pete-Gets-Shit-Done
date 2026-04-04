@@ -31,11 +31,13 @@
 
 **Note:** Can run in parallel with Phase 16.
 
-Plans:
-- [ ] 15-PLAN-01 -- Streaming output helper with line callback (Wave 1)
-- [ ] 15-PLAN-02 -- Deterministic ordering utility with stable-key sort (Wave 1)
+**Plans:** 2 plans
 
-**Status: NOT STARTED**
+Plans:
+- [ ] 15-01-PLAN.md -- streamLines: streaming output helper with per-line callback (Wave 1, TDD)
+- [ ] 15-02-PLAN.md -- deterministicSort: cache-stable key ordering utility (Wave 2, TDD)
+
+**Status: PLANNED**
 
 ---
 
