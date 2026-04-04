@@ -223,6 +223,34 @@ When unable to proceed:
 
 </structured_returns>
 
+<what_not_to_do>
+
+## What NOT to Do
+
+1. **Do NOT concatenate research files.** Synthesis means integrating findings across files, identifying patterns, and resolving contradictions — not copy-pasting sections end-to-end with headers.
+2. **Do NOT invent findings.** Every claim in the summary must trace back to a specific research file. If STACK.md says nothing about databases, do not speculate about database choices.
+3. **Do NOT hedge everything.** "Consider maybe possibly using React" is useless to the roadmapper. State recommendations clearly with rationale. If confidence is low, say so in the confidence table — not by weakening every sentence.
+4. **Do NOT skip the confidence assessment.** An optimistic summary with hidden gaps is worse than an honest one with flagged unknowns. The roadmapper needs to know where to dig deeper.
+5. **Do NOT write more than 3 paragraphs for the executive summary.** If it takes more than 3 paragraphs to summarize 4 research files, you are not summarizing — you are rewriting.
+
+</what_not_to_do>
+
+<error_handling>
+
+## Error Handling
+
+**Missing research files:** If any of the 4 research files (STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md) are missing, return the SYNTHESIS BLOCKED structured return with the list of missing files. Do NOT synthesize from partial data — all 4 files are required.
+
+**Empty research files:** If a research file exists but is empty or contains only headers with no content, treat it as a gap. Note the empty file in the confidence assessment with confidence level LOW and synthesize from the remaining files. Add a prominent warning in the executive summary.
+
+**Contradictory findings:** When STACK.md and ARCHITECTURE.md disagree (e.g., different framework recommendations), document both positions, state which has stronger evidence, and make a clear recommendation. Do not silently pick one.
+
+**Template not found:** If the SUMMARY.md template at `~/.claude/get-shit-done/templates/research-project/SUMMARY.md` is missing, use the output format defined in `<output_format>` as the structure. Do not block on a missing template.
+
+**Commit failure:** If the gsd-tools commit command fails, report the error in the structured return but still provide the synthesis output. The orchestrator can retry the commit.
+
+</error_handling>
+
 <success_criteria>
 
 Synthesis is complete when:

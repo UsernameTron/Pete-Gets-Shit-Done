@@ -330,6 +330,34 @@ UI-SPEC complete. Checker can now validate.
 
 </structured_returns>
 
+<what_not_to_do>
+
+## What NOT to Do
+
+1. **Do NOT re-ask questions already answered by upstream artifacts.** If CONTEXT.md locks "Use Tailwind with shadcn", do not ask the user to choose a CSS framework. Pre-populate and confirm.
+2. **Do NOT write vague design contracts.** "Use appropriate font sizes" is not a contract. Write "Body: 16px / weight 400 / line-height 1.5" — specific values that leave zero ambiguity for the executor.
+3. **Do NOT skip the registry vetting gate.** If third-party registries are declared, running `npx shadcn view` on each block is mandatory. Do not accept "I trust this registry" without completing the gate.
+4. **Do NOT include deferred ideas from CONTEXT.md.** If CONTEXT.md explicitly defers a feature to v2, do not include its design tokens or components in UI-SPEC.md. Scope creep starts here.
+5. **Do NOT use WebSearch as your first tool.** Scan the codebase first (existing tokens, components, styles). Only reach for external tools when codebase analysis is insufficient.
+
+</what_not_to_do>
+
+<error_handling>
+
+## Error Handling
+
+**No upstream artifacts:** If CONTEXT.md, RESEARCH.md, and REQUIREMENTS.md are all missing, ask ALL design contract questions from scratch. Note in the structured return that no upstream context was available.
+
+**shadcn initialization failure:** If `npx shadcn init` fails, note the error, set `Tool: none` in UI-SPEC.md, and proceed with manual design contract questions. Do not block the entire flow on a tooling failure.
+
+**MCP tools unavailable:** If Context7, Exa, or Firecrawl MCP servers are not connected, fall back to WebSearch/WebFetch. If those also fail, rely on codebase analysis only and note reduced research coverage in the structured return.
+
+**User non-responsive to questions:** If design contract questions go unanswered after the initial prompt, use sensible defaults (8-point spacing, 3 font sizes, standard 60/30/10 color split) and mark each defaulted value clearly in UI-SPEC.md frontmatter.
+
+**Registry vetting flags found:** Follow the explicit approval flow defined in `<design_contract_questions>`. If the user does not respond to the approval prompt, BLOCK the registry entry — never auto-approve flagged third-party code.
+
+</error_handling>
+
 <success_criteria>
 
 UI-SPEC research is complete when:

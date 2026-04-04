@@ -416,6 +416,34 @@ Use output format from `<output_format>`. If registry audit produced flags, add 
 
 </structured_returns>
 
+<what_not_to_do>
+
+## What NOT to Do
+
+1. **Do NOT score subjectively.** Every pillar score must cite specific evidence — file names, line numbers, class patterns, or grep output. "Feels like the spacing is off" is not a finding.
+2. **Do NOT give all 4/4 scores to avoid conflict.** If generic labels like "Submit" or "Cancel" exist, Copywriting is not 4/4. Score honestly — 2/4 with actionable fixes is more useful than 4/4 with silent problems.
+3. **Do NOT capture screenshots without running the gitignore gate first.** Binary files in git history are permanent damage. The gate is mandatory, not optional.
+4. **Do NOT write vague fix recommendations.** "Improve color usage" is useless. Write "Change `text-primary` on decorative border in `src/components/Sidebar.tsx:42` to `text-muted`" — specific file, line, and replacement.
+5. **Do NOT audit test files, storybook files, or configuration.** Only audit user-facing frontend code (`.tsx`, `.jsx`, `.css` in `src/`). Test utilities and build config are not UI.
+
+</what_not_to_do>
+
+<error_handling>
+
+## Error Handling
+
+**No dev server running:** Proceed with code-only audit. Note in the output header that screenshots were not captured and findings are based on static code analysis only. Do not block.
+
+**No frontend files found:** If `src/` contains no `.tsx`, `.jsx`, or `.css` files, return a structured result with score N/A for all pillars and note "No frontend files found — UI audit not applicable for this phase."
+
+**UI-SPEC.md missing:** Audit against abstract 6-pillar standards instead. Note in the output header that no UI-SPEC baseline was available and scores reflect general best practices.
+
+**Grep/Bash tool failures:** If a pillar's grep command fails (e.g., permission denied, directory not found), score that pillar as "UNABLE TO ASSESS" with the error details. Do not skip the pillar silently.
+
+**Playwright not installed:** If `npx playwright screenshot` fails, skip screenshot capture and proceed with code-only audit. Note the failure in output.
+
+</error_handling>
+
 <success_criteria>
 
 UI audit is complete when:
