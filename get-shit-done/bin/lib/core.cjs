@@ -1337,6 +1337,35 @@ function readSubdirectories(dirPath, sort = false) {
   }
 }
 
+// --- Streaming output -----------------------------------------------------------
+
+/**
+ * Write text line-by-line to a file descriptor, invoking an optional callback per line.
+ * Uses fs.writeSync for synchronous, blocking output matching the project's existing pattern.
+ *
+ * @param {string} text - The text to stream (may contain newlines)
+ * @param {object} [opts]
+ * @param {number} [opts.fd=1] - File descriptor (1=stdout, 2=stderr)
+ * @param {function} [opts.callback] - Called with (line, index) for each line
+ * @returns {number} Number of lines written
+ */
+function streamLines(text, opts = {}) {
+  const fd = opts.fd != null ? opts.fd : 1;
+  const callback = typeof opts.callback === 'function' ? opts.callback : null;
+  if (!text || typeof text !== 'string') return 0;
+
+  // Split on newlines, but do not produce a trailing empty element from a final \n
+  const raw = text.endsWith('\n') ? text.slice(0, -1) : text;
+  if (raw.length === 0) return 0;
+  const lines = raw.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    fs.writeSync(fd, lines[i] + '\n');
+    if (callback) callback(lines[i], i);
+  }
+  return lines.length;
+}
+
 module.exports = {
   output,
   error,
@@ -1387,4 +1416,5 @@ module.exports = {
   GSD_ERROR_CODES,
   debugLog,
   deepFreeze,
+  streamLines,
 };
