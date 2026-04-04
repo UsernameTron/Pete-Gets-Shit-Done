@@ -46,6 +46,9 @@ const {
   estimateTokens,
   budgetContext,
   createCancelToken,
+  createFeatureFlags,
+  GSD_TRUNCATED_SENTINEL,
+  detectTruncation,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -3068,5 +3071,117 @@ describe('safeExec cancelToken integration', () => {
     const result = safeExec('echo', ['world']);
     assert.strictEqual(result.ok, true);
     assert.strictEqual(result.stdout, 'world');
+  });
+});
+
+// ─── createFeatureFlags ─────────────────────────────────────────────────────
+
+describe('createFeatureFlags', () => {
+  test('returns object with isEnabled, listFlags, toJSON methods', () => {
+    const ff = createFeatureFlags({});
+    assert.strictEqual(typeof ff.isEnabled, 'function');
+    assert.strictEqual(typeof ff.listFlags, 'function');
+    assert.strictEqual(typeof ff.toJSON, 'function');
+  });
+
+  test('isEnabled returns false when flag not set', () => {
+    const ff = createFeatureFlags({ features: {} });
+    assert.strictEqual(ff.isEnabled('unknown'), false);
+  });
+
+  test('isEnabled returns true when features: { x: true }', () => {
+    const ff = createFeatureFlags({ features: { x: true } });
+    assert.strictEqual(ff.isEnabled('x'), true);
+  });
+
+  test('isEnabled returns false when features: { x: false }', () => {
+    const ff = createFeatureFlags({ features: { x: false } });
+    assert.strictEqual(ff.isEnabled('x'), false);
+  });
+
+  test('listFlags returns array of flag names', () => {
+    const ff = createFeatureFlags({ features: { alpha: true, beta: false } });
+    const flags = ff.listFlags();
+    assert.deepStrictEqual(flags.sort(), ['alpha', 'beta']);
+  });
+
+  test('toJSON returns copy of flags object', () => {
+    const original = { a: true, b: false };
+    const ff = createFeatureFlags({ features: original });
+    const json = ff.toJSON();
+    assert.deepStrictEqual(json, { a: true, b: false });
+    // Verify it is a copy, not a reference
+    json.a = false;
+    assert.strictEqual(ff.isEnabled('a'), true);
+  });
+
+  test('handles null config gracefully', () => {
+    const ff = createFeatureFlags(null);
+    assert.strictEqual(ff.isEnabled('anything'), false);
+    assert.deepStrictEqual(ff.listFlags(), []);
+    assert.deepStrictEqual(ff.toJSON(), {});
+  });
+
+  test('handles config without features key gracefully', () => {
+    const ff = createFeatureFlags({ someOtherKey: 'value' });
+    assert.strictEqual(ff.isEnabled('anything'), false);
+    assert.deepStrictEqual(ff.listFlags(), []);
+    assert.deepStrictEqual(ff.toJSON(), {});
+  });
+});
+
+// ─── detectTruncation ─────────────────────────────────────────────────────────
+
+describe('detectTruncation', () => {
+  test('returns truncated: false for normal string', () => {
+    const result = detectTruncation('hello world');
+    assert.strictEqual(result.truncated, false);
+    assert.strictEqual(result.cleanOutput, 'hello world');
+    assert.strictEqual(result.warning, null);
+  });
+
+  test('returns truncated: true for string ending with sentinel', () => {
+    const input = 'some output\n' + GSD_TRUNCATED_SENTINEL;
+    const result = detectTruncation(input);
+    assert.strictEqual(result.truncated, true);
+  });
+
+  test('strips sentinel from cleanOutput', () => {
+    const input = 'some output\n' + GSD_TRUNCATED_SENTINEL;
+    const result = detectTruncation(input);
+    assert.strictEqual(result.cleanOutput, 'some output\n');
+  });
+
+  test('returns warning message when truncated', () => {
+    const input = 'data' + GSD_TRUNCATED_SENTINEL;
+    const result = detectTruncation(input);
+    assert.strictEqual(typeof result.warning, 'string');
+    assert.ok(result.warning.length > 0);
+    assert.ok(result.warning.includes('truncated'), 'warning should mention truncation');
+  });
+
+  test('handles null input gracefully', () => {
+    const result = detectTruncation(null);
+    assert.strictEqual(result.truncated, false);
+    assert.strictEqual(result.cleanOutput, '');
+    assert.strictEqual(result.warning, null);
+  });
+
+  test('handles undefined input gracefully', () => {
+    const result = detectTruncation(undefined);
+    assert.strictEqual(result.truncated, false);
+    assert.strictEqual(result.cleanOutput, '');
+    assert.strictEqual(result.warning, null);
+  });
+
+  test('handles empty string', () => {
+    const result = detectTruncation('');
+    assert.strictEqual(result.truncated, false);
+    assert.strictEqual(result.cleanOutput, '');
+    assert.strictEqual(result.warning, null);
+  });
+
+  test('GSD_TRUNCATED_SENTINEL matches the string used in output()', () => {
+    assert.strictEqual(GSD_TRUNCATED_SENTINEL, '__GSD_TRUNCATED__');
   });
 });

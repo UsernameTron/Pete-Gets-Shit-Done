@@ -131,6 +131,7 @@ function buildNewProjectConfig(userChoices) {
       context_warnings: true,
     },
     agent_skills: {},
+    features: {},
   };
 
   // Three-level deep merge: hardcoded <- userDefaults <- choices
@@ -157,6 +158,11 @@ function buildNewProjectConfig(userChoices) {
       ...hardcoded.agent_skills,
       ...(userDefaults.agent_skills || {}),
       ...(choices.agent_skills || {}),
+    },
+    features: {
+      ...(hardcoded.features || {}),
+      ...(userDefaults.features || {}),
+      ...(choices.features || {}),
     },
   };
 }

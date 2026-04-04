@@ -68,6 +68,8 @@ class GsdError extends Error {
   }
 }
 
+const GSD_TRUNCATED_SENTINEL = '__GSD_TRUNCATED__';
+
 // ─── Debug logging ──────────────────────────────────────────────────────────
 
 /**
@@ -138,6 +140,22 @@ function createCancelToken() {
       if (cancelled) { fn(); return; }
       listeners.push(fn);
     },
+  };
+}
+
+// ── Feature Flags ──────────────────────────────────────────────────────────
+function createFeatureFlags(config) {
+  const flags = (config && config.features) || {};
+  return {
+    isEnabled(name) {
+      return flags[name] === true;
+    },
+    listFlags() {
+      return Object.keys(flags);
+    },
+    toJSON() {
+      return { ...flags };
+    }
   };
 }
 
@@ -299,7 +317,8 @@ function output(result, raw, rawValue) {
         data = '@file:' + tmpPath;
       } catch (_e) {
         // Temp file write failed — truncate with sentinel so consumers know data was lost
-        data = json.slice(0, 50000) + '\n__GSD_TRUNCATED__';
+        data = json.slice(0, 50000) + '\n' + GSD_TRUNCATED_SENTINEL;
+        fs.writeSync(2, JSON.stringify({ type: 'gsd_warning', code: 'OUTPUT_TRUNCATED', message: 'Output truncated — temp file write failed, JSON exceeded 50KB' }) + '\n');
       }
     } else {
       data = json;
@@ -310,6 +329,21 @@ function output(result, raw, rawValue) {
   // fs.writeSync(1, ...) blocks until the kernel accepts the bytes, and
   // skipping process.exit() lets the event loop drain naturally.
   fs.writeSync(1, data);
+}
+
+function detectTruncation(str) {
+  if (!str || typeof str !== 'string') {
+    return { truncated: false, cleanOutput: str || '', warning: null };
+  }
+  const truncated = str.endsWith(GSD_TRUNCATED_SENTINEL);
+  if (!truncated) {
+    return { truncated: false, cleanOutput: str, warning: null };
+  }
+  return {
+    truncated: true,
+    cleanOutput: str.slice(0, -GSD_TRUNCATED_SENTINEL.length),
+    warning: 'Output was truncated — temp file write failed and JSON exceeded 50KB limit',
+  };
 }
 
 function error(message) {
@@ -1608,9 +1642,12 @@ module.exports = {
   runConfigMigrations,
   GsdError,
   GSD_ERROR_CODES,
+  GSD_TRUNCATED_SENTINEL,
+  detectTruncation,
   debugLog,
   deepFreeze,
   createCancelToken,
+  createFeatureFlags,
   streamLines,
   deterministicSort,
   lazyRegistry,

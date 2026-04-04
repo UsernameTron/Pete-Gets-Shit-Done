@@ -7,6 +7,22 @@ const { execSync } = require('child_process');
 const { safeReadFile, loadConfig, isGitIgnored, execGit, normalizePhaseName, comparePhaseNum, getArchivedPhaseDirs, generateSlugInternal, getMilestoneInfo, getMilestonePhaseFilter, resolveModelInternal, stripShippedMilestones, extractCurrentMilestone, planningDir, planningPaths, toPosixPath, output, error, findPhaseInternal, extractOneLinerFromBody, getRoadmapPhaseInternal } = require('./core.cjs');
 const { extractFrontmatter } = require('./frontmatter.cjs');
 const { MODEL_PROFILES } = require('./model-profiles.cjs');
+const { validateShellArg } = require('./security.cjs');
+
+/**
+ * Wrapper around execGit that validates user-derived arguments.
+ * Skips validation for git subcommands (index 0) and flags (start with -).
+ * Use this instead of execGit when any argument contains user-supplied data
+ * (branch names, file paths, commit messages).
+ */
+function execGitValidated(cwd, args) {
+  const validatedArgs = args.map((arg, i) => {
+    // Skip git subcommands (index 0) and flags (start with -)
+    if (i === 0 || arg.startsWith('-')) return arg;
+    return validateShellArg(arg, `git arg[${i}]`);
+  });
+  return execGit(cwd, validatedArgs);
+}
 
 function cmdGenerateSlug(text, raw) {
   if (!text) {
@@ -274,9 +290,9 @@ function cmdCommit(cwd, message, files, raw, amend, noVerify) {
       const currentBranch = execGit(cwd, ['rev-parse', '--abbrev-ref', 'HEAD']);
       if (currentBranch.exitCode === 0 && currentBranch.stdout.trim() !== branchName) {
         // Create branch if it doesn't exist, or switch to it if it does
-        const create = execGit(cwd, ['checkout', '-b', branchName]);
+        const create = execGitValidated(cwd, ['checkout', '-b', branchName]);
         if (create.exitCode !== 0) {
-          execGit(cwd, ['checkout', branchName]);
+          execGitValidated(cwd, ['checkout', branchName]);
         }
       }
     }
@@ -288,9 +304,9 @@ function cmdCommit(cwd, message, files, raw, amend, noVerify) {
     const fullPath = path.join(cwd, file);
     if (!fs.existsSync(fullPath)) {
       // File was deleted/moved — stage the deletion
-      execGit(cwd, ['rm', '--cached', '--ignore-unmatch', file]);
+      execGitValidated(cwd, ['rm', '--cached', '--ignore-unmatch', file]);
     } else {
-      execGit(cwd, ['add', file]);
+      execGitValidated(cwd, ['add', file]);
     }
   }
 
@@ -356,7 +372,7 @@ function cmdCommitToSubrepo(cwd, message, files, raw) {
     // Stage files (strip sub-repo prefix for paths relative to that repo)
     for (const file of repoFiles) {
       const relativePath = file.slice(repo.length + 1);
-      execGit(repoCwd, ['add', relativePath]);
+      execGitValidated(repoCwd, ['add', relativePath]);
     }
 
     // Commit
@@ -964,4 +980,5 @@ module.exports = {
   cmdTodoMatchPhase,
   cmdScaffold,
   cmdStats,
+  execGitValidated,
 };

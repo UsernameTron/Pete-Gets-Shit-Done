@@ -4,12 +4,12 @@ milestone: v1.6
 milestone_name: Maintainability
 status: executing
 last_updated: "2026-04-04T23:59:00.000Z"
-last_activity: 2026-04-04 -- Phase 18 complete (architecture + cancel tokens)
+last_activity: 2026-04-04 -- Phase 19 complete (feature flags, validateShellArg wiring, truncation consumer)
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 12
-  completed_plans: 2
+  completed_plans: 5
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -23,12 +23,20 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 ## Current Position
 
-Phase: 18 complete, advancing to Phase 19
+Phase: 19 complete, advancing to Phase 20
 Milestone: v1.6 Maintainability — executing
-Status: Phase 18 shipped. Phase 19 next (Feature Management & Consumer Wiring).
-Last activity: 2026-04-04 -- Phase 18 complete — architecture header, boundary tests, CancelToken, safeExec integration
+Status: Phase 19 shipped. Phase 20 next (Skills System).
+Last activity: 2026-04-04 -- Phase 19 complete — feature flags, validateShellArg wiring (5 call sites), truncation detection
 
-Progress: [##--------] 1/4 phases | 2/12 plans | 2/12 requirements
+Progress: [#####-----] 2/4 phases | 5/12 plans | 5/12 requirements
+
+## Phase 19 Results
+
+| Plan | Requirement | Status |
+|------|-------------|--------|
+| 19-01 | MAINT-02 | Complete — createFeatureFlags factory + config merge + 8 tests |
+| 19-02 | MAINT-07 | Complete — execGitValidated wrapper, 5 call sites wired + 7 tests |
+| 19-03 | MAINT-08 | Complete — detectTruncation + GSD_TRUNCATED_SENTINEL + stderr warning + 8 tests |
 
 ## Phase 18 Results
 
@@ -51,6 +59,6 @@ Progress: [##--------] 1/4 phases | 2/12 plans | 2/12 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 18 complete — committing and advancing to Phase 19
-**Stopped at**: Autonomous execution of v1.6 — Phase 19 next
-**Next**: Discuss/plan/execute Phase 19 (MAINT-02, MAINT-07, MAINT-08)
+**Last action**: Phase 19 complete — committing and advancing to Phase 20
+**Stopped at**: Autonomous execution of v1.6 — Phase 20 next
+**Next**: Discuss/plan/execute Phase 20 (MAINT-03, MAINT-04, MAINT-05, MAINT-09)

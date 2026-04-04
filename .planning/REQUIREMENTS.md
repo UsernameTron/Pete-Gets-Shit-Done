@@ -14,9 +14,9 @@ Requirements for v1.6 Maintainability. Addresses all deferred items and tech deb
 
 ### Feature Management & Consumer Wiring
 
-- [ ] **MAINT-02**: Feature flags for experimental capabilities — add a feature flag system in core.cjs that gates experimental features behind named toggles, configurable via GSD config. Flags default to off, can be enabled per-project.
-- [ ] **MAINT-07**: Wire validateShellArg to production caller — identify or create at least one production code path that uses validateShellArg() from security.cjs, eliminating the zero-caller tech debt.
-- [ ] **MAINT-08**: Wire __GSD_TRUNCATED__ to programmatic consumer — add detection logic that checks for the __GSD_TRUNCATED__ sentinel in output and surfaces it as a structured warning, eliminating the no-consumer tech debt.
+- [x] **MAINT-02**: Feature flags for experimental capabilities — add a feature flag system in core.cjs that gates experimental features behind named toggles, configurable via GSD config. Flags default to off, can be enabled per-project.
+- [x] **MAINT-07**: Wire validateShellArg to production caller — identify or create at least one production code path that uses validateShellArg() from security.cjs, eliminating the zero-caller tech debt.
+- [x] **MAINT-08**: Wire __GSD_TRUNCATED__ to programmatic consumer — add detection logic that checks for the __GSD_TRUNCATED__ sentinel in output and surfaces it as a structured warning, eliminating the no-consumer tech debt.
 
 ### Skills System
 
@@ -46,9 +46,9 @@ Requirements for v1.6 Maintainability. Addresses all deferred items and tech deb
 |-------------|-------|--------|
 | MAINT-01 | Phase 18 | Complete |
 | MAINT-06 | Phase 18 | Complete |
-| MAINT-02 | Phase 19 | Pending |
-| MAINT-07 | Phase 19 | Pending |
-| MAINT-08 | Phase 19 | Pending |
+| MAINT-02 | Phase 19 | Complete |
+| MAINT-07 | Phase 19 | Complete |
+| MAINT-08 | Phase 19 | Complete |
 | MAINT-03 | Phase 20 | Pending |
 | MAINT-04 | Phase 20 | Pending |
 | MAINT-05 | Phase 20 | Pending |
