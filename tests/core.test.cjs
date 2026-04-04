@@ -45,6 +45,7 @@ const {
   lazyRegistry,
   estimateTokens,
   budgetContext,
+  createCancelToken,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -2217,6 +2218,7 @@ describe('GSD_ERROR_CODES', () => {
 
   test('contains expected error codes', () => {
     const expected = [
+      'CANCELLED',
       'CONFIG_READ', 'CONFIG_PARSE', 'CONFIG_MIGRATE', 'CONFIG_WRITE',
       'STATE_READ', 'STATE_WRITE', 'PHASE_READ', 'PHASE_WRITE',
       'LOCK_ACQUIRE', 'LOCK_STALE', 'GIT_EXEC', 'FILE_READ',
@@ -2976,5 +2978,95 @@ describe('budgetContext', () => {
     assert.strictEqual(result[0].priority, 1);
     assert.strictEqual(result[1].priority, 2);
     assert.strictEqual(result[2].priority, 3);
+  });
+});
+
+// ─── createCancelToken ──────────────────────────────────────────────────────
+
+describe('createCancelToken', () => {
+  test('returns object with cancelled=false', () => {
+    const token = createCancelToken();
+    assert.strictEqual(token.cancelled, false);
+  });
+
+  test('cancel() sets cancelled to true', () => {
+    const token = createCancelToken();
+    token.cancel();
+    assert.strictEqual(token.cancelled, true);
+  });
+
+  test('cancel() is idempotent', () => {
+    const token = createCancelToken();
+    token.cancel();
+    token.cancel(); // should not throw
+    assert.strictEqual(token.cancelled, true);
+  });
+
+  test('throwIfCancelled does nothing when not cancelled', () => {
+    const token = createCancelToken();
+    token.throwIfCancelled(); // should not throw
+  });
+
+  test('throwIfCancelled throws GsdError with CANCELLED code when cancelled', () => {
+    const token = createCancelToken();
+    token.cancel();
+    assert.throws(() => token.throwIfCancelled(), (err) => {
+      assert.strictEqual(err.name, 'GsdError');
+      assert.strictEqual(err.code, 'CANCELLED');
+      return true;
+    });
+  });
+
+  test('onCancel listener fires on cancel()', () => {
+    const token = createCancelToken();
+    let fired = false;
+    token.onCancel(() => { fired = true; });
+    assert.strictEqual(fired, false);
+    token.cancel();
+    assert.strictEqual(fired, true);
+  });
+
+  test('multiple onCancel listeners all fire', () => {
+    const token = createCancelToken();
+    const calls = [];
+    token.onCancel(() => calls.push('a'));
+    token.onCancel(() => calls.push('b'));
+    token.cancel();
+    assert.deepStrictEqual(calls, ['a', 'b']);
+  });
+
+  test('onCancel registered after cancel fires immediately', () => {
+    const token = createCancelToken();
+    token.cancel();
+    let fired = false;
+    token.onCancel(() => { fired = true; });
+    assert.strictEqual(fired, true);
+  });
+});
+
+// ─── safeExec cancelToken integration ───────────────────────────────────────
+
+describe('safeExec cancelToken integration', () => {
+  test('returns cancelled result when token is already cancelled', () => {
+    const token = createCancelToken();
+    token.cancel();
+    const result = safeExec('echo', ['hello'], { cancelToken: token });
+    assert.strictEqual(result.cancelled, true);
+    assert.strictEqual(result.ok, false);
+    assert.strictEqual(result.stdout, '');
+  });
+
+  test('runs normally when token is not cancelled', () => {
+    const token = createCancelToken();
+    const result = safeExec('echo', ['hello'], { cancelToken: token });
+    assert.strictEqual(result.cancelled, false);
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(result.stdout, 'hello');
+  });
+
+  test('runs normally when no cancelToken provided', () => {
+    const result = safeExec('echo', ['world']);
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(result.stdout, 'world');
   });
 });

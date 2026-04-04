@@ -2,6 +2,33 @@
  * Core — Shared utilities, constants, and internal helpers
  */
 
+/*
+ * MODULE ARCHITECTURE
+ *
+ * Layer 0 — Foundation (no intra-project deps):
+ *   model-profiles.cjs, security.cjs
+ *
+ * Layer 1 — Core Hub (depends only on Layer 0):
+ *   core.cjs → model-profiles.cjs
+ *
+ * Layer 2 — Domain (depends on Layer 1 + Layer 0):
+ *   frontmatter.cjs → core.cjs
+ *   config.cjs → core.cjs, model-profiles.cjs
+ *   state.cjs → core.cjs, frontmatter.cjs, security.cjs
+ *
+ * Layer 3 — Application (depends on Layers 0-2):
+ *   phase.cjs, milestone.cjs, roadmap.cjs, workstream.cjs,
+ *   verify.cjs, commands.cjs, uat.cjs, template.cjs, init.cjs,
+ *   profile-output.cjs, profile-pipeline.cjs
+ *
+ * RULES:
+ *   - Imports flow DOWN (Layer 3 → 2 → 1 → 0). Never up.
+ *   - core.cjs must NOT require any module except model-profiles.cjs.
+ *   - No circular dependencies between any pair of modules.
+ *   - Lazy requires (inside functions) follow the same direction rules.
+ *   - Enforced by tests/architecture.test.cjs.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -11,6 +38,7 @@ const { MODEL_PROFILES } = require('./model-profiles.cjs');
 // ─── Error Infrastructure ────────────────────────────────────────────────────
 
 const GSD_ERROR_CODES = Object.freeze({
+  CANCELLED:         'CANCELLED',
   CONFIG_READ:       'CONFIG_READ',
   CONFIG_PARSE:      'CONFIG_PARSE',
   CONFIG_MIGRATE:    'CONFIG_MIGRATE',
@@ -78,6 +106,39 @@ function deepFreeze(obj) {
     }
   }
   return obj;
+}
+
+// ─── Cancellation ────────────────────────────────────────────────────────────
+
+/**
+ * Create a synchronous cancel token for cooperative cancellation.
+ * Long-running sync operations can poll token.cancelled and bail out.
+ * No async, no AbortController — just a boolean flag with listeners.
+ *
+ * @returns {{ cancelled: boolean, cancel: function, throwIfCancelled: function, onCancel: function }}
+ */
+function createCancelToken() {
+  let cancelled = false;
+  const listeners = [];
+
+  return {
+    get cancelled() { return cancelled; },
+    cancel() {
+      if (cancelled) return;
+      cancelled = true;
+      for (const fn of listeners) fn();
+    },
+    throwIfCancelled() {
+      if (cancelled) {
+        throw new GsdError(GSD_ERROR_CODES.CANCELLED, 'Operation cancelled');
+      }
+    },
+    onCancel(fn) {
+      if (typeof fn !== 'function') return;
+      if (cancelled) { fn(); return; }
+      listeners.push(fn);
+    },
+  };
 }
 
 // ─── Path helpers ────────────────────────────────────────────────────────────
@@ -571,7 +632,21 @@ function safeExec(command, args, options = {}) {
     cwd = process.cwd(),
     timeout = 30000,
     encoding = 'utf-8',
+    cancelToken,
   } = options;
+
+  // Check cancellation before spawning
+  if (cancelToken && cancelToken.cancelled) {
+    return {
+      ok: false,
+      exitCode: 1,
+      stdout: '',
+      stderr: 'Operation cancelled',
+      timedOut: false,
+      cancelled: true,
+    };
+  }
+
   const result = spawnSync(command, args, {
     cwd,
     stdio: 'pipe',
@@ -585,6 +660,7 @@ function safeExec(command, args, options = {}) {
     stdout: (result.stdout ?? '').toString().trim(),
     stderr: (result.stderr ?? '').toString().trim(),
     timedOut,
+    cancelled: false,
   };
 }
 
@@ -1534,6 +1610,7 @@ module.exports = {
   GSD_ERROR_CODES,
   debugLog,
   deepFreeze,
+  createCancelToken,
   streamLines,
   deterministicSort,
   lazyRegistry,

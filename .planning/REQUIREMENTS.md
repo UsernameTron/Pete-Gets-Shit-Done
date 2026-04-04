@@ -9,8 +9,8 @@ Requirements for v1.6 Maintainability. Addresses all deferred items and tech deb
 
 ### Architecture & Module Boundaries
 
-- [ ] **MAINT-01**: Layered architecture refactoring — establish clear module boundaries between core utilities (core.cjs), security (security.cjs), agent management, skill registry, and CLI tooling. Extract cross-cutting concerns into well-defined interfaces.
-- [ ] **MAINT-06**: Sync-compatible cancel tokens — implement a lightweight cancellation pattern that works within the sync CommonJS architecture, allowing long-running operations to check a cancelled flag without requiring async/await or AbortController.
+- [x] **MAINT-01**: Layered architecture refactoring — establish clear module boundaries between core utilities (core.cjs), security (security.cjs), agent management, skill registry, and CLI tooling. Extract cross-cutting concerns into well-defined interfaces.
+- [x] **MAINT-06**: Sync-compatible cancel tokens — implement a lightweight cancellation pattern that works within the sync CommonJS architecture, allowing long-running operations to check a cancelled flag without requiring async/await or AbortController.
 
 ### Feature Management & Consumer Wiring
 
@@ -44,8 +44,8 @@ Requirements for v1.6 Maintainability. Addresses all deferred items and tech deb
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAINT-01 | Phase 18 | Pending |
-| MAINT-06 | Phase 18 | Pending |
+| MAINT-01 | Phase 18 | Complete |
+| MAINT-06 | Phase 18 | Complete |
 | MAINT-02 | Phase 19 | Pending |
 | MAINT-07 | Phase 19 | Pending |
 | MAINT-08 | Phase 19 | Pending |
