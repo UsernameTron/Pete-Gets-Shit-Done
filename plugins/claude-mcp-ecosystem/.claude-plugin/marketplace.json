@@ -1,13 +1,13 @@
 {
-  "name": "claude-code-research-marketplace",
+  "name": "local-plugin-marketplace",
   "owner": {
     "name": "Pete Connor"
   },
   "plugins": [
     {
-      "name": "claude-code-research",
+      "name": "claude-mcp-ecosystem",
       "source": "./",
-      "description": "Claude Code research and documentation knowledge base"
+      "description": "Project agent ecosystem — /prime, /wrap, agent lifecycle (/agents, /agent-setup, /agent-status, /agent-diagnose, /agent-add, /agent-remove, /agent-reset)"
     }
   ]
 }
