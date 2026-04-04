@@ -58,11 +58,13 @@ Plans:
 
 **Note:** Can run in parallel with Phase 15.
 
-Plans:
-- [ ] 16-PLAN-01 -- Lazy-load MODEL_PROFILES via accessor proxy (Wave 1)
-- [ ] 16-PLAN-02 -- Lazy-load skill registry with deferred directory scan (Wave 1)
+**Plans:** 2 plans
 
-**Status: NOT STARTED**
+Plans:
+- [ ] 16-01-PLAN.md -- Lazy-load MODEL_PROFILES via Object.defineProperty getter proxy (Wave 1, TDD)
+- [ ] 16-02-PLAN.md -- lazyRegistry generic utility in core.cjs (Wave 1, TDD)
+
+**Status: PLANNED**
 
 ---
 
