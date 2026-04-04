@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Correctness & Robustness
-status: All phases COMPLETE — milestone lifecycle pending
+status: MILESTONE COMPLETE — archived and closed
 last_updated: "2026-04-04T21:00:00.000Z"
 last_activity: 2026-04-04
 progress:
@@ -18,14 +18,14 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-04)
 
-**Last Shipped:** v1.3 Security Hardening & Coverage (2026-04-04)
-**Active:** v1.4 Correctness & Robustness
+**Last Shipped:** v1.4 Correctness & Robustness (2026-04-04)
+**Active:** None — next milestone pending
 
 ## Current Position
 
-Phase: ALL COMPLETE
+Phase: MILESTONE CLOSED
 Prior Phase: 14 — Timeout Guards & Graceful Degradation — COMPLETE
-Status: All 4 phases complete — milestone audit, archive, and cleanup next
+Status: v1.4 milestone archived — all 14 requirements satisfied, 4 phases complete
 Last activity: 2026-04-04
 
 ## Phase Status
@@ -45,6 +45,7 @@ Last activity: 2026-04-04
 | v1.1 | Testing & Hardening | 4 | 11 | 2026-03-26 |
 | v1.2 | Agent Quality & Consolidation | 1 | 5 | 2026-04-04 |
 | v1.3 | Security Hardening & Coverage | 4 | 4 | 2026-04-04 |
+| v1.4 | Correctness & Robustness | 4 | 6 | 2026-04-04 |
 
 ## Decisions
 
@@ -69,5 +70,5 @@ Last activity: 2026-04-04
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 14 COMPLETE — all v1.4 phases done
-**Next**: Milestone v1.4 lifecycle — audit, archive, complete
+**Last action**: v1.4 milestone archived and closed
+**Next**: `/gsd:new-milestone` to start v1.5
