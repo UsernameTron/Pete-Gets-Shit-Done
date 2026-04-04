@@ -1,24 +1,42 @@
 /**
  * Mapping of GSD agent to model for each profile.
  *
+ * MODEL_PROFILES and VALID_PROFILES are lazily initialized on first access
+ * via Object.defineProperty getters, then cached for all subsequent accesses.
+ * This defers parsing cost until a caller actually needs agent metadata (PERF-03).
+ *
  * Should be in sync with the profiles table in `get-shit-done/references/model-profiles.md`. But
  * possibly worth making this the single source of truth at some point, and removing the markdown
  * reference table in favor of programmatically determining the model to use for an agent (which
  * would be faster, use fewer tokens, and be less error-prone).
  */
-const MODEL_PROFILES = {
-  'gsd-planner': { quality: 'opus', balanced: 'opus', budget: 'sonnet' },
-  'gsd-roadmapper': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet' },
-  'gsd-executor': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet' },
-  'gsd-research-synthesizer': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
-  'gsd-debugger': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet' },
-  'gsd-codebase-mapper': { quality: 'sonnet', balanced: 'haiku', budget: 'haiku' },
-  'gsd-verifier': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
-  'gsd-ui-researcher': { quality: 'opus', balanced: 'sonnet', budget: 'haiku' },
-  'gsd-ui-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
-  'gsd-ui-auditor': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
-};
-const VALID_PROFILES = Object.keys(MODEL_PROFILES['gsd-planner']);
+
+let _initCount = 0;
+let _modelProfiles = null;
+let _validProfiles = null;
+
+function _initialize() {
+  if (_modelProfiles !== null) return;
+  _initCount++;
+  _modelProfiles = {
+    'gsd-planner': { quality: 'opus', balanced: 'opus', budget: 'sonnet' },
+    'gsd-roadmapper': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet' },
+    'gsd-executor': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet' },
+    'gsd-phase-researcher': { quality: 'opus', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-project-researcher': { quality: 'opus', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-research-synthesizer': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-debugger': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet' },
+    'gsd-codebase-mapper': { quality: 'sonnet', balanced: 'haiku', budget: 'haiku' },
+    'gsd-verifier': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-plan-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-integration-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-nyquist-auditor': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-ui-researcher': { quality: 'opus', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-ui-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-ui-auditor': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
+  };
+  _validProfiles = Object.keys(_modelProfiles['gsd-planner']);
+}
 
 /**
  * Formats the agent-to-model mapping as a human-readable table (in string format).
@@ -48,16 +66,36 @@ function formatAgentToModelMapAsTable(agentToModelMap) {
  * @returns {Object<string, string>} A mapping from agent to model for the given profile
  */
 function getAgentToModelMapForProfile(normalizedProfile) {
+  _initialize();
   const agentToModelMap = {};
-  for (const [agent, profileToModelMap] of Object.entries(MODEL_PROFILES)) {
+  for (const [agent, profileToModelMap] of Object.entries(_modelProfiles)) {
     agentToModelMap[agent] = profileToModelMap[normalizedProfile];
   }
   return agentToModelMap;
 }
 
-module.exports = {
-  MODEL_PROFILES,
-  VALID_PROFILES,
+const _exports = {
   formatAgentToModelMapAsTable,
   getAgentToModelMapForProfile,
+  _getInitCount: () => _initCount,
 };
+
+Object.defineProperty(_exports, 'MODEL_PROFILES', {
+  get() {
+    _initialize();
+    return _modelProfiles;
+  },
+  enumerable: true,
+  configurable: true,
+});
+
+Object.defineProperty(_exports, 'VALID_PROFILES', {
+  get() {
+    _initialize();
+    return _validProfiles;
+  },
+  enumerable: true,
+  configurable: true,
+});
+
+module.exports = _exports;

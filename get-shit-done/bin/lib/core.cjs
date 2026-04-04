@@ -1391,6 +1391,32 @@ function deterministicSort(value) {
   return sorted;
 }
 
+// --- Lazy registry ----------------------------------------------------------------
+
+/**
+ * Create a lazy-initialized registry. The initFn is not called until .get()
+ * is first invoked. The result is cached for all subsequent .get() calls.
+ *
+ * @param {function} initFn - Zero-argument function that returns the registry value
+ * @returns {{ get: function, initialized: boolean }} Registry accessor
+ */
+function lazyRegistry(initFn) {
+  const UNSET = Symbol('lazyRegistry.UNSET');
+  let _value = UNSET;
+
+  return {
+    get() {
+      if (_value === UNSET) {
+        _value = initFn();
+      }
+      return _value;
+    },
+    get initialized() {
+      return _value !== UNSET;
+    },
+  };
+}
+
 module.exports = {
   output,
   error,
@@ -1443,4 +1469,5 @@ module.exports = {
   deepFreeze,
   streamLines,
   deterministicSort,
+  lazyRegistry,
 };
