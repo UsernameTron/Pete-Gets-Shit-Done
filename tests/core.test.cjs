@@ -42,6 +42,7 @@ const {
   execGit,
   streamLines,
   deterministicSort,
+  lazyRegistry,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -2741,5 +2742,77 @@ describe('deterministicSort', () => {
       JSON.stringify(deterministicSort(input)),
       '{"items":[{"a":2,"z":1}],"meta":{"version":1}}'
     );
+  });
+});
+
+// ─── lazyRegistry ─────────────────────────────────────────────────────────────
+
+describe('lazyRegistry', () => {
+  test('creating lazyRegistry does not call initFn', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return { data: 'test' }; });
+    assert.strictEqual(callCount, 0);
+  });
+
+  test('first .get() calls initFn and returns the result', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return { data: 'test' }; });
+    const result = registry.get();
+    assert.strictEqual(callCount, 1);
+    assert.deepStrictEqual(result, { data: 'test' });
+  });
+
+  test('second .get() returns cached result without re-calling initFn', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return { data: 'test' }; });
+    const first = registry.get();
+    const second = registry.get();
+    assert.strictEqual(callCount, 1);
+    assert.strictEqual(first, second, 'should return same reference');
+  });
+
+  test('.initialized is false before .get() and true after', () => {
+    const registry = lazyRegistry(() => ({ data: 'test' }));
+    assert.strictEqual(registry.initialized, false);
+    registry.get();
+    assert.strictEqual(registry.initialized, true);
+  });
+
+  test('works with array return type', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return [1, 2, 3]; });
+    const first = registry.get();
+    assert.deepStrictEqual(first, [1, 2, 3]);
+    const second = registry.get();
+    assert.strictEqual(first, second, 'should return same array reference');
+    assert.strictEqual(callCount, 1);
+  });
+
+  test('works with string return type', () => {
+    const registry = lazyRegistry(() => 'hello');
+    assert.strictEqual(registry.get(), 'hello');
+  });
+
+  test('works with number return type', () => {
+    const registry = lazyRegistry(() => 42);
+    assert.strictEqual(registry.get(), 42);
+  });
+
+  test('handles initFn that returns null', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return null; });
+    assert.strictEqual(registry.get(), null);
+    assert.strictEqual(callCount, 1);
+    assert.strictEqual(registry.get(), null);
+    assert.strictEqual(callCount, 1, 'should not re-call initFn for null result');
+  });
+
+  test('handles initFn that returns undefined', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return undefined; });
+    assert.strictEqual(registry.get(), undefined);
+    assert.strictEqual(callCount, 1);
+    assert.strictEqual(registry.get(), undefined);
+    assert.strictEqual(callCount, 1, 'should not re-call initFn for undefined result');
   });
 });

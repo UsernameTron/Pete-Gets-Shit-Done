@@ -132,3 +132,60 @@ describe('formatAgentToModelMapAsTable', () => {
     assert.ok(table.includes('Agent'), 'should still have header');
   });
 });
+
+// --- Lazy initialization ---------------------------------------------------------
+
+describe('lazy initialization', () => {
+  // Helper: get a fresh copy of the module by clearing require cache
+  function freshRequire() {
+    const modPath = require.resolve('../get-shit-done/bin/lib/model-profiles.cjs');
+    delete require.cache[modPath];
+    return require(modPath);
+  }
+
+  test('requiring module does not trigger initialization', () => {
+    const mod = freshRequire();
+    assert.strictEqual(mod._getInitCount(), 0,
+      'init should not run on require()');
+  });
+
+  test('accessing MODEL_PROFILES triggers initialization', () => {
+    const mod = freshRequire();
+    const profiles = mod.MODEL_PROFILES;
+    assert.strictEqual(mod._getInitCount(), 1,
+      'init should run exactly once on first access');
+    assert.ok(profiles['gsd-planner'], 'should contain gsd-planner');
+    assert.ok(profiles['gsd-planner'].quality, 'should have quality profile');
+  });
+
+  test('accessing VALID_PROFILES triggers initialization and returns correct values', () => {
+    const mod = freshRequire();
+    const valid = mod.VALID_PROFILES;
+    assert.ok(mod._getInitCount() >= 1, 'init should have run');
+    assert.deepStrictEqual([...valid].sort(), ['balanced', 'budget', 'quality']);
+  });
+
+  test('repeat MODEL_PROFILES access returns cached reference', () => {
+    const mod = freshRequire();
+    const first = mod.MODEL_PROFILES;
+    const second = mod.MODEL_PROFILES;
+    assert.strictEqual(first, second,
+      'should return same object reference on repeat access');
+    assert.strictEqual(mod._getInitCount(), 1,
+      'init should run only once despite two accesses');
+  });
+
+  test('getAgentToModelMapForProfile works after lazy init', () => {
+    const mod = freshRequire();
+    const map = mod.getAgentToModelMapForProfile('balanced');
+    assert.strictEqual(map['gsd-planner'], 'opus');
+    assert.strictEqual(map['gsd-verifier'], 'sonnet');
+  });
+
+  test('formatAgentToModelMapAsTable works after lazy init', () => {
+    const mod = freshRequire();
+    const table = mod.formatAgentToModelMapAsTable({ 'gsd-test': 'opus' });
+    assert.ok(table.includes('Agent'), 'should have Agent header');
+    assert.ok(table.includes('Model'), 'should have Model header');
+  });
+});
