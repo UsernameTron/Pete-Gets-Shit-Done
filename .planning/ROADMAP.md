@@ -31,8 +31,10 @@
 
 Plans:
 - [x] 11-PLAN-01 — GsdError class and error code registry (Wave 1)
-- [ ] 11-PLAN-02 — loadConfig() and core.cjs catch block remediation (Wave 2)
-- [ ] 11-PLAN-03 — Catch block audit across remaining lib modules (Wave 2)
+- [x] 11-PLAN-02 — loadConfig() and core.cjs catch block remediation (Wave 2)
+- [x] 11-PLAN-03 — Catch block audit across remaining lib modules (Wave 2)
+
+**Status: COMPLETE** (2026-04-04)
 
 ---
 
