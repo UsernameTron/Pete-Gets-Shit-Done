@@ -84,9 +84,9 @@ Defined 3 tiers and assigned them to all 15 source agents via YAML frontmatter c
 
 | Tier | Access Level | Agents |
 |------|-------------|--------|
-| **Explore** | Read, Glob, Grep, Bash (read-only) | gsd-assumptions-analyzer, gsd-codebase-mapper, gsd-user-profiler, gsd-ui-auditor |
-| **Research** | Read, Glob, Grep, Bash, WebSearch, WebFetch | gsd-advisor-researcher, gsd-research-orchestrator, gsd-research-synthesizer, gsd-ui-researcher |
-| **Modify** | Read, Write, Edit, Bash, Glob, Grep | gsd-debugger, gsd-executor, gsd-planner, gsd-roadmapper, gsd-ui-checker, gsd-validator-hub, gsd-verifier |
+| **Explore** | Read, Glob, Grep, Bash (read-only) | gsd-assumptions-analyzer, gsd-ui-checker, gsd-user-profiler, gsd-validator-hub |
+| **Research** | Read, Glob, Grep, Bash, WebSearch, WebFetch | gsd-advisor-researcher, gsd-research-orchestrator, gsd-ui-researcher |
+| **Modify** | Read, Write, Edit, Bash, Glob, Grep | gsd-codebase-mapper, gsd-debugger, gsd-executor, gsd-planner, gsd-research-synthesizer, gsd-roadmapper, gsd-ui-auditor, gsd-verifier |
 
 ### Priority 7: Quality Sections (Plan 05, Task 1)
 
@@ -136,18 +136,18 @@ Added "What NOT to Do" (5 domain-specific anti-patterns) and "Error Handling" (5
 |-------|------|---------|
 | gsd-advisor-researcher | Research | Research-backed advisory |
 | gsd-assumptions-analyzer | Explore | Assumption detection |
-| gsd-codebase-mapper | Explore | Codebase structure analysis |
+| gsd-codebase-mapper | Modify | Codebase structure analysis |
 | gsd-debugger | Modify | Systematic debugging |
 | gsd-executor | Modify | Plan execution engine |
 | gsd-planner | Modify | Phase planning |
 | gsd-research-orchestrator | Research | Unified research (phase + project) |
-| gsd-research-synthesizer | Research | Multi-source synthesis |
+| gsd-research-synthesizer | Modify | Multi-source synthesis |
 | gsd-roadmapper | Modify | Roadmap construction |
-| gsd-ui-auditor | Explore | UI quality auditing |
-| gsd-ui-checker | Modify | UI spec compliance |
+| gsd-ui-auditor | Modify | UI quality auditing |
+| gsd-ui-checker | Explore | UI spec compliance |
 | gsd-ui-researcher | Research | UI research and discovery |
 | gsd-user-profiler | Explore | User context analysis |
-| gsd-validator-hub | Modify | Unified validation (extension + ecosystem) |
+| gsd-validator-hub | Explore | Unified validation (extension + ecosystem) |
 | gsd-verifier | Modify | Unified verification (plan + integration + nyquist + general) |
 
 ### Archived Agents (7)

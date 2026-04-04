@@ -7,6 +7,21 @@ const path = require('path');
 const { escapeRegex, loadConfig, getMilestoneInfo, getMilestonePhaseFilter, normalizeMd, planningDir, planningPaths, output, error } = require('./core.cjs');
 const { extractFrontmatter, reconstructFrontmatter } = require('./frontmatter.cjs');
 
+// ─── Mutation Safety Audit (CORR-06) ─────────────────────────────────────────
+// All .push() calls in this module operate on locally-scoped arrays that are
+// constructed fresh within each command invocation. None mutate shared
+// module-level state or objects passed in by callers.
+//
+// Verified patterns:
+//   cmdStatePatch        — results.updated[], results.failed[]  (local)
+//   cmdStateRecordSession — updated[]                           (local)
+//   cmdStateSnapshot     — decisions[], blockers[]              (local)
+//   cmdStateBeginPhase   — updated[]                            (local)
+//
+// If new .push() calls are added, verify they operate on locally-constructed
+// arrays, not on objects received from callers or module-level variables.
+// ─────────────────────────────────────────────────────────────────────────────
+
 /** Shorthand — every state command needs this path */
 function getStatePath(cwd) {
   return planningPaths(cwd).state;

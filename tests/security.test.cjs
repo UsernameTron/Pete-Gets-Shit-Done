@@ -124,6 +124,20 @@ describe('requireSafePath', () => {
       /PRD file validation failed/
     );
   });
+
+  test('uses default label when label is undefined', () => {
+    assert.throws(
+      () => requireSafePath('../../etc/passwd', base, undefined),
+      /Path validation failed/
+    );
+  });
+
+  test('uses default label when label is empty string', () => {
+    assert.throws(
+      () => requireSafePath('../../etc/passwd', base, ''),
+      /Path validation failed/
+    );
+  });
 });
 
 // ─── Prompt Injection Detection ─────────────────────────────────────────────
@@ -274,6 +288,18 @@ describe('sanitizeForDisplay', () => {
     const input = 'Type `pass` or describe what\\\'s wrong.';
     assert.equal(sanitizeForDisplay(input), input);
   });
+
+  test('handles null input gracefully', () => {
+    assert.equal(sanitizeForDisplay(null), null);
+  });
+
+  test('handles undefined input gracefully', () => {
+    assert.equal(sanitizeForDisplay(undefined), undefined);
+  });
+
+  test('handles empty string input', () => {
+    assert.equal(sanitizeForDisplay(''), '');
+  });
 });
 
 // ─── Shell Safety ───────────────────────────────────────────────────────────
@@ -381,6 +407,56 @@ describe('validateShellArg', () => {
 
   test('allows tilde in middle of string', () => {
     assert.equal(validateShellArg('file~backup', 'test'), 'file~backup');
+  });
+
+  test('rejects non-string truthy value (number)', () => {
+    assert.throws(
+      () => validateShellArg(42, 'count'),
+      /empty or invalid/
+    );
+  });
+
+  // Tests for label fallback (label omitted → defaults to 'Argument')
+  test('uses default label for empty value without label', () => {
+    assert.throws(
+      () => validateShellArg(''),
+      /Argument: empty or invalid/
+    );
+  });
+
+  test('uses default label for null bytes without label', () => {
+    assert.throws(
+      () => validateShellArg('file\0name'),
+      /Argument: contains null bytes/
+    );
+  });
+
+  test('uses default label for command substitution without label', () => {
+    assert.throws(
+      () => validateShellArg('$(whoami)'),
+      /Argument: contains potential command substitution/
+    );
+  });
+
+  test('uses default label for shell operator without label', () => {
+    assert.throws(
+      () => validateShellArg('foo;bar'),
+      /Argument: contains shell operator/
+    );
+  });
+
+  test('uses default label for newline without label', () => {
+    assert.throws(
+      () => validateShellArg('foo\nbar'),
+      /Argument: contains newline/
+    );
+  });
+
+  test('uses default label for tilde expansion without label', () => {
+    assert.throws(
+      () => validateShellArg('~root/.ssh'),
+      /Argument: contains tilde expansion/
+    );
   });
 });
 

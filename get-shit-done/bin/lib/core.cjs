@@ -59,6 +59,27 @@ function debugLog(code, message, context) {
   }
 }
 
+// ─── Deep freeze utility ─────────────────────────────────────────────────────
+
+/**
+ * Recursively freeze a plain object or array.
+ * Skips non-plain-object values (Date, RegExp, Buffer, etc.) and null/undefined.
+ * Safe to call on already-frozen objects (no-op).
+ */
+function deepFreeze(obj) {
+  if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
+  if (Object.isFrozen(obj)) return obj;
+  Object.freeze(obj);
+  const keys = Object.keys(obj);
+  for (let i = 0; i < keys.length; i++) {
+    const val = obj[keys[i]];
+    if (val !== null && typeof val === 'object' && !Object.isFrozen(val)) {
+      deepFreeze(val);
+    }
+  }
+  return obj;
+}
+
 // ─── Path helpers ────────────────────────────────────────────────────────────
 
 /** Normalize a relative path to always use forward slashes (cross-platform). */
@@ -380,7 +401,7 @@ function loadConfig(cwd) {
       return defaults.parallelization;
     })();
 
-    return {
+    return deepFreeze({
       model_profile: get('model_profile') ?? defaults.model_profile,
       commit_docs: (() => {
         const explicit = get('commit_docs', { section: 'planning', field: 'commit_docs' });
@@ -411,13 +432,13 @@ function loadConfig(cwd) {
       phase_naming: get('phase_naming') ?? defaults.phase_naming,
       model_overrides: parsed.model_overrides || null,
       agent_skills: parsed.agent_skills || {},
-    };
+    });
   } catch (err) {
     debugLog(GSD_ERROR_CODES.CONFIG_READ, 'loadConfig failed, using defaults', {
       path: configPath,
       error: err.message,
     });
-    return defaults;
+    return deepFreeze(defaults);
   }
 }
 
@@ -671,7 +692,7 @@ function planningRoot(cwd) {
 function planningPaths(cwd, ws) {
   const base = planningDir(cwd, ws);
   const root = path.join(cwd, '.planning');
-  return {
+  return deepFreeze({
     planning: base,
     state: path.join(base, 'STATE.md'),
     roadmap: path.join(base, 'ROADMAP.md'),
@@ -679,7 +700,7 @@ function planningPaths(cwd, ws) {
     config: path.join(root, 'config.json'),
     phases: path.join(base, 'phases'),
     requirements: path.join(base, 'REQUIREMENTS.md'),
-  };
+  });
 }
 
 // ─── Active Workstream Detection ─────────────────────────────────────────────
@@ -785,8 +806,8 @@ function searchPhaseInDir(baseDir, relBase, normalized) {
     const phaseName = dirMatch && dirMatch[2] ? dirMatch[2] : null;
     const phaseDir = path.join(baseDir, match);
     const { plans: unsortedPlans, summaries: unsortedSummaries, hasResearch, hasContext, hasVerification, hasReviews } = getPhaseFileStats(phaseDir);
-    const plans = unsortedPlans.sort();
-    const summaries = unsortedSummaries.sort();
+    const plans = [...unsortedPlans].sort();
+    const summaries = [...unsortedSummaries].sort();
 
     const completedPlanIds = new Set(
       summaries.map(s => s.replace('-SUMMARY.md', '').replace('SUMMARY.md', ''))
@@ -824,7 +845,7 @@ function findPhaseInternal(cwd, phase) {
   // Search current phases first
   const relPhasesDir = toPosixPath(path.relative(cwd, phasesDir));
   const current = searchPhaseInDir(phasesDir, relPhasesDir, normalized);
-  if (current) return current;
+  if (current) return deepFreeze(current);
 
   // Search archived milestone phases (newest first)
   const milestonesDir = path.join(cwd, '.planning', 'milestones');
@@ -845,7 +866,7 @@ function findPhaseInternal(cwd, phase) {
       const result = searchPhaseInDir(archivePath, relBase, normalized);
       if (result) {
         result.archived = version;
-        return result;
+        return deepFreeze(result);
       }
     }
   } catch { /* intentional: milestone archive directory may not exist */ }
@@ -1025,13 +1046,13 @@ function getRoadmapPhaseInternal(cwd, phaseNum) {
     const goalMatch = section.match(/\*\*Goal(?:\*\*:|\*?\*?:\*\*)\s*([^\n]+)/i);
     const goal = goalMatch ? goalMatch[1].trim() : null;
 
-    return {
+    return deepFreeze({
       found: true,
       phase_number: phaseNum.toString(),
       phase_name: phaseName,
       goal,
       section,
-    };
+    });
   } catch { /* intentional: ROADMAP.md may not exist or phase not found */
     return null;
   }
@@ -1064,12 +1085,12 @@ function checkAgentsInstalled() {
   const missing = [];
 
   if (!fs.existsSync(agentsDir)) {
-    return {
+    return deepFreeze({
       agents_installed: false,
       missing_agents: expectedAgents,
       installed_agents: [],
       agents_dir: agentsDir,
-    };
+    });
   }
 
   for (const agent of expectedAgents) {
@@ -1081,12 +1102,12 @@ function checkAgentsInstalled() {
     }
   }
 
-  return {
+  return deepFreeze({
     agents_installed: installed.length > 0 && missing.length === 0,
     missing_agents: missing,
     installed_agents: installed,
     agents_dir: agentsDir,
-  };
+  });
 }
 
 // ─── Model alias resolution ───────────────────────────────────────────────────
@@ -1178,10 +1199,10 @@ function getMilestoneInfo(cwd) {
     // e.g. "- 🚧 **v1.2.1 Tech Debt** — Phases 1-8 (in progress)"
     const inProgressMatch = roadmap.match(/🚧\s*\*\*v(\d+(?:\.\d+)+)\s+([^*]+)\*\*/);
     if (inProgressMatch) {
-      return {
+      return deepFreeze({
         version: 'v' + inProgressMatch[1],
         name: inProgressMatch[2].trim(),
-      };
+      });
     }
 
     // Second: heading-format roadmaps — strip shipped milestones in <details> blocks
@@ -1190,19 +1211,19 @@ function getMilestoneInfo(cwd) {
     // Supports 2+ segment versions: v1.2, v1.2.1, v2.0.1, etc.
     const headingMatch = cleaned.match(/## .*v(\d+(?:\.\d+)+)[:\s]+([^\n(]+)/);
     if (headingMatch) {
-      return {
+      return deepFreeze({
         version: 'v' + headingMatch[1],
         name: headingMatch[2].trim(),
-      };
+      });
     }
     // Fallback: try bare version match (greedy — capture longest version string)
     const versionMatch = cleaned.match(/v(\d+(?:\.\d+)+)/);
-    return {
+    return deepFreeze({
       version: versionMatch ? versionMatch[0] : 'v1.0',
       name: 'milestone',
-    };
+    });
   } catch { /* intentional: ROADMAP.md may not exist — return safe defaults */
-    return { version: 'v1.0', name: 'milestone' };
+    return deepFreeze({ version: 'v1.0', name: 'milestone' });
   }
 }
 
@@ -1265,14 +1286,14 @@ function filterSummaryFiles(files) {
  */
 function getPhaseFileStats(phaseDir) {
   const files = fs.readdirSync(phaseDir);
-  return {
+  return deepFreeze({
     plans: filterPlanFiles(files),
     summaries: filterSummaryFiles(files),
     hasResearch: files.some(f => f.endsWith('-RESEARCH.md') || f === 'RESEARCH.md'),
     hasContext: files.some(f => f.endsWith('-CONTEXT.md') || f === 'CONTEXT.md'),
     hasVerification: files.some(f => f.endsWith('-VERIFICATION.md') || f === 'VERIFICATION.md'),
     hasReviews: files.some(f => f.endsWith('-REVIEWS.md') || f === 'REVIEWS.md'),
-  };
+  });
 }
 
 /**
@@ -1338,4 +1359,5 @@ module.exports = {
   GsdError,
   GSD_ERROR_CODES,
   debugLog,
+  deepFreeze,
 };

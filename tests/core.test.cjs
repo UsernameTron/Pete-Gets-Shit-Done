@@ -37,6 +37,7 @@ const {
   GsdError,
   GSD_ERROR_CODES,
   debugLog,
+  deepFreeze,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -2330,5 +2331,156 @@ describe('debugLog', () => {
       debugLog(GSD_ERROR_CODES.CONFIG_WRITE, 'test');
       debugLog(GSD_ERROR_CODES.CONFIG_MIGRATE, 'test');
     });
+  });
+});
+
+// ─── deepFreeze ─────────────────────────────────────────────────────────────
+
+describe('deepFreeze', () => {
+  test('freezes a plain object', () => {
+    const obj = deepFreeze({ a: 1 });
+    assert.ok(Object.isFrozen(obj));
+  });
+
+  test('freezes nested objects recursively', () => {
+    const obj = deepFreeze({ a: { b: { c: 1 } } });
+    assert.ok(Object.isFrozen(obj));
+    assert.ok(Object.isFrozen(obj.a));
+    assert.ok(Object.isFrozen(obj.a.b));
+  });
+
+  test('freezes arrays', () => {
+    const arr = deepFreeze([1, [2, 3]]);
+    assert.ok(Object.isFrozen(arr));
+    assert.ok(Object.isFrozen(arr[1]));
+  });
+
+  test('freezes mixed objects and arrays', () => {
+    const obj = deepFreeze({ items: [{ id: 1 }] });
+    assert.ok(Object.isFrozen(obj));
+    assert.ok(Object.isFrozen(obj.items));
+    assert.ok(Object.isFrozen(obj.items[0]));
+  });
+
+  test('returns null/undefined/primitives unchanged', () => {
+    assert.strictEqual(deepFreeze(null), null);
+    assert.strictEqual(deepFreeze(undefined), undefined);
+    assert.strictEqual(deepFreeze(42), 42);
+    assert.strictEqual(deepFreeze('hello'), 'hello');
+    assert.strictEqual(deepFreeze(true), true);
+  });
+
+  test('is idempotent on already-frozen objects', () => {
+    const obj = Object.freeze({ a: 1 });
+    assert.doesNotThrow(() => deepFreeze(obj));
+    assert.ok(Object.isFrozen(deepFreeze(obj)));
+  });
+
+  test('prevents mutation', () => {
+    'use strict';
+    const obj = deepFreeze({ x: 1, nested: { y: 2 } });
+    assert.throws(() => { obj.x = 99; }, TypeError);
+    assert.throws(() => { obj.nested.y = 99; }, TypeError);
+    assert.throws(() => { obj.newProp = 'nope'; }, TypeError);
+  });
+});
+
+// ─── State Immutability — Freeze Assertions (CORR-05) ──────────────────────
+
+describe('loadConfig returns frozen objects', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('loadConfig returns a frozen object', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ model_profile: 'balanced' }, null, 2)
+    );
+    const config = loadConfig(tmpDir);
+    assert.ok(Object.isFrozen(config));
+  });
+
+  test('loadConfig frozen object has correct values', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ model_profile: 'quality', brave_search: true }, null, 2)
+    );
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.model_profile, 'quality');
+    assert.strictEqual(config.brave_search, true);
+  });
+
+  test('loadConfig freezes nested objects', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ agent_skills: { skill1: true }, model_overrides: { planner: 'opus' } }, null, 2)
+    );
+    const config = loadConfig(tmpDir);
+    assert.ok(Object.isFrozen(config));
+    assert.ok(Object.isFrozen(config.agent_skills));
+    assert.ok(Object.isFrozen(config.model_overrides));
+  });
+});
+
+describe('getMilestoneInfo returns frozen object', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('getMilestoneInfo returns frozen object', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n## Roadmap v1.2: My Project\n\nContent'
+    );
+    const info = getMilestoneInfo(tmpDir);
+    assert.ok(Object.isFrozen(info));
+  });
+});
+
+describe('planningPaths returns frozen object', () => {
+  const { planningPaths } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('planningPaths returns frozen object', () => {
+    const paths = planningPaths('/tmp/test-project');
+    assert.ok(Object.isFrozen(paths));
+  });
+});
+
+describe('findPhaseInternal returns frozen object or null', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('findPhaseInternal returns frozen object when phase exists', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '01-setup');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '01-PLAN.md'), '# Plan');
+    const result = findPhaseInternal(tmpDir, '1');
+    assert.ok(result !== null);
+    assert.ok(Object.isFrozen(result));
+  });
+
+  test('findPhaseInternal returns null for missing phase', () => {
+    const result = findPhaseInternal(tmpDir, '99');
+    assert.strictEqual(result, null);
   });
 });
