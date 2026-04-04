@@ -34,6 +34,8 @@ const {
   CONFIG_VERSION,
   configMigrations,
   runConfigMigrations,
+  GsdError,
+  GSD_ERROR_CODES,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -2154,6 +2156,74 @@ describe('config migration system', () => {
       assert.strictEqual(typeof m.to, 'number');
       assert.strictEqual(typeof m.migrate, 'function');
       assert.ok(m.to > m.from, 'to must be greater than from');
+    }
+  });
+});
+
+// ─── GsdError ───────────────────────────────────────────────────────────────
+
+describe('GsdError', () => {
+  test('constructs with code and message', () => {
+    const err = new GsdError('CONFIG_READ', 'cannot read config');
+    assert.strictEqual(err.name, 'GsdError');
+    assert.strictEqual(err.code, 'CONFIG_READ');
+    assert.strictEqual(err.message, 'cannot read config');
+    assert.ok(err instanceof Error, 'must be an Error instance');
+  });
+
+  test('stores context when provided', () => {
+    const ctx = { file: '/tmp/config.json', attempt: 2 };
+    const err = new GsdError('FILE_READ', 'read failed', { context: ctx });
+    assert.deepStrictEqual(err.context, ctx);
+  });
+
+  test('stores cause when provided', () => {
+    const original = new Error('ENOENT');
+    const err = new GsdError('FILE_READ', 'read failed', { cause: original });
+    assert.strictEqual(err.cause, original);
+  });
+
+  test('defaults context and cause to null', () => {
+    const err = new GsdError('VALIDATION', 'bad input');
+    assert.strictEqual(err.context, null);
+    assert.strictEqual(err.cause, null);
+  });
+
+  test('accepts both context and cause together', () => {
+    const ctx = { field: 'name' };
+    const original = new TypeError('expected string');
+    const err = new GsdError('VALIDATION', 'invalid', { context: ctx, cause: original });
+    assert.deepStrictEqual(err.context, ctx);
+    assert.strictEqual(err.cause, original);
+    assert.strictEqual(err.code, 'VALIDATION');
+  });
+});
+
+// ─── GSD_ERROR_CODES ────────────────────────────────────────────────────────
+
+describe('GSD_ERROR_CODES', () => {
+  test('is frozen', () => {
+    assert.ok(Object.isFrozen(GSD_ERROR_CODES));
+  });
+
+  test('contains expected error codes', () => {
+    const expected = [
+      'CONFIG_READ', 'CONFIG_PARSE', 'CONFIG_MIGRATE', 'CONFIG_WRITE',
+      'STATE_READ', 'STATE_WRITE', 'PHASE_READ', 'PHASE_WRITE',
+      'LOCK_ACQUIRE', 'LOCK_STALE', 'GIT_EXEC', 'FILE_READ',
+      'FILE_WRITE', 'PARSE_ERROR', 'COMMAND_DISPATCH', 'TEMPLATE_RENDER',
+      'VALIDATION',
+    ];
+    for (const code of expected) {
+      assert.ok(code in GSD_ERROR_CODES, `missing code: ${code}`);
+    }
+    assert.strictEqual(Object.keys(GSD_ERROR_CODES).length, expected.length);
+  });
+
+  test('all values are strings matching their keys', () => {
+    for (const [key, value] of Object.entries(GSD_ERROR_CODES)) {
+      assert.strictEqual(typeof value, 'string');
+      assert.strictEqual(key, value, `key ${key} must equal its value`);
     }
   });
 });

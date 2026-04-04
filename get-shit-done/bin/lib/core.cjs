@@ -8,6 +8,38 @@ const crypto = require('crypto');
 const { execSync, execFileSync, spawnSync } = require('child_process');
 const { MODEL_PROFILES } = require('./model-profiles.cjs');
 
+// ─── Error Infrastructure ────────────────────────────────────────────────────
+
+const GSD_ERROR_CODES = Object.freeze({
+  CONFIG_READ:       'CONFIG_READ',
+  CONFIG_PARSE:      'CONFIG_PARSE',
+  CONFIG_MIGRATE:    'CONFIG_MIGRATE',
+  CONFIG_WRITE:      'CONFIG_WRITE',
+  STATE_READ:        'STATE_READ',
+  STATE_WRITE:       'STATE_WRITE',
+  PHASE_READ:        'PHASE_READ',
+  PHASE_WRITE:       'PHASE_WRITE',
+  LOCK_ACQUIRE:      'LOCK_ACQUIRE',
+  LOCK_STALE:        'LOCK_STALE',
+  GIT_EXEC:          'GIT_EXEC',
+  FILE_READ:         'FILE_READ',
+  FILE_WRITE:        'FILE_WRITE',
+  PARSE_ERROR:       'PARSE_ERROR',
+  COMMAND_DISPATCH:   'COMMAND_DISPATCH',
+  TEMPLATE_RENDER:   'TEMPLATE_RENDER',
+  VALIDATION:        'VALIDATION',
+});
+
+class GsdError extends Error {
+  constructor(code, message, { context, cause } = {}) {
+    super(message);
+    this.name = 'GsdError';
+    this.code = code;
+    this.context = context || null;
+    this.cause = cause || null;
+  }
+}
+
 // ─── Path helpers ────────────────────────────────────────────────────────────
 
 /** Normalize a relative path to always use forward slashes (cross-platform). */
@@ -1268,4 +1300,6 @@ module.exports = {
   CONFIG_VERSION,
   configMigrations,
   runConfigMigrations,
+  GsdError,
+  GSD_ERROR_CODES,
 };
