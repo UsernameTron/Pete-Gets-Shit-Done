@@ -156,6 +156,13 @@ None — this plan is annotation-only with no new functionality or data wiring.
 - Combined with Plan 1 (GsdError + error codes) and Plan 2 (core.cjs remediation), Phase 11 error handling is complete
 - Future modules can follow the established `/* intentional: [reason] */` pattern
 
+## Self-Check: PASSED
+
+- All 12 modified files confirmed on disk
+- SUMMARY.md confirmed on disk
+- Commit `6404fef` confirmed in git log
+- Commit `6f157f0` confirmed in git log
+
 ---
 *Phase: 11-error-handling*
 *Completed: 2026-04-04*
