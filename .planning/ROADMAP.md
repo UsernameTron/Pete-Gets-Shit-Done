@@ -27,6 +27,13 @@
 
 **Key Files:** core.cjs, state.cjs, phase.cjs, commands.cjs
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 11-PLAN-01 — GsdError class and error code registry (Wave 1)
+- [ ] 11-PLAN-02 — loadConfig() and core.cjs catch block remediation (Wave 2)
+- [ ] 11-PLAN-03 — Catch block audit across remaining lib modules (Wave 2)
+
 ---
 
 ### Phase 12: State Immutability & Defensive Copies
