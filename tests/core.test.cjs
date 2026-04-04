@@ -40,6 +40,7 @@ const {
   deepFreeze,
   safeExec,
   execGit,
+  streamLines,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -2576,5 +2577,107 @@ describe('withPlanningLock — force-acquire', () => {
     assert.strictEqual(result, 'force-acquired');
     // Lock should be cleaned up
     assert.ok(!fs.existsSync(lockPath));
+  });
+});
+
+// ─── streamLines ────────────────────────────────────────────────────────────────
+
+describe('streamLines', () => {
+  let tmpPath;
+
+  afterEach(() => {
+    if (tmpPath && fs.existsSync(tmpPath)) {
+      try { fs.unlinkSync(tmpPath); } catch { /* ignore */ }
+    }
+    tmpPath = null;
+  });
+
+  test('writes multiline text line-by-line to the given fd', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-test-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    try {
+      streamLines('line1\nline2\nline3', { fd });
+    } finally {
+      fs.closeSync(fd);
+    }
+    const written = fs.readFileSync(tmpPath, 'utf8');
+    assert.strictEqual(written, 'line1\nline2\nline3\n');
+  });
+
+  test('writes to stderr fd when fd=2 is specified', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-stderr-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    try {
+      streamLines('err1\nerr2', { fd });
+    } finally {
+      fs.closeSync(fd);
+    }
+    const written = fs.readFileSync(tmpPath, 'utf8');
+    assert.strictEqual(written, 'err1\nerr2\n');
+  });
+
+  test('invokes callback once per line with (line, index) args', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-cb-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    const collected = [];
+    try {
+      streamLines('alpha\nbeta\ngamma', {
+        fd,
+        callback: (line, index) => { collected.push({ line, index }); },
+      });
+    } finally {
+      fs.closeSync(fd);
+    }
+    assert.strictEqual(collected.length, 3);
+    assert.deepStrictEqual(collected[0], { line: 'alpha', index: 0 });
+    assert.deepStrictEqual(collected[1], { line: 'beta', index: 1 });
+    assert.deepStrictEqual(collected[2], { line: 'gamma', index: 2 });
+  });
+
+  test('empty string writes nothing and does not invoke callback', () => {
+    const collected = [];
+    // Use a temp file fd so we can verify nothing was written
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-empty-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    try {
+      const count = streamLines('', {
+        fd,
+        callback: (line, index) => { collected.push({ line, index }); },
+      });
+      assert.strictEqual(count, 0);
+    } finally {
+      fs.closeSync(fd);
+    }
+    assert.strictEqual(collected.length, 0);
+    assert.strictEqual(fs.readFileSync(tmpPath, 'utf8'), '');
+  });
+
+  test('trailing newline does not produce an extra empty-line write', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-trail-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    const collected = [];
+    try {
+      const count = streamLines('a\nb\n', {
+        fd,
+        callback: (line, index) => { collected.push({ line, index }); },
+      });
+      assert.strictEqual(count, 2);
+    } finally {
+      fs.closeSync(fd);
+    }
+    assert.strictEqual(collected.length, 2);
+    assert.strictEqual(fs.readFileSync(tmpPath, 'utf8'), 'a\nb\n');
+  });
+
+  test('single line without newline writes that line followed by newline', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-single-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    try {
+      const count = streamLines('hello', { fd });
+      assert.strictEqual(count, 1);
+    } finally {
+      fs.closeSync(fd);
+    }
+    assert.strictEqual(fs.readFileSync(tmpPath, 'utf8'), 'hello\n');
   });
 });
