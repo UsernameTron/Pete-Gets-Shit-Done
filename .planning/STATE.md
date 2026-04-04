@@ -70,5 +70,5 @@ Last activity: 2026-04-04
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.4 milestone archived and closed
-**Next**: `/gsd:new-milestone` to start v1.5
+**Last action**: Shipped PR #26 — milestones v1.2–v1.4
+**Next**: Merge PR #26, then `/gsd:new-milestone` to start v1.5
