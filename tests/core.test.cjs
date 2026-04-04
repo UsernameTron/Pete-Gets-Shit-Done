@@ -36,6 +36,7 @@ const {
   runConfigMigrations,
   GsdError,
   GSD_ERROR_CODES,
+  debugLog,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -2225,5 +2226,109 @@ describe('GSD_ERROR_CODES', () => {
       assert.strictEqual(typeof value, 'string');
       assert.strictEqual(key, value, `key ${key} must equal its value`);
     }
+  });
+});
+
+// ─── loadConfig failure paths (CORR-03) ─────────────────────────────────────
+
+describe('loadConfig failure paths', () => {
+  let tmpDir;
+  let originalCwd;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    originalCwd = process.cwd();
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+    cleanup(tmpDir);
+    delete process.env.GSD_DEBUG;
+  });
+
+  test('returns defaults and logs debug when config.json is malformed', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      '{not json}'
+    );
+    process.env.GSD_DEBUG = '1';
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.model_profile, 'balanced',
+      'should return defaults when config is malformed');
+    assert.strictEqual(config.commit_docs, true);
+  });
+
+  test('returns defaults when .planning directory is missing', () => {
+    const bareDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-bare-'));
+    try {
+      const config = loadConfig(bareDir);
+      assert.strictEqual(config.model_profile, 'balanced');
+      assert.strictEqual(config.commit_docs, true);
+    } finally {
+      fs.rmSync(bareDir, { recursive: true, force: true });
+    }
+  });
+
+  test('gracefully handles config migration write failure on read-only config', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    // config_version: 0 with deprecated "depth" key triggers migration
+    fs.writeFileSync(configPath, JSON.stringify({
+      config_version: 0,
+      depth: 'quick',
+    }));
+    // Make config.json read-only so migration write fails
+    fs.chmodSync(configPath, 0o444);
+    process.env.GSD_DEBUG = '1';
+    try {
+      const config = loadConfig(tmpDir);
+      // Should still return a valid config object despite write failure
+      assert.ok(config, 'loadConfig should return config even when write fails');
+      assert.strictEqual(typeof config.model_profile, 'string');
+    } finally {
+      // Restore write permission for cleanup
+      fs.chmodSync(configPath, 0o644);
+    }
+  });
+});
+
+// ─── debugLog ────────────────────────────────────────────────────────────────
+
+describe('debugLog', () => {
+  afterEach(() => {
+    delete process.env.GSD_DEBUG;
+  });
+
+  test('is exported and callable', () => {
+    assert.strictEqual(typeof debugLog, 'function');
+  });
+
+  test('does not throw when GSD_DEBUG is not set', () => {
+    delete process.env.GSD_DEBUG;
+    assert.doesNotThrow(() => {
+      debugLog('CONFIG_READ', 'test message', { path: '/tmp/test' });
+    });
+  });
+
+  test('does not throw when GSD_DEBUG is set', () => {
+    process.env.GSD_DEBUG = '1';
+    assert.doesNotThrow(() => {
+      debugLog('CONFIG_READ', 'test message', { path: '/tmp/test' });
+    });
+  });
+
+  test('does not throw without context argument', () => {
+    process.env.GSD_DEBUG = '1';
+    assert.doesNotThrow(() => {
+      debugLog('CONFIG_READ', 'test message');
+    });
+  });
+
+  test('accepts GSD_ERROR_CODES values as code parameter', () => {
+    process.env.GSD_DEBUG = '1';
+    assert.doesNotThrow(() => {
+      debugLog(GSD_ERROR_CODES.CONFIG_READ, 'test', { key: 'value' });
+      debugLog(GSD_ERROR_CODES.CONFIG_WRITE, 'test');
+      debugLog(GSD_ERROR_CODES.CONFIG_MIGRATE, 'test');
+    });
   });
 });

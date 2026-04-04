@@ -40,6 +40,25 @@ class GsdError extends Error {
   }
 }
 
+// ─── Debug logging ──────────────────────────────────────────────────────────
+
+/**
+ * Write a debug diagnostic to stderr when GSD_DEBUG env var is set.
+ * Zero-cost when disabled — the env check short-circuits before any work.
+ * Uses fs.writeSync(2, ...) to match the project's existing stderr pattern.
+ *
+ * @param {string} code - GSD_ERROR_CODES key (e.g. 'CONFIG_READ')
+ * @param {string} message - Human-readable description
+ * @param {object} [context] - Optional structured context (serialized as JSON)
+ */
+function debugLog(code, message, context) {
+  if (process.env.GSD_DEBUG) {
+    const prefix = `[GSD:${code}]`;
+    const ctx = context ? ` ${JSON.stringify(context)}` : '';
+    fs.writeSync(2, `${prefix} ${message}${ctx}\n`);
+  }
+}
+
 // ─── Path helpers ────────────────────────────────────────────────────────────
 
 /** Normalize a relative path to always use forward slashes (cross-platform). */
@@ -64,9 +83,9 @@ function detectSubRepos(cwd) {
         if (fs.existsSync(gitPath)) {
           results.push(entry.name);
         }
-      } catch {}
+      } catch { /* intentional: existsSync fallback for race condition */ }
     }
-  } catch {}
+  } catch { /* intentional: non-critical directory scan */ }
   return results.sort();
 }
 
@@ -138,9 +157,7 @@ function findProjectRoot(startDir) {
         if (config.multiRepo === true && isInsideGitRepo(parent)) {
           return parent;
         }
-      } catch {
-        // config.json missing or malformed — fall back to .git heuristic
-      }
+      } catch { /* intentional: config.json missing or malformed — fall back to .git heuristic */ }
 
       // Heuristic: parent has .planning/ and we're inside a git repo
       if (isInsideGitRepo(parent)) {
@@ -179,13 +196,9 @@ function reapStaleTempFiles(prefix = 'gsd-', { maxAgeMs = 5 * 60 * 1000, dirsOnl
             fs.unlinkSync(fullPath);
           }
         }
-      } catch {
-        // File may have been removed between readdir and stat — ignore
-      }
+      } catch { /* intentional: file may disappear between readdir and stat */ }
     }
-  } catch {
-    // Non-critical — don't let cleanup failures break output
-  }
+  } catch { /* intentional: non-critical cleanup — must not break output */ }
 }
 
 function output(result, raw, rawValue) {
@@ -227,7 +240,7 @@ function error(message) {
 function safeReadFile(filePath) {
   try {
     return fs.readFileSync(filePath, 'utf-8');
-  } catch {
+  } catch { /* intentional: safeReadFile returns null on any read failure by design */
     return null;
   }
 }
@@ -267,7 +280,11 @@ function runConfigMigrations(parsed, cwd) {
   let migrated = false;
   for (const m of configMigrations) {
     if (version === m.from) {
-      try { m.migrate(parsed, cwd); } catch { /* migration error — continue with best effort */ }
+      try { m.migrate(parsed, cwd); } catch (migErr) {
+        debugLog(GSD_ERROR_CODES.CONFIG_MIGRATE, `Migration ${m.from}->${m.to} failed`, {
+          error: migErr.message,
+        });
+      }
       version = m.to;
       migrated = true;
     }
@@ -310,7 +327,14 @@ function loadConfig(cwd) {
     // Run versioned migrations
     const migrated = runConfigMigrations(parsed, cwd);
     if (migrated) {
-      try { fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8'); } catch { /* intentionally empty */ }
+      try {
+        fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8');
+      } catch (writeErr) {
+        debugLog(GSD_ERROR_CODES.CONFIG_WRITE, 'Failed to persist config migration', {
+          path: configPath,
+          error: writeErr.message,
+        });
+      }
     }
 
     // Auto-detect and sync sub_repos: scan for child directories with .git
@@ -331,7 +355,14 @@ function loadConfig(cwd) {
 
     // Persist sub_repos sync changes
     if (configDirty) {
-      try { fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8'); } catch {}
+      try {
+        fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8');
+      } catch (writeErr) {
+        debugLog(GSD_ERROR_CODES.CONFIG_WRITE, 'Failed to persist sub_repos sync', {
+          path: configPath,
+          error: writeErr.message,
+        });
+      }
     }
 
     const get = (key, nested) => {
@@ -381,7 +412,11 @@ function loadConfig(cwd) {
       model_overrides: parsed.model_overrides || null,
       agent_skills: parsed.agent_skills || {},
     };
-  } catch {
+  } catch (err) {
+    debugLog(GSD_ERROR_CODES.CONFIG_READ, 'loadConfig failed, using defaults', {
+      path: configPath,
+      error: err.message,
+    });
     return defaults;
   }
 }
@@ -401,7 +436,7 @@ function isGitIgnored(cwd, targetPath) {
       stdio: 'pipe',
     });
     return true;
-  } catch {
+  } catch { /* intentional: non-zero exit means path is not ignored */
     return false;
   }
 }
@@ -569,7 +604,7 @@ function withPlanningLock(cwd, fn) {
   const start = Date.now();
 
   // Ensure .planning/ exists
-  try { fs.mkdirSync(planningDir(cwd), { recursive: true }); } catch { /* ok */ }
+  try { fs.mkdirSync(planningDir(cwd), { recursive: true }); } catch { /* intentional: directory may already exist */ }
 
   while (Date.now() - start < lockTimeout) {
     try {
@@ -584,7 +619,7 @@ function withPlanningLock(cwd, fn) {
       try {
         return fn();
       } finally {
-        try { fs.unlinkSync(lockPath); } catch { /* already released */ }
+        try { fs.unlinkSync(lockPath); } catch { /* intentional: lock may already be released */ }
       }
     } catch (err) {
       if (err.code === 'EEXIST') {
@@ -595,7 +630,7 @@ function withPlanningLock(cwd, fn) {
             fs.unlinkSync(lockPath);
             continue; // retry
           }
-        } catch { continue; }
+        } catch { /* intentional: lock may disappear during stale check */ continue; }
 
         // Wait and retry
         spawnSync('sleep', ['0.1'], { stdio: 'ignore' });
@@ -605,7 +640,7 @@ function withPlanningLock(cwd, fn) {
     }
   }
   // Timeout — force acquire (stale lock recovery)
-  try { fs.unlinkSync(lockPath); } catch { /* ok */ }
+  try { fs.unlinkSync(lockPath); } catch { /* intentional: force-acquire cleanup is best-effort */ }
   return fn();
 }
 
@@ -661,7 +696,7 @@ function getActiveWorkstream(cwd) {
     const wsDir = path.join(planningRoot(cwd), 'workstreams', name);
     if (!fs.existsSync(wsDir)) return null;
     return name;
-  } catch {
+  } catch { /* intentional: missing file means no active workstream */
     return null;
   }
 }
@@ -672,7 +707,7 @@ function getActiveWorkstream(cwd) {
 function setActiveWorkstream(cwd, name) {
   const filePath = path.join(planningRoot(cwd), 'active-workstream');
   if (!name) {
-    try { fs.unlinkSync(filePath); } catch {}
+    try { fs.unlinkSync(filePath); } catch { /* intentional: file may not exist */ }
     return;
   }
   if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
@@ -775,7 +810,7 @@ function searchPhaseInDir(baseDir, relBase, normalized) {
       has_verification: hasVerification,
       has_reviews: hasReviews,
     };
-  } catch {
+  } catch { /* intentional: phase directory may not exist or be unreadable */
     return null;
   }
 }
@@ -813,7 +848,7 @@ function findPhaseInternal(cwd, phase) {
         return result;
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: milestone archive directory may not exist */ }
 
   return null;
 }
@@ -847,7 +882,7 @@ function getArchivedPhaseDirs(cwd) {
         });
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: milestone archive directory may not be readable */ }
 
   return results;
 }
@@ -894,7 +929,7 @@ function extractCurrentMilestone(content, cwd) {
         version = milestoneMatch[1].trim();
       }
     }
-  } catch {}
+  } catch { /* intentional: STATE.md may not exist — version derived from ROADMAP.md fallback */ }
 
   // 2. Fallback: derive version from getMilestoneInfo pattern in ROADMAP.md itself
   if (!version) {
@@ -997,7 +1032,7 @@ function getRoadmapPhaseInternal(cwd, phaseNum) {
       goal,
       section,
     };
-  } catch {
+  } catch { /* intentional: ROADMAP.md may not exist or phase not found */
     return null;
   }
 }
@@ -1124,7 +1159,7 @@ function pathExistsInternal(cwd, targetPath) {
   try {
     fs.statSync(fullPath);
     return true;
-  } catch {
+  } catch { /* intentional: stat failure means path does not exist */
     return false;
   }
 }
@@ -1166,7 +1201,7 @@ function getMilestoneInfo(cwd) {
       version: versionMatch ? versionMatch[0] : 'v1.0',
       name: 'milestone',
     };
-  } catch {
+  } catch { /* intentional: ROADMAP.md may not exist — return safe defaults */
     return { version: 'v1.0', name: 'milestone' };
   }
 }
@@ -1186,7 +1221,7 @@ function getMilestonePhaseFilter(cwd) {
     while ((m = phasePattern.exec(roadmap)) !== null) {
       milestonePhaseNums.add(m[1]);
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: ROADMAP.md may not exist — pass-all filter used as fallback */ }
 
   if (milestonePhaseNums.size === 0) {
     const passAll = () => true;
@@ -1250,7 +1285,7 @@ function readSubdirectories(dirPath, sort = false) {
     const entries = fs.readdirSync(dirPath, { withFileTypes: true });
     const dirs = entries.filter(e => e.isDirectory()).map(e => e.name);
     return sort ? dirs.sort((a, b) => comparePhaseNum(a, b)) : dirs;
-  } catch {
+  } catch { /* intentional: returns empty array when directory is missing or unreadable */
     return [];
   }
 }
@@ -1302,4 +1337,5 @@ module.exports = {
   runConfigMigrations,
   GsdError,
   GSD_ERROR_CODES,
+  debugLog,
 };
