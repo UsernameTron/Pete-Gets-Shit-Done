@@ -1366,6 +1366,31 @@ function streamLines(text, opts = {}) {
   return lines.length;
 }
 
+// --- Deterministic ordering ------------------------------------------------------
+
+/**
+ * Recursively sort object keys to produce deterministic JSON.stringify output.
+ * Arrays preserve element order but sort keys within object elements.
+ * Primitives pass through unchanged.
+ *
+ * @param {*} value - Any JSON-serializable value
+ * @returns {*} A new value with all object keys sorted alphabetically (deep)
+ */
+function deterministicSort(value) {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(item => deterministicSort(item));
+  }
+  const sorted = {};
+  const keys = Object.keys(value).sort();
+  for (let i = 0; i < keys.length; i++) {
+    sorted[keys[i]] = deterministicSort(value[keys[i]]);
+  }
+  return sorted;
+}
+
 module.exports = {
   output,
   error,
@@ -1417,4 +1442,5 @@ module.exports = {
   debugLog,
   deepFreeze,
   streamLines,
+  deterministicSort,
 };
