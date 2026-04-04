@@ -217,9 +217,7 @@ function cmdPhasePlanIndex(cwd, phase, raw) {
       phaseDir = path.join(phasesDir, match);
       phaseDirName = match;
     }
-  } catch {
-    // phases dir doesn't exist
-  }
+  } catch { /* intentional: phases directory may not exist yet */ }
 
   if (!phaseDir) {
     output({ phase: normalized, error: 'Phase not found', plans: [], waves: {}, incomplete: [], has_checkpoints: false }, raw);
@@ -415,7 +413,7 @@ function cmdPhaseInsert(cwd, afterPhase, description, raw) {
       const dm = dir.match(decimalPattern);
       if (dm) existingDecimals.push(parseInt(dm[1], 10));
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory may not exist for decimal phase enumeration */ }
 
   const nextDecimal = existingDecimals.length === 0 ? 1 : Math.max(...existingDecimals) + 1;
   const decimalPhase = `${normalizedBase}.${nextDecimal}`;
@@ -596,7 +594,7 @@ function cmdPhaseRemove(cwd, targetPhase, options, raw) {
       : renameIntegerPhases(phasesDir, parseInt(normalized, 10));
     renamedDirs = renamed.renamedDirs;
     renamedFiles = renamed.renamedFiles;
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phase renumbering is best-effort after removal */ }
 
   // Update ROADMAP.md
   updateRoadmapAfterPhaseRemoval(roadmapPath, targetPhase, isDecimal, parseInt(normalized, 10));
@@ -666,7 +664,7 @@ function cmdPhaseComplete(cwd, phaseNum, raw) {
       if (/status: human_needed/.test(content)) warnings.push(`${file}: needs human verification`);
       if (/status: gaps_found/.test(content)) warnings.push(`${file}: has unresolved gaps`);
     }
-  } catch {}
+  } catch { /* intentional: verification/review file reads are best-effort for warnings */ }
 
   // Update ROADMAP.md: mark phase complete
   if (fs.existsSync(roadmapPath)) {
@@ -774,7 +772,7 @@ function cmdPhaseComplete(cwd, phaseNum, raw) {
         }
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: filesystem phase listing may fail if phases dir missing */ }
 
   // Fallback: if filesystem found no next phase, check ROADMAP.md
   // for phases that are defined but not yet planned (no directory on disk)
@@ -791,7 +789,7 @@ function cmdPhaseComplete(cwd, phaseNum, raw) {
           break;
         }
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: ROADMAP.md fallback for next phase is best-effort */ }
   }
 
   // Update STATE.md — use shared helpers that handle both **bold:** and plain Field: formats

@@ -279,7 +279,7 @@ function cmdInitNewProject(cwd, raw) {
     function findCodeFiles(dir, depth) {
       if (depth > 3) return false;
       let entries;
-      try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return false; }
+      try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { /* intentional: unreadable directory treated as no code files */ return false; }
       for (const entry of entries) {
         if (entry.isFile() && codeExtensions.has(path.extname(entry.name))) return true;
         if (entry.isDirectory() && !skipDirs.has(entry.name)) {

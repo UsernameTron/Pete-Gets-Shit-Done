@@ -56,7 +56,7 @@ function readSessionIndex(projectDirPath) {
       }
     }
     return { originalPath: parsed.originalPath || null, entries };
-  } catch {
+  } catch { /* intentional: index.json may not exist or be malformed — return empty */
     return { originalPath: null, entries: new Map() };
   }
 }
@@ -139,7 +139,7 @@ async function streamExtractMessages(filePath, filterFn, maxMessages = 300) {
     let record;
     try {
       record = JSON.parse(line);
-    } catch {
+    } catch { /* intentional: skip malformed JSONL lines */
       continue;
     }
     if (!filterFn(record)) continue;
@@ -171,7 +171,7 @@ async function cmdScanSessions(overridePath, options, raw) {
       const fullPath = path.join(sessionsDir, entry);
       try {
         return fs.statSync(fullPath).isDirectory();
-      } catch {
+      } catch { /* intentional: skip entries where stat fails (deleted/inaccessible) */
         return false;
       }
     });
@@ -261,7 +261,7 @@ async function cmdExtractMessages(projectArg, options, raw, overridePath) {
       const fullPath = path.join(sessionsDir, entry);
       try {
         return fs.statSync(fullPath).isDirectory();
-      } catch {
+      } catch { /* intentional: skip entries where stat fails (deleted/inaccessible) */
         return false;
       }
     });
@@ -407,7 +407,7 @@ async function cmdProfileSample(overridePath, options, raw) {
       const fullPath = path.join(sessionsDir, entry);
       try {
         return fs.statSync(fullPath).isDirectory();
-      } catch {
+      } catch { /* intentional: skip entries where stat fails (deleted/inaccessible) */
         return false;
       }
     });
@@ -498,7 +498,7 @@ async function cmdProfileSample(overridePath, options, raw) {
           sessionUsed = true;
         }
         if (sessionUsed) projectSessionsUsed++;
-      } catch {
+      } catch { /* intentional: skip unreadable session files during stats collection */
         continue;
       }
     }

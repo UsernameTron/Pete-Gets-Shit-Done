@@ -49,7 +49,7 @@ function validatePath(filePath, baseDir, opts = {}) {
   let resolvedBase;
   try {
     resolvedBase = fs.realpathSync(path.resolve(baseDir));
-  } catch {
+  } catch { /* intentional: base directory may not exist yet — fall back to logical resolution */
     resolvedBase = path.resolve(baseDir);
   }
 
@@ -67,16 +67,12 @@ function validatePath(filePath, baseDir, opts = {}) {
   // Resolve symlinks in the target path too
   try {
     resolvedPath = fs.realpathSync(resolvedPath);
-  } catch {
-    // File may not exist yet (e.g., about to be created) — use logical resolution
-    // but still resolve the parent directory if it exists
+  } catch { /* intentional: file may not exist yet — use logical resolution with parent fallback */
     const parentDir = path.dirname(resolvedPath);
     try {
       const realParent = fs.realpathSync(parentDir);
       resolvedPath = path.join(realParent, path.basename(resolvedPath));
-    } catch {
-      // Parent doesn't exist either — keep the resolved path as-is
-    }
+    } catch { /* intentional: parent directory doesn't exist either — keep logical path */ }
   }
 
   // Normalize both paths and check containment

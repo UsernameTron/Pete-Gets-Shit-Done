@@ -31,7 +31,7 @@ function cmdStateLoad(cwd, raw) {
   let stateRaw = '';
   try {
     stateRaw = fs.readFileSync(path.join(planDir, 'STATE.md'), 'utf-8');
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: STATE.md may not exist in new projects */ }
 
   const configExists = fs.existsSync(path.join(planDir, 'config.json'));
   const roadmapExists = fs.existsSync(path.join(planDir, 'ROADMAP.md'));
@@ -661,7 +661,7 @@ function buildStateFrontmatter(bodyContent, cwd) {
       const info = getMilestoneInfo(cwd);
       milestone = info.version;
       milestoneName = info.name;
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: milestone info unavailable in unconfigured projects */ }
   }
 
   let totalPhases = totalPhasesRaw ? parseInt(totalPhasesRaw, 10) : null;
@@ -696,7 +696,7 @@ function buildStateFrontmatter(bodyContent, cwd) {
         totalPlans = diskTotalPlans;
         completedPlans = diskTotalSummaries;
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: phase directory listing is best-effort for progress calculation */ }
   }
 
   let progressPercent = null;
@@ -809,11 +809,11 @@ function writeStateMd(statePath, content, cwd) {
             fs.unlinkSync(lockPath);
             continue; // retry immediately after clearing stale lock
           }
-        } catch { /* lock was released between check — retry */ }
+        } catch { /* intentional: lock was released between stat and unlink — retry */ }
 
         if (i === maxRetries - 1) {
           // Last resort: write anyway rather than losing data
-          try { fs.unlinkSync(lockPath); } catch {}
+          try { fs.unlinkSync(lockPath); } catch { /* intentional: best-effort stale lock removal */ }
           break;
         }
         // Spin-wait with small jitter
@@ -829,7 +829,7 @@ function writeStateMd(statePath, content, cwd) {
   try {
     fs.writeFileSync(statePath, normalizeMd(synced), 'utf-8');
   } finally {
-    try { fs.unlinkSync(lockPath); } catch { /* lock already gone */ }
+    try { fs.unlinkSync(lockPath); } catch { /* intentional: lock already released by another process */ }
   }
 }
 
@@ -1000,7 +1000,7 @@ function cmdSignalResume(cwd, raw) {
   let removed = false;
   for (const p of paths) {
     if (fs.existsSync(p)) {
-      try { fs.unlinkSync(p); removed = true; } catch {}
+      try { fs.unlinkSync(p); removed = true; } catch { /* intentional: best-effort signal file cleanup */ }
     }
   }
 
