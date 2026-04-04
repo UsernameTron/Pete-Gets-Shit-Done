@@ -9,7 +9,7 @@ Requirements for v1.5 Performance. Each maps to roadmap phases.
 
 ### Streaming Output
 
-- [ ] **PERF-01**: Streaming output helper in core.cjs — write chunks to stdout/stderr incrementally instead of buffering full results, with line-based callback support for progress reporting
+- [x] **PERF-01**: Streaming output helper in core.cjs — write chunks to stdout/stderr incrementally instead of buffering full results, with line-based callback support for progress reporting
 
 ### Cache-Stable Ordering
 
@@ -47,7 +47,7 @@ Requirements for v1.5 Performance. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PERF-01 | Phase 15 | Pending |
+| PERF-01 | Phase 15 | Complete |
 | PERF-02 | Phase 15 | Pending |
 | PERF-03 | Phase 16 | Pending |
 | PERF-04 | Phase 16 | Pending |
