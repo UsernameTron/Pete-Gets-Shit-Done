@@ -6,27 +6,30 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Shipped:** v1.4 Correctness & Robustness (2026-04-04)
-**Active:** v1.5 Performance
+**Shipped:** v1.5 Performance (2026-04-04)
 **Package:** `get-shit-done-cc` v1.29.0
-**Tests:** 260 passing (51 suites, 717ms)
+**Tests:** 259 passing (51 suites)
 **Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
 **Agents:** 15 source, 29 global, 7 archived — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-## Current Milestone: v1.5 Performance
+**Next:** v1.6 Maintainability
 
-**Goal:** Reduce latency and resource consumption in GSD workflows through streaming output, deterministic ordering, lazy loading, and token estimation.
+## Validated Requirements (v1.5)
 
-**Target features:**
-- Streaming output for large operations (avoid buffering full results)
-- Cache-stable ordering for deterministic outputs across runs
-- Lazy loading for agent definitions (load on demand, not at startup)
-- Token estimation utilities for context budget management
+All 6 requirements verified complete:
 
-**Strategy:** Three milestones — v1.4 Correctness (done), v1.5 Performance (active), v1.6 Maintainability (next). All performance utilities must be zero-dependency CommonJS — no new npm packages.
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| PERF-01: Streaming output helper (streamLines) | Phase 15 | Validated |
+| PERF-02: Deterministic ordering utility (deterministicSort) | Phase 15 | Validated |
+| PERF-03: Lazy-load MODEL_PROFILES in model-profiles.cjs | Phase 16 | Validated |
+| PERF-04: Lazy-load skill registry (lazyRegistry) | Phase 16 | Validated |
+| PERF-05: Token estimation utility (estimateTokens) | Phase 17 | Validated |
+| PERF-06: Context budget helper (budgetContext) | Phase 17 | Validated |
 
-## Validated Requirements (v1.4)
+<details>
+<summary><strong>v1.4 Requirements (14/14 validated)</strong></summary>
 
 All 14 requirements verified complete:
 
@@ -46,6 +49,8 @@ All 14 requirements verified complete:
 | DEBT-03: security.cjs branch coverage >= 95% | Phase 13 | Validated |
 | DEBT-04: gsd-validator-hub workflow wiring | Phase 13 | Validated |
 | DEBT-05: v1.3 VALIDATION.md gap fill | Phase 13 | Validated |
+
+</details>
 
 <details>
 <summary><strong>v1.3 Requirements (6/6 validated)</strong></summary>
@@ -160,4 +165,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 -- v1.5 milestone started*
+*Last updated: 2026-04-04 -- v1.5 Performance milestone complete*
