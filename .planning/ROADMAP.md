@@ -8,118 +8,98 @@
 - **v1.3 Security Hardening & Coverage** (2026-04-04) -- 4 phases, 6 requirements. [Archive](milestones/v1.3-ROADMAP.md)
 - **v1.4 Correctness & Robustness** (2026-04-04) -- 4 phases, 14 requirements. [Archive](milestones/v1.4-ROADMAP.md)
 
-## Current Milestone: None (v1.4 complete, next milestone pending)
+## Current Milestone: v1.5 Performance
 
-**Goal:** Replace silent failures with structured error handling, freeze shared state at module boundaries, resolve carried tech debt, and add timeout guards.
+**Goal:** Add performance primitives to the core library -- streaming output, deterministic ordering, lazy loading of agent/skill registries, and token-aware context budgeting.
 
-**14 requirements** | **4 phases** (11-14)
+**6 requirements** | **3 phases** (15-17)
 
-### Phase 11: Error Handling & Silent Failure Elimination
+### Phase 15: Core Performance Primitives
 
-**Goal:** Replace silent catch blocks with structured error handling. Create GsdError class.
+**Goal:** Provide streaming output and deterministic ordering utilities so downstream code can write incrementally and produce cache-stable hashes.
 
-**Requirements:** CORR-01, CORR-02, CORR-03
+**Requirements:** PERF-01, PERF-02
 
 **Success Criteria:**
-1. GsdError class exists in core.cjs with code, context, and cause fields
-2. Every catch block across lib modules is documented as intentionally silent, logs warning, or propagates GsdError
-3. loadConfig() empty catches log diagnostics via output() at debug level
-4. Unit tests cover GsdError construction, error code enum, and loadConfig() failure paths
+1. Calling the streaming helper with a multi-line string writes each line to the target fd as it is produced, not after full buffering
+2. The streaming helper accepts a per-line callback and invokes it for every emitted line
+3. The deterministic ordering utility produces identical JSON.stringify output for objects whose keys were inserted in different order
+4. Arrays of objects sorted by the utility maintain stable order across repeated invocations
+5. Unit tests cover streaming to stdout, streaming to stderr, line callback invocation, and deterministic sort of nested structures
 
-**Key Files:** core.cjs, state.cjs, phase.cjs, commands.cjs
+**Key Files:** core.cjs, tests/core.test.cjs
 
-**Plans:** 3 plans
+**Note:** Can run in parallel with Phase 16.
 
 Plans:
-- [x] 11-PLAN-01 — GsdError class and error code registry (Wave 1)
-- [x] 11-PLAN-02 — loadConfig() and core.cjs catch block remediation (Wave 2)
-- [x] 11-PLAN-03 — Catch block audit across remaining lib modules (Wave 2)
+- [ ] 15-PLAN-01 -- Streaming output helper with line callback (Wave 1)
+- [ ] 15-PLAN-02 -- Deterministic ordering utility with stable-key sort (Wave 1)
 
-**Status: COMPLETE** (2026-04-04)
+**Status: NOT STARTED**
 
 ---
 
-### Phase 12: State Immutability & Defensive Copies
+### Phase 16: Lazy Loading
 
-**Goal:** Freeze module-boundary return objects. Prevent downstream mutation of shared state.
+**Goal:** Defer agent definition parsing and skill registry scanning until first access, reducing startup cost for commands that never touch those registries.
 
-**Requirements:** CORR-04, CORR-05, CORR-06
+**Requirements:** PERF-03, PERF-04
 
 **Success Criteria:**
-1. deepFreeze() utility exists in core.cjs with recursive freeze for plain objects and arrays
-2. loadConfig() return value is frozen (Object.isFrozen() assertion passes)
-3. State accessor returns are frozen at module boundaries
-4. .push() patterns in state.cjs confirmed safe (local array building, documented)
+1. Requiring model-profiles.cjs does not parse or iterate agent definitions until getAgentToModelMapForProfile() or MODEL_PROFILES is first accessed
+2. Skill registry does not scan the filesystem for skill files until a skill lookup is requested
+3. After first access, subsequent accesses return the same cached result without re-parsing
+4. All existing callers of MODEL_PROFILES and skill APIs continue to work without changes (backward compatible)
+5. Unit tests verify deferred initialization, cache hit on repeat access, and no regression in existing model-profiles tests
 
-**Key Files:** core.cjs, state.cjs, config.cjs
+**Key Files:** model-profiles.cjs, tests/model-profiles.test.cjs, core.cjs (if skill registry lives there)
 
-**Note:** Can run in parallel with Phase 13.
+**Note:** Can run in parallel with Phase 15.
 
 Plans:
-- [x] 12-PLAN-01 — deepFreeze utility + module boundary freezing (Wave 1-2)
+- [ ] 16-PLAN-01 -- Lazy-load MODEL_PROFILES via accessor proxy (Wave 1)
+- [ ] 16-PLAN-02 -- Lazy-load skill registry with deferred directory scan (Wave 1)
 
-**Status: COMPLETE** (2026-04-04)
+**Status: NOT STARTED**
 
 ---
 
-### Phase 13: Tech Debt Cleanup
+### Phase 17: Token Budget System
 
-**Goal:** Resolve carried tech debt items from v1.2 and v1.3 audits.
+**Goal:** Enable token-aware content selection so callers can estimate token counts and pack the highest-priority content within a budget.
 
-**Requirements:** DEBT-01, DEBT-02, DEBT-03, DEBT-04, DEBT-05
-
-**Success Criteria:**
-1. CREW-ASSESSMENT tier labels match actual tool grants (5 fixes)
-2. MODEL_PROFILES contains no entries for absorbed agents
-3. security.cjs branch coverage >= 95%
-4. gsd-validator-hub wired into at least one workflow entry point
-5. VALIDATION.md files exist for v1.3 phases 7-10
-
-**Key Files:** model-profiles.cjs, security.cjs, agent definitions, docs
-
-**Note:** Can run in parallel with Phase 12.
-
-Plans:
-- [x] 13-01-PLAN — Tier Labels, Dead Profiles, Coverage, Validator Wiring, Validation Gaps
-
-**Status: COMPLETE** (2026-04-04)
-
----
-
-### Phase 14: Timeout Guards & Graceful Degradation
-
-**Goal:** Add configurable timeouts and graceful degradation to synchronous operations.
-
-**Requirements:** CORR-07, CORR-08, CORR-09
+**Requirements:** PERF-05, PERF-06
 
 **Success Criteria:**
-1. Safe execution wrapper exists in core.cjs returning {ok, stdout, stderr, timedOut}
-2. execGit() uses safe wrapper with configurable timeout
-3. withPlanningLock() force-acquire logs diagnostic message with stale lock details
-4. Unit tests cover success, failure, timeout, and force-acquire logging paths
+1. Token estimation utility returns an approximate count for a given string using char/word heuristics
+2. Token estimation accepts a model profile parameter to adjust the tokens-per-word ratio
+3. Context budget helper accepts a token limit and a priority-ordered list of content sections, returning the subset that fits
+4. When total content exceeds budget, lower-priority sections are dropped while higher-priority sections are retained
+5. Unit tests cover estimation accuracy within reasonable bounds, model profile switching, budget selection with mixed priorities, and edge cases (empty input, single section, all sections fit, no sections fit)
 
-**Key Files:** core.cjs, state.cjs, commands.cjs
+**Key Files:** core.cjs, tests/core.test.cjs
+
+**Depends on:** Phase 15 (core.cjs utilities pattern established)
 
 Plans:
-- [x] 14-PLAN-01 — safeExec wrapper, execGit refactor, lock diagnostics (Wave 1)
+- [ ] 17-PLAN-01 -- Token estimation utility with model-profile heuristics (Wave 1)
+- [ ] 17-PLAN-02 -- Context budget helper with priority-based section selection (Wave 2)
 
-**Status: COMPLETE** (2026-04-04)
+**Status: NOT STARTED**
 
 ---
 
 ### Phase Dependencies
 
 ```
-Phase 11 (Error Handling) -----+---> Phase 14 (Timeout Guards)
-                                |
-Phase 12 (Immutability) -------+
-          ||                    |
-          || parallel           |
-          ||                    |
-Phase 13 (Tech Debt) ----------+
+Phase 15 (Core Primitives) ----+---> Phase 17 (Token Budget)
+         ||                    |
+         || parallel           |
+         ||                    |
+Phase 16 (Lazy Loading) -------+
 ```
 
-Phase 11 first (GsdError class needed by later phases). Phases 12 and 13 in parallel. Phase 14 after all three.
+Phases 15 and 16 have no cross-dependencies and can run in parallel. Phase 17 runs after Phase 15 completes (token estimation builds on the core.cjs utility pattern; context budget depends on token estimation).
 
 ---
-*Last updated: 2026-04-04 -- v1.4 milestone COMPLETE and archived*
+*Last updated: 2026-04-04 -- v1.5 Performance milestone roadmap created*

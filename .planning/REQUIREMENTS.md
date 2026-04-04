@@ -3,46 +3,29 @@
 **Defined:** 2026-04-04
 **Core Value:** Zero-dependency spec-driven development plugin for Claude Code
 
-## v1.4 Requirements
+## v1.5 Requirements
 
-Requirements for v1.4 Correctness & Robustness. Each maps to roadmap phases.
+Requirements for v1.5 Performance. Each maps to roadmap phases.
 
-### Error Handling
+### Streaming Output
 
-- [x] **CORR-01**: GsdError class in core.cjs with structured error (code, context, cause fields)
-- [x] **CORR-02**: Audit and fix silent catch blocks across lib modules (~90 catch blocks in 12 files)
-- [x] **CORR-03**: loadConfig() silent failures at core.cjs empty catches must log diagnostics or propagate meaningfully
+- [ ] **PERF-01**: Streaming output helper in core.cjs — write chunks to stdout/stderr incrementally instead of buffering full results, with line-based callback support for progress reporting
 
-### State Immutability
+### Cache-Stable Ordering
 
-- [x] **CORR-04**: deepFreeze() utility in core.cjs — recursive Object.freeze for plain objects and arrays
-- [x] **CORR-05**: Freeze return values at module boundaries (loadConfig, state accessors, phase readers)
-- [x] **CORR-06**: Verify .push() mutations in state.cjs are safe (local array building, not shared state mutation)
+- [ ] **PERF-02**: Deterministic ordering utility in core.cjs — sort objects and arrays by stable keys so identical inputs produce identical outputs across runs, enabling cache hits on hash-based comparisons
 
-### Timeout Guards
+### Lazy Loading
 
-- [x] **CORR-07**: Safe execution wrapper in core.cjs with configurable timeout and structured error on timeout
-- [x] **CORR-08**: Apply safe wrapper to execGit() and other high-frequency callers
-- [x] **CORR-09**: withPlanningLock() force-acquire path must log diagnostic message explaining why lock was broken
+- [ ] **PERF-03**: Lazy-load agent definitions in model-profiles.cjs — defer parsing agent YAML/MD until first access, reducing startup time for commands that don't need agent metadata
+- [ ] **PERF-04**: Lazy-load skill registry — defer skill file scanning until a skill is actually requested, avoiding upfront directory traversal
 
-### Tech Debt
+### Token Estimation
 
-- [x] **DEBT-01**: Fix 5 agent tier label mismatches in CREW-ASSESSMENT docs
-- [x] **DEBT-02**: Remove 5 absorbed agent entries from MODEL_PROFILES in model-profiles.cjs
-- [x] **DEBT-03**: Raise security.cjs branch coverage from 91.11% to 95%+
-- [x] **DEBT-04**: Wire gsd-validator-hub into at least one workflow entry point
-- [x] **DEBT-05**: Add VALIDATION.md files for v1.3 phases (process gap from Nyquist)
+- [ ] **PERF-05**: Token estimation utility in core.cjs — approximate token count for strings using character/word ratio heuristics (no external tokenizer), with configurable model profiles for different token-per-word ratios
+- [ ] **PERF-06**: Context budget helper — given a token limit and a list of content sections with priorities, select the highest-priority sections that fit within the budget
 
-## Deferred (v1.5 / v1.6)
-
-### Performance (v1.5)
-
-- **PERF-01**: Streaming output for large operations
-- **PERF-02**: Cache-stable ordering for deterministic outputs
-- **PERF-03**: Lazy loading for agent definitions
-- **PERF-04**: Token estimation utilities
-
-### Maintainability (v1.6)
+## Deferred (v1.6 Maintainability)
 
 - **MAINT-01**: Layered architecture refactoring
 - **MAINT-02**: Feature flags for experimental capabilities
@@ -54,9 +37,9 @@ Requirements for v1.4 Correctness & Robustness. Each maps to roadmap phases.
 
 | Feature | Reason |
 |---------|--------|
-| Abort controller propagation | Current sync architecture doesn't benefit without async refactor (v1.5 candidate) |
-| Plugin audit and marketplace | Ecosystem-level concern, deferred to v1.6 |
-| skill-forge consolidation | Maintainability scope, deferred to v1.6 |
+| Abort controller propagation | Current sync architecture doesn't benefit without async refactor (v1.6 candidate) |
+| External tokenizer (tiktoken, etc.) | Zero-dependency constraint — heuristic estimation only |
+| Async streaming (ReadableStream) | Sync architecture — use synchronous incremental writes |
 | Breaking changes to GSD commands | Backward compatibility constraint |
 | New npm dependencies | Zero-dependency constraint |
 
@@ -64,26 +47,17 @@ Requirements for v1.4 Correctness & Robustness. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORR-01 | Phase 11 | Complete |
-| CORR-02 | Phase 11 | Complete |
-| CORR-03 | Phase 11 | Complete |
-| CORR-04 | Phase 12 | Complete |
-| CORR-05 | Phase 12 | Complete |
-| CORR-06 | Phase 12 | Complete |
-| CORR-07 | Phase 14 | Complete |
-| CORR-08 | Phase 14 | Complete |
-| CORR-09 | Phase 14 | Complete |
-| DEBT-01 | Phase 13 | Complete |
-| DEBT-02 | Phase 13 | Complete |
-| DEBT-03 | Phase 13 | Complete |
-| DEBT-04 | Phase 13 | Complete |
-| DEBT-05 | Phase 13 | Complete |
+| PERF-01 | Phase 15 | Pending |
+| PERF-02 | Phase 15 | Pending |
+| PERF-03 | Phase 16 | Pending |
+| PERF-04 | Phase 16 | Pending |
+| PERF-05 | Phase 17 | Pending |
+| PERF-06 | Phase 17 | Pending |
 
 **Coverage:**
-- v1.4 requirements: 14 total
-- Mapped to phases: 14
+- v1.5 requirements: 6 total
+- Mapped to phases: 6/6
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 — all 14 requirements complete, milestone v1.4 closed*
+*Requirements defined: 2026-04-04 | Traceability updated: 2026-04-04*
