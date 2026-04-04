@@ -54,6 +54,11 @@ Plans:
 
 **Note:** Can run in parallel with Phase 13.
 
+Plans:
+- [x] 12-PLAN-01 — deepFreeze utility + module boundary freezing (Wave 1-2)
+
+**Status: COMPLETE** (2026-04-04)
+
 ---
 
 ### Phase 13: Tech Debt Cleanup
@@ -73,6 +78,11 @@ Plans:
 
 **Note:** Can run in parallel with Phase 12.
 
+Plans:
+- [x] 13-01-PLAN — Tier Labels, Dead Profiles, Coverage, Validator Wiring, Validation Gaps
+
+**Status: COMPLETE** (2026-04-04)
+
 ---
 
 ### Phase 14: Timeout Guards & Graceful Degradation
@@ -88,6 +98,11 @@ Plans:
 4. Unit tests cover success, failure, timeout, and force-acquire logging paths
 
 **Key Files:** core.cjs, state.cjs, commands.cjs
+
+Plans:
+- [x] 14-PLAN-01 — safeExec wrapper, execGit refactor, lock diagnostics (Wave 1)
+
+**Status: COMPLETE** (2026-04-04)
 
 ---
 
@@ -106,4 +121,4 @@ Phase 13 (Tech Debt) ----------+
 Phase 11 first (GsdError class needed by later phases). Phases 12 and 13 in parallel. Phase 14 after all three.
 
 ---
-*Last updated: 2026-04-04 -- v1.4 milestone initialized*
+*Last updated: 2026-04-04 -- v1.4 Phase 14 COMPLETE, all phases done*

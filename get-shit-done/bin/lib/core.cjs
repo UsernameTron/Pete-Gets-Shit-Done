@@ -566,16 +566,35 @@ function isClosingFence(lines, i) {
   return fenceCount % 2 === 0;
 }
 
-function execGit(cwd, args) {
-  const result = spawnSync('git', args, {
+function safeExec(command, args, options = {}) {
+  const {
+    cwd = process.cwd(),
+    timeout = 30000,
+    encoding = 'utf-8',
+  } = options;
+  const result = spawnSync(command, args, {
     cwd,
     stdio: 'pipe',
-    encoding: 'utf-8',
+    encoding,
+    timeout,
   });
+  const timedOut = !!(result.signal === 'SIGTERM' || (result.error && result.error.code === 'ETIMEDOUT'));
   return {
+    ok: (result.status === 0) && !timedOut,
     exitCode: result.status ?? 1,
     stdout: (result.stdout ?? '').toString().trim(),
     stderr: (result.stderr ?? '').toString().trim(),
+    timedOut,
+  };
+}
+
+function execGit(cwd, args) {
+  const result = safeExec('git', args, { cwd, timeout: 30000 });
+  return {
+    exitCode: result.exitCode,
+    stdout: result.stdout,
+    stderr: result.stderr,
+    timedOut: result.timedOut,
   };
 }
 
@@ -661,6 +680,13 @@ function withPlanningLock(cwd, fn) {
     }
   }
   // Timeout — force acquire (stale lock recovery)
+  let lockInfo = null;
+  try { lockInfo = JSON.parse(fs.readFileSync(lockPath, 'utf-8')); } catch { /* intentional: lock may be unreadable */ }
+  if (lockInfo) {
+    debugLog('LOCK_FORCE', `Planning lock force-acquired — stale lock held by PID ${lockInfo.pid} since ${lockInfo.acquired} in ${lockInfo.cwd}`);
+  } else {
+    debugLog('LOCK_FORCE', 'Planning lock force-acquired — could not read stale lock details');
+  }
   try { fs.unlinkSync(lockPath); } catch { /* intentional: force-acquire cleanup is best-effort */ }
   return fn();
 }
@@ -1317,6 +1343,7 @@ module.exports = {
   safeReadFile,
   loadConfig,
   isGitIgnored,
+  safeExec,
   execGit,
   normalizeMd,
   escapeRegex,
