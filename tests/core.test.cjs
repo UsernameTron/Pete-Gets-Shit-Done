@@ -41,6 +41,7 @@ const {
   safeExec,
   execGit,
   streamLines,
+  deterministicSort,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -2679,5 +2680,66 @@ describe('streamLines', () => {
       fs.closeSync(fd);
     }
     assert.strictEqual(fs.readFileSync(tmpPath, 'utf8'), 'hello\n');
+  });
+});
+
+// ─── deterministicSort ──────────────────────────────────────────────────────────
+
+describe('deterministicSort', () => {
+  test('objects with different key insertion order produce identical JSON', () => {
+    const a = { z: 1, a: 2, m: 3 };
+    const b = { a: 2, m: 3, z: 1 };
+    assert.strictEqual(JSON.stringify(deterministicSort(a)), JSON.stringify(deterministicSort(b)));
+    assert.strictEqual(JSON.stringify(deterministicSort(a)), '{"a":2,"m":3,"z":1}');
+  });
+
+  test('nested objects have their keys sorted recursively', () => {
+    const input = { b: { z: 1, a: 2 }, a: { y: 3, x: 4 } };
+    assert.strictEqual(
+      JSON.stringify(deterministicSort(input)),
+      '{"a":{"x":4,"y":3},"b":{"a":2,"z":1}}'
+    );
+  });
+
+  test('arrays of objects maintain element order but sort keys within each object', () => {
+    const input = [{ b: 2, a: 1 }, { d: 4, c: 3 }];
+    assert.strictEqual(
+      JSON.stringify(deterministicSort(input)),
+      '[{"a":1,"b":2},{"c":3,"d":4}]'
+    );
+  });
+
+  test('arrays of primitives are left in their original order', () => {
+    const input = [3, 1, 2];
+    assert.strictEqual(JSON.stringify(deterministicSort(input)), '[3,1,2]');
+  });
+
+  test('primitives are returned unchanged', () => {
+    assert.strictEqual(deterministicSort('hello'), 'hello');
+    assert.strictEqual(deterministicSort(42), 42);
+    assert.strictEqual(deterministicSort(true), true);
+    assert.strictEqual(deterministicSort(null), null);
+  });
+
+  test('repeated invocations produce identical output (stability)', () => {
+    const input = { z: { c: 3, a: 1 }, m: [{ y: 2, x: 1 }], a: 'val' };
+    const result1 = JSON.stringify(deterministicSort(input));
+    const result2 = JSON.stringify(deterministicSort(input));
+    const result3 = JSON.stringify(deterministicSort(input));
+    assert.strictEqual(result1, result2);
+    assert.strictEqual(result2, result3);
+  });
+
+  test('empty object and empty array pass through', () => {
+    assert.deepStrictEqual(deterministicSort({}), {});
+    assert.deepStrictEqual(deterministicSort([]), []);
+  });
+
+  test('mixed nested structures (objects inside arrays inside objects)', () => {
+    const input = { items: [{ z: 1, a: 2 }], meta: { version: 1 } };
+    assert.strictEqual(
+      JSON.stringify(deterministicSort(input)),
+      '{"items":[{"a":2,"z":1}],"meta":{"version":1}}'
+    );
   });
 });
