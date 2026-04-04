@@ -1,5 +1,30 @@
 # Milestones
 
+## v1.3 Security Hardening & Coverage (Shipped: 2026-04-04)
+
+**Phases completed:** 4 phases (7-10), 4 plans, 260 tests passing
+
+**Key accomplishments:**
+
+- Cryptographic temp paths (crypto.randomBytes) replacing predictable Date.now() in output() — SEC-01
+- Shell metacharacter blocking in validateShellArg() and output truncation sentinel (__GSD_TRUNCATED__) — SEC-03, SEC-04
+- Branch coverage improved: core.cjs 82.82% to 87.11%, security.cjs to 100% line / 91.11% branch — SEC-05
+- Config migration registry with version tracking + migration pipeline in loadConfig — SEC-06
+
+---
+
+## v1.2 Agent Quality & Consolidation (Shipped: 2026-04-04)
+
+**Phases completed:** 1 phase (6), 5 plans, 7 requirements
+
+**Key accomplishments:**
+
+- Consolidated verification agents (4 to 1), research agents (2 to 1), validator agents (2 to 1)
+- Applied 3-tier tool access model (Explore/Research/Modify) to all 15 source agents
+- Added domain-specific guardrails and quality sections to 9 low-scoring agents
+
+---
+
 ## v1.1 Testing & Hardening (Shipped: 2026-03-26)
 
 **Phases completed:** 4 phases, 11 plans, 4 tasks

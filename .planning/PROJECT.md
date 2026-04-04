@@ -6,16 +6,28 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Shipped:** v1.2 Agent Quality & Consolidation (2026-04-04)
+**Shipped:** v1.3 Security Hardening & Coverage (2026-04-04)
 **Package:** `get-shit-done-cc` v1.29.0
-**Tests:** 1,662 passing (76 unit + 39 integration added in v1.1)
-**Coverage:** 85%+ lines, 77%+ branches across 25 instrumented source files
+**Tests:** 260 passing (51 suites, 717ms)
+**Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
 **Agents:** 15 source, 29 global, 7 archived — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-## Validated Requirements (v1.2)
+## Validated Requirements (v1.3)
 
-All 7 requirements verified complete:
+All 6 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| SEC-01: Cryptographic temp paths in output() | Phase 7 | Validated |
+| SEC-02: Path containment fix (path.sep before startsWith) | Phase 7 | Validated |
+| SEC-03: Shell metacharacter blocking in validateShellArg() | Phase 8 | Validated |
+| SEC-04: __GSD_TRUNCATED__ sentinel in output fallback | Phase 8 | Validated |
+| SEC-05: Branch coverage 82.82% to 87%+ on core.cjs | Phase 9 | Validated |
+| SEC-06: Config version tracking + migration registry | Phase 10 | Validated |
+
+<details>
+<summary><strong>v1.2 Requirements (7/7 validated)</strong></summary>
 
 | Requirement | Phase | Outcome |
 |-------------|-------|---------|
@@ -26,6 +38,8 @@ All 7 requirements verified complete:
 | CREW-05: Wire utility agents into workflows | Phase 6 | Validated |
 | CREW-06: Tool-access tiers for all agents | Phase 6 | Validated |
 | CREW-07: Quality sections for low-scoring agents | Phase 6 | Validated |
+
+</details>
 
 <details>
 <summary><strong>v1.1 Requirements (13/13 validated)</strong></summary>
@@ -58,13 +72,13 @@ All 7 requirements verified complete:
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
+| crypto.randomBytes for temp paths | Date.now() was predictable — race condition and symlink attack vector | v1.3 Phase 7 |
+| Config migration registry pattern | Array of {from, to, migrate} objects over version-keyed map — matches DB migration conventions | v1.3 Phase 10 |
+| validateShellArg as library infra | No production callers yet — design-intentional for downstream consumers | v1.3 Phase 8 |
+| __GSD_TRUNCATED__ as LLM protocol marker | No programmatic consumer — protocol-level for LLM detection of truncated output | v1.3 Phase 8 |
 | 4→1 verification consolidation | Overlapping scopes unified into gsd-verifier with scope param | v1.2 Phase 6 |
-| 2→1 research consolidation | Phase/project researchers differ only in scope | v1.2 Phase 6 |
-| 2→1 validator consolidation | extension-validator + validator merged into gsd-validator-hub | v1.2 Phase 6 |
 | 3-tier tool access | Explore (read), Research (+web), Modify (+write) applied to all agents | v1.2 Phase 6 |
-| Quality threshold: 2+ missing sections | Agents missing 1 section skipped to minimize churn | v1.2 Phase 6 |
 | Integration tests use real code paths | Prior incident where mock/prod divergence masked failures | v1.1 Phase 4 |
-| Advisory 80% threshold warns, never fails | Build stability over enforcement during ramp-up | v1.1 Phase 5 |
 
 ## Context
 
@@ -76,13 +90,16 @@ All 7 requirements verified complete:
 - 3 specialist agents deployed: plugin-developer, test-runner, docs-sync
 - 15 source agents + 7 archived agents after v1.2 consolidation
 - 25 source files instrumented for coverage across lib, hooks, gsd-tools, bin, scripts
+- v1.3 added config migration system — configs auto-gain config_version on first load
 
-## Tech Debt (from v1.2 audit)
+## Tech Debt (from v1.3 audit)
 
-- 5 agent tier labels mismatch actual tool grants (documentation-only, no runtime effect)
-- gsd-validator-hub has no workflow entry point
-- Global CLAUDE.md files reference absorbed agents as standalone
-- Missing SUMMARY.md files for plans 02-04 (context compaction)
+- validateShellArg has zero production callers (library infrastructure)
+- __GSD_TRUNCATED__ sentinel has no programmatic consumer (LLM protocol marker)
+- security.cjs branch coverage 91.11% — short-circuit expressions, below 95% aspirational target
+- No VALIDATION.md files for v1.3 phases (Nyquist process gap)
+- 5 agent tier labels mismatch actual tool grants (documentation-only, from v1.2)
+- gsd-validator-hub has no workflow entry point (from v1.2)
 
 ## Deferred
 
@@ -107,4 +124,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 -- v1.2 milestone shipped*
+*Last updated: 2026-04-04 -- v1.3 milestone shipped*
