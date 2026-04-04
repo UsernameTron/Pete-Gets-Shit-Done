@@ -3,61 +3,64 @@
 **Defined:** 2026-04-04
 **Core Value:** Zero-dependency spec-driven development plugin for Claude Code
 
-## v1.5 Requirements
+## v1.6 Requirements
 
-Requirements for v1.5 Performance. Each maps to roadmap phases.
+Requirements for v1.6 Maintainability. Addresses all deferred items and tech debt from v1.0-v1.5.
 
-### Streaming Output
+### Architecture & Module Boundaries
 
-- [x] **PERF-01**: Streaming output helper in core.cjs — write chunks to stdout/stderr incrementally instead of buffering full results, with line-based callback support for progress reporting
+- [ ] **MAINT-01**: Layered architecture refactoring — establish clear module boundaries between core utilities (core.cjs), security (security.cjs), agent management, skill registry, and CLI tooling. Extract cross-cutting concerns into well-defined interfaces.
+- [ ] **MAINT-06**: Sync-compatible cancel tokens — implement a lightweight cancellation pattern that works within the sync CommonJS architecture, allowing long-running operations to check a cancelled flag without requiring async/await or AbortController.
 
-### Cache-Stable Ordering
+### Feature Management & Consumer Wiring
 
-- [x] **PERF-02**: Deterministic ordering utility in core.cjs — sort objects and arrays by stable keys so identical inputs produce identical outputs across runs, enabling cache hits on hash-based comparisons
+- [ ] **MAINT-02**: Feature flags for experimental capabilities — add a feature flag system in core.cjs that gates experimental features behind named toggles, configurable via GSD config. Flags default to off, can be enabled per-project.
+- [ ] **MAINT-07**: Wire validateShellArg to production caller — identify or create at least one production code path that uses validateShellArg() from security.cjs, eliminating the zero-caller tech debt.
+- [ ] **MAINT-08**: Wire __GSD_TRUNCATED__ to programmatic consumer — add detection logic that checks for the __GSD_TRUNCATED__ sentinel in output and surfaces it as a structured warning, eliminating the no-consumer tech debt.
 
-### Lazy Loading
+### Skills System
 
-- [x] **PERF-03**: Lazy-load agent definitions in model-profiles.cjs — defer parsing agent YAML/MD until first access, reducing startup time for commands that don't need agent metadata
-- [x] **PERF-04**: Lazy-load skill registry — defer skill file scanning until a skill is actually requested, avoiding upfront directory traversal
+- [ ] **MAINT-03**: Skills extensibility improvements — support skill composition (skills that reference other skills), skill metadata queries, and dynamic skill discovery from plugin directories.
+- [ ] **MAINT-04**: Orphaned skills audit and cleanup — scan all skill directories, identify skills with no trigger path or broken references, archive or remove dead skills.
+- [ ] **MAINT-05**: Skill versioning system — add version tracking to skill metadata, support version-pinned references, and emit warnings when skill versions drift from their plugin manifest.
+- [ ] **MAINT-09**: skill-forge consolidation — merge skill-forge patterns into the core skill registry, eliminating the separate skill-forge code path while preserving all production-grade engineering behaviors.
 
-### Token Estimation
+### Package & Metadata Polish
 
-- [x] **PERF-05**: Token estimation utility in core.cjs — approximate token count for strings using character/word ratio heuristics (no external tokenizer), with configurable model profiles for different token-per-word ratios
-- [x] **PERF-06**: Context budget helper — given a token limit and a list of content sections with priorities, select the highest-priority sections that fit within the budget
-
-## Deferred (v1.6 Maintainability)
-
-- **MAINT-01**: Layered architecture refactoring
-- **MAINT-02**: Feature flags for experimental capabilities
-- **MAINT-03**: Skills extensibility improvements
-- **MAINT-04**: Orphaned skills audit and cleanup
-- **MAINT-05**: Skill versioning system
+- [ ] **META-01**: Align plugin.json author fields with package.json — synchronize author, description, and version fields between root plugin.json, plugins/plugin.json, and package.json.
+- [ ] **META-02**: Version bump and publish prep — bump version to v1.30.0, update changelog, verify npm publish readiness (package.json files field, .npmignore accuracy).
+- [ ] **META-03**: Plugin audit and marketplace prep — audit plugin structure against marketplace requirements, verify all plugin.json fields meet schema, document plugin submission checklist.
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Abort controller propagation | Current sync architecture doesn't benefit without async refactor (v1.6 candidate) |
-| External tokenizer (tiktoken, etc.) | Zero-dependency constraint — heuristic estimation only |
-| Async streaming (ReadableStream) | Sync architecture — use synchronous incremental writes |
+| Full async/await refactor | Zero-dependency sync constraint — cancel tokens use polling, not AbortController |
+| External dependency additions | Zero-dependency constraint |
 | Breaking changes to GSD commands | Backward compatibility constraint |
-| New npm dependencies | Zero-dependency constraint |
+| New skill DSL or language | Extensibility means better composition, not a new authoring format |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PERF-01 | Phase 15 | Complete |
-| PERF-02 | Phase 15 | Complete |
-| PERF-03 | Phase 16 | Complete |
-| PERF-04 | Phase 16 | Complete |
-| PERF-05 | Phase 17 | Complete |
-| PERF-06 | Phase 17 | Complete |
+| MAINT-01 | Phase 18 | Pending |
+| MAINT-06 | Phase 18 | Pending |
+| MAINT-02 | Phase 19 | Pending |
+| MAINT-07 | Phase 19 | Pending |
+| MAINT-08 | Phase 19 | Pending |
+| MAINT-03 | Phase 20 | Pending |
+| MAINT-04 | Phase 20 | Pending |
+| MAINT-05 | Phase 20 | Pending |
+| MAINT-09 | Phase 20 | Pending |
+| META-01 | Phase 21 | Pending |
+| META-02 | Phase 21 | Pending |
+| META-03 | Phase 21 | Pending |
 
 **Coverage:**
-- v1.5 requirements: 6 total
-- Mapped to phases: 6/6
+- v1.6 requirements: 12 total
+- Mapped to phases: 12/12
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-04-04 | All 6 requirements complete | Archived: 2026-04-04*
+*Requirements defined: 2026-04-04*

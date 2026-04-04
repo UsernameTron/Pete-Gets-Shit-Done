@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: Performance
-status: archived
-last_updated: "2026-04-04T23:30:00.000Z"
-last_activity: 2026-04-04 -- v1.5 milestone archived, all tracking documents updated
+milestone: v1.6
+milestone_name: Maintainability
+status: planning
+last_updated: "2026-04-04T23:45:00.000Z"
+last_activity: 2026-04-04 -- v1.6 milestone initiated, requirements and roadmap defined
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-04)
 
-**Last Shipped:** v1.5 Performance (2026-04-04)
-**Next:** v1.6 Maintainability (not yet started)
+**Active:** v1.6 Maintainability (2026-04-04)
+**Previous:** v1.5 Performance (shipped 2026-04-04)
 
 ## Current Position
 
-Phase: None active
-Milestone: v1.5 Performance — archived
-Status: Milestone complete and archived. Ready for v1.6.
-Last activity: 2026-04-04 -- v1.5 archived with all 6 requirements validated
+Phase: None yet — roadmap being created
+Milestone: v1.6 Maintainability — planning
+Status: Requirements defined. Roadmap creation in progress.
+Last activity: 2026-04-04 -- v1.6 milestone initiated with 12 requirements across 4 phases
 
-Progress: [##########] 3/3 phases | 6/6 plans | 6/6 requirements
+Progress: [----------] 0/4 phases | 0/0 plans | 0/12 requirements
 
 ## Milestone History
 
@@ -44,6 +44,6 @@ Progress: [##########] 3/3 phases | 6/6 plans | 6/6 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.5 milestone archived — all tracking documents updated
-**Stopped at**: Milestone lifecycle complete
-**Next**: `/gsd:new-milestone` for v1.6 Maintainability, or commit + ship current branch
+**Last action**: v1.6 milestone initiated — requirements and roadmap being defined
+**Stopped at**: Autonomous execution about to begin
+**Next**: Execute phases 18-21 autonomously

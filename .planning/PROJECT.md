@@ -6,16 +6,32 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Shipped:** v1.5 Performance (2026-04-04)
+**Active:** v1.6 Maintainability (2026-04-04)
 **Package:** `get-shit-done-cc` v1.29.0
 **Tests:** 259 passing (51 suites)
 **Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
 **Agents:** 15 source, 29 global, 7 archived — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-**Next:** v1.6 Maintainability
+## Active Requirements (v1.6)
 
-## Validated Requirements (v1.5)
+| Requirement | Category | Phase |
+|-------------|----------|-------|
+| MAINT-01: Layered architecture refactoring | Architecture | Phase 18 |
+| MAINT-02: Feature flags for experimental capabilities | Feature Mgmt | Phase 19 |
+| MAINT-03: Skills extensibility improvements | Skills | Phase 20 |
+| MAINT-04: Orphaned skills audit and cleanup | Skills | Phase 20 |
+| MAINT-05: Skill versioning system | Skills | Phase 20 |
+| MAINT-06: Sync-compatible cancel tokens | Architecture | Phase 18 |
+| MAINT-07: Wire validateShellArg to production caller | Feature Mgmt | Phase 19 |
+| MAINT-08: Wire __GSD_TRUNCATED__ to programmatic consumer | Feature Mgmt | Phase 19 |
+| MAINT-09: skill-forge consolidation | Skills | Phase 20 |
+| META-01: Align plugin.json author fields with package.json | Package | Phase 21 |
+| META-02: Version bump and publish prep | Package | Phase 21 |
+| META-03: Plugin audit and marketplace prep | Package | Phase 21 |
+
+<details>
+<summary><strong>v1.5 Requirements (6/6 validated)</strong></summary>
 
 All 6 requirements verified complete:
 
@@ -27,6 +43,8 @@ All 6 requirements verified complete:
 | PERF-04: Lazy-load skill registry (lazyRegistry) | Phase 16 | Validated |
 | PERF-05: Token estimation utility (estimateTokens) | Phase 17 | Validated |
 | PERF-06: Context budget helper (budgetContext) | Phase 17 | Validated |
+
+</details>
 
 <details>
 <summary><strong>v1.4 Requirements (14/14 validated)</strong></summary>
@@ -134,18 +152,16 @@ All 6 requirements verified complete:
 - 25 source files instrumented for coverage across lib, hooks, gsd-tools, bin, scripts
 - v1.3 added config migration system — configs auto-gain config_version on first load
 
-## Tech Debt (carried into v1.5)
+## Tech Debt (addressing in v1.6)
 
-- validateShellArg has zero production callers (library infrastructure)
-- __GSD_TRUNCATED__ sentinel has no programmatic consumer (LLM protocol marker)
-- GSD v1.29 publish (version bump not yet done)
-- Align plugin.json author fields with package.json (META-01)
-
-## Deferred
-
-- Abort controller propagation (needs async refactor, v1.6 candidate)
-- Plugin audit and marketplace (ecosystem-level concern, v1.6)
-- skill-forge consolidation (maintainability scope, v1.6)
+All prior tech debt items promoted to v1.6 requirements:
+- validateShellArg zero callers → MAINT-07
+- __GSD_TRUNCATED__ no consumer → MAINT-08
+- Version bump → META-02
+- plugin.json author alignment → META-01
+- Abort controller propagation → MAINT-06 (sync-compatible cancel tokens)
+- Plugin audit/marketplace → META-03
+- skill-forge consolidation → MAINT-09
 
 ## Evolution
 
@@ -165,4 +181,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 -- v1.5 Performance milestone complete*
+*Last updated: 2026-04-04 -- v1.6 Maintainability milestone started*
