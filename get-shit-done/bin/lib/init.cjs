@@ -232,7 +232,7 @@ function cmdInitPlanPhase(cwd, phase, raw) {
       if (reviewsFile) {
         result.reviews_path = toPosixPath(path.join(phaseInfo.directory, reviewsFile));
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: phase directory file listing is best-effort for UAT/review paths */ }
   }
 
   output(withProjectRoot(cwd, result), raw);
@@ -289,7 +289,7 @@ function cmdInitNewProject(cwd, raw) {
       return false;
     }
     hasCode = findCodeFiles(cwd, 0);
-  } catch { /* intentionally empty — best-effort detection */ }
+  } catch { /* intentional: code file detection is best-effort for project type heuristic */ }
 
   hasPackageFile = pathExistsInternal(cwd, 'package.json') ||
                    pathExistsInternal(cwd, 'requirements.txt') ||
@@ -356,7 +356,7 @@ function cmdInitNewMilestone(cwd, raw) {
         .filter(entry => entry.isDirectory())
         .length;
     }
-  } catch {}
+  } catch { /* intentional: phases directory may not exist for phase count */ }
 
   const result = {
     // Models
@@ -455,7 +455,7 @@ function cmdInitResume(cwd, raw) {
   let interruptedAgentId = null;
   try {
     interruptedAgentId = fs.readFileSync(path.join(planningRoot(cwd), 'current-agent-id.txt'), 'utf-8').trim();
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: interrupted agent ID file may not exist */ }
 
   const result = {
     // File existence
@@ -635,7 +635,7 @@ function cmdInitPhaseOp(cwd, phase, raw) {
       if (reviewsFile) {
         result.reviews_path = toPosixPath(path.join(phaseInfo.directory, reviewsFile));
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: phase directory file listing is best-effort for verification/UAT paths */ }
   }
 
   output(withProjectRoot(cwd, result), raw);
@@ -670,9 +670,9 @@ function cmdInitTodos(cwd, area, raw) {
           area: todoArea,
           path: toPosixPath(path.relative(cwd, path.join(planningDir(cwd), 'todos', 'pending', file))),
         });
-      } catch { /* intentionally empty */ }
+      } catch { /* intentional: skip unreadable individual todo files */ }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: pending todos directory may not exist */ }
 
   const result = {
     // Config
@@ -719,9 +719,9 @@ function cmdInitMilestoneOp(cwd, raw) {
         const phaseFiles = fs.readdirSync(path.join(phasesDir, dir));
         const hasSummary = phaseFiles.some(f => f.endsWith('-SUMMARY.md') || f === 'SUMMARY.md');
         if (hasSummary) completedPhases++;
-      } catch { /* intentionally empty */ }
+      } catch { /* intentional: skip unreadable phase directories during summary count */ }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory may not exist for milestone progress */ }
 
   // Check archive
   const archiveDir = path.join(planningRoot(cwd), 'archive');
@@ -730,7 +730,7 @@ function cmdInitMilestoneOp(cwd, raw) {
     archivedMilestones = fs.readdirSync(archiveDir, { withFileTypes: true })
       .filter(e => e.isDirectory())
       .map(e => e.name);
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: archive directory may not exist */ }
 
   const result = {
     // Config
@@ -769,7 +769,7 @@ function cmdInitMapCodebase(cwd, raw) {
   let existingMaps = [];
   try {
     existingMaps = fs.readdirSync(codebaseDir).filter(f => f.endsWith('.md'));
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: codebase maps directory may not exist */ }
 
   const result = {
     // Models
@@ -870,14 +870,14 @@ function cmdInitManager(cwd, raw) {
           try {
             const stat = fs.statSync(path.join(fullDir, f));
             if (stat.mtimeMs > newestMtime) newestMtime = stat.mtimeMs;
-          } catch { /* intentionally empty */ }
+          } catch { /* intentional: file stat may fail for deleted or inaccessible files */ }
         }
         if (newestMtime > 0) {
           lastActivity = new Date(newestMtime).toISOString();
           isActive = (now - newestMtime) < 300000; // 5 minutes
         }
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: phase directory reading is best-effort for progress status */ }
 
     // Check ROADMAP checkbox status
     const checkboxPattern = new RegExp(`-\\s*\\[(x| )\\]\\s*.*Phase\\s+${phaseNum.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[:\\s]`, 'i');
@@ -951,7 +951,7 @@ function cmdInitManager(cwd, raw) {
     if (fs.existsSync(waitingPath)) {
       waitingSignal = JSON.parse(fs.readFileSync(waitingPath, 'utf-8'));
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: WAITING.json may not exist or be malformed */ }
 
   // Compute recommended actions (execute > plan > discuss)
   const recommendedActions = [];
@@ -1065,7 +1065,7 @@ function cmdInitProgress(cwd, raw) {
       roadmapPhaseNums.add(hm[1]);
       roadmapPhaseNames.set(hm[1], hm[2].replace(/\(INSERTED\)/i, '').trim());
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: ROADMAP.md may not exist for phase name extraction */ }
 
   const isDirInMilestone = getMilestonePhaseFilter(cwd);
   const seenPhaseNums = new Set();
@@ -1118,7 +1118,7 @@ function cmdInitProgress(cwd, raw) {
         nextPhase = phaseInfo;
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory may not exist for execute-phase enumeration */ }
 
   // Add phases defined in ROADMAP but not yet scaffolded to disk
   for (const [num, name] of roadmapPhaseNames) {
@@ -1149,7 +1149,7 @@ function cmdInitProgress(cwd, raw) {
     const state = fs.readFileSync(path.join(planningDir(cwd), 'STATE.md'), 'utf-8');
     const pauseMatch = state.match(/\*\*Paused At:\*\*\s*(.+)/);
     if (pauseMatch) pausedAt = pauseMatch[1].trim();
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: STATE.md may not exist for paused work detection */ }
 
   const result = {
     // Models
@@ -1196,7 +1196,7 @@ function cmdInitProgress(cwd, raw) {
 function detectChildRepos(dir) {
   const repos = [];
   let entries;
-  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return repos; }
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { /* intentional: directory may not be readable */ return repos; }
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     if (entry.name.startsWith('.')) continue;
@@ -1207,7 +1207,7 @@ function detectChildRepos(dir) {
       try {
         const status = execSync('git status --porcelain', { cwd: fullPath, encoding: 'utf8', timeout: 5000 });
         hasUncommitted = status.trim().length > 0;
-      } catch { /* best-effort */ }
+      } catch { /* intentional: git status check is best-effort for child repo detection */ }
       repos.push({ name: entry.name, path: fullPath, has_uncommitted: hasUncommitted });
     }
   }
@@ -1226,7 +1226,7 @@ function cmdInitNewWorkspace(cwd, raw) {
   try {
     execSync('git --version', { encoding: 'utf8', timeout: 5000, stdio: 'pipe' });
     worktreeAvailable = true;
-  } catch { /* no git at all */ }
+  } catch { /* intentional: git may not be installed — feature detection */ }
 
   const result = {
     default_workspace_base: defaultBase,
@@ -1247,7 +1247,7 @@ function cmdInitListWorkspaces(cwd, raw) {
   const workspaces = [];
   if (fs.existsSync(defaultBase)) {
     let entries;
-    try { entries = fs.readdirSync(defaultBase, { withFileTypes: true }); } catch { entries = []; }
+    try { entries = fs.readdirSync(defaultBase, { withFileTypes: true }); } catch { /* intentional: workspace base directory may not be readable */ entries = []; }
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
       const wsPath = path.join(defaultBase, entry.name);
@@ -1264,7 +1264,7 @@ function cmdInitListWorkspaces(cwd, raw) {
         // Count table rows (lines starting with |, excluding header and separator)
         const tableRows = manifest.split('\n').filter(l => l.match(/^\|\s*\w/) && !l.includes('Repo') && !l.includes('---'));
         repoCount = tableRows.length;
-      } catch { /* best-effort */ }
+      } catch { /* intentional: workspace manifest parsing is best-effort */ }
       hasProject = fs.existsSync(path.join(wsPath, '.planning', 'PROJECT.md'));
 
       workspaces.push({
@@ -1318,7 +1318,7 @@ function cmdInitRemoveWorkspace(cwd, name, raw) {
           repos.push({ name: match[1], source: match[2], branch: match[3], strategy: match[4] });
         }
       }
-    } catch { /* best-effort */ }
+    } catch { /* intentional: workspace manifest table parsing is best-effort */ }
   }
 
   // Check for uncommitted changes in workspace repos
@@ -1331,7 +1331,7 @@ function cmdInitRemoveWorkspace(cwd, name, raw) {
       if (status.trim().length > 0) {
         dirtyRepos.push(repo.name);
       }
-    } catch { /* best-effort */ }
+    } catch { /* intentional: git status in workspace repo is best-effort */ }
   }
 
   const result = {

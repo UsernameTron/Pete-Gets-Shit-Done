@@ -428,7 +428,7 @@ function cmdValidateConsistency(cwd, raw) {
       const dm = dir.match(/^(\d+[A-Z]?(?:\.\d+)*)/i);
       if (dm) diskPhases.add(dm[1]);
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory may not exist for disk phase enumeration */ }
 
   // Check: phases in ROADMAP but not on disk
   for (const p of roadmapPhases) {
@@ -493,7 +493,7 @@ function cmdValidateConsistency(cwd, raw) {
         }
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory scan for plan numbering is best-effort */ }
 
   // Check: frontmatter in plans has required fields
   try {
@@ -513,7 +513,7 @@ function cmdValidateConsistency(cwd, raw) {
         }
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory scan for frontmatter validation is best-effort */ }
 
   const passed = errors.length === 0;
   output({ passed, errors, warnings, warning_count: warnings.length }, raw, passed ? 'passed' : 'failed');
@@ -603,7 +603,7 @@ function cmdValidateHealth(cwd, options, raw) {
           if (m) diskPhases.add(m[1]);
         }
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: phases directory may not exist for STATE.md cross-reference */ }
     // Check for invalid references
     for (const ref of phaseRefs) {
       const normalizedRef = String(parseInt(ref, 10)).padStart(2, '0');
@@ -649,7 +649,7 @@ function cmdValidateHealth(cwd, options, raw) {
         addIssue('warning', 'W008', 'config.json: workflow.nyquist_validation absent (defaults to enabled but agents may skip)', 'Run /gsd:health --repair to add key', true);
         if (!repairs.includes('addNyquistKey')) repairs.push('addNyquistKey');
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: config.json parse is best-effort for nyquist key check */ }
   }
 
   // ─── Check 6: Phase directory naming (NN-name format) ─────────────────────
@@ -660,7 +660,7 @@ function cmdValidateHealth(cwd, options, raw) {
         addIssue('warning', 'W005', `Phase directory "${e.name}" doesn't follow NN-name format`, 'Rename to match pattern (e.g., 01-setup)');
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory may not exist for naming convention check */ }
 
   // ─── Check 7: Orphaned plans (PLAN without SUMMARY) ───────────────────────
   try {
@@ -679,7 +679,7 @@ function cmdValidateHealth(cwd, options, raw) {
         }
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory scan for orphaned plans is best-effort */ }
 
   // ─── Check 7b: Nyquist VALIDATION.md consistency ────────────────────────
   try {
@@ -697,7 +697,7 @@ function cmdValidateHealth(cwd, options, raw) {
         }
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: Nyquist validation consistency check is best-effort */ }
 
   // ─── Check 7c: Agent installation (#1371) ──────────────────────────────────
   // Verify GSD agents are installed. Missing agents cause Task(subagent_type=...)
@@ -715,7 +715,7 @@ function cmdValidateHealth(cwd, options, raw) {
           'Run the GSD installer: npx get-shit-done-cc@latest');
       }
     }
-  } catch { /* intentionally empty — agent check is non-blocking */ }
+  } catch { /* intentional: agent installation check is non-blocking best-effort */ }
 
   // ─── Check 8: Run existing consistency checks ─────────────────────────────
   // Inline subset of cmdValidateConsistency
@@ -738,7 +738,7 @@ function cmdValidateHealth(cwd, options, raw) {
           if (dm) diskPhases.add(dm[1]);
         }
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: phases directory may not exist for ROADMAP cross-check */ }
 
     // Phases in ROADMAP but not on disk
     for (const p of roadmapPhases) {

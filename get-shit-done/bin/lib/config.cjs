@@ -93,12 +93,10 @@ function buildNewProjectConfig(userChoices) {
         delete userDefaults.depth;
         try {
           fs.writeFileSync(globalDefaultsPath, JSON.stringify(userDefaults, null, 2), 'utf-8');
-        } catch { /* intentionally empty */ }
+        } catch { /* intentional: best-effort migration write — original config still works */ }
       }
     }
-  } catch {
-    // Ignore malformed global defaults
-  }
+  } catch { /* intentional: global defaults file may not exist or be malformed */ }
 
   const hardcoded = {
     model_profile: 'balanced',
@@ -326,7 +324,7 @@ function cmdConfigSet(cwd, keyPath, value, raw) {
   else if (value === 'false') parsedValue = false;
   else if (!isNaN(value) && value !== '') parsedValue = Number(value);
   else if (typeof value === 'string' && (value.startsWith('[') || value.startsWith('{'))) {
-    try { parsedValue = JSON.parse(value); } catch { /* keep as string */ }
+    try { parsedValue = JSON.parse(value); } catch { /* intentional: invalid JSON kept as raw string value */ }
   }
 
   const setConfigValueResult = setConfigValue(cwd, keyPath, parsedValue);
