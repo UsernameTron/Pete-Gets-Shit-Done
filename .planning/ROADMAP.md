@@ -58,13 +58,13 @@ Plans:
 
 **Note:** Can run in parallel with Phase 15.
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 16-01-PLAN.md -- Lazy-load MODEL_PROFILES via Object.defineProperty getter proxy (Wave 1, TDD)
-- [ ] 16-02-PLAN.md -- lazyRegistry generic utility in core.cjs (Wave 1, TDD)
+- [x] 16-01-PLAN.md -- Lazy-load MODEL_PROFILES via Object.defineProperty getter proxy (Wave 1, TDD)
+- [x] 16-02-PLAN.md -- lazyRegistry generic utility in core.cjs (Wave 1, TDD)
 
-**Status: PLANNED**
+**Status: COMPLETE**
 
 ---
 
@@ -85,9 +85,11 @@ Plans:
 
 **Depends on:** Phase 15 (core.cjs utilities pattern established)
 
+**Plans:** 2 plans
+
 Plans:
-- [ ] 17-PLAN-01 -- Token estimation utility with model-profile heuristics (Wave 1)
-- [ ] 17-PLAN-02 -- Context budget helper with priority-based section selection (Wave 2)
+- [ ] 17-01-PLAN.md -- Token estimation utility with model-profile heuristics (Wave 1, TDD)
+- [ ] 17-02-PLAN.md -- Context budget helper with priority-based section selection (Wave 2, TDD)
 
 **Status: NOT STARTED**
 
