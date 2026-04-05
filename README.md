@@ -28,7 +28,7 @@ Trusted by engineers at Amazon, Google, Shopify, and Webflow.
 
 ## Why I Built This
 
-I'm a solo developer. I don't write code — Claude Code does.
+I'm a solo developer. I don't write ALL the code — my Get Shit Done agent helps.
 
 Other spec-driven development tools exist. BMAD. Speckit. The usual lineup. They all contract the same disease: they recreate the organizational dysfunction of a 50-person engineering team and sell it as a feature. Sprint ceremonies, story points, stakeholder syncs, retrospectives, Jira workflows — the full cargo cult, miniaturized for your terminal. The rest just lack any real understanding of what you're actually building.
 
