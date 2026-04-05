@@ -289,7 +289,7 @@ function cmdFrontmatterSet(cwd, filePath, field, value, raw) {
   const content = fs.readFileSync(fullPath, 'utf-8');
   const fm = extractFrontmatter(content);
   let parsedValue;
-  try { parsedValue = JSON.parse(value); } catch { parsedValue = value; }
+  try { parsedValue = JSON.parse(value); } catch { /* intentional: non-JSON value kept as string */ parsedValue = value; }
   fm[field] = parsedValue;
   const newContent = spliceFrontmatter(content, fm);
   fs.writeFileSync(fullPath, normalizeMd(newContent), 'utf-8');
@@ -303,7 +303,7 @@ function cmdFrontmatterMerge(cwd, filePath, data, raw) {
   const content = fs.readFileSync(fullPath, 'utf-8');
   const fm = extractFrontmatter(content);
   let mergeData;
-  try { mergeData = JSON.parse(data); } catch { error('Invalid JSON for --data'); return; }
+  try { mergeData = JSON.parse(data); } catch { /* intentional: report malformed JSON input */ error('Invalid JSON for --data'); return; }
   Object.assign(fm, mergeData);
   const newContent = spliceFrontmatter(content, fm);
   fs.writeFileSync(fullPath, normalizeMd(newContent), 'utf-8');

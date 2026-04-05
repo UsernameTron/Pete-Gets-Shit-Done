@@ -1,0 +1,14 @@
+{
+  "include": [
+    "get-shit-done/bin/lib/*.cjs",
+    "get-shit-done/bin/gsd-tools.cjs",
+    "bin/install.js",
+    "hooks/*.js",
+    "scripts/build-hooks.js"
+  ],
+  "exclude": [
+    "hooks/dist/**",
+    "tests/**"
+  ],
+  "all": true
+}

@@ -1,6 +1,6 @@
 {
   "name": "get-shit-done-cc",
-  "version": "1.29.0",
+  "version": "1.30.0",
   "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code, OpenCode, Gemini and Codex by TÂCHES.",
   "bin": {
     "get-shit-done-cc": "bin/install.js"
@@ -27,7 +27,7 @@
     "codex",
     "codex-cli"
   ],
-  "author": "TÂCHES",
+  "author": "Pete Connor",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -48,7 +48,9 @@
     "build:hooks": "node scripts/build-hooks.js",
     "prepublishOnly": "npm run build:hooks",
     "test": "node scripts/run-tests.cjs",
-    "test:coverage": "c8 --reporter text --reporter json --include 'get-shit-done/bin/lib/*.cjs' --include 'get-shit-done/bin/gsd-tools.cjs' --include 'bin/install.js' --include 'hooks/*.js' --include 'scripts/build-hooks.js' --exclude 'hooks/dist/**' --exclude 'tests/**' --all node scripts/run-tests.cjs",
-    "test:coverage:full": "c8 --reporter text --reporter lcov --reporter json --include 'get-shit-done/bin/lib/*.cjs' --include 'get-shit-done/bin/gsd-tools.cjs' --include 'bin/install.js' --include 'hooks/*.js' --include 'scripts/build-hooks.js' --exclude 'hooks/dist/**' --exclude 'tests/**' --all node scripts/run-tests.cjs"
+    "test:coverage": "c8 --reporter text --reporter json node scripts/run-tests.cjs",
+    "test:coverage:full": "c8 --reporter text --reporter lcov --reporter json node scripts/run-tests.cjs",
+    "test:e2e": "node scripts/run-e2e-tests.cjs",
+    "test:e2e:smoke": "node scripts/run-e2e-tests.cjs --smoke"
   }
 }

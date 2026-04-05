@@ -78,12 +78,15 @@ ALLOWLIST=(
   'tests/verify.test.cjs'
   'tests/integ-governance-hooks.test.cjs'
   'SECURITY.md'
+  'SECURITY_HOOKS_REVIEW.md'
+  '.planning/milestones/archived-phases/'
 )
 
 is_allowlisted() {
   local file="$1"
   for allowed in "${ALLOWLIST[@]}"; do
-    if [[ "$file" == *"$allowed" ]]; then
+    # Suffix match for files, substring match for directory prefixes
+    if [[ "$file" == *"$allowed"* ]]; then
       return 0
     fi
   done

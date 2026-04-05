@@ -554,6 +554,33 @@ async function runCommand(command, args, cwd, raw) {
       break;
     }
 
+    case 'skill-query': {
+      const filterArgs = {};
+      for (let i = 1; i < args.length; i += 2) {
+        if (args[i] && args[i].startsWith('--')) {
+          filterArgs[args[i].slice(2)] = args[i + 1];
+        }
+      }
+      const results = init.querySkills(cwd, filterArgs);
+      core.output(results, raw);
+      break;
+    }
+
+    case 'audit-skills': {
+      init.cmdAuditSkills(cwd, raw);
+      break;
+    }
+
+    case 'check-skill-versions': {
+      init.cmdCheckSkillVersions(cwd, raw);
+      break;
+    }
+
+    case 'validate-skill': {
+      init.cmdValidateSkill(cwd, args[1], raw);
+      break;
+    }
+
     case 'history-digest': {
       commands.cmdHistoryDigest(cwd, raw);
       break;

@@ -16,9 +16,9 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-- gsd-phase-researcher — Researches technical approaches for a phase
+- gsd-research-orchestrator — Researches technical approaches for a phase (scope: phase)
 - gsd-planner — Creates detailed plans from phase scope
-- gsd-plan-checker — Reviews plan quality before execution
+- gsd-verifier — Reviews plan quality before execution (scope: plan)
 - gsd-executor — Executes plan tasks, commits, creates SUMMARY.md
 - gsd-verifier — Verifies phase completion, checks quality gates
 </available_agent_types>
@@ -351,7 +351,7 @@ Use standard research format but keep it lean — skip sections that don't apply
 Return: ## RESEARCH COMPLETE with file path
 </output>
 ",
-  subagent_type="gsd-phase-researcher",
+  subagent_type="gsd-research-orchestrator",
   model="{planner_model}",
   description="Research: ${DESCRIPTION}"
 )
@@ -471,7 +471,7 @@ ${DISCUSS_MODE ? '- Context compliance: Does the plan honor locked decisions fro
 ```
 Task(
   prompt=checker_prompt,
-  subagent_type="gsd-plan-checker",
+  subagent_type="gsd-verifier",
   model="{checker_model}",
   description="Check quick plan: ${DESCRIPTION}"
 )

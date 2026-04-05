@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { escapeRegex, normalizePhaseName, planningPaths, output, error, findPhaseInternal, stripShippedMilestones, extractCurrentMilestone, replaceInCurrentMilestone } = require('./core.cjs');
+const { escapeRegex, normalizePhaseName, matchesPhaseDir, planningPaths, output, error, findPhaseInternal, stripShippedMilestones, extractCurrentMilestone, replaceInCurrentMilestone } = require('./core.cjs');
 
 function cmdRoadmapGetPhase(cwd, phaseNum, raw) {
   const roadmapPath = planningPaths(cwd).roadmap;
@@ -135,7 +135,7 @@ function cmdRoadmapAnalyze(cwd, raw) {
     try {
       const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
       const dirs = entries.filter(e => e.isDirectory()).map(e => e.name);
-      const dirMatch = dirs.find(d => d.startsWith(normalized + '-') || d === normalized);
+      const dirMatch = dirs.find(d => matchesPhaseDir(d, normalized));
 
       if (dirMatch) {
         const phaseFiles = fs.readdirSync(path.join(phasesDir, dirMatch));
@@ -151,7 +151,7 @@ function cmdRoadmapAnalyze(cwd, raw) {
         else if (hasContext) diskStatus = 'discussed';
         else diskStatus = 'empty';
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: phase directory reading is best-effort for ROADMAP status */ }
 
     // Check ROADMAP checkbox status
     const checkboxPattern = new RegExp(`-\\s*\\[(x| )\\]\\s*.*Phase\\s+${escapeRegex(phaseNum)}[:\\s]`, 'i');

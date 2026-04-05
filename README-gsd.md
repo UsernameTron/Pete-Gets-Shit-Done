@@ -66,7 +66,7 @@ GSD is two layers in one install:
 
 | Layer | What it does | Components |
 |-------|-------------|------------|
-| **Execution Engine** | discuss → plan → execute → verify → ship | 57 commands, 18 agents, 5 hooks, wave-based parallel execution |
+| **Execution Engine** | discuss → plan → execute → verify → ship | 57 commands, 15 agents, 5 hooks, wave-based parallel execution |
 | **Governance Framework** | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (45 skills, 10 subagents), 6 reference docs |
 
 The execution engine handles **how** your code gets built. The governance framework handles **what rules** it follows while building.
@@ -76,13 +76,13 @@ The execution engine handles **how** your code gets built. The governance framew
 | Metric | Count |
 |--------|-------|
 | GSD commands | 57 |
-| Specialized agents | 18 |
+| Specialized agents | 15 |
 | Runtime hooks | 15 (5 execution + 10 governance) |
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
 | Session commands | 9 (/prime, /wrap, /agents, /agent-setup, etc.) |
-| Test suites | 295 |
-| Test assertions | 1,517 |
+| Test suites | 373 |
+| Test assertions | 1,913 |
 | Reference docs | 6 (CLI, skills, hooks, MCP, settings, subagents) |
 
 ---

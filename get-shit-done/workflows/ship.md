@@ -134,6 +134,22 @@ For each SUMMARY.md in the phase directory:
 ```
 </step>
 
+<step name="pre_pr_validation">
+Before creating the PR, run an agent ecosystem health check:
+
+1. Spawn **gsd-validator-hub** as a subagent with:
+   - `target: ecosystem`
+   - Input: project root path
+   - Contract: read-only validation, return structured report
+2. If result is **FAIL**: log the critical issues in the PR body as a "Known Issues" section
+   but do NOT block the PR. Ecosystem validation failures are informational at ship time.
+3. If result is **PASS** or **WARN**: note in PR body that ecosystem validation passed.
+
+This step is read-only (gsd-validator-hub has `disallowedTools: Write, Edit`) and cannot
+modify the working tree. It serves as a final quality gate surfacing agent ecosystem drift,
+stale references, or configuration mismatches before the PR is created.
+</step>
+
 <step name="create_pr">
 Create the PR using the generated body:
 

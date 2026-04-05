@@ -1,30 +1,29 @@
 # Todo
 
-## Current Status: Between Milestones — v1.1 Shipped, History Reset
+## Current Status: Between Milestones -- v1.8 Archived
 
-v1.1 Testing & Hardening milestone fully archived, tagged, and merged.
-README.md fully populated with governance, plugins, skills, and 57-command GSD table.
-Git history squashed to single initial commit. All obsolete content removed.
+v1.8 Documentation & Accuracy milestone archived. All 9 milestones (v1.0-v1.8) shipped.
+1913 tests passing across 373 suites. 15 active agents, 7 archived.
 
 ## Open Items
 
-All resolved. No open items.
+- [ ] Decide next milestone direction (`/gsd:new-milestone`)
 
-## Completed (This Session)
+## Completed
 
-- [x] 9/9 end-to-end validation scorecard passed
-- [x] Delete `plugins/claude-code-factory/downloads/agent-teams/` (PR #24)
-- [x] Delete `docs/superpowers/` directory (PR #24)
-- [x] Update MCP ecosystem plugin.json with all 9 commands (PR #24)
-- [x] Clean superpowers reference from governance-customization.md (PR #24)
-- [x] Squash git history to single initial commit (`6247018`)
-- [x] Recreate v1.0 and v1.1 tags on new commit
-- [x] Clean all stale branches and worktrees
+- [x] v1.0 Post-Merge Cleanup (2026-03-26)
+- [x] v1.1 Testing & Hardening (2026-03-26)
+- [x] v1.2 Agent Quality & Consolidation (2026-04-04)
+- [x] v1.3 Security Hardening & Coverage (2026-04-04)
+- [x] v1.4 Correctness & Robustness (2026-04-04)
+- [x] v1.5 Performance (2026-04-04)
+- [x] v1.6 Maintainability (2026-04-04)
+- [x] v1.7 End-to-End Integration Testing (2026-04-04)
+- [x] v1.8 Documentation & Accuracy (2026-04-05)
+- [x] Project finalized via /gsd:finalize (2026-04-05)
 
 ## Session Handoff
 
 **State tracking**: `.planning/STATE.md` is canonical.
-**Branch**: `main` at `6247018` (clean, single commit)
-**Tags**: `v1.0`, `v1.1` pointing to `6247018`
-**History**: Squashed — all prior PRs and commits replaced by single initial commit
-**Next**: `/gsd:new-milestone` to start the next cycle
+**Branch**: `chore/session-wrap-0403` (finalized, ready for PR)
+**Next**: `/gsd:new-milestone` or `/gsd:ship` to create PR

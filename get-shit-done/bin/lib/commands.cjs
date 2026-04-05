@@ -7,6 +7,22 @@ const { execSync } = require('child_process');
 const { safeReadFile, loadConfig, isGitIgnored, execGit, normalizePhaseName, comparePhaseNum, getArchivedPhaseDirs, generateSlugInternal, getMilestoneInfo, getMilestonePhaseFilter, resolveModelInternal, stripShippedMilestones, extractCurrentMilestone, planningDir, planningPaths, toPosixPath, output, error, findPhaseInternal, extractOneLinerFromBody, getRoadmapPhaseInternal } = require('./core.cjs');
 const { extractFrontmatter } = require('./frontmatter.cjs');
 const { MODEL_PROFILES } = require('./model-profiles.cjs');
+const { validateShellArg } = require('./security.cjs');
+
+/**
+ * Wrapper around execGit that validates user-derived arguments.
+ * Skips validation for git subcommands (index 0) and flags (start with -).
+ * Use this instead of execGit when any argument contains user-supplied data
+ * (branch names, file paths, commit messages).
+ */
+function execGitValidated(cwd, args) {
+  const validatedArgs = args.map((arg, i) => {
+    // Skip git subcommands (index 0) and flags (start with -)
+    if (i === 0 || arg.startsWith('-')) return arg;
+    return validateShellArg(arg, `git arg[${i}]`);
+  });
+  return execGit(cwd, validatedArgs);
+}
 
 function cmdGenerateSlug(text, raw) {
   if (!text) {
@@ -71,9 +87,9 @@ function cmdListTodos(cwd, area, raw) {
           area: todoArea,
           path: toPosixPath(path.relative(cwd, path.join(pendingDir, file))),
         });
-      } catch { /* intentionally empty */ }
+      } catch { /* intentional: skip unreadable individual todo files */ }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: pending todos directory may not exist */ }
 
   const result = { count, todos };
   output(result, raw, count.toString());
@@ -125,7 +141,7 @@ function cmdHistoryDigest(cwd, raw) {
       for (const dir of currentDirs) {
         allPhaseDirs.push({ name: dir, fullPath: path.join(phasesDir, dir), milestone: null });
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: current phases directory may not exist yet */ }
   }
 
   if (allPhaseDirs.length === 0) {
@@ -183,9 +199,7 @@ function cmdHistoryDigest(cwd, raw) {
             fm['tech-stack'].added.forEach(t => digest.tech_stack.add(typeof t === 'string' ? t : t.name));
           }
 
-        } catch (e) {
-          // Skip malformed summaries
-        }
+        } catch (e) { /* intentional: skip malformed summary files during digest */ }
       }
     }
 
@@ -276,9 +290,9 @@ function cmdCommit(cwd, message, files, raw, amend, noVerify) {
       const currentBranch = execGit(cwd, ['rev-parse', '--abbrev-ref', 'HEAD']);
       if (currentBranch.exitCode === 0 && currentBranch.stdout.trim() !== branchName) {
         // Create branch if it doesn't exist, or switch to it if it does
-        const create = execGit(cwd, ['checkout', '-b', branchName]);
+        const create = execGitValidated(cwd, ['checkout', '-b', branchName]);
         if (create.exitCode !== 0) {
-          execGit(cwd, ['checkout', branchName]);
+          execGitValidated(cwd, ['checkout', branchName]);
         }
       }
     }
@@ -290,9 +304,9 @@ function cmdCommit(cwd, message, files, raw, amend, noVerify) {
     const fullPath = path.join(cwd, file);
     if (!fs.existsSync(fullPath)) {
       // File was deleted/moved — stage the deletion
-      execGit(cwd, ['rm', '--cached', '--ignore-unmatch', file]);
+      execGitValidated(cwd, ['rm', '--cached', '--ignore-unmatch', file]);
     } else {
-      execGit(cwd, ['add', file]);
+      execGitValidated(cwd, ['add', file]);
     }
   }
 
@@ -358,7 +372,7 @@ function cmdCommitToSubrepo(cwd, message, files, raw) {
     // Stage files (strip sub-repo prefix for paths relative to that repo)
     for (const file of repoFiles) {
       const relativePath = file.slice(repo.length + 1);
-      execGit(repoCwd, ['add', relativePath]);
+      execGitValidated(repoCwd, ['add', relativePath]);
     }
 
     // Commit
@@ -536,7 +550,7 @@ function cmdProgressRender(cwd, format, raw) {
 
       phases.push({ number: phaseNum, name: phaseName, plans, summaries, status });
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory may not exist for progress rendering */ }
 
   const percent = totalPlans > 0 ? Math.min(100, Math.round((totalSummaries / totalPlans) * 100)) : 0;
 
@@ -601,9 +615,9 @@ function cmdTodoMatchPhase(cwd, phase, raw) {
           files: filesMatch ? filesMatch[1].trim().split(/[,\s]+/).filter(Boolean) : [],
           body: body.slice(0, 200), // first 200 chars for context
         });
-      } catch {}
+      } catch { /* intentional: skip unreadable todo files during matching */ }
     }
-  } catch {}
+  } catch { /* intentional: pending todos directory may not exist */ }
 
   if (todos.length === 0) {
     output({ phase, matches: [], todo_count: 0 }, raw);
@@ -639,9 +653,9 @@ function cmdTodoMatchPhase(cwd, phase, raw) {
           if (fmFiles) {
             phasePlans.push(...fmFiles[1].split(',').map(s => s.trim().replace(/['"]/g, '')).filter(Boolean));
           }
-        } catch {}
+        } catch { /* intentional: skip unreadable plan files during todo matching */ }
       }
-    } catch {}
+    } catch { /* intentional: phase directory may not exist for plan file scanning */ }
   }
 
   // Score each todo for relevance
@@ -817,7 +831,7 @@ function cmdStats(cwd, format, raw) {
         status: 'Not Started',
       });
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: ROADMAP.md may not exist for phase enumeration */ }
 
   try {
     const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
@@ -853,7 +867,7 @@ function cmdStats(cwd, format, raw) {
         status,
       });
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory may not exist for stats collection */ }
 
   const phases = [...phasesByNumber.values()].sort((a, b) => comparePhaseNum(a.number, b.number));
   const completedPhases = phases.filter(p => p.status === 'Complete').length;
@@ -871,7 +885,7 @@ function cmdStats(cwd, format, raw) {
       requirementsComplete = checked ? checked.length : 0;
       requirementsTotal = requirementsComplete + (unchecked ? unchecked.length : 0);
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: REQUIREMENTS.md may not exist for stats */ }
 
   // Last activity from STATE.md
   let lastActivity = null;
@@ -884,7 +898,7 @@ function cmdStats(cwd, format, raw) {
         || stateContent.match(/^Last activity:\s*(.+)$/im);
       if (activityMatch) lastActivity = activityMatch[1].trim();
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: STATE.md may not exist for last activity extraction */ }
 
   // Git stats
   let gitCommits = 0;
@@ -966,4 +980,5 @@ module.exports = {
   cmdTodoMatchPhase,
   cmdScaffold,
   cmdStats,
+  execGitValidated,
 };

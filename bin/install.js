@@ -24,15 +24,19 @@ const GSD_COPILOT_INSTRUCTIONS_CLOSE_MARKER = '<!-- /GSD Configuration -->';
 const CODEX_AGENT_SANDBOX = {
   'gsd-executor': 'workspace-write',
   'gsd-planner': 'workspace-write',
-  'gsd-phase-researcher': 'workspace-write',
-  'gsd-project-researcher': 'workspace-write',
+  'gsd-research-orchestrator': 'workspace-write',
   'gsd-research-synthesizer': 'workspace-write',
   'gsd-verifier': 'workspace-write',
   'gsd-codebase-mapper': 'workspace-write',
   'gsd-roadmapper': 'workspace-write',
   'gsd-debugger': 'workspace-write',
-  'gsd-plan-checker': 'read-only',
-  'gsd-integration-checker': 'read-only',
+  'gsd-ui-auditor': 'workspace-write',
+  'gsd-ui-researcher': 'workspace-write',
+  'gsd-advisor-researcher': 'read-only',
+  'gsd-assumptions-analyzer': 'read-only',
+  'gsd-ui-checker': 'read-only',
+  'gsd-user-profiler': 'read-only',
+  'gsd-validator-hub': 'read-only',
 };
 
 // Copilot tool name mapping — Claude Code tools to GitHub Copilot tools

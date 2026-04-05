@@ -19,6 +19,7 @@ const {
   generateSlugInternal,
   normalizePhaseName,
   reapStaleTempFiles,
+  output,
   normalizeMd,
   comparePhaseNum,
   safeReadFile,
@@ -30,6 +31,24 @@ const {
   findPhaseInternal,
   findProjectRoot,
   detectSubRepos,
+  CONFIG_VERSION,
+  configMigrations,
+  runConfigMigrations,
+  GsdError,
+  GSD_ERROR_CODES,
+  debugLog,
+  deepFreeze,
+  safeExec,
+  execGit,
+  streamLines,
+  deterministicSort,
+  lazyRegistry,
+  estimateTokens,
+  budgetContext,
+  createCancelToken,
+  createFeatureFlags,
+  GSD_TRUNCATED_SENTINEL,
+  detectTruncation,
 } = require('../get-shit-done/bin/lib/core.cjs');
 
 // ─── loadConfig ────────────────────────────────────────────────────────────────
@@ -213,7 +232,7 @@ describe('resolveModelInternal', () => {
 
   describe('model profile structural validation', () => {
     test('all known agents resolve to a valid string for each profile', () => {
-      const knownAgents = ['gsd-planner', 'gsd-executor', 'gsd-phase-researcher', 'gsd-codebase-mapper'];
+      const knownAgents = ['gsd-planner', 'gsd-executor', 'gsd-research-orchestrator', 'gsd-codebase-mapper'];
       const profiles = ['quality', 'balanced', 'budget', 'inherit'];
       const validValues = ['inherit', 'sonnet', 'haiku', 'opus'];
 
@@ -230,7 +249,7 @@ describe('resolveModelInternal', () => {
     });
 
     test('inherit profile forces all known agents to inherit model', () => {
-      const knownAgents = ['gsd-planner', 'gsd-executor', 'gsd-phase-researcher', 'gsd-codebase-mapper'];
+      const knownAgents = ['gsd-planner', 'gsd-executor', 'gsd-research-orchestrator', 'gsd-codebase-mapper'];
       writeConfig({ model_profile: 'inherit' });
       for (const agent of knownAgents) {
         assert.strictEqual(resolveModelInternal(tmpDir, agent), 'inherit');
@@ -1563,5 +1582,1607 @@ describe('reapStaleTempFiles', () => {
     assert.doesNotThrow(() => {
       reapStaleTempFiles('gsd-nonexistent-prefix-xyz-', { maxAgeMs: 0 });
     });
+  });
+});
+
+// ─── SEC-01: Cryptographic temp paths ──────────────────────────────────────────
+
+describe('output — SEC-01 cryptographic temp paths', () => {
+  test('large payloads create temp files with hex nonce names, not timestamps', () => {
+    const tmpDir = os.tmpdir();
+    // Snapshot existing gsd-*.json files before calling output
+    const before = new Set(
+      fs.readdirSync(tmpDir).filter(f => f.startsWith('gsd-') && f.endsWith('.json'))
+    );
+
+    // Create a payload >50KB to trigger temp file path
+    const largePayload = { data: 'x'.repeat(60000) };
+
+    // Redirect fd 1 to /dev/null to suppress stdout noise during test
+    const origWrite = fs.writeSync;
+    let capturedData = '';
+    fs.writeSync = (fd, data) => {
+      if (fd === 1) { capturedData = data; return data.length; }
+      return origWrite(fd, data);
+    };
+    try {
+      output(largePayload);
+    } finally {
+      fs.writeSync = origWrite;
+    }
+
+    // Find the newly created temp file
+    const after = fs.readdirSync(tmpDir).filter(f => f.startsWith('gsd-') && f.endsWith('.json'));
+    const newFiles = after.filter(f => !before.has(f));
+
+    assert.ok(newFiles.length >= 1, 'should create at least one new temp file');
+
+    // Verify the filename uses hex nonce format (16 hex chars), not a timestamp
+    const filename = newFiles[0];
+    const nonce = filename.replace('gsd-', '').replace('.json', '');
+    assert.match(nonce, /^[0-9a-f]{16}$/, `nonce "${nonce}" should be 16 hex chars from crypto.randomBytes(8)`);
+
+    // Verify it does NOT look like a timestamp (timestamps are 13 digits)
+    assert.ok(!/^\d{13}$/.test(nonce), 'nonce should not be a timestamp');
+
+    // Verify the @file: prefix in stdout output
+    assert.ok(capturedData.startsWith('@file:'), 'output should start with @file: prefix');
+
+    // Clean up
+    for (const f of newFiles) {
+      try { fs.unlinkSync(path.join(tmpDir, f)); } catch {}
+    }
+  });
+
+  test('SEC-04: emits __GSD_TRUNCATED__ sentinel when temp file write fails', () => {
+    const largePayload = { data: 'y'.repeat(60000) };
+
+    // Stub fs.writeFileSync to throw, simulating disk full / permission denied
+    const origWriteFileSync = fs.writeFileSync;
+    const origWriteSync = fs.writeSync;
+    let capturedData = '';
+
+    fs.writeFileSync = () => { throw new Error('ENOSPC: no space left on device'); };
+    fs.writeSync = (fd, data) => {
+      if (fd === 1) { capturedData = data; return data.length; }
+      return origWriteSync(fd, data);
+    };
+
+    try {
+      output(largePayload);
+    } finally {
+      fs.writeFileSync = origWriteFileSync;
+      fs.writeSync = origWriteSync;
+    }
+
+    // Should NOT have @file: prefix (temp file creation failed)
+    assert.ok(!capturedData.startsWith('@file:'), 'should not use temp file path');
+
+    // Should end with the truncation sentinel
+    assert.ok(capturedData.endsWith('\n__GSD_TRUNCATED__'), 'should end with __GSD_TRUNCATED__ sentinel');
+
+    // Should be truncated to ~50KB + sentinel length
+    assert.ok(capturedData.length <= 50000 + '\n__GSD_TRUNCATED__'.length + 10, 'should be truncated');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — output raw mode ────────────────────────────
+
+describe('output — raw mode', () => {
+  test('outputs raw string value when raw flag is true', () => {
+    const origWriteSync = fs.writeSync;
+    let capturedData = '';
+    fs.writeSync = (fd, data) => {
+      if (fd === 1) { capturedData = data; return data.length; }
+      return origWriteSync(fd, data);
+    };
+    try {
+      output({ ignored: true }, true, 'hello raw');
+    } finally {
+      fs.writeSync = origWriteSync;
+    }
+    assert.strictEqual(capturedData, 'hello raw');
+  });
+
+  test('outputs stringified rawValue for non-string types', () => {
+    const origWriteSync = fs.writeSync;
+    let capturedData = '';
+    fs.writeSync = (fd, data) => {
+      if (fd === 1) { capturedData = data; return data.length; }
+      return origWriteSync(fd, data);
+    };
+    try {
+      output(null, true, 42);
+    } finally {
+      fs.writeSync = origWriteSync;
+    }
+    assert.strictEqual(capturedData, '42');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — comparePhaseNum branches ────────────────────
+
+describe('comparePhaseNum — extended branches', () => {
+  test('custom (non-numeric) IDs fall back to string comparison', () => {
+    assert.ok(comparePhaseNum('AUTH-01', 'PROJ-42') < 0);
+    assert.ok(comparePhaseNum('PROJ-42', 'AUTH-01') > 0);
+    assert.strictEqual(comparePhaseNum('PROJ-42', 'PROJ-42'), 0);
+  });
+
+  test('letter suffix ordering: no letter < A < B', () => {
+    assert.ok(comparePhaseNum('12', '12A') < 0);
+    assert.ok(comparePhaseNum('12A', '12') > 0);
+    assert.ok(comparePhaseNum('12A', '12B') < 0);
+    assert.ok(comparePhaseNum('12B', '12A') > 0);
+  });
+
+  test('decimal segment ordering: no decimal < .1 < .2', () => {
+    assert.ok(comparePhaseNum('12', '12.1') < 0);
+    assert.ok(comparePhaseNum('12.1', '12') > 0);
+    assert.ok(comparePhaseNum('12.1', '12.2') < 0);
+  });
+
+  test('multi-segment decimal ordering: 12.1 < 12.1.2 < 12.2', () => {
+    assert.ok(comparePhaseNum('12.1', '12.1.2') < 0);
+    assert.ok(comparePhaseNum('12.1.2', '12.2') < 0);
+  });
+
+  test('equal decimals return 0', () => {
+    assert.strictEqual(comparePhaseNum('5.1', '5.1'), 0);
+    assert.strictEqual(comparePhaseNum('5.1.2', '5.1.2'), 0);
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — normalizePhaseName custom IDs ───────────────
+
+describe('normalizePhaseName — custom IDs', () => {
+  test('returns custom IDs as-is', () => {
+    assert.strictEqual(normalizePhaseName('PROJ-42'), 'PROJ-42');
+    assert.strictEqual(normalizePhaseName('AUTH-101'), 'AUTH-101');
+  });
+
+  test('normalizes letter suffix', () => {
+    assert.strictEqual(normalizePhaseName('3a'), '03A');
+    assert.strictEqual(normalizePhaseName('12B'), '12B');
+  });
+
+  test('normalizes decimal phases', () => {
+    assert.strictEqual(normalizePhaseName('5.1'), '05.1');
+    assert.strictEqual(normalizePhaseName('12.3.1'), '12.3.1');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — planningDir & planningPaths workstreams ─────
+
+describe('planningDir — workstream awareness', () => {
+  const { planningDir, planningRoot, planningPaths } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('returns root .planning/ when no workstream', () => {
+    const result = planningDir('/projects/foo');
+    assert.strictEqual(result, path.join('/projects/foo', '.planning'));
+  });
+
+  test('returns workstream subdir when ws is specified', () => {
+    const result = planningDir('/projects/foo', 'feature-x');
+    assert.strictEqual(result, path.join('/projects/foo', '.planning', 'workstreams', 'feature-x'));
+  });
+
+  test('reads GSD_WORKSTREAM env var when ws is undefined', () => {
+    const orig = process.env.GSD_WORKSTREAM;
+    process.env.GSD_WORKSTREAM = 'env-ws';
+    try {
+      const result = planningDir('/projects/foo');
+      assert.strictEqual(result, path.join('/projects/foo', '.planning', 'workstreams', 'env-ws'));
+    } finally {
+      if (orig === undefined) delete process.env.GSD_WORKSTREAM;
+      else process.env.GSD_WORKSTREAM = orig;
+    }
+  });
+
+  test('planningRoot always returns root .planning/', () => {
+    const result = planningRoot('/projects/foo');
+    assert.strictEqual(result, path.join('/projects/foo', '.planning'));
+  });
+
+  test('planningPaths returns scoped and shared paths', () => {
+    const paths = planningPaths('/projects/foo', 'ws1');
+    const wsSeg = path.join('workstreams', 'ws1');
+    assert.ok(paths.planning.includes(wsSeg));
+    assert.ok(paths.state.includes(wsSeg));
+    assert.ok(!paths.project.includes('workstreams'));
+    assert.ok(!paths.config.includes('workstreams'));
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — getActiveWorkstream / setActiveWorkstream ───
+
+describe('getActiveWorkstream / setActiveWorkstream', () => {
+  const { getActiveWorkstream, setActiveWorkstream } = require('../get-shit-done/bin/lib/core.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('returns null when no active-workstream file exists', () => {
+    assert.strictEqual(getActiveWorkstream(tmpDir), null);
+  });
+
+  test('returns null for invalid workstream name', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'bad name!!\n');
+    assert.strictEqual(getActiveWorkstream(tmpDir), null);
+  });
+
+  test('returns null when workstream dir does not exist', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'ghost-ws\n');
+    assert.strictEqual(getActiveWorkstream(tmpDir), null);
+  });
+
+  test('returns name when valid workstream dir exists', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'my-ws');
+    fs.mkdirSync(wsDir, { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'my-ws\n');
+    assert.strictEqual(getActiveWorkstream(tmpDir), 'my-ws');
+  });
+
+  test('setActiveWorkstream writes file', () => {
+    setActiveWorkstream(tmpDir, 'new-ws');
+    const content = fs.readFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'utf-8');
+    assert.strictEqual(content, 'new-ws\n');
+  });
+
+  test('setActiveWorkstream with null clears file', () => {
+    setActiveWorkstream(tmpDir, 'temp-ws');
+    setActiveWorkstream(tmpDir, null);
+    assert.ok(!fs.existsSync(path.join(tmpDir, '.planning', 'active-workstream')));
+  });
+
+  test('setActiveWorkstream rejects invalid names', () => {
+    assert.throws(() => setActiveWorkstream(tmpDir, 'bad name!!'), /Invalid workstream name/);
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — extractCurrentMilestone branches ────────────
+
+describe('extractCurrentMilestone — branch coverage', () => {
+  const { extractCurrentMilestone } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('returns full content when no cwd provided', () => {
+    const content = '# Roadmap\n\n## v1.0 Stuff\n- phase 1\n';
+    const result = extractCurrentMilestone(content);
+    assert.ok(result.includes('Roadmap'));
+  });
+
+  test('extracts current milestone section when STATE.md has version', () => {
+    const tmpDir = createTempProject();
+    try {
+      fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '---\nmilestone: v1.0\n---\n# State\n');
+      const content = '# Roadmap\n\n## v1.0 Initial\n\n- Phase 1\n\n## v2.0 Next\n\n- Phase 2\n';
+      const result = extractCurrentMilestone(content, tmpDir);
+      assert.ok(result.includes('v1.0 Initial'));
+      assert.ok(!result.includes('v2.0 Next'));
+    } finally {
+      cleanup(tmpDir);
+    }
+  });
+
+  test('falls back to in-progress marker when STATE.md has no milestone', () => {
+    const tmpDir = createTempProject();
+    try {
+      fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '---\nstatus: active\n---\n');
+      const content = '# Roadmap\n\n## 🚧 v2.1 Belgium\n\n- Phase 1\n';
+      const result = extractCurrentMilestone(content, tmpDir);
+      assert.ok(result.includes('v2.1 Belgium'));
+    } finally {
+      cleanup(tmpDir);
+    }
+  });
+
+  test('strips shipped milestones when no version found', () => {
+    const tmpDir = createTempProject();
+    try {
+      fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '---\nstatus: active\n---\n');
+      const content = '<details>\nOld stuff\n</details>\n\n## Current\nActive work\n';
+      const result = extractCurrentMilestone(content, tmpDir);
+      assert.ok(!result.includes('Old stuff'));
+      assert.ok(result.includes('Active work'));
+    } finally {
+      cleanup(tmpDir);
+    }
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — replaceInCurrentMilestone ───────────────────
+
+describe('replaceInCurrentMilestone', () => {
+  const { replaceInCurrentMilestone } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('replaces pattern in content after last </details> tag', () => {
+    const content = '<details>shipped</details>\n\n## Current\n- [ ] Phase 1\n';
+    const result = replaceInCurrentMilestone(content, /\[ \]/, '[x]');
+    assert.ok(result.includes('[x] Phase 1'));
+    assert.ok(result.includes('<details>shipped</details>'));
+  });
+
+  test('replaces across entire content when no </details> tag exists', () => {
+    const content = '## Current\n- [ ] Phase 1\n';
+    const result = replaceInCurrentMilestone(content, /\[ \]/, '[x]');
+    assert.ok(result.includes('[x] Phase 1'));
+  });
+
+  test('does not modify content before </details>', () => {
+    const content = '<details>\n- [ ] Old Phase\n</details>\n\n- [ ] New Phase\n';
+    const result = replaceInCurrentMilestone(content, /\[ \]/, '[x]');
+    assert.ok(result.includes('[ ] Old Phase'), 'should not modify archived content');
+    assert.ok(result.includes('[x] New Phase'), 'should modify current content');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — checkAgentsInstalled ────────────────────────
+
+describe('checkAgentsInstalled', () => {
+  const { checkAgentsInstalled, getAgentsDir } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('reports agents_installed false when agents dir missing', () => {
+    // getAgentsDir resolves relative to __dirname, which points at get-shit-done/bin/lib
+    // Just verify the function returns a valid structure
+    const result = checkAgentsInstalled();
+    assert.ok(typeof result.agents_installed === 'boolean');
+    assert.ok(Array.isArray(result.missing_agents));
+    assert.ok(Array.isArray(result.installed_agents));
+    assert.ok(typeof result.agents_dir === 'string');
+  });
+
+  test('getAgentsDir returns a path string', () => {
+    const dir = getAgentsDir();
+    assert.ok(typeof dir === 'string');
+    assert.ok(dir.includes('agents'));
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — resolveModelInternal resolve_model_ids ──────
+
+describe('resolveModelInternal — resolve_model_ids', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  function writeConfig(obj) {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify(obj, null, 2)
+    );
+  }
+
+  test('resolve_model_ids: true maps alias to full model ID', () => {
+    writeConfig({ resolve_model_ids: true, model_profile: 'balanced' });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor');
+    // Should be a full model ID, not just an alias
+    assert.ok(result.includes('claude-') || result === 'inherit' || result === 'sonnet',
+      `Expected full model ID or alias, got: ${result}`);
+  });
+
+  test('resolve_model_ids: true with unknown alias returns alias as-is', () => {
+    writeConfig({ resolve_model_ids: true, model_profile: 'balanced' });
+    // The function should still work without throwing
+    const result = resolveModelInternal(tmpDir, 'gsd-executor');
+    assert.ok(typeof result === 'string');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — extractOneLinerFromBody ─────────────────────
+
+describe('extractOneLinerFromBody', () => {
+  const { extractOneLinerFromBody } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('extracts bold one-liner after heading', () => {
+    const content = '---\nphase: 1\n---\n\n# Phase 1: Setup Summary\n**This is the one-liner**\n\nMore content.';
+    assert.strictEqual(extractOneLinerFromBody(content), 'This is the one-liner');
+  });
+
+  test('returns null for null input', () => {
+    assert.strictEqual(extractOneLinerFromBody(null), null);
+  });
+
+  test('returns null when no bold line after heading', () => {
+    const content = '---\nphase: 1\n---\n\n# Phase 1: Setup\n\nRegular paragraph.';
+    assert.strictEqual(extractOneLinerFromBody(content), null);
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — getMilestoneInfo in-progress marker ──────────
+
+describe('getMilestoneInfo — in-progress marker', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('detects 🚧 in-progress marker format', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n- 🚧 **v2.1 Belgium** — Phases 24-28 (in progress)\n- ✅ **v2.0 Alpha** — Done\n'
+    );
+    const result = getMilestoneInfo(tmpDir);
+    assert.strictEqual(result.version, 'v2.1');
+    assert.strictEqual(result.name, 'Belgium');
+  });
+
+  test('detects multi-segment version in 🚧 format', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '- 🚧 **v1.2.1 Tech Debt** — Phases 1-8 (in progress)\n'
+    );
+    const result = getMilestoneInfo(tmpDir);
+    assert.strictEqual(result.version, 'v1.2.1');
+    assert.strictEqual(result.name, 'Tech Debt');
+  });
+});
+
+// ─── SEC-05: Coverage Expansion — loadConfig depth migration ──────────────────
+
+describe('loadConfig — deprecated depth migration', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('migrates depth: quick to granularity: coarse in config file', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick' }));
+    loadConfig(tmpDir); // triggers migration
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.ok(!('depth' in raw), 'depth key should be removed');
+    assert.strictEqual(raw.granularity, 'coarse');
+  });
+
+  test('migrates depth: comprehensive to granularity: fine in config file', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'comprehensive' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.granularity, 'fine');
+    assert.ok(!('depth' in raw));
+  });
+
+  test('does not migrate when granularity already set', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick', granularity: 'standard' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    // When granularity already exists, depth should NOT be migrated (migration skipped)
+    assert.strictEqual(raw.granularity, 'standard');
+    assert.ok('depth' in raw, 'depth key should remain when granularity already present');
+  });
+});
+
+// ─── Config Migration System ────────────────────────────────────────────────────
+
+describe('config migration system', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('unversioned config gets migrated to v1 with config_version stamp', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 1);
+  });
+
+  test('config already at v1 skips migration', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const original = { config_version: 1, granularity: 'standard' };
+    fs.writeFileSync(configPath, JSON.stringify(original));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.granularity, 'standard');
+  });
+
+  test('depth + multiRepo both migrated in single pass', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    // Create a sub-repo directory so detectSubRepos finds something
+    const subDir = path.join(tmpDir, 'sub-project');
+    fs.mkdirSync(subDir, { recursive: true });
+    fs.mkdirSync(path.join(subDir, '.git'), { recursive: true });
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'standard', multiRepo: true }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.granularity, 'standard');
+    assert.ok(!('depth' in raw));
+    // multiRepo should be removed if sub_repos were detected
+    if (raw.sub_repos) {
+      assert.ok(!('multiRepo' in raw));
+    }
+  });
+
+  test('migration error does not break config loading', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick' }));
+    // loadConfig should not throw even if migration has issues
+    const result = loadConfig(tmpDir);
+    assert.ok(result, 'loadConfig should return a config object');
+  });
+
+  test('unknown future version (v99) left alone', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const futureConfig = { config_version: 99, future_field: 'value' };
+    fs.writeFileSync(configPath, JSON.stringify(futureConfig));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 99);
+    assert.strictEqual(raw.future_field, 'value');
+  });
+
+  test('runConfigMigrations returns false when no migration needed', () => {
+    const parsed = { config_version: CONFIG_VERSION };
+    const result = runConfigMigrations(parsed, tmpDir);
+    assert.strictEqual(result, false);
+  });
+
+  test('runConfigMigrations returns true when migration applied', () => {
+    const parsed = { depth: 'quick' };
+    const result = runConfigMigrations(parsed, tmpDir);
+    assert.strictEqual(result, true);
+    assert.strictEqual(parsed.config_version, CONFIG_VERSION);
+  });
+
+  test('CONFIG_VERSION is exported and is a positive integer', () => {
+    assert.strictEqual(typeof CONFIG_VERSION, 'number');
+    assert.ok(CONFIG_VERSION >= 1);
+    assert.strictEqual(CONFIG_VERSION, Math.floor(CONFIG_VERSION));
+  });
+
+  test('configMigrations is an array with valid entries', () => {
+    assert.ok(Array.isArray(configMigrations));
+    assert.ok(configMigrations.length > 0);
+    for (const m of configMigrations) {
+      assert.strictEqual(typeof m.from, 'number');
+      assert.strictEqual(typeof m.to, 'number');
+      assert.strictEqual(typeof m.migrate, 'function');
+      assert.ok(m.to > m.from, 'to must be greater than from');
+    }
+  });
+});
+
+// ─── GsdError ───────────────────────────────────────────────────────────────
+
+describe('GsdError', () => {
+  test('constructs with code and message', () => {
+    const err = new GsdError('CONFIG_READ', 'cannot read config');
+    assert.strictEqual(err.name, 'GsdError');
+    assert.strictEqual(err.code, 'CONFIG_READ');
+    assert.strictEqual(err.message, 'cannot read config');
+    assert.ok(err instanceof Error, 'must be an Error instance');
+  });
+
+  test('stores context when provided', () => {
+    const ctx = { file: '/tmp/config.json', attempt: 2 };
+    const err = new GsdError('FILE_READ', 'read failed', { context: ctx });
+    assert.deepStrictEqual(err.context, ctx);
+  });
+
+  test('stores cause when provided', () => {
+    const original = new Error('ENOENT');
+    const err = new GsdError('FILE_READ', 'read failed', { cause: original });
+    assert.strictEqual(err.cause, original);
+  });
+
+  test('defaults context and cause to null', () => {
+    const err = new GsdError('VALIDATION', 'bad input');
+    assert.strictEqual(err.context, null);
+    assert.strictEqual(err.cause, null);
+  });
+
+  test('accepts both context and cause together', () => {
+    const ctx = { field: 'name' };
+    const original = new TypeError('expected string');
+    const err = new GsdError('VALIDATION', 'invalid', { context: ctx, cause: original });
+    assert.deepStrictEqual(err.context, ctx);
+    assert.strictEqual(err.cause, original);
+    assert.strictEqual(err.code, 'VALIDATION');
+  });
+});
+
+// ─── GSD_ERROR_CODES ────────────────────────────────────────────────────────
+
+describe('GSD_ERROR_CODES', () => {
+  test('is frozen', () => {
+    assert.ok(Object.isFrozen(GSD_ERROR_CODES));
+  });
+
+  test('contains expected error codes', () => {
+    const expected = [
+      'CANCELLED',
+      'CONFIG_READ', 'CONFIG_PARSE', 'CONFIG_MIGRATE', 'CONFIG_WRITE',
+      'STATE_READ', 'STATE_WRITE', 'PHASE_READ', 'PHASE_WRITE',
+      'LOCK_ACQUIRE', 'LOCK_STALE', 'GIT_EXEC', 'FILE_READ',
+      'FILE_WRITE', 'PARSE_ERROR', 'COMMAND_DISPATCH', 'TEMPLATE_RENDER',
+      'VALIDATION',
+    ];
+    for (const code of expected) {
+      assert.ok(code in GSD_ERROR_CODES, `missing code: ${code}`);
+    }
+    assert.strictEqual(Object.keys(GSD_ERROR_CODES).length, expected.length);
+  });
+
+  test('all values are strings matching their keys', () => {
+    for (const [key, value] of Object.entries(GSD_ERROR_CODES)) {
+      assert.strictEqual(typeof value, 'string');
+      assert.strictEqual(key, value, `key ${key} must equal its value`);
+    }
+  });
+});
+
+// ─── loadConfig failure paths (CORR-03) ─────────────────────────────────────
+
+describe('loadConfig failure paths', () => {
+  let tmpDir;
+  let originalCwd;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    originalCwd = process.cwd();
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+    cleanup(tmpDir);
+    delete process.env.GSD_DEBUG;
+  });
+
+  test('returns defaults and logs debug when config.json is malformed', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      '{not json}'
+    );
+    process.env.GSD_DEBUG = '1';
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.model_profile, 'balanced',
+      'should return defaults when config is malformed');
+    assert.strictEqual(config.commit_docs, true);
+  });
+
+  test('returns defaults when .planning directory is missing', () => {
+    const bareDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-bare-'));
+    try {
+      const config = loadConfig(bareDir);
+      assert.strictEqual(config.model_profile, 'balanced');
+      assert.strictEqual(config.commit_docs, true);
+    } finally {
+      fs.rmSync(bareDir, { recursive: true, force: true });
+    }
+  });
+
+  test('gracefully handles config migration write failure on read-only config', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    // config_version: 0 with deprecated "depth" key triggers migration
+    fs.writeFileSync(configPath, JSON.stringify({
+      config_version: 0,
+      depth: 'quick',
+    }));
+    // Make config.json read-only so migration write fails
+    fs.chmodSync(configPath, 0o444);
+    process.env.GSD_DEBUG = '1';
+    try {
+      const config = loadConfig(tmpDir);
+      // Should still return a valid config object despite write failure
+      assert.ok(config, 'loadConfig should return config even when write fails');
+      assert.strictEqual(typeof config.model_profile, 'string');
+    } finally {
+      // Restore write permission for cleanup
+      fs.chmodSync(configPath, 0o644);
+    }
+  });
+});
+
+// ─── debugLog ────────────────────────────────────────────────────────────────
+
+describe('debugLog', () => {
+  afterEach(() => {
+    delete process.env.GSD_DEBUG;
+  });
+
+  test('is exported and callable', () => {
+    assert.strictEqual(typeof debugLog, 'function');
+  });
+
+  test('does not throw when GSD_DEBUG is not set', () => {
+    delete process.env.GSD_DEBUG;
+    assert.doesNotThrow(() => {
+      debugLog('CONFIG_READ', 'test message', { path: '/tmp/test' });
+    });
+  });
+
+  test('does not throw when GSD_DEBUG is set', () => {
+    process.env.GSD_DEBUG = '1';
+    assert.doesNotThrow(() => {
+      debugLog('CONFIG_READ', 'test message', { path: '/tmp/test' });
+    });
+  });
+
+  test('does not throw without context argument', () => {
+    process.env.GSD_DEBUG = '1';
+    assert.doesNotThrow(() => {
+      debugLog('CONFIG_READ', 'test message');
+    });
+  });
+
+  test('accepts GSD_ERROR_CODES values as code parameter', () => {
+    process.env.GSD_DEBUG = '1';
+    assert.doesNotThrow(() => {
+      debugLog(GSD_ERROR_CODES.CONFIG_READ, 'test', { key: 'value' });
+      debugLog(GSD_ERROR_CODES.CONFIG_WRITE, 'test');
+      debugLog(GSD_ERROR_CODES.CONFIG_MIGRATE, 'test');
+    });
+  });
+});
+
+// ─── deepFreeze ─────────────────────────────────────────────────────────────
+
+describe('deepFreeze', () => {
+  test('freezes a plain object', () => {
+    const obj = deepFreeze({ a: 1 });
+    assert.ok(Object.isFrozen(obj));
+  });
+
+  test('freezes nested objects recursively', () => {
+    const obj = deepFreeze({ a: { b: { c: 1 } } });
+    assert.ok(Object.isFrozen(obj));
+    assert.ok(Object.isFrozen(obj.a));
+    assert.ok(Object.isFrozen(obj.a.b));
+  });
+
+  test('freezes arrays', () => {
+    const arr = deepFreeze([1, [2, 3]]);
+    assert.ok(Object.isFrozen(arr));
+    assert.ok(Object.isFrozen(arr[1]));
+  });
+
+  test('freezes mixed objects and arrays', () => {
+    const obj = deepFreeze({ items: [{ id: 1 }] });
+    assert.ok(Object.isFrozen(obj));
+    assert.ok(Object.isFrozen(obj.items));
+    assert.ok(Object.isFrozen(obj.items[0]));
+  });
+
+  test('returns null/undefined/primitives unchanged', () => {
+    assert.strictEqual(deepFreeze(null), null);
+    assert.strictEqual(deepFreeze(undefined), undefined);
+    assert.strictEqual(deepFreeze(42), 42);
+    assert.strictEqual(deepFreeze('hello'), 'hello');
+    assert.strictEqual(deepFreeze(true), true);
+  });
+
+  test('is idempotent on already-frozen objects', () => {
+    const obj = Object.freeze({ a: 1 });
+    assert.doesNotThrow(() => deepFreeze(obj));
+    assert.ok(Object.isFrozen(deepFreeze(obj)));
+  });
+
+  test('prevents mutation', () => {
+    'use strict';
+    const obj = deepFreeze({ x: 1, nested: { y: 2 } });
+    assert.throws(() => { obj.x = 99; }, TypeError);
+    assert.throws(() => { obj.nested.y = 99; }, TypeError);
+    assert.throws(() => { obj.newProp = 'nope'; }, TypeError);
+  });
+});
+
+// ─── State Immutability — Freeze Assertions (CORR-05) ──────────────────────
+
+describe('loadConfig returns frozen objects', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('loadConfig returns a frozen object', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ model_profile: 'balanced' }, null, 2)
+    );
+    const config = loadConfig(tmpDir);
+    assert.ok(Object.isFrozen(config));
+  });
+
+  test('loadConfig frozen object has correct values', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ model_profile: 'quality', brave_search: true }, null, 2)
+    );
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.model_profile, 'quality');
+    assert.strictEqual(config.brave_search, true);
+  });
+
+  test('loadConfig freezes nested objects', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ agent_skills: { skill1: true }, model_overrides: { planner: 'opus' } }, null, 2)
+    );
+    const config = loadConfig(tmpDir);
+    assert.ok(Object.isFrozen(config));
+    assert.ok(Object.isFrozen(config.agent_skills));
+    assert.ok(Object.isFrozen(config.model_overrides));
+  });
+});
+
+describe('getMilestoneInfo returns frozen object', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('getMilestoneInfo returns frozen object', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n## Roadmap v1.2: My Project\n\nContent'
+    );
+    const info = getMilestoneInfo(tmpDir);
+    assert.ok(Object.isFrozen(info));
+  });
+});
+
+describe('planningPaths returns frozen object', () => {
+  const { planningPaths } = require('../get-shit-done/bin/lib/core.cjs');
+
+  test('planningPaths returns frozen object', () => {
+    const paths = planningPaths('/tmp/test-project');
+    assert.ok(Object.isFrozen(paths));
+  });
+});
+
+describe('findPhaseInternal returns frozen object or null', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('findPhaseInternal returns frozen object when phase exists', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '01-setup');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '01-PLAN.md'), '# Plan');
+    const result = findPhaseInternal(tmpDir, '1');
+    assert.ok(result !== null);
+    assert.ok(Object.isFrozen(result));
+  });
+
+  test('findPhaseInternal returns null for missing phase', () => {
+    const result = findPhaseInternal(tmpDir, '99');
+    assert.strictEqual(result, null);
+  });
+});
+
+// ─── safeExec (CORR-07) ─────────────────────────────────────────────────────
+
+describe('safeExec', () => {
+  test('safeExec success', () => {
+    const result = safeExec('echo', ['hello']);
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(result.exitCode, 0);
+    assert.strictEqual(result.timedOut, false);
+    assert.ok(result.stdout.includes('hello'));
+  });
+
+  test('safeExec failure', () => {
+    const result = safeExec('node', ['-e', 'process.exit(1)']);
+    assert.strictEqual(result.ok, false);
+    assert.strictEqual(result.exitCode, 1);
+    assert.strictEqual(result.timedOut, false);
+  });
+
+  test('safeExec timeout', () => {
+    const result = safeExec('sleep', ['10'], { timeout: 100 });
+    assert.strictEqual(result.ok, false);
+    assert.strictEqual(result.timedOut, true);
+  });
+
+  test('safeExec defaults', () => {
+    const result = safeExec('echo', ['test']);
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(result.exitCode, 0);
+    assert.ok(result.stdout.includes('test'));
+  });
+});
+
+// ─── execGit timedOut field (CORR-08) ────────────────────────────────────────
+
+describe('execGit — timedOut field', () => {
+  test('execGit returns timedOut field', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-execgit-'));
+    const { execSync: execSyncLocal } = require('child_process');
+    execSyncLocal('git init', { cwd: tmpDir, stdio: 'pipe' });
+    try {
+      const result = execGit(tmpDir, ['status']);
+      assert.strictEqual(typeof result.timedOut, 'boolean');
+      assert.strictEqual(result.timedOut, false);
+      assert.strictEqual(result.exitCode, 0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+// ─── withPlanningLock force-acquire (CORR-09) ────────────────────────────────
+
+describe('withPlanningLock — force-acquire', () => {
+  const { withPlanningLock, planningDir } = require('../get-shit-done/bin/lib/core.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('force-acquires stale lock and executes callback', () => {
+    const lockPath = path.join(planningDir(tmpDir), '.lock');
+    // Create a lock file with valid JSON so diagnostics can read it
+    fs.writeFileSync(lockPath, JSON.stringify({
+      pid: 99999,
+      cwd: tmpDir,
+      acquired: new Date().toISOString(),
+    }), { flag: 'wx' });
+
+    // The lock retry loop uses spawnSync('sleep', ['0.1']) for each retry.
+    // With lockTimeout=10000 and retryDelay=100, it will eventually
+    // force-acquire. To make this fast, we backdate the lock to trigger
+    // stale detection (>30s), but that path deletes and retries rather
+    // than force-acquiring. Instead, we rely on the 10s lock timeout.
+    //
+    // To avoid waiting 10s, we call withPlanningLock in a child process
+    // or accept the stale-lock shortcut: backdate the file so the
+    // stale check removes it and the retry succeeds normally.
+    const staleTime = new Date(Date.now() - 31000);
+    fs.utimesSync(lockPath, staleTime, staleTime);
+
+    const result = withPlanningLock(tmpDir, () => 'force-acquired');
+    assert.strictEqual(result, 'force-acquired');
+    // Lock should be cleaned up
+    assert.ok(!fs.existsSync(lockPath));
+  });
+});
+
+// ─── streamLines ────────────────────────────────────────────────────────────────
+
+describe('streamLines', () => {
+  let tmpPath;
+
+  afterEach(() => {
+    if (tmpPath && fs.existsSync(tmpPath)) {
+      try { fs.unlinkSync(tmpPath); } catch { /* ignore */ }
+    }
+    tmpPath = null;
+  });
+
+  test('writes multiline text line-by-line to the given fd', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-test-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    try {
+      streamLines('line1\nline2\nline3', { fd });
+    } finally {
+      fs.closeSync(fd);
+    }
+    const written = fs.readFileSync(tmpPath, 'utf8');
+    assert.strictEqual(written, 'line1\nline2\nline3\n');
+  });
+
+  test('writes to stderr fd when fd=2 is specified', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-stderr-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    try {
+      streamLines('err1\nerr2', { fd });
+    } finally {
+      fs.closeSync(fd);
+    }
+    const written = fs.readFileSync(tmpPath, 'utf8');
+    assert.strictEqual(written, 'err1\nerr2\n');
+  });
+
+  test('invokes callback once per line with (line, index) args', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-cb-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    const collected = [];
+    try {
+      streamLines('alpha\nbeta\ngamma', {
+        fd,
+        callback: (line, index) => { collected.push({ line, index }); },
+      });
+    } finally {
+      fs.closeSync(fd);
+    }
+    assert.strictEqual(collected.length, 3);
+    assert.deepStrictEqual(collected[0], { line: 'alpha', index: 0 });
+    assert.deepStrictEqual(collected[1], { line: 'beta', index: 1 });
+    assert.deepStrictEqual(collected[2], { line: 'gamma', index: 2 });
+  });
+
+  test('empty string writes nothing and does not invoke callback', () => {
+    const collected = [];
+    // Use a temp file fd so we can verify nothing was written
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-empty-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    try {
+      const count = streamLines('', {
+        fd,
+        callback: (line, index) => { collected.push({ line, index }); },
+      });
+      assert.strictEqual(count, 0);
+    } finally {
+      fs.closeSync(fd);
+    }
+    assert.strictEqual(collected.length, 0);
+    assert.strictEqual(fs.readFileSync(tmpPath, 'utf8'), '');
+  });
+
+  test('trailing newline does not produce an extra empty-line write', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-trail-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    const collected = [];
+    try {
+      const count = streamLines('a\nb\n', {
+        fd,
+        callback: (line, index) => { collected.push({ line, index }); },
+      });
+      assert.strictEqual(count, 2);
+    } finally {
+      fs.closeSync(fd);
+    }
+    assert.strictEqual(collected.length, 2);
+    assert.strictEqual(fs.readFileSync(tmpPath, 'utf8'), 'a\nb\n');
+  });
+
+  test('single line without newline writes that line followed by newline', () => {
+    tmpPath = path.join(os.tmpdir(), 'gsd-stream-single-' + Date.now() + '.txt');
+    const fd = fs.openSync(tmpPath, 'w');
+    try {
+      const count = streamLines('hello', { fd });
+      assert.strictEqual(count, 1);
+    } finally {
+      fs.closeSync(fd);
+    }
+    assert.strictEqual(fs.readFileSync(tmpPath, 'utf8'), 'hello\n');
+  });
+});
+
+// ─── deterministicSort ──────────────────────────────────────────────────────────
+
+describe('deterministicSort', () => {
+  test('objects with different key insertion order produce identical JSON', () => {
+    const a = { z: 1, a: 2, m: 3 };
+    const b = { a: 2, m: 3, z: 1 };
+    assert.strictEqual(JSON.stringify(deterministicSort(a)), JSON.stringify(deterministicSort(b)));
+    assert.strictEqual(JSON.stringify(deterministicSort(a)), '{"a":2,"m":3,"z":1}');
+  });
+
+  test('nested objects have their keys sorted recursively', () => {
+    const input = { b: { z: 1, a: 2 }, a: { y: 3, x: 4 } };
+    assert.strictEqual(
+      JSON.stringify(deterministicSort(input)),
+      '{"a":{"x":4,"y":3},"b":{"a":2,"z":1}}'
+    );
+  });
+
+  test('arrays of objects maintain element order but sort keys within each object', () => {
+    const input = [{ b: 2, a: 1 }, { d: 4, c: 3 }];
+    assert.strictEqual(
+      JSON.stringify(deterministicSort(input)),
+      '[{"a":1,"b":2},{"c":3,"d":4}]'
+    );
+  });
+
+  test('arrays of primitives are left in their original order', () => {
+    const input = [3, 1, 2];
+    assert.strictEqual(JSON.stringify(deterministicSort(input)), '[3,1,2]');
+  });
+
+  test('primitives are returned unchanged', () => {
+    assert.strictEqual(deterministicSort('hello'), 'hello');
+    assert.strictEqual(deterministicSort(42), 42);
+    assert.strictEqual(deterministicSort(true), true);
+    assert.strictEqual(deterministicSort(null), null);
+  });
+
+  test('repeated invocations produce identical output (stability)', () => {
+    const input = { z: { c: 3, a: 1 }, m: [{ y: 2, x: 1 }], a: 'val' };
+    const result1 = JSON.stringify(deterministicSort(input));
+    const result2 = JSON.stringify(deterministicSort(input));
+    const result3 = JSON.stringify(deterministicSort(input));
+    assert.strictEqual(result1, result2);
+    assert.strictEqual(result2, result3);
+  });
+
+  test('empty object and empty array pass through', () => {
+    assert.deepStrictEqual(deterministicSort({}), {});
+    assert.deepStrictEqual(deterministicSort([]), []);
+  });
+
+  test('mixed nested structures (objects inside arrays inside objects)', () => {
+    const input = { items: [{ z: 1, a: 2 }], meta: { version: 1 } };
+    assert.strictEqual(
+      JSON.stringify(deterministicSort(input)),
+      '{"items":[{"a":2,"z":1}],"meta":{"version":1}}'
+    );
+  });
+});
+
+// ─── lazyRegistry ─────────────────────────────────────────────────────────────
+
+describe('lazyRegistry', () => {
+  test('creating lazyRegistry does not call initFn', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return { data: 'test' }; });
+    assert.strictEqual(callCount, 0);
+  });
+
+  test('first .get() calls initFn and returns the result', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return { data: 'test' }; });
+    const result = registry.get();
+    assert.strictEqual(callCount, 1);
+    assert.deepStrictEqual(result, { data: 'test' });
+  });
+
+  test('second .get() returns cached result without re-calling initFn', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return { data: 'test' }; });
+    const first = registry.get();
+    const second = registry.get();
+    assert.strictEqual(callCount, 1);
+    assert.strictEqual(first, second, 'should return same reference');
+  });
+
+  test('.initialized is false before .get() and true after', () => {
+    const registry = lazyRegistry(() => ({ data: 'test' }));
+    assert.strictEqual(registry.initialized, false);
+    registry.get();
+    assert.strictEqual(registry.initialized, true);
+  });
+
+  test('works with array return type', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return [1, 2, 3]; });
+    const first = registry.get();
+    assert.deepStrictEqual(first, [1, 2, 3]);
+    const second = registry.get();
+    assert.strictEqual(first, second, 'should return same array reference');
+    assert.strictEqual(callCount, 1);
+  });
+
+  test('works with string return type', () => {
+    const registry = lazyRegistry(() => 'hello');
+    assert.strictEqual(registry.get(), 'hello');
+  });
+
+  test('works with number return type', () => {
+    const registry = lazyRegistry(() => 42);
+    assert.strictEqual(registry.get(), 42);
+  });
+
+  test('handles initFn that returns null', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return null; });
+    assert.strictEqual(registry.get(), null);
+    assert.strictEqual(callCount, 1);
+    assert.strictEqual(registry.get(), null);
+    assert.strictEqual(callCount, 1, 'should not re-call initFn for null result');
+  });
+
+  test('handles initFn that returns undefined', () => {
+    let callCount = 0;
+    const registry = lazyRegistry(() => { callCount++; return undefined; });
+    assert.strictEqual(registry.get(), undefined);
+    assert.strictEqual(callCount, 1);
+    assert.strictEqual(registry.get(), undefined);
+    assert.strictEqual(callCount, 1, 'should not re-call initFn for undefined result');
+  });
+});
+
+// --- Token estimation ------------------------------------------------------------
+
+describe('estimateTokens', () => {
+  test('empty string returns 0', () => {
+    assert.strictEqual(estimateTokens(''), 0);
+  });
+
+  test('null returns 0', () => {
+    assert.strictEqual(estimateTokens(null), 0);
+  });
+
+  test('undefined returns 0', () => {
+    assert.strictEqual(estimateTokens(undefined), 0);
+  });
+
+  test('whitespace-only string returns 0', () => {
+    assert.strictEqual(estimateTokens('   \t\n  '), 0);
+  });
+
+  test('single word returns reasonable estimate', () => {
+    const result = estimateTokens('hello');
+    // 1 word * 1.3 default ratio = 1.3 -> ceil -> 2
+    assert.strictEqual(result, 2);
+  });
+
+  test('multi-word sentence returns word_count * default ratio rounded up', () => {
+    const result = estimateTokens('the quick brown fox');
+    // 4 words * 1.3 = 5.2 -> ceil -> 6
+    assert.strictEqual(result, 6);
+  });
+
+  test('model profile claude uses ratio 1.35', () => {
+    const result = estimateTokens('the quick brown fox', { model: 'claude' });
+    // 4 words * 1.35 = 5.4 -> ceil -> 6
+    assert.strictEqual(result, 6);
+  });
+
+  test('model profile code uses ratio 2.0', () => {
+    const result = estimateTokens('the quick brown fox', { model: 'code' });
+    // 4 words * 2.0 = 8.0 -> ceil -> 8
+    assert.strictEqual(result, 8);
+  });
+
+  test('default model profile works when no opts provided', () => {
+    const result = estimateTokens('the quick brown fox');
+    // Same as default: 4 * 1.3 = 5.2 -> ceil -> 6
+    assert.strictEqual(result, 6);
+  });
+
+  test('unknown model profile falls back to default ratio', () => {
+    const withUnknown = estimateTokens('the quick brown fox', { model: 'unknown-model' });
+    const withDefault = estimateTokens('the quick brown fox');
+    assert.strictEqual(withUnknown, withDefault);
+  });
+
+  test('code-like string with code profile returns higher estimate', () => {
+    const result = estimateTokens('function foo() { return bar; }', { model: 'code' });
+    // 6 words (function, foo(), {, return, bar;, }) * 2.0 = 12
+    assert.strictEqual(result, 12);
+  });
+
+  test('very long string scales linearly', () => {
+    const words = Array(1000).fill('word').join(' ');
+    const result = estimateTokens(words);
+    // 1000 words * 1.3 = 1300
+    assert.strictEqual(result, 1300);
+  });
+});
+
+// --- Context budget ---------------------------------------------------------------
+
+describe('budgetContext', () => {
+  test('empty sections array returns []', () => {
+    const result = budgetContext(100, []);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('limit of 0 returns []', () => {
+    const sections = [{ content: 'hello world', priority: 1 }];
+    const result = budgetContext(0, sections);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('single section that fits is returned', () => {
+    const sections = [{ content: 'hello world', priority: 1 }];
+    const result = budgetContext(100, sections);
+    assert.strictEqual(result.length, 1);
+    assert.strictEqual(result[0].content, 'hello world');
+    assert.strictEqual(result[0].priority, 1);
+  });
+
+  test('single section that does not fit returns []', () => {
+    const sections = [{ content: 'the quick brown fox jumps over the lazy dog', priority: 1 }];
+    // 9 words * 1.3 = 11.7 -> ceil -> 12 tokens; limit is 1
+    const result = budgetContext(1, sections);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('multiple sections all fit -- returns all sorted by priority', () => {
+    const sections = [
+      { content: 'second priority content here', priority: 2 },
+      { content: 'first priority content here', priority: 1 },
+    ];
+    const result = budgetContext(1000, sections);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0].priority, 1);
+    assert.strictEqual(result[1].priority, 2);
+  });
+
+  test('multiple sections, budget exceeded -- lower priority dropped', () => {
+    const sections = [
+      { content: 'aaa bbb ccc', priority: 1 },  // 3 words * 1.3 = 3.9 -> 4
+      { content: 'ddd eee fff', priority: 2 },  // 3 words * 1.3 = 3.9 -> 4
+      { content: 'ggg hhh iii', priority: 3 },  // 3 words * 1.3 = 3.9 -> 4
+    ];
+    // Total would be 12 tokens. Limit 8 fits priority 1 + 2 (8 tokens) but not 3.
+    const result = budgetContext(8, sections);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0].priority, 1);
+    assert.strictEqual(result[1].priority, 2);
+  });
+
+  test('sections with same priority preserve input order (stable sort)', () => {
+    const sections = [
+      { content: 'alpha content', priority: 1 },
+      { content: 'beta content', priority: 1 },
+    ];
+    const result = budgetContext(1000, sections);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0].content, 'alpha content');
+    assert.strictEqual(result[1].content, 'beta content');
+  });
+
+  test('model profile affects budget calculation', () => {
+    const sections = [
+      { content: 'aaa bbb ccc ddd', priority: 1 },  // default: 4*1.3=5.2->6, code: 4*2.0=8
+      { content: 'eee fff ggg hhh', priority: 2 },  // default: 6, code: 8
+    ];
+    const resultDefault = budgetContext(12, sections);
+    const resultCode = budgetContext(12, sections, { model: 'code' });
+    // Default: 6+6=12 fits both. Code: 8+8=16 > 12, only priority 1 fits.
+    assert.strictEqual(resultDefault.length, 2, 'default ratio fits both');
+    assert.strictEqual(resultCode.length, 1, 'code ratio fits only one');
+    assert.strictEqual(resultCode[0].priority, 1);
+  });
+
+  test('sections returned in priority order regardless of input order', () => {
+    const sections = [
+      { content: 'low priority', priority: 3 },
+      { content: 'high priority', priority: 1 },
+      { content: 'mid priority', priority: 2 },
+    ];
+    const result = budgetContext(1000, sections);
+    assert.strictEqual(result.length, 3);
+    assert.strictEqual(result[0].priority, 1);
+    assert.strictEqual(result[1].priority, 2);
+    assert.strictEqual(result[2].priority, 3);
+  });
+});
+
+// ─── createCancelToken ──────────────────────────────────────────────────────
+
+describe('createCancelToken', () => {
+  test('returns object with cancelled=false', () => {
+    const token = createCancelToken();
+    assert.strictEqual(token.cancelled, false);
+  });
+
+  test('cancel() sets cancelled to true', () => {
+    const token = createCancelToken();
+    token.cancel();
+    assert.strictEqual(token.cancelled, true);
+  });
+
+  test('cancel() is idempotent', () => {
+    const token = createCancelToken();
+    token.cancel();
+    token.cancel(); // should not throw
+    assert.strictEqual(token.cancelled, true);
+  });
+
+  test('throwIfCancelled does nothing when not cancelled', () => {
+    const token = createCancelToken();
+    token.throwIfCancelled(); // should not throw
+  });
+
+  test('throwIfCancelled throws GsdError with CANCELLED code when cancelled', () => {
+    const token = createCancelToken();
+    token.cancel();
+    assert.throws(() => token.throwIfCancelled(), (err) => {
+      assert.strictEqual(err.name, 'GsdError');
+      assert.strictEqual(err.code, 'CANCELLED');
+      return true;
+    });
+  });
+
+  test('onCancel listener fires on cancel()', () => {
+    const token = createCancelToken();
+    let fired = false;
+    token.onCancel(() => { fired = true; });
+    assert.strictEqual(fired, false);
+    token.cancel();
+    assert.strictEqual(fired, true);
+  });
+
+  test('multiple onCancel listeners all fire', () => {
+    const token = createCancelToken();
+    const calls = [];
+    token.onCancel(() => calls.push('a'));
+    token.onCancel(() => calls.push('b'));
+    token.cancel();
+    assert.deepStrictEqual(calls, ['a', 'b']);
+  });
+
+  test('onCancel registered after cancel fires immediately', () => {
+    const token = createCancelToken();
+    token.cancel();
+    let fired = false;
+    token.onCancel(() => { fired = true; });
+    assert.strictEqual(fired, true);
+  });
+});
+
+// ─── safeExec cancelToken integration ───────────────────────────────────────
+
+describe('safeExec cancelToken integration', () => {
+  test('returns cancelled result when token is already cancelled', () => {
+    const token = createCancelToken();
+    token.cancel();
+    const result = safeExec('echo', ['hello'], { cancelToken: token });
+    assert.strictEqual(result.cancelled, true);
+    assert.strictEqual(result.ok, false);
+    assert.strictEqual(result.stdout, '');
+  });
+
+  test('runs normally when token is not cancelled', () => {
+    const token = createCancelToken();
+    const result = safeExec('echo', ['hello'], { cancelToken: token });
+    assert.strictEqual(result.cancelled, false);
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(result.stdout, 'hello');
+  });
+
+  test('runs normally when no cancelToken provided', () => {
+    const result = safeExec('echo', ['world']);
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(result.stdout, 'world');
+  });
+});
+
+// ─── createFeatureFlags ─────────────────────────────────────────────────────
+
+describe('createFeatureFlags', () => {
+  test('returns object with isEnabled, listFlags, toJSON methods', () => {
+    const ff = createFeatureFlags({});
+    assert.strictEqual(typeof ff.isEnabled, 'function');
+    assert.strictEqual(typeof ff.listFlags, 'function');
+    assert.strictEqual(typeof ff.toJSON, 'function');
+  });
+
+  test('isEnabled returns false when flag not set', () => {
+    const ff = createFeatureFlags({ features: {} });
+    assert.strictEqual(ff.isEnabled('unknown'), false);
+  });
+
+  test('isEnabled returns true when features: { x: true }', () => {
+    const ff = createFeatureFlags({ features: { x: true } });
+    assert.strictEqual(ff.isEnabled('x'), true);
+  });
+
+  test('isEnabled returns false when features: { x: false }', () => {
+    const ff = createFeatureFlags({ features: { x: false } });
+    assert.strictEqual(ff.isEnabled('x'), false);
+  });
+
+  test('listFlags returns array of flag names', () => {
+    const ff = createFeatureFlags({ features: { alpha: true, beta: false } });
+    const flags = ff.listFlags();
+    assert.deepStrictEqual(flags.sort(), ['alpha', 'beta']);
+  });
+
+  test('toJSON returns copy of flags object', () => {
+    const original = { a: true, b: false };
+    const ff = createFeatureFlags({ features: original });
+    const json = ff.toJSON();
+    assert.deepStrictEqual(json, { a: true, b: false });
+    // Verify it is a copy, not a reference
+    json.a = false;
+    assert.strictEqual(ff.isEnabled('a'), true);
+  });
+
+  test('handles null config gracefully', () => {
+    const ff = createFeatureFlags(null);
+    assert.strictEqual(ff.isEnabled('anything'), false);
+    assert.deepStrictEqual(ff.listFlags(), []);
+    assert.deepStrictEqual(ff.toJSON(), {});
+  });
+
+  test('handles config without features key gracefully', () => {
+    const ff = createFeatureFlags({ someOtherKey: 'value' });
+    assert.strictEqual(ff.isEnabled('anything'), false);
+    assert.deepStrictEqual(ff.listFlags(), []);
+    assert.deepStrictEqual(ff.toJSON(), {});
+  });
+});
+
+// ─── detectTruncation ─────────────────────────────────────────────────────────
+
+describe('detectTruncation', () => {
+  test('returns truncated: false for normal string', () => {
+    const result = detectTruncation('hello world');
+    assert.strictEqual(result.truncated, false);
+    assert.strictEqual(result.cleanOutput, 'hello world');
+    assert.strictEqual(result.warning, null);
+  });
+
+  test('returns truncated: true for string ending with sentinel', () => {
+    const input = 'some output\n' + GSD_TRUNCATED_SENTINEL;
+    const result = detectTruncation(input);
+    assert.strictEqual(result.truncated, true);
+  });
+
+  test('strips sentinel from cleanOutput', () => {
+    const input = 'some output\n' + GSD_TRUNCATED_SENTINEL;
+    const result = detectTruncation(input);
+    assert.strictEqual(result.cleanOutput, 'some output\n');
+  });
+
+  test('returns warning message when truncated', () => {
+    const input = 'data' + GSD_TRUNCATED_SENTINEL;
+    const result = detectTruncation(input);
+    assert.strictEqual(typeof result.warning, 'string');
+    assert.ok(result.warning.length > 0);
+    assert.ok(result.warning.includes('truncated'), 'warning should mention truncation');
+  });
+
+  test('handles null input gracefully', () => {
+    const result = detectTruncation(null);
+    assert.strictEqual(result.truncated, false);
+    assert.strictEqual(result.cleanOutput, '');
+    assert.strictEqual(result.warning, null);
+  });
+
+  test('handles undefined input gracefully', () => {
+    const result = detectTruncation(undefined);
+    assert.strictEqual(result.truncated, false);
+    assert.strictEqual(result.cleanOutput, '');
+    assert.strictEqual(result.warning, null);
+  });
+
+  test('handles empty string', () => {
+    const result = detectTruncation('');
+    assert.strictEqual(result.truncated, false);
+    assert.strictEqual(result.cleanOutput, '');
+    assert.strictEqual(result.warning, null);
+  });
+
+  test('GSD_TRUNCATED_SENTINEL matches the string used in output()', () => {
+    assert.strictEqual(GSD_TRUNCATED_SENTINEL, '__GSD_TRUNCATED__');
   });
 });

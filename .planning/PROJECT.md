@@ -6,17 +6,135 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Shipped:** v1.1 Testing & Hardening (2026-03-26)
-**Package:** `get-shit-done-cc` v1.28.0
-**Tests:** 1,662 passing (76 unit + 39 integration added in v1.1)
-**Coverage:** 85%+ lines, 77%+ branches across 25 instrumented source files
+**Active:** v1.8 Documentation & Accuracy (2026-04-05)
+**Package:** `get-shit-done-cc` v1.30.0
+**Tests:** 2046 total (1913 unit + 133 E2E), 2027 passing, 19 failing across 74 test files
+**Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
+**Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-The repo has comprehensive test coverage, hardened CI pipeline (Linux/macOS/Windows), and integrated coverage reporting. Ready for v1.29 publish when scope allows.
+## Active Requirements (v1.8)
 
-## Validated Requirements (v1.1)
+*Requirements will be defined in REQUIREMENTS.md after PROJECT.md update.*
+
+<details>
+<summary><strong>v1.7 Requirements (13/13 validated)</strong></summary>
 
 All 13 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| E2E-01: Test harness with mocked LLM layer | Phase 22 | Validated |
+| E2E-02: Fixture system for project scaffolding | Phase 22 | Validated |
+| E2E-03: Assertion helpers (exit codes, file content, state) | Phase 22 | Validated |
+| E2E-04: new-project end-to-end flow | Phase 23 | Validated |
+| E2E-05: discuss-phase through execute-phase pipeline | Phase 23 | Validated |
+| E2E-06: verify-work through ship pipeline | Phase 23 | Validated |
+| E2E-07: quick/fast/do command coverage | Phase 24 | Validated |
+| E2E-08: progress/stats/health command coverage | Phase 24 | Validated |
+| E2E-09: Milestone lifecycle (new/audit/complete/cleanup) | Phase 24 | Validated |
+| E2E-10: Workstream management commands | Phase 24 | Validated |
+| E2E-11: Failure mode handling and recovery | Phase 25 | Validated |
+| E2E-12: Edge case coverage (empty projects, corrupt state) | Phase 25 | Validated |
+| E2E-13: CI integration and regression gate | Phase 25 | Validated |
+
+</details>
+
+<details>
+<summary><strong>v1.6 Requirements (12/12 validated)</strong></summary>
+
+All 12 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| MAINT-01: Layered architecture refactoring | Phase 18 | Validated |
+| MAINT-02: Feature flags for experimental capabilities | Phase 19 | Validated |
+| MAINT-03: Skills extensibility improvements | Phase 20 | Validated |
+| MAINT-04: Orphaned skills audit and cleanup | Phase 20 | Validated |
+| MAINT-05: Skill versioning system | Phase 20 | Validated |
+| MAINT-06: Sync-compatible cancel tokens | Phase 18 | Validated |
+| MAINT-07: Wire validateShellArg to production caller | Phase 19 | Validated |
+| MAINT-08: Wire __GSD_TRUNCATED__ to programmatic consumer | Phase 19 | Validated |
+| MAINT-09: skill-forge consolidation | Phase 20 | Validated |
+| META-01: Align plugin.json author fields with package.json | Phase 21 | Validated |
+| META-02: Version bump and publish prep | Phase 21 | Validated |
+| META-03: Plugin audit and marketplace prep | Phase 21 | Validated |
+
+</details>
+
+<details>
+<summary><strong>v1.5 Requirements (6/6 validated)</strong></summary>
+
+All 6 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| PERF-01: Streaming output helper (streamLines) | Phase 15 | Validated |
+| PERF-02: Deterministic ordering utility (deterministicSort) | Phase 15 | Validated |
+| PERF-03: Lazy-load MODEL_PROFILES in model-profiles.cjs | Phase 16 | Validated |
+| PERF-04: Lazy-load skill registry (lazyRegistry) | Phase 16 | Validated |
+| PERF-05: Token estimation utility (estimateTokens) | Phase 17 | Validated |
+| PERF-06: Context budget helper (budgetContext) | Phase 17 | Validated |
+
+</details>
+
+<details>
+<summary><strong>v1.4 Requirements (14/14 validated)</strong></summary>
+
+All 14 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| CORR-01: GsdError class with code, context, cause | Phase 11 | Validated |
+| CORR-02: Silent catch block audit (~90 blocks) | Phase 11 | Validated |
+| CORR-03: loadConfig() silent failure diagnostics | Phase 11 | Validated |
+| CORR-04: deepFreeze() utility in core.cjs | Phase 12 | Validated |
+| CORR-05: Freeze returns at module boundaries | Phase 12 | Validated |
+| CORR-06: .push() mutation safety verification | Phase 12 | Validated |
+| CORR-07: safeExec wrapper with timeout support | Phase 14 | Validated |
+| CORR-08: execGit uses safeExec with timeout | Phase 14 | Validated |
+| CORR-09: Lock force-acquire diagnostics | Phase 14 | Validated |
+| DEBT-01: Agent tier label fixes | Phase 13 | Validated |
+| DEBT-02: Absorbed agent profile cleanup | Phase 13 | Validated |
+| DEBT-03: security.cjs branch coverage >= 95% | Phase 13 | Validated |
+| DEBT-04: gsd-validator-hub workflow wiring | Phase 13 | Validated |
+| DEBT-05: v1.3 VALIDATION.md gap fill | Phase 13 | Validated |
+
+</details>
+
+<details>
+<summary><strong>v1.3 Requirements (6/6 validated)</strong></summary>
+
+All 6 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| SEC-01: Cryptographic temp paths in output() | Phase 7 | Validated |
+| SEC-02: Path containment fix (path.sep before startsWith) | Phase 7 | Validated |
+| SEC-03: Shell metacharacter blocking in validateShellArg() | Phase 8 | Validated |
+| SEC-04: __GSD_TRUNCATED__ sentinel in output fallback | Phase 8 | Validated |
+| SEC-05: Branch coverage 82.82% to 87%+ on core.cjs | Phase 9 | Validated |
+| SEC-06: Config version tracking + migration registry | Phase 10 | Validated |
+
+</details>
+
+<details>
+<summary><strong>v1.2 Requirements (7/7 validated)</strong></summary>
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| CREW-01: Fix YAML parsing in 8 agents | Phase 6 | Validated (no changes needed) |
+| CREW-02: Consolidate verification agents (4→1) | Phase 6 | Validated |
+| CREW-03: Consolidate research agents (2→1) | Phase 6 | Validated |
+| CREW-04: Consolidate validator agents (2→1) | Phase 6 | Validated |
+| CREW-05: Wire utility agents into workflows | Phase 6 | Validated |
+| CREW-06: Tool-access tiers for all agents | Phase 6 | Validated |
+| CREW-07: Quality sections for low-scoring agents | Phase 6 | Validated |
+
+</details>
+
+<details>
+<summary><strong>v1.1 Requirements (13/13 validated)</strong></summary>
 
 | Requirement | Phase | Outcome |
 |-------------|-------|---------|
@@ -34,6 +152,8 @@ All 13 requirements verified complete:
 | CI-02: Coverage reporting in CI | Phase 5 | Validated |
 | CI-03: Cross-platform CI passes | Phase 5 | Validated |
 
+</details>
+
 ## Constraints
 
 - **Zero dependencies**: Package must remain zero-dependency CommonJS
@@ -44,15 +164,13 @@ All 13 requirements verified complete:
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Collapse 4 phases to 1 (v1.0) | Contamination scan showed most work already done | Accepted |
-| Conditional step phrasing in governance | "if exists" preserves compatibility with non-GSD projects | Accepted |
-| `.planning/phases/` gitignored | Phase plans are local execution artifacts, not committed | By design |
-| Coverage thresholds advisory-only | Expanding scope dropped overall to ~81%; hard thresholds deferred | v1.1 Phase 2 |
-| Single script for gap analysis + baseline | Consistency between gap analysis and baseline docs | v1.1 Phase 2 |
+| crypto.randomBytes for temp paths | Date.now() was predictable — race condition and symlink attack vector | v1.3 Phase 7 |
+| Config migration registry pattern | Array of {from, to, migrate} objects over version-keyed map — matches DB migration conventions | v1.3 Phase 10 |
+| validateShellArg as library infra | No production callers yet — design-intentional for downstream consumers | v1.3 Phase 8 |
+| __GSD_TRUNCATED__ as LLM protocol marker | No programmatic consumer — protocol-level for LLM detection of truncated output | v1.3 Phase 8 |
+| 4→1 verification consolidation | Overlapping scopes unified into gsd-verifier with scope param | v1.2 Phase 6 |
+| 3-tier tool access | Explore (read), Research (+web), Modify (+write) applied to all agents | v1.2 Phase 6 |
 | Integration tests use real code paths | Prior incident where mock/prod divergence masked failures | v1.1 Phase 4 |
-| base64-scan timeout exits clean (exit 0) | Incomplete scan is not a finding; prevents false positives | v1.1 Phase 5 |
-| Coverage report on Linux Node 22 only | Avoids duplicate reports across matrix jobs | v1.1 Phase 5 |
-| Advisory 80% threshold warns, never fails | Build stability over enforcement during ramp-up | v1.1 Phase 5 |
 
 ## Context
 
@@ -62,14 +180,19 @@ All 13 requirements verified complete:
 - Two plugin.json files exist (root and plugins/)
 - Governance templates in `governance/` define session initialization behavior
 - 3 specialist agents deployed: plugin-developer, test-runner, docs-sync
+- 15 source agents + 7 archived agents after v1.2 consolidation
 - 25 source files instrumented for coverage across lib, hooks, gsd-tools, bin, scripts
-- Integration tests validate CLI command chains, governance hook enforcement, plugin ecosystem coherence
+- v1.3 added config migration system — configs auto-gain config_version on first load
 
-## Deferred
+## Tech Debt
 
-- GSD v1.29 publish (version bump not yet done)
-- Align plugin.json author fields with package.json (META-01)
-- Delete accidental `UsernameTron/Pete-Gets-Shit-Done` repo (manual)
+**19 test failures across 4 root causes** (identified in end-to-end analysis):
+1. **13 failures**: Stale agent references in MODEL_PROFILES, workflows, and test expectations (consolidated agents still referenced by old names)
+2. **2 failures**: gsd-validator-hub.md missing `color:` field, has forbidden `skills:` block
+3. **2 failures**: gsd-verifier.md missing `# hooks:` comment, 64KB exceeds 50K threshold
+4. **2 failures**: Missing plugin/agent directory structures expected by tests
+
+**Documentation inaccuracies**: PROJECT.md test counts stale, agent counts inconsistent, CLAUDE.md references need sync.
 
 ## Evolution
 
@@ -89,4 +212,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-26 -- v1.1 milestone shipped*
+*Last updated: 2026-04-05 -- v1.8 Documentation & Accuracy milestone started*

@@ -2,10 +2,162 @@
  * Core — Shared utilities, constants, and internal helpers
  */
 
+/*
+ * MODULE ARCHITECTURE
+ *
+ * Layer 0 — Foundation (no intra-project deps):
+ *   model-profiles.cjs, security.cjs
+ *
+ * Layer 1 — Core Hub (depends only on Layer 0):
+ *   core.cjs → model-profiles.cjs
+ *
+ * Layer 2 — Domain (depends on Layer 1 + Layer 0):
+ *   frontmatter.cjs → core.cjs
+ *   config.cjs → core.cjs, model-profiles.cjs
+ *   state.cjs → core.cjs, frontmatter.cjs, security.cjs
+ *
+ * Layer 3 — Application (depends on Layers 0-2):
+ *   phase.cjs, milestone.cjs, roadmap.cjs, workstream.cjs,
+ *   verify.cjs, commands.cjs, uat.cjs, template.cjs, init.cjs,
+ *   profile-output.cjs, profile-pipeline.cjs
+ *
+ * RULES:
+ *   - Imports flow DOWN (Layer 3 → 2 → 1 → 0). Never up.
+ *   - core.cjs must NOT require any module except model-profiles.cjs.
+ *   - No circular dependencies between any pair of modules.
+ *   - Lazy requires (inside functions) follow the same direction rules.
+ *   - Enforced by tests/architecture.test.cjs.
+ */
+
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execSync, execFileSync, spawnSync } = require('child_process');
 const { MODEL_PROFILES } = require('./model-profiles.cjs');
+
+// ─── Error Infrastructure ────────────────────────────────────────────────────
+
+const GSD_ERROR_CODES = Object.freeze({
+  CANCELLED:         'CANCELLED',
+  CONFIG_READ:       'CONFIG_READ',
+  CONFIG_PARSE:      'CONFIG_PARSE',
+  CONFIG_MIGRATE:    'CONFIG_MIGRATE',
+  CONFIG_WRITE:      'CONFIG_WRITE',
+  STATE_READ:        'STATE_READ',
+  STATE_WRITE:       'STATE_WRITE',
+  PHASE_READ:        'PHASE_READ',
+  PHASE_WRITE:       'PHASE_WRITE',
+  LOCK_ACQUIRE:      'LOCK_ACQUIRE',
+  LOCK_STALE:        'LOCK_STALE',
+  GIT_EXEC:          'GIT_EXEC',
+  FILE_READ:         'FILE_READ',
+  FILE_WRITE:        'FILE_WRITE',
+  PARSE_ERROR:       'PARSE_ERROR',
+  COMMAND_DISPATCH:   'COMMAND_DISPATCH',
+  TEMPLATE_RENDER:   'TEMPLATE_RENDER',
+  VALIDATION:        'VALIDATION',
+});
+
+class GsdError extends Error {
+  constructor(code, message, { context, cause } = {}) {
+    super(message);
+    this.name = 'GsdError';
+    this.code = code;
+    this.context = context || null;
+    this.cause = cause || null;
+  }
+}
+
+const GSD_TRUNCATED_SENTINEL = '__GSD_TRUNCATED__';
+
+// ─── Debug logging ──────────────────────────────────────────────────────────
+
+/**
+ * Write a debug diagnostic to stderr when GSD_DEBUG env var is set.
+ * Zero-cost when disabled — the env check short-circuits before any work.
+ * Uses fs.writeSync(2, ...) to match the project's existing stderr pattern.
+ *
+ * @param {string} code - GSD_ERROR_CODES key (e.g. 'CONFIG_READ')
+ * @param {string} message - Human-readable description
+ * @param {object} [context] - Optional structured context (serialized as JSON)
+ */
+function debugLog(code, message, context) {
+  if (process.env.GSD_DEBUG) {
+    const prefix = `[GSD:${code}]`;
+    const ctx = context ? ` ${JSON.stringify(context)}` : '';
+    fs.writeSync(2, `${prefix} ${message}${ctx}\n`);
+  }
+}
+
+// ─── Deep freeze utility ─────────────────────────────────────────────────────
+
+/**
+ * Recursively freeze a plain object or array.
+ * Skips non-plain-object values (Date, RegExp, Buffer, etc.) and null/undefined.
+ * Safe to call on already-frozen objects (no-op).
+ */
+function deepFreeze(obj) {
+  if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
+  if (Object.isFrozen(obj)) return obj;
+  Object.freeze(obj);
+  const keys = Object.keys(obj);
+  for (let i = 0; i < keys.length; i++) {
+    const val = obj[keys[i]];
+    if (val !== null && typeof val === 'object' && !Object.isFrozen(val)) {
+      deepFreeze(val);
+    }
+  }
+  return obj;
+}
+
+// ─── Cancellation ────────────────────────────────────────────────────────────
+
+/**
+ * Create a synchronous cancel token for cooperative cancellation.
+ * Long-running sync operations can poll token.cancelled and bail out.
+ * No async, no AbortController — just a boolean flag with listeners.
+ *
+ * @returns {{ cancelled: boolean, cancel: function, throwIfCancelled: function, onCancel: function }}
+ */
+function createCancelToken() {
+  let cancelled = false;
+  const listeners = [];
+
+  return {
+    get cancelled() { return cancelled; },
+    cancel() {
+      if (cancelled) return;
+      cancelled = true;
+      for (const fn of listeners) fn();
+    },
+    throwIfCancelled() {
+      if (cancelled) {
+        throw new GsdError(GSD_ERROR_CODES.CANCELLED, 'Operation cancelled');
+      }
+    },
+    onCancel(fn) {
+      if (typeof fn !== 'function') return;
+      if (cancelled) { fn(); return; }
+      listeners.push(fn);
+    },
+  };
+}
+
+// ── Feature Flags ──────────────────────────────────────────────────────────
+function createFeatureFlags(config) {
+  const flags = (config && config.features) || {};
+  return {
+    isEnabled(name) {
+      return flags[name] === true;
+    },
+    listFlags() {
+      return Object.keys(flags);
+    },
+    toJSON() {
+      return { ...flags };
+    }
+  };
+}
 
 // ─── Path helpers ────────────────────────────────────────────────────────────
 
@@ -31,9 +183,9 @@ function detectSubRepos(cwd) {
         if (fs.existsSync(gitPath)) {
           results.push(entry.name);
         }
-      } catch {}
+      } catch { /* intentional: existsSync fallback for race condition */ }
     }
-  } catch {}
+  } catch { /* intentional: non-critical directory scan */ }
   return results.sort();
 }
 
@@ -105,9 +257,7 @@ function findProjectRoot(startDir) {
         if (config.multiRepo === true && isInsideGitRepo(parent)) {
           return parent;
         }
-      } catch {
-        // config.json missing or malformed — fall back to .git heuristic
-      }
+      } catch { /* intentional: config.json missing or malformed — fall back to .git heuristic */ }
 
       // Heuristic: parent has .planning/ and we're inside a git repo
       if (isInsideGitRepo(parent)) {
@@ -146,13 +296,9 @@ function reapStaleTempFiles(prefix = 'gsd-', { maxAgeMs = 5 * 60 * 1000, dirsOnl
             fs.unlinkSync(fullPath);
           }
         }
-      } catch {
-        // File may have been removed between readdir and stat — ignore
-      }
+      } catch { /* intentional: file may disappear between readdir and stat */ }
     }
-  } catch {
-    // Non-critical — don't let cleanup failures break output
-  }
+  } catch { /* intentional: non-critical cleanup — must not break output */ }
 }
 
 function output(result, raw, rawValue) {
@@ -165,9 +311,15 @@ function output(result, raw, rawValue) {
     // Write to tmpfile and output the path prefixed with @file: so callers can detect it.
     if (json.length > 50000) {
       reapStaleTempFiles();
-      const tmpPath = path.join(require('os').tmpdir(), `gsd-${Date.now()}.json`);
-      fs.writeFileSync(tmpPath, json, 'utf-8');
-      data = '@file:' + tmpPath;
+      try {
+        const tmpPath = path.join(require('os').tmpdir(), `gsd-${crypto.randomBytes(8).toString('hex')}.json`);
+        fs.writeFileSync(tmpPath, json, 'utf-8');
+        data = '@file:' + tmpPath;
+      } catch (_e) {
+        // Temp file write failed — truncate with sentinel so consumers know data was lost
+        data = json.slice(0, 50000) + '\n' + GSD_TRUNCATED_SENTINEL;
+        fs.writeSync(2, JSON.stringify({ type: 'gsd_warning', code: 'OUTPUT_TRUNCATED', message: 'Output truncated — temp file write failed, JSON exceeded 50KB' }) + '\n');
+      }
     } else {
       data = json;
     }
@@ -177,6 +329,21 @@ function output(result, raw, rawValue) {
   // fs.writeSync(1, ...) blocks until the kernel accepts the bytes, and
   // skipping process.exit() lets the event loop drain naturally.
   fs.writeSync(1, data);
+}
+
+function detectTruncation(str) {
+  if (!str || typeof str !== 'string') {
+    return { truncated: false, cleanOutput: str || '', warning: null };
+  }
+  const truncated = str.endsWith(GSD_TRUNCATED_SENTINEL);
+  if (!truncated) {
+    return { truncated: false, cleanOutput: str, warning: null };
+  }
+  return {
+    truncated: true,
+    cleanOutput: str.slice(0, -GSD_TRUNCATED_SENTINEL.length),
+    warning: 'Output was truncated — temp file write failed and JSON exceeded 50KB limit',
+  };
 }
 
 function error(message) {
@@ -189,9 +356,59 @@ function error(message) {
 function safeReadFile(filePath) {
   try {
     return fs.readFileSync(filePath, 'utf-8');
-  } catch {
+  } catch { /* intentional: safeReadFile returns null on any read failure by design */
     return null;
   }
+}
+
+const CONFIG_VERSION = 1;
+
+const configMigrations = [
+  {
+    from: 0, to: 1,
+    migrate(parsed, cwd) {
+      // Migrate deprecated "depth" key to "granularity" with value mapping
+      if ('depth' in parsed && !('granularity' in parsed)) {
+        const depthToGranularity = { quick: 'coarse', standard: 'standard', comprehensive: 'fine' };
+        parsed.granularity = depthToGranularity[parsed.depth] || parsed.depth;
+        delete parsed.depth;
+      }
+      // Migrate legacy "multiRepo: true" boolean → sub_repos array
+      if (parsed.multiRepo === true && !parsed.sub_repos && !parsed.planning?.sub_repos) {
+        const detected = detectSubRepos(cwd);
+        if (detected.length > 0) {
+          parsed.sub_repos = detected;
+          if (!parsed.planning) parsed.planning = {};
+          parsed.planning.commit_docs = false;
+          delete parsed.multiRepo;
+        }
+      }
+    },
+  },
+];
+
+function runConfigMigrations(parsed, cwd) {
+  let version = parsed.config_version || 0;
+  if (version >= CONFIG_VERSION) return false;
+  // Unknown future version — leave it alone
+  if (typeof version !== 'number') return false;
+
+  let migrated = false;
+  for (const m of configMigrations) {
+    if (version === m.from) {
+      try { m.migrate(parsed, cwd); } catch (migErr) {
+        debugLog(GSD_ERROR_CODES.CONFIG_MIGRATE, `Migration ${m.from}->${m.to} failed`, {
+          error: migErr.message,
+        });
+      }
+      version = m.to;
+      migrated = true;
+    }
+  }
+  if (migrated) {
+    parsed.config_version = version;
+  }
+  return migrated;
 }
 
 function loadConfig(cwd) {
@@ -212,39 +429,32 @@ function loadConfig(cwd) {
     brave_search: false,
     firecrawl: false,
     exa_search: false,
-    text_mode: false, // when true, use plain-text numbered lists instead of AskUserQuestion menus
+    text_mode: false,
     sub_repos: [],
-    resolve_model_ids: false, // false: return alias as-is | true: map to full Claude model ID | "omit": return '' (runtime uses its default)
-    context_window: 200000, // default 200k; set to 1000000 for Opus/Sonnet 4.6 1M models
-    phase_naming: 'sequential', // 'sequential' (default, auto-increment) or 'custom' (arbitrary string IDs)
+    resolve_model_ids: false,
+    context_window: 200000,
+    phase_naming: 'sequential',
   };
 
   try {
     const raw = fs.readFileSync(configPath, 'utf-8');
     const parsed = JSON.parse(raw);
 
-    // Migrate deprecated "depth" key to "granularity" with value mapping
-    if ('depth' in parsed && !('granularity' in parsed)) {
-      const depthToGranularity = { quick: 'coarse', standard: 'standard', comprehensive: 'fine' };
-      parsed.granularity = depthToGranularity[parsed.depth] || parsed.depth;
-      delete parsed.depth;
-      try { fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8'); } catch { /* intentionally empty */ }
+    // Run versioned migrations
+    const migrated = runConfigMigrations(parsed, cwd);
+    if (migrated) {
+      try {
+        fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8');
+      } catch (writeErr) {
+        debugLog(GSD_ERROR_CODES.CONFIG_WRITE, 'Failed to persist config migration', {
+          path: configPath,
+          error: writeErr.message,
+        });
+      }
     }
 
     // Auto-detect and sync sub_repos: scan for child directories with .git
     let configDirty = false;
-
-    // Migrate legacy "multiRepo: true" boolean → sub_repos array
-    if (parsed.multiRepo === true && !parsed.sub_repos && !parsed.planning?.sub_repos) {
-      const detected = detectSubRepos(cwd);
-      if (detected.length > 0) {
-        parsed.sub_repos = detected;
-        if (!parsed.planning) parsed.planning = {};
-        parsed.planning.commit_docs = false;
-        delete parsed.multiRepo;
-        configDirty = true;
-      }
-    }
 
     // Keep sub_repos in sync with actual filesystem
     const currentSubRepos = parsed.sub_repos || parsed.planning?.sub_repos || [];
@@ -259,9 +469,16 @@ function loadConfig(cwd) {
       }
     }
 
-    // Persist sub_repos changes (migration or sync)
+    // Persist sub_repos sync changes
     if (configDirty) {
-      try { fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8'); } catch {}
+      try {
+        fs.writeFileSync(configPath, JSON.stringify(parsed, null, 2), 'utf-8');
+      } catch (writeErr) {
+        debugLog(GSD_ERROR_CODES.CONFIG_WRITE, 'Failed to persist sub_repos sync', {
+          path: configPath,
+          error: writeErr.message,
+        });
+      }
     }
 
     const get = (key, nested) => {
@@ -279,7 +496,7 @@ function loadConfig(cwd) {
       return defaults.parallelization;
     })();
 
-    return {
+    return deepFreeze({
       model_profile: get('model_profile') ?? defaults.model_profile,
       commit_docs: (() => {
         const explicit = get('commit_docs', { section: 'planning', field: 'commit_docs' });
@@ -310,9 +527,13 @@ function loadConfig(cwd) {
       phase_naming: get('phase_naming') ?? defaults.phase_naming,
       model_overrides: parsed.model_overrides || null,
       agent_skills: parsed.agent_skills || {},
-    };
-  } catch {
-    return defaults;
+    });
+  } catch (err) {
+    debugLog(GSD_ERROR_CODES.CONFIG_READ, 'loadConfig failed, using defaults', {
+      path: configPath,
+      error: err.message,
+    });
+    return deepFreeze(defaults);
   }
 }
 
@@ -331,7 +552,7 @@ function isGitIgnored(cwd, targetPath) {
       stdio: 'pipe',
     });
     return true;
-  } catch {
+  } catch { /* intentional: non-zero exit means path is not ignored */
     return false;
   }
 }
@@ -440,16 +661,50 @@ function isClosingFence(lines, i) {
   return fenceCount % 2 === 0;
 }
 
-function execGit(cwd, args) {
-  const result = spawnSync('git', args, {
+function safeExec(command, args, options = {}) {
+  const {
+    cwd = process.cwd(),
+    timeout = 30000,
+    encoding = 'utf-8',
+    cancelToken,
+  } = options;
+
+  // Check cancellation before spawning
+  if (cancelToken && cancelToken.cancelled) {
+    return {
+      ok: false,
+      exitCode: 1,
+      stdout: '',
+      stderr: 'Operation cancelled',
+      timedOut: false,
+      cancelled: true,
+    };
+  }
+
+  const result = spawnSync(command, args, {
     cwd,
     stdio: 'pipe',
-    encoding: 'utf-8',
+    encoding,
+    timeout,
   });
+  const timedOut = !!(result.signal === 'SIGTERM' || (result.error && result.error.code === 'ETIMEDOUT'));
   return {
+    ok: (result.status === 0) && !timedOut,
     exitCode: result.status ?? 1,
     stdout: (result.stdout ?? '').toString().trim(),
     stderr: (result.stderr ?? '').toString().trim(),
+    timedOut,
+    cancelled: false,
+  };
+}
+
+function execGit(cwd, args) {
+  const result = safeExec('git', args, { cwd, timeout: 30000 });
+  return {
+    exitCode: result.exitCode,
+    stdout: result.stdout,
+    stderr: result.stderr,
+    timedOut: result.timedOut,
   };
 }
 
@@ -499,7 +754,7 @@ function withPlanningLock(cwd, fn) {
   const start = Date.now();
 
   // Ensure .planning/ exists
-  try { fs.mkdirSync(planningDir(cwd), { recursive: true }); } catch { /* ok */ }
+  try { fs.mkdirSync(planningDir(cwd), { recursive: true }); } catch { /* intentional: directory may already exist */ }
 
   while (Date.now() - start < lockTimeout) {
     try {
@@ -514,7 +769,7 @@ function withPlanningLock(cwd, fn) {
       try {
         return fn();
       } finally {
-        try { fs.unlinkSync(lockPath); } catch { /* already released */ }
+        try { fs.unlinkSync(lockPath); } catch { /* intentional: lock may already be released */ }
       }
     } catch (err) {
       if (err.code === 'EEXIST') {
@@ -525,7 +780,7 @@ function withPlanningLock(cwd, fn) {
             fs.unlinkSync(lockPath);
             continue; // retry
           }
-        } catch { continue; }
+        } catch { /* intentional: lock may disappear during stale check */ continue; }
 
         // Wait and retry
         spawnSync('sleep', ['0.1'], { stdio: 'ignore' });
@@ -535,7 +790,14 @@ function withPlanningLock(cwd, fn) {
     }
   }
   // Timeout — force acquire (stale lock recovery)
-  try { fs.unlinkSync(lockPath); } catch { /* ok */ }
+  let lockInfo = null;
+  try { lockInfo = JSON.parse(fs.readFileSync(lockPath, 'utf-8')); } catch { /* intentional: lock may be unreadable */ }
+  if (lockInfo) {
+    debugLog('LOCK_FORCE', `Planning lock force-acquired — stale lock held by PID ${lockInfo.pid} since ${lockInfo.acquired} in ${lockInfo.cwd}`);
+  } else {
+    debugLog('LOCK_FORCE', 'Planning lock force-acquired — could not read stale lock details');
+  }
+  try { fs.unlinkSync(lockPath); } catch { /* intentional: force-acquire cleanup is best-effort */ }
   return fn();
 }
 
@@ -566,7 +828,7 @@ function planningRoot(cwd) {
 function planningPaths(cwd, ws) {
   const base = planningDir(cwd, ws);
   const root = path.join(cwd, '.planning');
-  return {
+  return deepFreeze({
     planning: base,
     state: path.join(base, 'STATE.md'),
     roadmap: path.join(base, 'ROADMAP.md'),
@@ -574,7 +836,7 @@ function planningPaths(cwd, ws) {
     config: path.join(root, 'config.json'),
     phases: path.join(base, 'phases'),
     requirements: path.join(base, 'REQUIREMENTS.md'),
-  };
+  });
 }
 
 // ─── Active Workstream Detection ─────────────────────────────────────────────
@@ -591,7 +853,7 @@ function getActiveWorkstream(cwd) {
     const wsDir = path.join(planningRoot(cwd), 'workstreams', name);
     if (!fs.existsSync(wsDir)) return null;
     return name;
-  } catch {
+  } catch { /* intentional: missing file means no active workstream */
     return null;
   }
 }
@@ -602,7 +864,7 @@ function getActiveWorkstream(cwd) {
 function setActiveWorkstream(cwd, name) {
   const filePath = path.join(planningRoot(cwd), 'active-workstream');
   if (!name) {
-    try { fs.unlinkSync(filePath); } catch {}
+    try { fs.unlinkSync(filePath); } catch { /* intentional: file may not exist */ }
     return;
   }
   if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
@@ -629,6 +891,19 @@ function normalizePhaseName(phase) {
   }
   // Custom phase IDs (e.g. PROJ-42, AUTH-101): return as-is
   return str;
+}
+
+/**
+ * Check if a directory name matches a normalized phase identifier.
+ * Handles both NN-slug (e.g. 20-skills-overhaul) and phase-N (e.g. phase-20) conventions.
+ */
+function matchesPhaseDir(dirName, normalized) {
+  if (dirName.startsWith(normalized)) return true;
+  if (dirName.toUpperCase().startsWith(normalized.toUpperCase())) return true;
+  // Support phase-N naming convention (e.g., phase-20, phase-18)
+  const phasePfx = dirName.match(/^phase-(\d+[A-Z]?(?:\.\d+)*)/i);
+  if (phasePfx && normalizePhaseName(phasePfx[1]) === normalized) return true;
+  return false;
 }
 
 function comparePhaseNum(a, b) {
@@ -664,24 +939,20 @@ function searchPhaseInDir(baseDir, relBase, normalized) {
   try {
     const dirs = readSubdirectories(baseDir, true);
     // Match: starts with normalized (numeric) OR contains normalized as prefix segment (custom ID)
-    const match = dirs.find(d => {
-      if (d.startsWith(normalized)) return true;
-      // For custom IDs like PROJ-42, match case-insensitively
-      if (d.toUpperCase().startsWith(normalized.toUpperCase())) return true;
-      return false;
-    });
+    const match = dirs.find(d => matchesPhaseDir(d, normalized));
     if (!match) return null;
 
-    // Extract phase number and name — supports both numeric (01-name) and custom (PROJ-42-name)
-    const dirMatch = match.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i)
+    // Extract phase number and name — supports phase-N, numeric (01-name), and custom (PROJ-42-name)
+    const dirMatch = match.match(/^phase-(\d+[A-Z]?(?:\.\d+)*)(?:-(.+))?$/i)
+      || match.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i)
       || match.match(/^([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*)-(.+)/i)
       || [null, match, null];
     const phaseNumber = dirMatch ? dirMatch[1] : normalized;
     const phaseName = dirMatch && dirMatch[2] ? dirMatch[2] : null;
     const phaseDir = path.join(baseDir, match);
     const { plans: unsortedPlans, summaries: unsortedSummaries, hasResearch, hasContext, hasVerification, hasReviews } = getPhaseFileStats(phaseDir);
-    const plans = unsortedPlans.sort();
-    const summaries = unsortedSummaries.sort();
+    const plans = [...unsortedPlans].sort();
+    const summaries = [...unsortedSummaries].sort();
 
     const completedPlanIds = new Set(
       summaries.map(s => s.replace('-SUMMARY.md', '').replace('SUMMARY.md', ''))
@@ -705,7 +976,7 @@ function searchPhaseInDir(baseDir, relBase, normalized) {
       has_verification: hasVerification,
       has_reviews: hasReviews,
     };
-  } catch {
+  } catch { /* intentional: phase directory may not exist or be unreadable */
     return null;
   }
 }
@@ -719,7 +990,7 @@ function findPhaseInternal(cwd, phase) {
   // Search current phases first
   const relPhasesDir = toPosixPath(path.relative(cwd, phasesDir));
   const current = searchPhaseInDir(phasesDir, relPhasesDir, normalized);
-  if (current) return current;
+  if (current) return deepFreeze(current);
 
   // Search archived milestone phases (newest first)
   const milestonesDir = path.join(cwd, '.planning', 'milestones');
@@ -740,10 +1011,10 @@ function findPhaseInternal(cwd, phase) {
       const result = searchPhaseInDir(archivePath, relBase, normalized);
       if (result) {
         result.archived = version;
-        return result;
+        return deepFreeze(result);
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: milestone archive directory may not exist */ }
 
   return null;
 }
@@ -777,7 +1048,7 @@ function getArchivedPhaseDirs(cwd) {
         });
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: milestone archive directory may not be readable */ }
 
   return results;
 }
@@ -824,7 +1095,7 @@ function extractCurrentMilestone(content, cwd) {
         version = milestoneMatch[1].trim();
       }
     }
-  } catch {}
+  } catch { /* intentional: STATE.md may not exist — version derived from ROADMAP.md fallback */ }
 
   // 2. Fallback: derive version from getMilestoneInfo pattern in ROADMAP.md itself
   if (!version) {
@@ -920,14 +1191,14 @@ function getRoadmapPhaseInternal(cwd, phaseNum) {
     const goalMatch = section.match(/\*\*Goal(?:\*\*:|\*?\*?:\*\*)\s*([^\n]+)/i);
     const goal = goalMatch ? goalMatch[1].trim() : null;
 
-    return {
+    return deepFreeze({
       found: true,
       phase_number: phaseNum.toString(),
       phase_name: phaseName,
       goal,
       section,
-    };
-  } catch {
+    });
+  } catch { /* intentional: ROADMAP.md may not exist or phase not found */
     return null;
   }
 }
@@ -959,12 +1230,12 @@ function checkAgentsInstalled() {
   const missing = [];
 
   if (!fs.existsSync(agentsDir)) {
-    return {
+    return deepFreeze({
       agents_installed: false,
       missing_agents: expectedAgents,
       installed_agents: [],
       agents_dir: agentsDir,
-    };
+    });
   }
 
   for (const agent of expectedAgents) {
@@ -976,12 +1247,12 @@ function checkAgentsInstalled() {
     }
   }
 
-  return {
+  return deepFreeze({
     agents_installed: installed.length > 0 && missing.length === 0,
     missing_agents: missing,
     installed_agents: installed,
     agents_dir: agentsDir,
-  };
+  });
 }
 
 // ─── Model alias resolution ───────────────────────────────────────────────────
@@ -1054,7 +1325,7 @@ function pathExistsInternal(cwd, targetPath) {
   try {
     fs.statSync(fullPath);
     return true;
-  } catch {
+  } catch { /* intentional: stat failure means path does not exist */
     return false;
   }
 }
@@ -1073,10 +1344,10 @@ function getMilestoneInfo(cwd) {
     // e.g. "- 🚧 **v1.2.1 Tech Debt** — Phases 1-8 (in progress)"
     const inProgressMatch = roadmap.match(/🚧\s*\*\*v(\d+(?:\.\d+)+)\s+([^*]+)\*\*/);
     if (inProgressMatch) {
-      return {
+      return deepFreeze({
         version: 'v' + inProgressMatch[1],
         name: inProgressMatch[2].trim(),
-      };
+      });
     }
 
     // Second: heading-format roadmaps — strip shipped milestones in <details> blocks
@@ -1085,19 +1356,19 @@ function getMilestoneInfo(cwd) {
     // Supports 2+ segment versions: v1.2, v1.2.1, v2.0.1, etc.
     const headingMatch = cleaned.match(/## .*v(\d+(?:\.\d+)+)[:\s]+([^\n(]+)/);
     if (headingMatch) {
-      return {
+      return deepFreeze({
         version: 'v' + headingMatch[1],
         name: headingMatch[2].trim(),
-      };
+      });
     }
     // Fallback: try bare version match (greedy — capture longest version string)
     const versionMatch = cleaned.match(/v(\d+(?:\.\d+)+)/);
-    return {
+    return deepFreeze({
       version: versionMatch ? versionMatch[0] : 'v1.0',
       name: 'milestone',
-    };
-  } catch {
-    return { version: 'v1.0', name: 'milestone' };
+    });
+  } catch { /* intentional: ROADMAP.md may not exist — return safe defaults */
+    return deepFreeze({ version: 'v1.0', name: 'milestone' });
   }
 }
 
@@ -1116,7 +1387,7 @@ function getMilestonePhaseFilter(cwd) {
     while ((m = phasePattern.exec(roadmap)) !== null) {
       milestonePhaseNums.add(m[1]);
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: ROADMAP.md may not exist — pass-all filter used as fallback */ }
 
   if (milestonePhaseNums.size === 0) {
     const passAll = () => true;
@@ -1160,14 +1431,14 @@ function filterSummaryFiles(files) {
  */
 function getPhaseFileStats(phaseDir) {
   const files = fs.readdirSync(phaseDir);
-  return {
+  return deepFreeze({
     plans: filterPlanFiles(files),
     summaries: filterSummaryFiles(files),
     hasResearch: files.some(f => f.endsWith('-RESEARCH.md') || f === 'RESEARCH.md'),
     hasContext: files.some(f => f.endsWith('-CONTEXT.md') || f === 'CONTEXT.md'),
     hasVerification: files.some(f => f.endsWith('-VERIFICATION.md') || f === 'VERIFICATION.md'),
     hasReviews: files.some(f => f.endsWith('-REVIEWS.md') || f === 'REVIEWS.md'),
-  };
+  });
 }
 
 /**
@@ -1180,9 +1451,156 @@ function readSubdirectories(dirPath, sort = false) {
     const entries = fs.readdirSync(dirPath, { withFileTypes: true });
     const dirs = entries.filter(e => e.isDirectory()).map(e => e.name);
     return sort ? dirs.sort((a, b) => comparePhaseNum(a, b)) : dirs;
-  } catch {
+  } catch { /* intentional: returns empty array when directory is missing or unreadable */
     return [];
   }
+}
+
+// --- Streaming output -----------------------------------------------------------
+
+/**
+ * Write text line-by-line to a file descriptor, invoking an optional callback per line.
+ * Uses fs.writeSync for synchronous, blocking output matching the project's existing pattern.
+ *
+ * @param {string} text - The text to stream (may contain newlines)
+ * @param {object} [opts]
+ * @param {number} [opts.fd=1] - File descriptor (1=stdout, 2=stderr)
+ * @param {function} [opts.callback] - Called with (line, index) for each line
+ * @returns {number} Number of lines written
+ */
+function streamLines(text, opts = {}) {
+  const fd = opts.fd != null ? opts.fd : 1;
+  const callback = typeof opts.callback === 'function' ? opts.callback : null;
+  if (!text || typeof text !== 'string') return 0;
+
+  // Split on newlines, but do not produce a trailing empty element from a final \n
+  const raw = text.endsWith('\n') ? text.slice(0, -1) : text;
+  if (raw.length === 0) return 0;
+  const lines = raw.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    fs.writeSync(fd, lines[i] + '\n');
+    if (callback) callback(lines[i], i);
+  }
+  return lines.length;
+}
+
+// --- Deterministic ordering ------------------------------------------------------
+
+/**
+ * Recursively sort object keys to produce deterministic JSON.stringify output.
+ * Arrays preserve element order but sort keys within object elements.
+ * Primitives pass through unchanged.
+ *
+ * @param {*} value - Any JSON-serializable value
+ * @returns {*} A new value with all object keys sorted alphabetically (deep)
+ */
+function deterministicSort(value) {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(item => deterministicSort(item));
+  }
+  const sorted = {};
+  const keys = Object.keys(value).sort();
+  for (let i = 0; i < keys.length; i++) {
+    sorted[keys[i]] = deterministicSort(value[keys[i]]);
+  }
+  return sorted;
+}
+
+// --- Lazy registry ----------------------------------------------------------------
+
+/**
+ * Create a lazy-initialized registry. The initFn is not called until .get()
+ * is first invoked. The result is cached for all subsequent .get() calls.
+ *
+ * @param {function} initFn - Zero-argument function that returns the registry value
+ * @returns {{ get: function, initialized: boolean }} Registry accessor
+ */
+function lazyRegistry(initFn) {
+  const UNSET = Symbol('lazyRegistry.UNSET');
+  let _value = UNSET;
+
+  return {
+    get() {
+      if (_value === UNSET) {
+        _value = initFn();
+      }
+      return _value;
+    },
+    get initialized() {
+      return _value !== UNSET;
+    },
+  };
+}
+
+// --- Token estimation -------------------------------------------------------------
+
+/**
+ * Tokens-per-word ratio profiles for different model families.
+ * Used by estimateTokens to approximate token counts without an external tokenizer.
+ */
+const TOKEN_RATIOS = {
+  default: 1.3,
+  claude: 1.35,
+  gpt: 1.3,
+  code: 2.0,
+};
+
+/**
+ * Approximate token count for a string using word-count heuristics.
+ * Splits on whitespace, counts words, multiplies by a tokens-per-word ratio
+ * selected by the optional model profile. Returns a rounded-up integer.
+ *
+ * @param {string} text - Input string to estimate tokens for
+ * @param {object} [opts] - Options
+ * @param {string} [opts.model] - Model profile name (key in TOKEN_RATIOS). Defaults to 'default'.
+ * @returns {number} Approximate token count (integer, 0 for empty/null/undefined input)
+ */
+function estimateTokens(text, opts) {
+  if (!text || typeof text !== 'string') return 0;
+  const words = text.trim().split(/\s+/);
+  if (words.length === 1 && words[0] === '') return 0;
+  const model = (opts && opts.model) || 'default';
+  const ratio = TOKEN_RATIOS[model] || TOKEN_RATIOS.default;
+  return Math.ceil(words.length * ratio);
+}
+
+// --- Context budget ---------------------------------------------------------------
+
+/**
+ * Select the highest-priority content sections that fit within a token budget.
+ * Sections are sorted by priority (lower number = higher priority, included first).
+ * Uses estimateTokens internally to measure each section's token cost.
+ *
+ * @param {number} limit - Maximum token budget (positive integer)
+ * @param {Array<{content: string, priority: number}>} sections - Content sections with priorities
+ * @param {object} [opts] - Options
+ * @param {string} [opts.model] - Model profile passed through to estimateTokens
+ * @returns {Array<{content: string, priority: number}>} Sections that fit, sorted by priority
+ */
+function budgetContext(limit, sections, opts) {
+  if (!sections || sections.length === 0 || limit <= 0) return [];
+
+  // Stable sort by priority ascending (lower number = higher priority)
+  const sorted = sections
+    .map((s, i) => ({ section: s, index: i }))
+    .sort((a, b) => a.section.priority - b.section.priority || a.index - b.index);
+
+  const result = [];
+  let remaining = limit;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const cost = estimateTokens(sorted[i].section.content, opts);
+    if (cost <= remaining) {
+      result.push(sorted[i].section);
+      remaining -= cost;
+    }
+  }
+
+  return result;
 }
 
 module.exports = {
@@ -1191,10 +1609,12 @@ module.exports = {
   safeReadFile,
   loadConfig,
   isGitIgnored,
+  safeExec,
   execGit,
   normalizeMd,
   escapeRegex,
   normalizePhaseName,
+  matchesPhaseDir,
   comparePhaseNum,
   searchPhaseInDir,
   findPhaseInternal,
@@ -1227,4 +1647,20 @@ module.exports = {
   readSubdirectories,
   getAgentsDir,
   checkAgentsInstalled,
+  CONFIG_VERSION,
+  configMigrations,
+  runConfigMigrations,
+  GsdError,
+  GSD_ERROR_CODES,
+  GSD_TRUNCATED_SENTINEL,
+  detectTruncation,
+  debugLog,
+  deepFreeze,
+  createCancelToken,
+  createFeatureFlags,
+  streamLines,
+  deterministicSort,
+  lazyRegistry,
+  estimateTokens,
+  budgetContext,
 };

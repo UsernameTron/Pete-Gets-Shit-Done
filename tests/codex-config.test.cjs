@@ -188,16 +188,16 @@ color: yellow
     assert.ok(result.includes('sandbox_mode = "workspace-write"'), 'has workspace-write');
   });
 
-  test('sets read-only for plan-checker', () => {
+  test('sets workspace-write for verifier', () => {
     const checker = `---
-name: gsd-plan-checker
+name: gsd-verifier
 description: Checks plans
-tools: Read, Grep, Glob
+tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
 <role>You check plans.</role>`;
-    const result = generateCodexAgentToml('gsd-plan-checker', checker);
-    assert.ok(result.includes('sandbox_mode = "read-only"'), 'has read-only');
+    const result = generateCodexAgentToml('gsd-verifier', checker);
+    assert.ok(result.includes('sandbox_mode = "workspace-write"'), 'has workspace-write');
   });
 
   test('includes developer_instructions from body', () => {
@@ -229,16 +229,17 @@ tools: Read, Grep, Glob
 // ─── CODEX_AGENT_SANDBOX mapping ────────────────────────────────────────────────
 
 describe('CODEX_AGENT_SANDBOX', () => {
-  test('has all 11 agents mapped', () => {
+  test('has all 15 agents mapped', () => {
     const agentNames = Object.keys(CODEX_AGENT_SANDBOX);
-    assert.strictEqual(agentNames.length, 11, 'has 11 agents');
+    assert.strictEqual(agentNames.length, 15, 'has 15 agents');
   });
 
   test('workspace-write agents have write tools', () => {
     const writeAgents = [
-      'gsd-executor', 'gsd-planner', 'gsd-phase-researcher',
-      'gsd-project-researcher', 'gsd-research-synthesizer', 'gsd-verifier',
+      'gsd-executor', 'gsd-planner', 'gsd-research-orchestrator',
+      'gsd-research-synthesizer', 'gsd-verifier',
       'gsd-codebase-mapper', 'gsd-roadmapper', 'gsd-debugger',
+      'gsd-ui-auditor', 'gsd-ui-researcher',
     ];
     for (const name of writeAgents) {
       assert.strictEqual(CODEX_AGENT_SANDBOX[name], 'workspace-write', `${name} is workspace-write`);
@@ -246,7 +247,10 @@ describe('CODEX_AGENT_SANDBOX', () => {
   });
 
   test('read-only agents have no write tools', () => {
-    const readOnlyAgents = ['gsd-plan-checker', 'gsd-integration-checker'];
+    const readOnlyAgents = [
+      'gsd-advisor-researcher', 'gsd-assumptions-analyzer',
+      'gsd-ui-checker', 'gsd-user-profiler', 'gsd-validator-hub',
+    ];
     for (const name of readOnlyAgents) {
       assert.strictEqual(CODEX_AGENT_SANDBOX[name], 'read-only', `${name} is read-only`);
     }
@@ -660,7 +664,7 @@ describe('installCodexConfig (integration)', () => {
     const { installCodexConfig } = require('../bin/install.js');
     const count = installCodexConfig(tmpTarget, agentsSrc);
 
-    assert.ok(count >= 11, `installed ${count} agents (expected >= 11)`);
+    assert.ok(count >= 15, `installed ${count} agents (expected >= 15)`);
 
     // Verify config.toml
     const configPath = path.join(tmpTarget, 'config.toml');
@@ -673,7 +677,7 @@ describe('installCodexConfig (integration)', () => {
     // Verify per-agent .toml files
     const agentsDir = path.join(tmpTarget, 'agents');
     assert.ok(fs.existsSync(path.join(agentsDir, 'gsd-executor.toml')), 'executor .toml exists');
-    assert.ok(fs.existsSync(path.join(agentsDir, 'gsd-plan-checker.toml')), 'plan-checker .toml exists');
+    assert.ok(fs.existsSync(path.join(agentsDir, 'gsd-verifier.toml')), 'verifier .toml exists');
 
     const executorToml = fs.readFileSync(path.join(agentsDir, 'gsd-executor.toml'), 'utf8');
     assert.ok(executorToml.includes('name = "gsd-executor"'), 'executor has name');
@@ -681,9 +685,9 @@ describe('installCodexConfig (integration)', () => {
     assert.ok(executorToml.includes('sandbox_mode = "workspace-write"'), 'executor is workspace-write');
     assert.ok(executorToml.includes('developer_instructions'), 'has developer_instructions');
 
-    const checkerToml = fs.readFileSync(path.join(agentsDir, 'gsd-plan-checker.toml'), 'utf8');
-    assert.ok(checkerToml.includes('name = "gsd-plan-checker"'), 'plan-checker has name');
-    assert.ok(checkerToml.includes('sandbox_mode = "read-only"'), 'plan-checker is read-only');
+    const verifierToml = fs.readFileSync(path.join(agentsDir, 'gsd-verifier.toml'), 'utf8');
+    assert.ok(verifierToml.includes('name = "gsd-verifier"'), 'verifier has name');
+    assert.ok(verifierToml.includes('sandbox_mode = "workspace-write"'), 'verifier is workspace-write');
   });
 });
 

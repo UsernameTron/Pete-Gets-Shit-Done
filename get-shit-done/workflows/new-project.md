@@ -8,7 +8,7 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-- gsd-project-researcher — Researches project-level technical decisions
+- gsd-research-orchestrator — Researches project-level technical decisions (scope: project)
 - gsd-research-synthesizer — Synthesizes findings from parallel research agents
 - gsd-roadmapper — Creates phased execution roadmaps
 </available_agent_types>
@@ -59,7 +59,7 @@ The document should describe what you want to build.
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init new-project)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
-AGENT_SKILLS_RESEARCHER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-project-researcher 2>/dev/null)
+AGENT_SKILLS_RESEARCHER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-research-orchestrator 2>/dev/null)
 AGENT_SKILLS_SYNTHESIZER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-synthesizer 2>/dev/null)
 AGENT_SKILLS_ROADMAPPER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-roadmapper 2>/dev/null)
 ```
@@ -611,7 +611,7 @@ Display spawning indicator:
   → Pitfalls research
 ```
 
-Spawn 4 parallel gsd-project-researcher agents with path references:
+Spawn 4 parallel gsd-research-orchestrator agents (scope: project) with path references:
 
 ```
 Task(prompt="<research_type>
@@ -652,7 +652,7 @@ Your STACK.md feeds into roadmap creation. Be prescriptive:
 Write to: .planning/research/STACK.md
 Use template: ~/.claude/get-shit-done/templates/research-project/STACK.md
 </output>
-", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Stack research")
+", subagent_type="gsd-research-orchestrator", model="{researcher_model}", description="Stack research")
 
 Task(prompt="<research_type>
 Project Research — Features dimension for [domain].
@@ -692,7 +692,7 @@ Your FEATURES.md feeds into requirements definition. Categorize clearly:
 Write to: .planning/research/FEATURES.md
 Use template: ~/.claude/get-shit-done/templates/research-project/FEATURES.md
 </output>
-", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Features research")
+", subagent_type="gsd-research-orchestrator", model="{researcher_model}", description="Features research")
 
 Task(prompt="<research_type>
 Project Research — Architecture dimension for [domain].
@@ -732,7 +732,7 @@ Your ARCHITECTURE.md informs phase structure in roadmap. Include:
 Write to: .planning/research/ARCHITECTURE.md
 Use template: ~/.claude/get-shit-done/templates/research-project/ARCHITECTURE.md
 </output>
-", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Architecture research")
+", subagent_type="gsd-research-orchestrator", model="{researcher_model}", description="Architecture research")
 
 Task(prompt="<research_type>
 Project Research — Pitfalls dimension for [domain].
@@ -772,7 +772,7 @@ Your PITFALLS.md prevents mistakes in roadmap/planning. For each pitfall:
 Write to: .planning/research/PITFALLS.md
 Use template: ~/.claude/get-shit-done/templates/research-project/PITFALLS.md
 </output>
-", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Pitfalls research")
+", subagent_type="gsd-research-orchestrator", model="{researcher_model}", description="Pitfalls research")
 ```
 
 After all 4 agents complete, spawn synthesizer to create SUMMARY.md:

