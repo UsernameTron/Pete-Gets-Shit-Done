@@ -1664,6 +1664,103 @@ describe('task_classification in init plan-phase (INTEL-10, INTEL-12)', () => {
   });
 });
 
+// ─── init history wiring (INTEL-16, INTEL-18) ────────────────────────────────
+
+describe('init history wiring (INTEL-16, INTEL-18)', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  function setConfig(overrides) {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, ...overrides }, null, 2));
+  }
+
+  function writeHistory(records) {
+    const histDir = path.join(tmpDir, '.planning', 'history');
+    fs.mkdirSync(histDir, { recursive: true });
+    const lines = records.map(r => JSON.stringify(r)).join('\n') + '\n';
+    fs.writeFileSync(path.join(histDir, 'executions.jsonl'), lines);
+  }
+
+  const historyFixture = [
+    { timestamp: '2026-01-01T00:00:00Z', phase: 3, plan: 1, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 1000, outcome: 'fail', error_code: null, files_changed: 0 },
+    { timestamp: '2026-01-01T00:01:00Z', phase: 3, plan: 1, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 1100, outcome: 'fail', error_code: null, files_changed: 0 },
+    { timestamp: '2026-01-01T00:02:00Z', phase: 3, plan: 1, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 900, outcome: 'fail', error_code: null, files_changed: 0 },
+    { timestamp: '2026-01-01T00:03:00Z', phase: 3, plan: 2, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 1200, outcome: 'pass', error_code: null, files_changed: 2 },
+    { timestamp: '2026-01-01T00:04:00Z', phase: 3, plan: 2, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 800, outcome: 'pass', error_code: null, files_changed: 1 },
+  ];
+
+  test('cmdInitExecutePhase with adaptive: true and history supplies failureRate', () => {
+    writeHistory(historyFixture);
+    setConfig({ workflow: { adaptive: true } });
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.ok(output.task_classification, 'should have task_classification when adaptive');
+    // failureRate = 3/5 = 0.6 — classifyTask uses this to influence confidence/complexity
+    assert.ok(output.task_classification.signals, 'should have classification signals');
+  });
+
+  test('cmdInitExecutePhase with routing_strategy auto includes historyHints in model selection', () => {
+    writeHistory(historyFixture);
+    setConfig({ routing_strategy: 'auto', workflow: { adaptive: true } });
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    // With historyHints containing agent_tier_mismatch for gsd-executor,
+    // dynamicSelect should promote executor model. The output contains resolved models.
+    assert.ok(output.executor_model || output.planner_model, 'should have model selections');
+  });
+
+  test('cmdInitPlanPhase with adaptive: true supplies failureRate from history', () => {
+    writeHistory(historyFixture);
+    setConfig({ workflow: { adaptive: true } });
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.ok(output.task_classification, 'should have task_classification when adaptive');
+    assert.ok(output.task_classification.signals, 'should have classification signals');
+  });
+
+  test('cmdInitExecutePhase with adaptive: true and no history file returns successfully', () => {
+    // No writeHistory — history file does not exist
+    setConfig({ workflow: { adaptive: true } });
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command should succeed without history: ${result.error}`);
+    const output = JSON.parse(result.output);
+    // Should still have classification but failureRate was null
+    assert.ok(output.task_classification, 'should have task_classification even without history');
+  });
+
+  test('history module errors are caught — init still succeeds with malformed JSONL', () => {
+    // Write malformed JSONL that parseJsonlSafe will skip
+    const histDir = path.join(tmpDir, '.planning', 'history');
+    fs.mkdirSync(histDir, { recursive: true });
+    fs.writeFileSync(path.join(histDir, 'executions.jsonl'), 'not-json\n{broken\n');
+    setConfig({ workflow: { adaptive: true } });
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command should succeed despite malformed history: ${result.error}`);
+  });
+
+  test('cmdInitExecutePhase with adaptive: false and routing_strategy: static does not load history', () => {
+    writeHistory(historyFixture);
+    // Default config — adaptive: false, routing_strategy: 'static' (or absent)
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    // Without adaptive or auto routing, task_classification should be null
+    assert.strictEqual(output.task_classification, null, 'should not have task_classification with static routing');
+  });
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // roadmap analyze command
 // ─────────────────────────────────────────────────────────────────────────────

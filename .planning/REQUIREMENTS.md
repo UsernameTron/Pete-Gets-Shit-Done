@@ -28,12 +28,12 @@ Make the GSD engine smarter — route models by task complexity, learn from exec
 
 ### Phase 32 — Execution History & Pattern Learning
 
-- [ ] **INTEL-13**: Create `recordExecution(cwd, phaseNum, planNum, outcome)` that appends JSONL records to `.planning/history/executions.jsonl` — fields: timestamp, phase, plan, agent, model_used, duration_ms, outcome, error_code, files_changed.
-- [ ] **INTEL-14**: Create `queryHistory(cwd, filters)` that reads executions.jsonl and returns filtered/aggregated results — supports filtering by agent, phase range, outcome, date range.
-- [ ] **INTEL-15**: Create `detectPatterns(cwd)` that analyzes history for: frequently-failing phases, agents that consistently need quality tier, average execution times by complexity, cost distribution across tiers.
-- [ ] **INTEL-16**: Integrate history into `dynamicSelect()` — when history exists and `routing_strategy: 'auto'`, use past agent performance to influence tier selection.
-- [ ] **INTEL-17**: History hygiene: auto-rotate executions.jsonl when >1000 records (keep latest 500), add `gsd-tools history` CLI commands (list, stats, prune).
-- [ ] **INTEL-18**: Wire `recordExecution()` into post-execution workflow — call from execute-phase completion, plan completion summaries, and verification outcomes.
+- [x] **INTEL-13**: Create `recordExecution(cwd, phaseNum, planNum, outcome)` that appends JSONL records to `.planning/history/executions.jsonl` — fields: timestamp, phase, plan, agent, model_used, duration_ms, outcome, error_code, files_changed.
+- [x] **INTEL-14**: Create `queryHistory(cwd, filters)` that reads executions.jsonl and returns filtered/aggregated results — supports filtering by agent, phase range, outcome, date range.
+- [x] **INTEL-15**: Create `detectPatterns(cwd)` that analyzes history for: frequently-failing phases, agents that consistently need quality tier, average execution times by complexity, cost distribution across tiers.
+- [x] **INTEL-16**: Integrate history into `dynamicSelect()` — when history exists and `routing_strategy: 'auto'`, use past agent performance to influence tier selection.
+- [x] **INTEL-17**: History hygiene: auto-rotate executions.jsonl when >1000 records (keep latest 500), add `gsd-tools history` CLI commands (list, stats, prune).
+- [x] **INTEL-18**: Wire `recordExecution()` into post-execution workflow — call from execute-phase completion, plan completion summaries, and verification outcomes.
 
 ### Phase 33 — Integration, Testing & Documentation
 
@@ -70,12 +70,12 @@ Make the GSD engine smarter — route models by task complexity, learn from exec
 | INTEL-10 | Phase 31 | Complete |
 | INTEL-11 | Phase 31 | Complete |
 | INTEL-12 | Phase 31 | Complete |
-| INTEL-13 | Phase 32 | Pending |
-| INTEL-14 | Phase 32 | Pending |
-| INTEL-15 | Phase 32 | Pending |
-| INTEL-16 | Phase 32 | Pending |
-| INTEL-17 | Phase 32 | Pending |
-| INTEL-18 | Phase 32 | Pending |
+| INTEL-13 | Phase 32 | Complete |
+| INTEL-14 | Phase 32 | Complete |
+| INTEL-15 | Phase 32 | Complete |
+| INTEL-16 | Phase 32 | Complete |
+| INTEL-17 | Phase 32 | Complete |
+| INTEL-18 | Phase 32 | Complete |
 | INTEL-19 | Phase 33 | Pending |
 | INTEL-20 | Phase 33 | Pending |
 | INTEL-21 | Phase 33 | Pending |

@@ -110,13 +110,47 @@ function cmdInitExecutePhase(cwd, phase, raw) {
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
   const taskContext = buildTaskContext(phaseInfo, phaseInfo?.plans, phase_req_ids, config);
 
+  // Historical failure rate for classification and routing (INTEL-18)
+  let failureRate = null;
+  let historyHints = null;
+  if (config.adaptive || config.routing_strategy === 'auto') {
+    try {
+      const history = require('./history.cjs');
+      const phaseNum = phaseInfo?.phase_number;
+      if (phaseNum != null) {
+        const phaseRecords = history.queryHistory(cwd, {
+          phaseRange: [phaseNum, phaseNum],
+        });
+        if (phaseRecords.total > 0) {
+          const failures = phaseRecords.records.filter(r => r.outcome === 'fail').length;
+          failureRate = failures / phaseRecords.total;
+        }
+      }
+      // History hints for dynamic routing (INTEL-16)
+      if (config.routing_strategy === 'auto') {
+        const patterns = history.detectPatterns(cwd);
+        historyHints = {
+          failureRate,
+          patterns: patterns.patterns || [],
+          summary: patterns.summary || null,
+        };
+      }
+    } catch {
+      // History module unavailable or history file missing — degrade gracefully
+    }
+  }
+
+  if (historyHints && taskContext) {
+    taskContext.historyHints = historyHints;
+  }
+
   // Task classification for adaptive workflows (INTEL-10, INTEL-12)
   let task_classification = null;
   if (config.adaptive) {
     const { classifyTask } = require('./classify.cjs');
     const classContext = {
       reqIds: phase_req_ids,
-      failureRate: null, // Phase 32 will supply historical failure rate
+      failureRate,
     };
     task_classification = classifyTask(phaseInfo, phaseInfo?.plans, classContext);
   }
@@ -216,13 +250,47 @@ function cmdInitPlanPhase(cwd, phase, raw) {
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
   const taskContext = buildTaskContext(phaseInfo, null, phase_req_ids, config);
 
+  // Historical failure rate for classification and routing (INTEL-18)
+  let failureRate = null;
+  let historyHints = null;
+  if (config.adaptive || config.routing_strategy === 'auto') {
+    try {
+      const history = require('./history.cjs');
+      const phaseNum = phaseInfo?.phase_number;
+      if (phaseNum != null) {
+        const phaseRecords = history.queryHistory(cwd, {
+          phaseRange: [phaseNum, phaseNum],
+        });
+        if (phaseRecords.total > 0) {
+          const failures = phaseRecords.records.filter(r => r.outcome === 'fail').length;
+          failureRate = failures / phaseRecords.total;
+        }
+      }
+      // History hints for dynamic routing (INTEL-16)
+      if (config.routing_strategy === 'auto') {
+        const patterns = history.detectPatterns(cwd);
+        historyHints = {
+          failureRate,
+          patterns: patterns.patterns || [],
+          summary: patterns.summary || null,
+        };
+      }
+    } catch {
+      // History module unavailable or history file missing — degrade gracefully
+    }
+  }
+
+  if (historyHints && taskContext) {
+    taskContext.historyHints = historyHints;
+  }
+
   // Task classification for adaptive workflows (INTEL-10, INTEL-12)
   let task_classification = null;
   if (config.adaptive) {
     const { classifyTask } = require('./classify.cjs');
     const classContext = {
       reqIds: phase_req_ids,
-      failureRate: null, // Phase 32 will supply historical failure rate
+      failureRate,
     };
     task_classification = classifyTask(phaseInfo, null, classContext);
   }

@@ -310,4 +310,93 @@ describe('dynamicSelect()', () => {
     assert.strictEqual(result.tier, 'quality'); // complex -> quality, no profile override
     assert.ok(result.rationale.includes('profile=balanced'));
   });
+
+  // ── History-based promotion (INTEL-16) ──────────────────────────────────
+
+  test('promotes to quality when agent_tier_mismatch pattern exists', () => {
+    const taskContext = {
+      complexity: 'standard',
+      historyHints: {
+        failureRate: 0.6,
+        patterns: [
+          { type: 'agent_tier_mismatch', agent: 'gsd-executor', recommended_tier: 'quality', evidence: '60% fail on budget' },
+        ],
+        summary: null,
+      },
+    };
+    const result = dynamicSelect('gsd-executor', taskContext, balancedConfig);
+    assert.strictEqual(result.tier, 'quality');
+    assert.strictEqual(result.alias, 'opus'); // gsd-executor quality = opus
+  });
+
+  test('promotes budget to balanced when phase has high failure rate', () => {
+    const taskContext = {
+      complexity: 'trivial',
+      historyHints: {
+        failureRate: 0.5,
+        patterns: [
+          { type: 'failing_phase', phase: 5, failure_rate: 0.5, executions: 10 },
+        ],
+        summary: null,
+      },
+    };
+    const result = dynamicSelect('gsd-codebase-mapper', taskContext, budgetConfig);
+    // trivial -> budget tier, but phase failure promotes budget -> balanced
+    assert.strictEqual(result.tier, 'balanced');
+  });
+
+  test('rationale includes history-promoted annotation', () => {
+    const taskContext = {
+      complexity: 'standard',
+      historyHints: {
+        failureRate: 0.4,
+        patterns: [
+          { type: 'agent_tier_mismatch', agent: 'gsd-planner', recommended_tier: 'quality', evidence: '70% fail on budget' },
+        ],
+        summary: null,
+      },
+    };
+    const result = dynamicSelect('gsd-planner', taskContext, balancedConfig);
+    assert.ok(result.rationale.includes('history-promoted=true'));
+    assert.ok(result.rationale.includes('70% fail on budget'));
+  });
+
+  test('with no historyHints produces same result as before', () => {
+    const withHints = dynamicSelect('gsd-executor', { complexity: 'standard' }, balancedConfig);
+    const without = dynamicSelect('gsd-executor', { complexity: 'standard', historyHints: undefined }, balancedConfig);
+    assert.strictEqual(withHints.tier, without.tier);
+    assert.strictEqual(withHints.alias, without.alias);
+  });
+
+  test('does not promote when already at quality tier', () => {
+    const taskContext = {
+      complexity: 'critical',
+      historyHints: {
+        failureRate: 0.8,
+        patterns: [
+          { type: 'agent_tier_mismatch', agent: 'gsd-executor', recommended_tier: 'quality', evidence: '80% fail on budget' },
+        ],
+        summary: null,
+      },
+    };
+    // quality config forces quality tier — already at max, no promotion should happen
+    const result = dynamicSelect('gsd-executor', taskContext, qualityConfig);
+    assert.strictEqual(result.tier, 'quality');
+    assert.ok(!result.rationale.includes('history-promoted'), 'should not promote when already quality');
+  });
+
+  test('with empty patterns array does not promote', () => {
+    const taskContext = {
+      complexity: 'trivial',
+      historyHints: {
+        failureRate: 0.1,
+        patterns: [],
+        summary: null,
+      },
+    };
+    const result = dynamicSelect('gsd-codebase-mapper', taskContext, budgetConfig);
+    assert.strictEqual(result.tier, 'budget');
+    assert.ok(!result.rationale.includes('history-promoted'));
+    assert.ok(!result.rationale.includes('phase-promoted'));
+  });
 });
