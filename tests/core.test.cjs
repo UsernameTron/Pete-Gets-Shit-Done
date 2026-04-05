@@ -2329,25 +2329,27 @@ describe('config migration system', () => {
     cleanup(tmpDir);
   });
 
-  test('unversioned config gets migrated to v1 with config_version stamp', () => {
+  test('unversioned config gets migrated through all versions to CONFIG_VERSION', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
     fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick' }));
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.config_version, CONFIG_VERSION);
   });
 
-  test('config already at v1 skips migration', () => {
+  test('config at v1 gets migrated to v2 with intelligence layer keys', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
     const original = { config_version: 1, granularity: 'standard' };
     fs.writeFileSync(configPath, JSON.stringify(original));
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.config_version, 2);
     assert.strictEqual(raw.granularity, 'standard');
+    assert.strictEqual(raw.routing_strategy, 'static');
+    assert.strictEqual(raw.adaptive, false);
   });
 
-  test('depth + multiRepo both migrated in single pass', () => {
+  test('depth + multiRepo both migrated in single pass (chains through to v2)', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
     // Create a sub-repo directory so detectSubRepos finds something
     const subDir = path.join(tmpDir, 'sub-project');
@@ -2356,7 +2358,7 @@ describe('config migration system', () => {
     fs.writeFileSync(configPath, JSON.stringify({ depth: 'standard', multiRepo: true }));
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.config_version, CONFIG_VERSION);
     assert.strictEqual(raw.granularity, 'standard');
     assert.ok(!('depth' in raw));
     // multiRepo should be removed if sub_repos were detected
@@ -2411,6 +2413,94 @@ describe('config migration system', () => {
       assert.strictEqual(typeof m.migrate, 'function');
       assert.ok(m.to > m.from, 'to must be greater than from');
     }
+  });
+});
+
+// ─── Config Migration v1 -> v2 ──────────────────────────────────────────────
+
+describe('Config migration v1 -> v2', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('v1 config gets routing_strategy and adaptive added', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, model_profile: 'balanced' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.routing_strategy, 'static');
+    assert.strictEqual(raw.adaptive, false);
+    assert.strictEqual(raw.config_version, 2);
+  });
+
+  test('v1 config preserves existing routing_strategy', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, routing_strategy: 'dynamic' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.routing_strategy, 'dynamic');
+  });
+
+  test('v1 config preserves existing adaptive', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, adaptive: true }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.adaptive, true);
+  });
+
+  test('v0 config runs both migrations (chains 0->1->2)', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'comprehensive' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.granularity, 'fine', 'depth->granularity from 0->1');
+    assert.strictEqual(raw.routing_strategy, 'static', 'routing_strategy from 1->2');
+    assert.strictEqual(raw.adaptive, false, 'adaptive from 1->2');
+    assert.strictEqual(raw.config_version, 2);
+    assert.ok(!('depth' in raw), 'depth key should be removed by 0->1');
+  });
+
+  test('v2 config is not mutated', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const original = { config_version: 2, routing_strategy: 'auto', adaptive: true };
+    fs.writeFileSync(configPath, JSON.stringify(original));
+    const beforeContent = fs.readFileSync(configPath, 'utf-8');
+    loadConfig(tmpDir);
+    const afterContent = fs.readFileSync(configPath, 'utf-8');
+    assert.strictEqual(beforeContent, afterContent, 'config.json should not be rewritten');
+    const raw = JSON.parse(afterContent);
+    assert.strictEqual(raw.config_version, 2);
+    assert.strictEqual(raw.routing_strategy, 'auto');
+    assert.strictEqual(raw.adaptive, true);
+  });
+
+  test('missing config.json returns defaults with v2 keys', () => {
+    // tmpDir has .planning/ but no config.json
+    const result = loadConfig(tmpDir);
+    assert.strictEqual(result.routing_strategy, 'static');
+    assert.strictEqual(result.adaptive, false);
+  });
+
+  test('migration is idempotent (loadConfig twice on same v1 config)', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, model_profile: 'balanced' }));
+    const first = loadConfig(tmpDir);
+    const second = loadConfig(tmpDir);
+    assert.strictEqual(first.routing_strategy, second.routing_strategy);
+    assert.strictEqual(first.adaptive, second.adaptive);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 2);
+  });
+
+  test('CONFIG_VERSION is 2', () => {
+    assert.strictEqual(CONFIG_VERSION, 2);
   });
 });
 

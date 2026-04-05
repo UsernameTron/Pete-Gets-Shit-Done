@@ -361,7 +361,7 @@ function safeReadFile(filePath) {
   }
 }
 
-const CONFIG_VERSION = 1;
+const CONFIG_VERSION = 2;
 
 const configMigrations = [
   {
@@ -382,6 +382,21 @@ const configMigrations = [
           parsed.planning.commit_docs = false;
           delete parsed.multiRepo;
         }
+      }
+    },
+  },
+  {
+    from: 1, to: 2,
+    migrate(parsed, _cwd) {
+      // Add intelligence layer defaults for existing v1 configs
+      if (!('routing_strategy' in parsed)) {
+        parsed.routing_strategy = 'static';
+      }
+      // Check both top-level and nested workflow.adaptive (loadConfig reads both)
+      const hasAdaptive = ('adaptive' in parsed) ||
+        (parsed.workflow && 'adaptive' in parsed.workflow);
+      if (!hasAdaptive) {
+        parsed.adaptive = false;
       }
     },
   },
