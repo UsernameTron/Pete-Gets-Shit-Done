@@ -6,6 +6,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.30.0] - 2026-04-04
+
+### Added
+- **Layered architecture boundaries** — Module boundary interfaces with import direction enforcement and 4-tier layer system (core.cjs, frontmatter.cjs, config.cjs, state.cjs, init.cjs)
+- **Sync-compatible cancel tokens** — `createCancelToken()` for cooperative cancellation in sync CommonJS operations
+- **Feature flag system** — `createFeatureFlags(config)` with named toggles, config-driven, default-off gates for experimental capabilities
+- **Skills discovery** — `discoverSkills()` and `parseSkillMetadata()` for dynamic skill scanning and metadata extraction
+- **Skills audit** — `auditSkills()` detects orphaned skills (on disk, not in config) and missing skills (in config, not on disk)
+- **Skill versioning** — `path@version` pinned references with drift warnings via `checkSkillVersions()`
+- **Skill validation** — `validateSkillMetadata()` and `validateSkillStructure()` with feature-flagged registry integration
+- **`validate-skill` CLI command** — Runs metadata and structure validation with structured output
+- **`audit-skills` CLI command** — Reports orphaned, missing, and broken skill references
+- **`check-skill-versions` CLI command** — Reports version matches, drifts, and unversioned refs
+
+### Changed
+- **`validateShellArg()` wired to production** — `execGitValidated()` wrapper applies shell validation across 5 git call sites
+- **`__GSD_TRUNCATED__` sentinel wired** — `detectTruncation()` checks output for truncation and surfaces structured stderr warnings
+- **Plugin metadata aligned** — Author fields synchronized across package.json and plugin manifests
+
+### Fixed
+- **Architecture boundary violations** — Module import direction now enforced (lower layers never import from higher)
+
 ## [1.28.0] - 2026-03-22
 
 ### Added

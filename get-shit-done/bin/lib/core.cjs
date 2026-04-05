@@ -893,6 +893,19 @@ function normalizePhaseName(phase) {
   return str;
 }
 
+/**
+ * Check if a directory name matches a normalized phase identifier.
+ * Handles both NN-slug (e.g. 20-skills-overhaul) and phase-N (e.g. phase-20) conventions.
+ */
+function matchesPhaseDir(dirName, normalized) {
+  if (dirName.startsWith(normalized)) return true;
+  if (dirName.toUpperCase().startsWith(normalized.toUpperCase())) return true;
+  // Support phase-N naming convention (e.g., phase-20, phase-18)
+  const phasePfx = dirName.match(/^phase-(\d+[A-Z]?(?:\.\d+)*)/i);
+  if (phasePfx && normalizePhaseName(phasePfx[1]) === normalized) return true;
+  return false;
+}
+
 function comparePhaseNum(a, b) {
   const pa = String(a).match(/^(\d+)([A-Z])?((?:\.\d+)*)/i);
   const pb = String(b).match(/^(\d+)([A-Z])?((?:\.\d+)*)/i);
@@ -926,16 +939,12 @@ function searchPhaseInDir(baseDir, relBase, normalized) {
   try {
     const dirs = readSubdirectories(baseDir, true);
     // Match: starts with normalized (numeric) OR contains normalized as prefix segment (custom ID)
-    const match = dirs.find(d => {
-      if (d.startsWith(normalized)) return true;
-      // For custom IDs like PROJ-42, match case-insensitively
-      if (d.toUpperCase().startsWith(normalized.toUpperCase())) return true;
-      return false;
-    });
+    const match = dirs.find(d => matchesPhaseDir(d, normalized));
     if (!match) return null;
 
-    // Extract phase number and name — supports both numeric (01-name) and custom (PROJ-42-name)
-    const dirMatch = match.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i)
+    // Extract phase number and name — supports phase-N, numeric (01-name), and custom (PROJ-42-name)
+    const dirMatch = match.match(/^phase-(\d+[A-Z]?(?:\.\d+)*)(?:-(.+))?$/i)
+      || match.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i)
       || match.match(/^([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*)-(.+)/i)
       || [null, match, null];
     const phaseNumber = dirMatch ? dirMatch[1] : normalized;
@@ -1605,6 +1614,7 @@ module.exports = {
   normalizeMd,
   escapeRegex,
   normalizePhaseName,
+  matchesPhaseDir,
   comparePhaseNum,
   searchPhaseInDir,
   findPhaseInternal,
