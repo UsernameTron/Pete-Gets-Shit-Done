@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Ship Readiness & Hygiene
-status: active
+status: complete
 last_updated: "2026-04-05T00:00:00.000Z"
-last_activity: 2026-04-05 -- Phase 28 complete, Phase 29 next
+last_activity: 2026-04-05 -- All phases complete, milestone ready for lifecycle
 progress:
   total_phases: 2
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Active:** v1.9 Ship Readiness & Hygiene
+**Active:** v1.9 Ship Readiness & Hygiene (all phases complete)
 **Previous:** v1.8 Documentation & Accuracy (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: 29 — DEVOPS-HANDOFF.md Rewrite (not started)
+Phase: All complete
 Plan: —
-Status: Phase 28 complete, continuing autonomous execution
-Last activity: 2026-04-05 — Phase 28 executed (3 plans, 13 files updated, 1 deleted)
+Status: v1.9 all phases executed, milestone lifecycle pending
+Last activity: 2026-04-05 — Phase 29 executed (1 plan, DEVOPS-HANDOFF.md rewritten from 22 to 264 lines)
 
-Progress: [=====.....] 1/2 phases | 3/5 requirements
+Progress: [==========] 2/2 phases | 5/5 requirements
 
 ## Milestone History
 
@@ -47,6 +47,6 @@ Progress: [=====.....] 1/2 phases | 3/5 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 28 executed — stale agent references replaced across 13 files
-**Stopped at**: Phase 28 complete, autonomous workflow continuing
-**Next**: Phase 29 — DEVOPS-HANDOFF.md Rewrite (discuss → plan → execute)
+**Last action**: Phase 29 executed — DEVOPS-HANDOFF.md rewritten (22 → 264 lines, all live metrics)
+**Stopped at**: All v1.9 phases complete, milestone lifecycle next
+**Next**: Milestone audit → complete → cleanup for v1.9
