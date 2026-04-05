@@ -1,13 +1,14 @@
 # Todo
 
-## Current Status: Between Milestones -- v1.8 Archived
+## Current Status: Between Milestones -- v1.9 Archived
 
-v1.8 Documentation & Accuracy milestone archived. All 9 milestones (v1.0-v1.8) shipped.
-1913 tests passing across 373 suites. 15 active agents, 7 archived.
+v1.9 Ship Readiness & Hygiene milestone complete. All 10 milestones (v1.0-v1.9) shipped.
+2046 tests passing (1913 unit + 133 E2E). 15 active agents, 7 archived.
 
 ## Open Items
 
 - [ ] Decide next milestone direction (`/gsd:new-milestone`)
+- [ ] Merge `chore/session-wrap-0403` to main or create PR (`/gsd:ship`)
 
 ## Completed
 
@@ -20,15 +21,15 @@ v1.8 Documentation & Accuracy milestone archived. All 9 milestones (v1.0-v1.8) s
 - [x] v1.6 Maintainability (2026-04-04)
 - [x] v1.7 End-to-End Integration Testing (2026-04-04)
 - [x] v1.8 Documentation & Accuracy (2026-04-05)
+- [x] v1.9 Ship Readiness & Hygiene (2026-04-05)
 - [x] Project finalized via /gsd:finalize (2026-04-05)
 
 ## Session Handoff
 
 **State tracking**: `.planning/STATE.md` is canonical.
-**Branch**: `chore/session-wrap-0403` — 4 commits pushed, CI re-running
-**Commits this session**:
-1. `3e5856c` — c8 coverage config moved to `.c8rc.json` (Windows CI 0% coverage fix)
-2. `3068398` — Archived phase plans allowlisted in prompt injection scanner
-3. `b0f4e7d` — Author restored to "Pete Connor" across 3 manifests
-4. `02ea838` — Windows path separator fix in planningPaths test assertion
-**Next**: Confirm CI green, then `/gsd:ship` to create PR or `/gsd:new-milestone`
+**Branch**: `chore/session-wrap-0403`
+**v1.9 work this session**:
+- Phase 28: Stale Reference Cleanup (3 plans, 13 files updated, 1 deleted)
+- Phase 29: DEVOPS-HANDOFF.md rewrite (22 → 264 lines, live metrics)
+- Milestone lifecycle: audit passed (5/5 requirements), archived
+**Next**: Merge to main or `/gsd:new-milestone`
