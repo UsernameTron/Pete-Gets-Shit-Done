@@ -6,14 +6,24 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Active:** v1.8 Documentation & Accuracy (2026-04-05)
+**Active:** v1.9 Ship Readiness & Hygiene (2026-04-05)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2046 total (1913 unit + 133 E2E), 2027 passing, 19 failing across 74 test files
+**Tests:** 2046 total (1913 unit + 133 E2E), all passing across 74 test files
 **Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
 **Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-## Active Requirements (v1.8)
+## Current Milestone: v1.9 Ship Readiness & Hygiene
+
+**Goal:** Make every documentation file match reality — remove stale references, rewrite placeholder docs, ensure handoff-readiness.
+
+**Target features:**
+- Clean 13 active files of stale consolidated agent references
+- Update PROJECT.md Tech Debt section to reflect actual remaining debt
+- Rewrite DEVOPS-HANDOFF.md from placeholder to comprehensive handoff document
+- Sync all documentation metrics with current state
+
+## Active Requirements (v1.9)
 
 *Requirements will be defined in REQUIREMENTS.md after PROJECT.md update.*
 
@@ -186,13 +196,9 @@ All 6 requirements verified complete:
 
 ## Tech Debt
 
-**19 test failures across 4 root causes** (identified in end-to-end analysis):
-1. **13 failures**: Stale agent references in MODEL_PROFILES, workflows, and test expectations (consolidated agents still referenced by old names)
-2. **2 failures**: gsd-validator-hub.md missing `color:` field, has forbidden `skills:` block
-3. **2 failures**: gsd-verifier.md missing `# hooks:` comment, 64KB exceeds 50K threshold
-4. **2 failures**: Missing plugin/agent directory structures expected by tests
+**Stale agent references in 13 active files**: v1.2 consolidated 5 agents into 2 (gsd-verifier, gsd-research-orchestrator), but references to old names persist in commands, docs, governance templates, and agent definitions. v1.8 fixed test-related references; remaining files are documentation and workflow definitions.
 
-**Documentation inaccuracies**: PROJECT.md test counts stale, agent counts inconsistent, CLAUDE.md references need sync.
+**DEVOPS-HANDOFF.md placeholder**: 22-line bootstrap text with contradictory claims ("No test suite yet", "No CI/CD pipeline yet"). Needs full rewrite to match project maturity.
 
 ## Evolution
 
@@ -212,4 +218,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 -- v1.8 Documentation & Accuracy milestone started*
+*Last updated: 2026-04-05 -- v1.9 Ship Readiness & Hygiene milestone started*

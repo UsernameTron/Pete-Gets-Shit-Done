@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.8
-milestone_name: Documentation & Accuracy
-status: archived
+milestone: v1.9
+milestone_name: Ship Readiness & Hygiene
+status: active
 last_updated: "2026-04-05T00:00:00.000Z"
-last_activity: 2026-04-05 -- v1.8 milestone completed
+last_activity: 2026-04-05 -- Milestone v1.9 started
 progress:
   total_phases: 2
-  completed_phases: 2
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
 ---
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Active:** None — between milestones
+**Active:** v1.9 Ship Readiness & Hygiene
 **Previous:** v1.8 Documentation & Accuracy (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: Complete
-Milestone: v1.8 Documentation & Accuracy — completed
-Status: All phases shipped. Phase 26 fixed 19 test failures across 26 files. Phase 27 synced stale metrics in README.md and README-gsd.md. 1913/1913 tests pass.
-Last activity: 2026-04-05 -- v1.8 milestone completed
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-05 — Milestone v1.9 started
 
-Progress: [##########] 2/2 phases | 7/7 requirements
+Progress: [..........] 0/2 phases | 0/5 requirements
 
 ## Milestone History
 
@@ -47,6 +47,6 @@ Progress: [##########] 2/2 phases | 7/7 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.8 milestone completed — all phases shipped
-**Stopped at**: Milestone lifecycle complete
-**Next**: `/gsd:new-milestone` or `/gsd:ship` to create PR for this branch
+**Last action**: v1.9 milestone initialized — defining requirements
+**Stopped at**: Requirements definition
+**Next**: Define REQUIREMENTS.md, then ROADMAP.md, then `/gsd:plan-phase 28`
