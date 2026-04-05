@@ -377,3 +377,231 @@ describe('detectPatterns', () => {
     assert.strictEqual(result.summary.avg_duration_ms, 20000);
   });
 });
+
+// ─── Auto-rotation tests (Plan 02) ──────────────────────────────────────────
+
+describe('auto-rotation', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('ROTATION_THRESHOLD and ROTATION_KEEP are exported', () => {
+    assert.strictEqual(ROTATION_THRESHOLD, 1000);
+    assert.strictEqual(ROTATION_KEEP, 500);
+  });
+
+  test('auto-rotate does not trigger when records <= 1000', () => {
+    // Write exactly 1000 lines manually to avoid 1000 recordExecution calls
+    const historyPath = getHistoryPath(tmpDir);
+    fs.mkdirSync(path.dirname(historyPath), { recursive: true });
+    const lines = [];
+    for (let i = 0; i < 999; i++) {
+      lines.push(JSON.stringify({ timestamp: new Date().toISOString(), phase: 1, plan: 1, outcome: 'pass', agent: 'test', model_used: null, duration_ms: null, error_code: null, files_changed: 0 }));
+    }
+    fs.writeFileSync(historyPath, lines.join('\n') + '\n');
+
+    // This makes it 1000 total — should NOT trigger rotation
+    recordExecution(tmpDir, 99, 1, { outcome: 'pass' });
+
+    const afterRecords = parseJsonlSafe(historyPath);
+    assert.strictEqual(afterRecords.length, 1000, 'Should have exactly 1000 records (no rotation)');
+  });
+
+  test('auto-rotate triggers when records exceed 1000', () => {
+    const historyPath = getHistoryPath(tmpDir);
+    fs.mkdirSync(path.dirname(historyPath), { recursive: true });
+    const lines = [];
+    for (let i = 0; i < 1000; i++) {
+      lines.push(JSON.stringify({ timestamp: new Date().toISOString(), phase: i, plan: 1, outcome: 'pass', agent: 'test', model_used: null, duration_ms: null, error_code: null, files_changed: 0 }));
+    }
+    fs.writeFileSync(historyPath, lines.join('\n') + '\n');
+
+    // This makes it 1001 total — should trigger rotation
+    recordExecution(tmpDir, 9999, 1, { outcome: 'pass', agent: 'trigger' });
+
+    const afterRecords = parseJsonlSafe(historyPath);
+    assert.strictEqual(afterRecords.length, ROTATION_KEEP, `Should be rotated to ${ROTATION_KEEP} records`);
+  });
+
+  test('auto-rotate keeps the latest 500 records', () => {
+    const historyPath = getHistoryPath(tmpDir);
+    fs.mkdirSync(path.dirname(historyPath), { recursive: true });
+    const lines = [];
+    for (let i = 0; i < 1000; i++) {
+      lines.push(JSON.stringify({ timestamp: new Date().toISOString(), phase: i, plan: 1, outcome: 'pass', agent: 'old', model_used: null, duration_ms: null, error_code: null, files_changed: 0 }));
+    }
+    fs.writeFileSync(historyPath, lines.join('\n') + '\n');
+
+    // The 1001st record should trigger rotation and be in the kept set
+    recordExecution(tmpDir, 9999, 1, { outcome: 'fail', agent: 'newest' });
+
+    const afterRecords = parseJsonlSafe(historyPath);
+    // The last record should be the one we just appended
+    const lastRecord = afterRecords[afterRecords.length - 1];
+    assert.strictEqual(lastRecord.phase, 9999);
+    assert.strictEqual(lastRecord.agent, 'newest');
+    assert.strictEqual(lastRecord.outcome, 'fail');
+  });
+
+  test('rotated file is valid JSONL', () => {
+    const historyPath = getHistoryPath(tmpDir);
+    fs.mkdirSync(path.dirname(historyPath), { recursive: true });
+    const lines = [];
+    for (let i = 0; i < 1000; i++) {
+      lines.push(JSON.stringify({ timestamp: new Date().toISOString(), phase: i, plan: 1, outcome: 'pass', agent: 'test', model_used: null, duration_ms: null, error_code: null, files_changed: 0 }));
+    }
+    fs.writeFileSync(historyPath, lines.join('\n') + '\n');
+
+    recordExecution(tmpDir, 9999, 1, { outcome: 'pass' });
+
+    // Re-parse to verify every line is valid JSON
+    const content = fs.readFileSync(historyPath, 'utf8');
+    const nonEmptyLines = content.split('\n').filter(l => l.trim());
+    for (const line of nonEmptyLines) {
+      assert.doesNotThrow(() => JSON.parse(line), `Line should be valid JSON: ${line.slice(0, 80)}`);
+    }
+    assert.strictEqual(nonEmptyLines.length, ROTATION_KEEP);
+  });
+});
+
+// ─── formatHistoryList tests (Plan 02) ───────────────────────────────────────
+
+describe('formatHistoryList', () => {
+  test('outputs JSON when raw=true', () => {
+    const records = [
+      { phase: 1, plan: 1, outcome: 'pass', agent: 'test', duration_ms: 5000, model_used: 'sonnet', timestamp: '2026-04-05T10:00:00Z' },
+    ];
+    const output = [];
+    const origLog = console.log;
+    console.log = (...args) => output.push(args.join(' '));
+    try {
+      formatHistoryList(records, true);
+    } finally {
+      console.log = origLog;
+    }
+    const parsed = JSON.parse(output[0]);
+    assert.ok(Array.isArray(parsed));
+    assert.strictEqual(parsed.length, 1);
+    assert.strictEqual(parsed[0].phase, 1);
+  });
+
+  test('outputs table format when raw=false', () => {
+    const records = [
+      { phase: 30, plan: 1, outcome: 'pass', agent: 'gsd-executor', duration_ms: 12500, model_used: 'sonnet', timestamp: '2026-04-05T10:30:00Z' },
+      { phase: 30, plan: 2, outcome: 'fail', agent: 'gsd-planner', duration_ms: null, model_used: 'haiku', timestamp: '2026-04-05T11:15:00Z' },
+    ];
+    const output = [];
+    const origLog = console.log;
+    console.log = (...args) => output.push(args.join(' '));
+    try {
+      formatHistoryList(records, false);
+    } finally {
+      console.log = origLog;
+    }
+    // First line is header, second is separator, then data rows
+    assert.ok(output[0].includes('Phase'), 'Header should contain Phase');
+    assert.ok(output[0].includes('Outcome'), 'Header should contain Outcome');
+    assert.ok(output[2].includes('pass'), 'First data row should contain pass');
+    assert.ok(output[3].includes('fail'), 'Second data row should contain fail');
+  });
+});
+
+// ─── formatHistoryStats tests (Plan 02) ──────────────────────────────────────
+
+describe('formatHistoryStats', () => {
+  test('outputs JSON when raw=true', () => {
+    const records = [
+      { outcome: 'pass', model_used: 'sonnet', duration_ms: 5000 },
+    ];
+    const patterns = { patterns: [], insufficient_data: true };
+    const output = [];
+    const origLog = console.log;
+    console.log = (...args) => output.push(args.join(' '));
+    try {
+      formatHistoryStats(records, patterns, true);
+    } finally {
+      console.log = origLog;
+    }
+    const parsed = JSON.parse(output[0]);
+    assert.strictEqual(parsed.records_count, 1);
+    assert.ok(parsed.patterns);
+  });
+
+  test('outputs human-readable format when raw=false', () => {
+    const records = [
+      { outcome: 'pass', model_used: 'sonnet', duration_ms: 5000 },
+      { outcome: 'pass', model_used: 'sonnet', duration_ms: 10000 },
+      { outcome: 'fail', model_used: 'haiku', duration_ms: 3000 },
+    ];
+    const patterns = { patterns: [], insufficient_data: true };
+    const output = [];
+    const origLog = console.log;
+    console.log = (...args) => output.push(args.join(' '));
+    try {
+      formatHistoryStats(records, patterns, false);
+    } finally {
+      console.log = origLog;
+    }
+    const fullOutput = output.join('\n');
+    assert.ok(fullOutput.includes('Execution History Stats'), 'Should have title');
+    assert.ok(fullOutput.includes('Total executions: 3'), 'Should show total');
+    assert.ok(fullOutput.includes('Pass rate:'), 'Should show pass rate');
+    assert.ok(fullOutput.includes('Model usage:'), 'Should show model usage');
+  });
+});
+
+// ─── pruneHistory tests (Plan 02) ────────────────────────────────────────────
+
+describe('pruneHistory', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('keeps specified number of records', () => {
+    // Seed 10 records
+    for (let i = 0; i < 10; i++) {
+      recordExecution(tmpDir, i, 1, { outcome: 'pass', agent: `agent-${i}` });
+    }
+
+    pruneHistory(tmpDir, 3);
+
+    const remaining = parseJsonlSafe(getHistoryPath(tmpDir));
+    assert.strictEqual(remaining.length, 3);
+    // Should be the last 3 records (agents 7, 8, 9)
+    assert.strictEqual(remaining[0].agent, 'agent-7');
+    assert.strictEqual(remaining[1].agent, 'agent-8');
+    assert.strictEqual(remaining[2].agent, 'agent-9');
+  });
+
+  test('returns correct pruned/remaining counts', () => {
+    for (let i = 0; i < 10; i++) {
+      recordExecution(tmpDir, i, 1, { outcome: 'pass' });
+    }
+
+    const result = pruneHistory(tmpDir, 4);
+    assert.strictEqual(result.pruned, 6);
+    assert.strictEqual(result.remaining, 4);
+  });
+
+  test('returns pruned=0 when keepCount >= record count', () => {
+    for (let i = 0; i < 5; i++) {
+      recordExecution(tmpDir, i, 1, { outcome: 'pass' });
+    }
+
+    const result = pruneHistory(tmpDir, 100);
+    assert.strictEqual(result.pruned, 0);
+    assert.strictEqual(result.remaining, 5);
+  });
+});
