@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Documentation & Accuracy
-status: active
+status: completed
 last_updated: "2026-04-05T00:00:00.000Z"
-last_activity: 2026-04-05 -- v1.8 milestone initialized
+last_activity: 2026-04-05 -- v1.8 milestone completed
 progress:
   total_phases: 2
-  completed_phases: 0
+  completed_phases: 2
   total_plans: 0
   completed_plans: 0
 ---
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Active:** v1.8 Documentation & Accuracy (2026-04-05)
-**Previous:** v1.7 End-to-End Integration Testing (shipped 2026-04-04)
+**Active:** None — between milestones
+**Previous:** v1.8 Documentation & Accuracy (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: None — milestone initializing
-Milestone: v1.8 Documentation & Accuracy — active
-Status: Milestone initialized. Fixing 19 test failures, syncing stale agent references, updating all documentation to match actual state.
-Last activity: 2026-04-05 -- v1.8 milestone initialized
+Phase: Complete
+Milestone: v1.8 Documentation & Accuracy — completed
+Status: All phases shipped. Phase 26 fixed 19 test failures across 26 files. Phase 27 synced stale metrics in README.md and README-gsd.md. 1913/1913 tests pass.
+Last activity: 2026-04-05 -- v1.8 milestone completed
 
-Progress: [..........] 0/2 phases | 0/0 plans | 0/7 requirements
+Progress: [##########] 2/2 phases | 7/7 requirements
 
 ## Milestone History
 
@@ -42,10 +42,11 @@ Progress: [..........] 0/2 phases | 0/0 plans | 0/7 requirements
 | v1.5 | Performance | 3 | 6 | 2026-04-04 |
 | v1.6 | Maintainability | 4 | 12 | 2026-04-04 |
 | v1.7 | End-to-End Integration Testing | 4 | 4 | 2026-04-04 |
+| v1.8 | Documentation & Accuracy | 2 | 0 | 2026-04-05 |
 
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.8 milestone initialized
-**Stopped at**: Milestone setup complete
-**Next**: `/gsd:plan-phase 26` to plan test failure fixes
+**Last action**: v1.8 milestone completed — all phases shipped
+**Stopped at**: Milestone lifecycle complete
+**Next**: `/gsd:new-milestone` or `/gsd:ship` to create PR for this branch
