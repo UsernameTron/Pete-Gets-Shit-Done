@@ -1,5 +1,35 @@
 # Milestones
 
+## v1.6 Maintainability (Shipped: 2026-04-04)
+
+**Phases completed:** 4 phases (18-21), 12 plans, 12 requirements
+
+**Key accomplishments:**
+
+- 4-layer module architecture with documented boundaries — MAINT-01
+- Sync-compatible cancel token pattern (createCancelToken) — MAINT-06
+- Feature flag system with config-driven toggles (createFeatureFlags) — MAINT-02
+- validateShellArg wired to 5 production call sites via execGitValidated — MAINT-07
+- Truncation detection consumer (detectTruncation + GSD_TRUNCATED_SENTINEL) — MAINT-08
+- Complete skills system overhaul: discovery, audit, versioning, forge consolidation — MAINT-03 through MAINT-09
+- Package v1.30.0 marketplace-ready with aligned metadata — META-01 through META-03
+
+---
+
+## v1.5 Performance (Shipped: 2026-04-04)
+
+**Phases completed:** 3 phases (15-17), 6 plans, 6 requirements
+
+**Key accomplishments:**
+
+- Streaming output helper (streamLines) for progressive line-by-line output — PERF-01
+- Deterministic ordering utility (deterministicSort) for reproducible output — PERF-02
+- Lazy-load MODEL_PROFILES and skill registry for faster cold starts — PERF-03, PERF-04
+- Token estimation utility (estimateTokens) for budget-aware workflows — PERF-05
+- Context budget helper (budgetContext) for token-aware context packing — PERF-06
+
+---
+
 ## v1.4 Correctness & Robustness (Shipped: 2026-04-04)
 
 **Phases completed:** 4 phases (11-14), 6 plans, 14 requirements

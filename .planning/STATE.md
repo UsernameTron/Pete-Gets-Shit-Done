@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: Maintainability
-status: shipped
-last_updated: "2026-04-04T23:59:00.000Z"
-last_activity: 2026-04-04 -- v1.6 milestone archived and closed.
+milestone: v1.7
+milestone_name: End-to-End Integration Testing
+status: active
+last_updated: "2026-04-04T00:00:00.000Z"
+last_activity: 2026-04-04 -- v1.7 milestone initialized
 progress:
   total_phases: 4
-  completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,49 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-04)
 
-**Active:** v1.6 Maintainability (2026-04-04) — COMPLETE
-**Previous:** v1.5 Performance (shipped 2026-04-04)
+**Active:** v1.7 End-to-End Integration Testing (2026-04-04)
+**Previous:** v1.6 Maintainability (shipped 2026-04-04)
 
 ## Current Position
 
-Phase: All phases complete
-Milestone: v1.6 Maintainability — complete
-Status: All 12 requirements delivered across 4 phases. Ready for milestone closure.
-Last activity: 2026-04-04 -- Phase 21 complete — metadata alignment, v1.30.0 bump, marketplace audit
+Phase: Phase 22 — Test Infrastructure (pending)
+Milestone: v1.7 End-to-End Integration Testing — in progress
+Status: Milestone initialized. 4 phases, 13 requirements defined. Ready for Phase 22.
+Last activity: 2026-04-04 -- v1.7 milestone initialized
 
-Progress: [##########] 4/4 phases | 12/12 plans | 12/12 requirements
-
-## Phase 21 Results
-
-| Plan | Requirement | Status |
-|------|-------------|--------|
-| 21-01 | META-01 | Complete — plugin.json author aligned to TÂCHES |
-| 21-02 | META-02 | Complete — v1.30.0 bump + full v1.6 changelog |
-| 21-03 | META-03 | Complete — marketplace audit passed, all fields valid |
-
-## Phase 20 Results
-
-| Plan | Requirement | Status |
-|------|-------------|--------|
-| 20-01 | MAINT-03 | Complete — skills discovery from plugin directories |
-| 20-02 | MAINT-04 | Complete — orphaned skills audit + cleanup |
-| 20-03 | MAINT-05 | Complete — skill versioning with drift warnings |
-| 20-04 | MAINT-09 | Complete — skill-forge consolidated into core registry |
-
-## Phase 19 Results
-
-| Plan | Requirement | Status |
-|------|-------------|--------|
-| 19-01 | MAINT-02 | Complete — createFeatureFlags factory + config merge + 8 tests |
-| 19-02 | MAINT-07 | Complete — execGitValidated wrapper, 5 call sites wired + 7 tests |
-| 19-03 | MAINT-08 | Complete — detectTruncation + GSD_TRUNCATED_SENTINEL + stderr warning + 8 tests |
-
-## Phase 18 Results
-
-| Plan | Requirement | Status |
-|------|-------------|--------|
-| 18-01 | MAINT-01 | Complete — architecture header + 4 boundary tests |
-| 18-02 | MAINT-06 | Complete — createCancelToken + safeExec integration + 11 tests |
+Progress: [----------] 0/4 phases | 0/0 plans | 0/13 requirements
 
 ## Milestone History
 
@@ -77,6 +45,6 @@ Progress: [##########] 4/4 phases | 12/12 plans | 12/12 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.6 milestone archived and closed
-**Stopped at**: All milestones through v1.6 shipped
-**Next**: Run `/gsd:new-milestone` to start next cycle
+**Last action**: v1.7 milestone initialized
+**Stopped at**: Ready for Phase 22 planning
+**Next**: Run `/gsd:plan-phase 22` or `/gsd:autonomous` to begin execution

@@ -6,29 +6,52 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Active:** v1.6 Maintainability (2026-04-04)
-**Package:** `get-shit-done-cc` v1.29.0
+**Active:** v1.7 End-to-End Integration Testing (2026-04-04)
+**Package:** `get-shit-done-cc` v1.30.0
 **Tests:** 259 passing (51 suites)
 **Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
 **Agents:** 15 source, 29 global, 7 archived — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-## Active Requirements (v1.6)
+## Active Requirements (v1.7)
 
 | Requirement | Category | Phase |
 |-------------|----------|-------|
-| MAINT-01: Layered architecture refactoring | Architecture | Phase 18 |
-| MAINT-02: Feature flags for experimental capabilities | Feature Mgmt | Phase 19 |
-| MAINT-03: Skills extensibility improvements | Skills | Phase 20 |
-| MAINT-04: Orphaned skills audit and cleanup | Skills | Phase 20 |
-| MAINT-05: Skill versioning system | Skills | Phase 20 |
-| MAINT-06: Sync-compatible cancel tokens | Architecture | Phase 18 |
-| MAINT-07: Wire validateShellArg to production caller | Feature Mgmt | Phase 19 |
-| MAINT-08: Wire __GSD_TRUNCATED__ to programmatic consumer | Feature Mgmt | Phase 19 |
-| MAINT-09: skill-forge consolidation | Skills | Phase 20 |
-| META-01: Align plugin.json author fields with package.json | Package | Phase 21 |
-| META-02: Version bump and publish prep | Package | Phase 21 |
-| META-03: Plugin audit and marketplace prep | Package | Phase 21 |
+| E2E-01: Test harness with mocked LLM layer | Infrastructure | Phase 22 |
+| E2E-02: Fixture system for project scaffolding | Infrastructure | Phase 22 |
+| E2E-03: Assertion helpers (exit codes, file content, state) | Infrastructure | Phase 22 |
+| E2E-04: new-project end-to-end flow | Core Pipeline | Phase 23 |
+| E2E-05: discuss-phase through execute-phase pipeline | Core Pipeline | Phase 23 |
+| E2E-06: verify-work through ship pipeline | Core Pipeline | Phase 23 |
+| E2E-07: quick/fast/do command coverage | Utility Commands | Phase 24 |
+| E2E-08: progress/stats/health command coverage | Utility Commands | Phase 24 |
+| E2E-09: Milestone lifecycle (new/audit/complete/cleanup) | Lifecycle | Phase 24 |
+| E2E-10: Workstream management commands | Lifecycle | Phase 24 |
+| E2E-11: Failure mode handling and recovery | Error Paths | Phase 25 |
+| E2E-12: Edge case coverage (empty projects, corrupt state) | Error Paths | Phase 25 |
+| E2E-13: CI integration and regression gate | Error Paths | Phase 25 |
+
+<details>
+<summary><strong>v1.6 Requirements (12/12 validated)</strong></summary>
+
+All 12 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| MAINT-01: Layered architecture refactoring | Phase 18 | Validated |
+| MAINT-02: Feature flags for experimental capabilities | Phase 19 | Validated |
+| MAINT-03: Skills extensibility improvements | Phase 20 | Validated |
+| MAINT-04: Orphaned skills audit and cleanup | Phase 20 | Validated |
+| MAINT-05: Skill versioning system | Phase 20 | Validated |
+| MAINT-06: Sync-compatible cancel tokens | Phase 18 | Validated |
+| MAINT-07: Wire validateShellArg to production caller | Phase 19 | Validated |
+| MAINT-08: Wire __GSD_TRUNCATED__ to programmatic consumer | Phase 19 | Validated |
+| MAINT-09: skill-forge consolidation | Phase 20 | Validated |
+| META-01: Align plugin.json author fields with package.json | Phase 21 | Validated |
+| META-02: Version bump and publish prep | Phase 21 | Validated |
+| META-03: Plugin audit and marketplace prep | Phase 21 | Validated |
+
+</details>
 
 <details>
 <summary><strong>v1.5 Requirements (6/6 validated)</strong></summary>
@@ -152,16 +175,10 @@ All 6 requirements verified complete:
 - 25 source files instrumented for coverage across lib, hooks, gsd-tools, bin, scripts
 - v1.3 added config migration system — configs auto-gain config_version on first load
 
-## Tech Debt (addressing in v1.6)
+## Tech Debt
 
-All prior tech debt items promoted to v1.6 requirements:
-- validateShellArg zero callers → MAINT-07
-- __GSD_TRUNCATED__ no consumer → MAINT-08
-- Version bump → META-02
-- plugin.json author alignment → META-01
-- Abort controller propagation → MAINT-06 (sync-compatible cancel tokens)
-- Plugin audit/marketplace → META-03
-- skill-forge consolidation → MAINT-09
+All prior tech debt resolved in v1.6. No outstanding items.
+Current focus: comprehensive E2E integration test coverage for the full 57+ command surface.
 
 ## Evolution
 
@@ -181,4 +198,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 -- v1.6 Maintainability milestone started*
+*Last updated: 2026-04-04 -- v1.7 End-to-End Integration Testing milestone started*
