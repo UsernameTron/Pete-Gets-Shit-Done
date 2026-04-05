@@ -1786,8 +1786,9 @@ describe('planningDir — workstream awareness', () => {
 
   test('planningPaths returns scoped and shared paths', () => {
     const paths = planningPaths('/projects/foo', 'ws1');
-    assert.ok(paths.planning.includes('workstreams/ws1'));
-    assert.ok(paths.state.includes('workstreams/ws1'));
+    const wsSeg = path.join('workstreams', 'ws1');
+    assert.ok(paths.planning.includes(wsSeg));
+    assert.ok(paths.state.includes(wsSeg));
     assert.ok(!paths.project.includes('workstreams'));
     assert.ok(!paths.config.includes('workstreams'));
   });
