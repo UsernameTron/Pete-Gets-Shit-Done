@@ -4,12 +4,12 @@ milestone: v1.7
 milestone_name: End-to-End Integration Testing
 status: active
 last_updated: "2026-04-04T00:00:00.000Z"
-last_activity: 2026-04-04 -- Phase 23 complete (Core Pipeline E2E Tests)
+last_activity: 2026-04-04 -- Phase 24 complete (Utility & Lifecycle Tests)
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 3
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 ## Current Position
 
-Phase: Phase 24 — Utility & Lifecycle Tests (pending)
+Phase: Phase 25 — Error Path & Edge Case Tests (pending)
 Milestone: v1.7 End-to-End Integration Testing — in progress
-Status: Phase 23 complete. 29 new E2E tests (41 total) covering new-project, plan/execute, and verify/ship pipelines. All passing.
-Last activity: 2026-04-04 -- Phase 23 complete (Core Pipeline E2E Tests)
+Status: Phase 24 complete. 54 new E2E tests (95 total) covering utility commands, progress/stats/health, milestone lifecycle, and workstream management. All passing.
+Last activity: 2026-04-04 -- Phase 24 complete (Utility & Lifecycle Tests)
 
-Progress: [#####-----] 2/4 phases | 2/2 plans | 6/13 requirements
+Progress: [########--] 3/4 phases | 3/3 plans | 10/13 requirements
 
 ## Milestone History
 
@@ -45,6 +45,6 @@ Progress: [#####-----] 2/4 phases | 2/2 plans | 6/13 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 23 complete — Core Pipeline E2E Tests (29 new, 41 total)
-**Stopped at**: Phase 23 verified, continuing autonomous execution
-**Next**: Phase 24 (Utility & Lifecycle Tests: E2E-07/08/09/10)
+**Last action**: Phase 24 complete — Utility & Lifecycle Tests (54 new, 95 total)
+**Stopped at**: Phase 24 verified, continuing autonomous execution
+**Next**: Phase 25 (Error Path & Edge Case Tests: E2E-11/12/13)
