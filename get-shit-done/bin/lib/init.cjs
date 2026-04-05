@@ -110,6 +110,17 @@ function cmdInitExecutePhase(cwd, phase, raw) {
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
   const taskContext = buildTaskContext(phaseInfo, phaseInfo?.plans, phase_req_ids, config);
 
+  // Task classification for adaptive workflows (INTEL-10, INTEL-12)
+  let task_classification = null;
+  if (config.adaptive) {
+    const { classifyTask } = require('./classify.cjs');
+    const classContext = {
+      reqIds: phase_req_ids,
+      failureRate: null, // Phase 32 will supply historical failure rate
+    };
+    task_classification = classifyTask(phaseInfo, phaseInfo?.plans, classContext);
+  }
+
   const result = {
     // Models
     executor_model: resolveModelInternal(cwd, 'gsd-executor', taskContext),
@@ -132,6 +143,7 @@ function cmdInitExecutePhase(cwd, phase, raw) {
     phase_name: phaseInfo?.phase_name || null,
     phase_slug: phaseInfo?.phase_slug || null,
     phase_req_ids,
+    task_classification,
 
     // Plan inventory
     plans: phaseInfo?.plans || [],
@@ -204,6 +216,17 @@ function cmdInitPlanPhase(cwd, phase, raw) {
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
   const taskContext = buildTaskContext(phaseInfo, null, phase_req_ids, config);
 
+  // Task classification for adaptive workflows (INTEL-10, INTEL-12)
+  let task_classification = null;
+  if (config.adaptive) {
+    const { classifyTask } = require('./classify.cjs');
+    const classContext = {
+      reqIds: phase_req_ids,
+      failureRate: null, // Phase 32 will supply historical failure rate
+    };
+    task_classification = classifyTask(phaseInfo, null, classContext);
+  }
+
   const result = {
     // Models
     researcher_model: resolveModelInternal(cwd, 'gsd-research-orchestrator', taskContext),
@@ -225,6 +248,7 @@ function cmdInitPlanPhase(cwd, phase, raw) {
     phase_slug: phaseInfo?.phase_slug || null,
     padded_phase: phaseInfo?.phase_number ? normalizePhaseName(phaseInfo.phase_number) : null,
     phase_req_ids,
+    task_classification,
 
     // Existing artifacts
     has_research: phaseInfo?.has_research || false,

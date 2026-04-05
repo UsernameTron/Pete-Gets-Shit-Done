@@ -19,12 +19,12 @@ Make the GSD engine smarter — route models by task complexity, learn from exec
 
 ### Phase 31 — Task Classification & Adaptive Workflows
 
-- [ ] **INTEL-07**: Create `classifyTask(phaseInfo, planInventory, context)` function returning `{ complexity, signals, confidence }` with complexity levels: trivial, standard, complex, critical.
-- [ ] **INTEL-08**: Signal extraction: file count from plan, requirement count, phase type (research/execute/verify), dependency depth, historical failure rate (when history available).
-- [ ] **INTEL-09**: Create `adaptWorkflowGates(taskContext, config)` that returns adjusted config overrides: skip research for trivial tasks, increase verification rigor for complex/critical, adjust parallelization wave size.
-- [ ] **INTEL-10**: Wire `classifyTask()` into execute-phase and plan-phase init commands — classification result included in init output JSON.
-- [ ] **INTEL-11**: Add `workflow.adaptive` config key (boolean, default: false) gating all adaptive behavior behind a feature flag.
-- [ ] **INTEL-12**: Classification transparency: include `task_classification` object in init output so workflow prompts can reference it.
+- [x] **INTEL-07**: Create `classifyTask(phaseInfo, planInventory, context)` function returning `{ complexity, signals, confidence }` with complexity levels: trivial, standard, complex, critical.
+- [x] **INTEL-08**: Signal extraction: file count from plan, requirement count, phase type (research/execute/verify), dependency depth, historical failure rate (when history available).
+- [x] **INTEL-09**: Create `adaptWorkflowGates(taskContext, config)` that returns adjusted config overrides: skip research for trivial tasks, increase verification rigor for complex/critical, adjust parallelization wave size.
+- [x] **INTEL-10**: Wire `classifyTask()` into execute-phase and plan-phase init commands — classification result included in init output JSON.
+- [x] **INTEL-11**: Add `workflow.adaptive` config key (boolean, default: false) gating all adaptive behavior behind a feature flag.
+- [x] **INTEL-12**: Classification transparency: include `task_classification` object in init output so workflow prompts can reference it.
 
 ### Phase 32 — Execution History & Pattern Learning
 
@@ -64,12 +64,12 @@ Make the GSD engine smarter — route models by task complexity, learn from exec
 | INTEL-04 | Phase 30 | Complete |
 | INTEL-05 | Phase 30 | Complete |
 | INTEL-06 | Phase 30 | Complete |
-| INTEL-07 | Phase 31 | Pending |
-| INTEL-08 | Phase 31 | Pending |
-| INTEL-09 | Phase 31 | Pending |
-| INTEL-10 | Phase 31 | Pending |
-| INTEL-11 | Phase 31 | Pending |
-| INTEL-12 | Phase 31 | Pending |
+| INTEL-07 | Phase 31 | Complete |
+| INTEL-08 | Phase 31 | Complete |
+| INTEL-09 | Phase 31 | Complete |
+| INTEL-10 | Phase 31 | Complete |
+| INTEL-11 | Phase 31 | Complete |
+| INTEL-12 | Phase 31 | Complete |
 | INTEL-13 | Phase 32 | Pending |
 | INTEL-14 | Phase 32 | Pending |
 | INTEL-15 | Phase 32 | Pending |

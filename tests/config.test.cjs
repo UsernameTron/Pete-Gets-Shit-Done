@@ -805,3 +805,31 @@ describe('config-set routing_strategy', () => {
     assert.strictEqual(config.routing_strategy, 'static');
   });
 });
+
+// ─── config-set (workflow.adaptive) ───────────────────────────────────────────
+
+describe('config-set workflow.adaptive', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    runGsdTools('config-ensure-section', tmpDir, { HOME: tmpDir, USERPROFILE: tmpDir });
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('workflow.adaptive is a valid config key', () => {
+    const result = runGsdTools('config-set workflow.adaptive true', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const config = readConfig(tmpDir);
+    assert.strictEqual(config.workflow.adaptive, true);
+  });
+
+  test('buildNewProjectConfig() includes workflow.adaptive: false', () => {
+    const config = readConfig(tmpDir);
+    assert.strictEqual(config.workflow.adaptive, false);
+  });
+});

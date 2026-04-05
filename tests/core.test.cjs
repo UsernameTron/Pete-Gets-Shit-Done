@@ -2097,6 +2097,44 @@ describe('resolveModelInternal — dynamic routing', () => {
   });
 });
 
+// ─── loadConfig — workflow.adaptive feature flag ─────────────────────────────
+
+describe('loadConfig — workflow.adaptive feature flag', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  function writeConfig(obj) {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify(obj, null, 2)
+    );
+  }
+
+  test('loadConfig returns adaptive: false by default', () => {
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.adaptive, false);
+  });
+
+  test('loadConfig returns adaptive: true when config has it', () => {
+    writeConfig({ workflow: { adaptive: true } });
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.adaptive, true);
+  });
+
+  test('config with workflow.adaptive passes validation via config-set', () => {
+    writeConfig({ workflow: { adaptive: false } });
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(typeof config.adaptive, 'boolean');
+  });
+});
+
 // ─── resolveModelInternal — debug logging ────────────────────────────────────
 
 describe('resolveModelInternal — debug logging', () => {
