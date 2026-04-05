@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: End-to-End Integration Testing
-status: active
+status: complete
 last_updated: "2026-04-04T00:00:00.000Z"
-last_activity: 2026-04-04 -- Phase 24 complete (Utility & Lifecycle Tests)
+last_activity: 2026-04-04 -- Phase 25 complete (Error Path & Edge Case Tests)
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 4
+  total_plans: 4
+  completed_plans: 4
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-04)
 
-**Active:** v1.7 End-to-End Integration Testing (2026-04-04)
+**Active:** v1.7 End-to-End Integration Testing (2026-04-04) — COMPLETE
 **Previous:** v1.6 Maintainability (shipped 2026-04-04)
 
 ## Current Position
 
-Phase: Phase 25 — Error Path & Edge Case Tests (pending)
-Milestone: v1.7 End-to-End Integration Testing — in progress
-Status: Phase 24 complete. 54 new E2E tests (95 total) covering utility commands, progress/stats/health, milestone lifecycle, and workstream management. All passing.
-Last activity: 2026-04-04 -- Phase 24 complete (Utility & Lifecycle Tests)
+Phase: Phase 25 — Error Path & Edge Case Tests (complete)
+Milestone: v1.7 End-to-End Integration Testing — complete
+Status: All 4 phases complete. 133 E2E tests across 10 test files covering infrastructure, core pipeline, utilities, lifecycle, failure modes, edge cases, and CI integration. All passing.
+Last activity: 2026-04-04 -- Phase 25 complete (Error Path & Edge Case Tests)
 
-Progress: [########--] 3/4 phases | 3/3 plans | 10/13 requirements
+Progress: [##########] 4/4 phases | 4/4 plans | 13/13 requirements
 
 ## Milestone History
 
@@ -45,6 +45,6 @@ Progress: [########--] 3/4 phases | 3/3 plans | 10/13 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 24 complete — Utility & Lifecycle Tests (54 new, 95 total)
-**Stopped at**: Phase 24 verified, continuing autonomous execution
-**Next**: Phase 25 (Error Path & Edge Case Tests: E2E-11/12/13)
+**Last action**: Phase 25 complete — Error Path & Edge Case Tests (38 new, 133 total)
+**Stopped at**: v1.7 milestone complete, ready for archive
+**Next**: Milestone lifecycle — audit, archive v1.7
