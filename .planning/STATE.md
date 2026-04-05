@@ -23,10 +23,10 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 28 — Stale Reference Cleanup (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-05 — Milestone v1.9 started
+Status: Roadmap defined, ready for planning
+Last activity: 2026-04-05 — ROADMAP.md written for v1.9
 
 Progress: [..........] 0/2 phases | 0/5 requirements
 
@@ -47,6 +47,6 @@ Progress: [..........] 0/2 phases | 0/5 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.9 milestone initialized — defining requirements
-**Stopped at**: Requirements definition
-**Next**: Define REQUIREMENTS.md, then ROADMAP.md, then `/gsd:plan-phase 28`
+**Last action**: ROADMAP.md written for v1.9 (2 phases, 5 requirements)
+**Stopped at**: Roadmap complete
+**Next**: `/gsd:plan-phase 28` to plan Stale Reference Cleanup
