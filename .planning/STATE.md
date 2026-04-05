@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Ship Readiness & Hygiene
-status: complete
+status: shipped
 last_updated: "2026-04-05T00:00:00.000Z"
-last_activity: 2026-04-05 -- All phases complete, milestone ready for lifecycle
+last_activity: 2026-04-05 -- v1.9 milestone complete, archived, no active milestone
 progress:
   total_phases: 2
   completed_phases: 2
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Active:** v1.9 Ship Readiness & Hygiene (all phases complete)
-**Previous:** v1.8 Documentation & Accuracy (shipped 2026-04-05)
+**Active:** None — all milestones through v1.9 complete
+**Previous:** v1.9 Ship Readiness & Hygiene (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: All complete
+Phase: —
 Plan: —
-Status: v1.9 all phases executed, milestone lifecycle pending
-Last activity: 2026-04-05 — Phase 29 executed (1 plan, DEVOPS-HANDOFF.md rewritten from 22 to 264 lines)
+Status: No active milestone. v1.0 through v1.9 shipped.
+Last activity: 2026-04-05 — v1.9 milestone lifecycle completed (audit passed, archived)
 
-Progress: [==========] 2/2 phases | 5/5 requirements
+Progress: All milestones complete (v1.0–v1.9)
 
 ## Milestone History
 
@@ -43,10 +43,11 @@ Progress: [==========] 2/2 phases | 5/5 requirements
 | v1.6 | Maintainability | 4 | 12 | 2026-04-04 |
 | v1.7 | End-to-End Integration Testing | 4 | 4 | 2026-04-04 |
 | v1.8 | Documentation & Accuracy | 2 | 0 | 2026-04-05 |
+| v1.9 | Ship Readiness & Hygiene | 2 | 4 | 2026-04-05 |
 
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 29 executed — DEVOPS-HANDOFF.md rewritten (22 → 264 lines, all live metrics)
-**Stopped at**: All v1.9 phases complete, milestone lifecycle next
-**Next**: Milestone audit → complete → cleanup for v1.9
+**Last action**: v1.9 milestone lifecycle — audit passed (5/5 requirements), archived to milestones/v1.9-ROADMAP.md
+**Stopped at**: All milestones complete (v1.0–v1.9)
+**Next**: `/gsd:new-milestone` when ready to start next work, or merge current branch to main

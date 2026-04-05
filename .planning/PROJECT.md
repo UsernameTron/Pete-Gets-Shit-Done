@@ -198,7 +198,7 @@ All 6 requirements verified complete:
 
 ~~**Stale agent references in 13 active files**~~: **Resolved** in v1.9 Phase 28. All active files now reference current agent names (gsd-verifier with scope parameter, gsd-research-orchestrator). Commands, docs, governance templates, and crew assessment updated across Plans 01 and 02.
 
-**DEVOPS-HANDOFF.md placeholder**: 22-line bootstrap text with contradictory claims ("No test suite yet", "No CI/CD pipeline yet"). Needs full rewrite to match project maturity.
+~~**DEVOPS-HANDOFF.md placeholder**~~: **Resolved** in v1.9 Phase 29. Rewritten from 22-line placeholder to 264-line comprehensive DevOps handoff document with all 12 sections and live-verified metrics (2046 tests, 95.49% coverage, 15 agents, 0 runtime deps).
 
 ## Evolution
 
@@ -218,4 +218,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 -- v1.9 Ship Readiness & Hygiene milestone started*
+*Last updated: 2026-04-05 -- v1.9 Ship Readiness & Hygiene complete*
