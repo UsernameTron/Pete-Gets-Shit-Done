@@ -9,7 +9,7 @@ allowed-tools:
 ---
 
 <objective>
-Research how to implement a phase. Spawns gsd-phase-researcher agent with phase context.
+Research how to implement a phase. Spawns gsd-research-orchestrator agent (scope: phase) with phase context.
 
 **Note:** This is a standalone research command. For most workflows, use `/gsd:plan-phase` which integrates research automatically.
 
@@ -47,7 +47,7 @@ Extract from init JSON: `phase_dir`, `phase_number`, `phase_name`, `phase_found`
 
 Resolve researcher model:
 ```bash
-RESEARCHER_MODEL=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" resolve-model gsd-phase-researcher --raw)
+RESEARCHER_MODEL=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" resolve-model gsd-research-orchestrator --raw)
 ```
 
 ## 1. Validate Phase
@@ -77,7 +77,7 @@ Use paths from INIT (do not inline file contents in orchestrator context):
 
 Present summary with phase description and what files the researcher will load.
 
-## 4. Spawn gsd-phase-researcher Agent
+## 4. Spawn gsd-research-orchestrator Agent (scope: phase)
 
 Research modes: ecosystem (default), feasibility, implementation, comparison.
 
@@ -189,7 +189,7 @@ Task(
 <success_criteria>
 - [ ] Phase validated against roadmap
 - [ ] Existing research checked
-- [ ] gsd-phase-researcher spawned with context
+- [ ] gsd-research-orchestrator spawned with context
 - [ ] Checkpoints handled correctly
 - [ ] User knows next steps
 </success_criteria>

@@ -126,7 +126,7 @@ Added "What NOT to Do" (5 domain-specific anti-patterns) and "Error Handling" (5
 
 ## Known Issues
 
-- **Global CLAUDE.md stale references:** `/Users/cpconnor/CLAUDE.md` and `/Users/cpconnor/.claude/CLAUDE.md` still mention gsd-plan-checker and gsd-integration-checker as standalone agents in the "Quality Gates" section. These should be updated to reference gsd-verifier. Out of scope for this phase (global config, not project-specific).
+- ~~Global CLAUDE.md stale references~~: **RESOLVED in Phase 28, Plan 01** — both CLAUDE.md files now reference gsd-verifier with scope parameters.
 
 ## Active Agent Roster (Post-Phase-6)
 

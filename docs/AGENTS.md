@@ -1,6 +1,6 @@
 # GSD Agent Reference
 
-> All 18 specialized agents — roles, tools, spawn patterns, and relationships. For architecture context, see [Architecture](ARCHITECTURE.md).
+> All 15 specialized agents — roles, tools, spawn patterns, and relationships. For architecture context, see [Architecture](ARCHITECTURE.md).
 
 ---
 
@@ -12,15 +12,15 @@ GSD uses a multi-agent architecture where thin orchestrators (workflow files) sp
 
 | Category | Count | Agents |
 |----------|-------|--------|
-| Researchers | 3 | project-researcher, phase-researcher, ui-researcher |
+| Researchers | 2 | research-orchestrator (scope: phase/project), ui-researcher |
 | Analyzers | 2 | assumptions-analyzer, advisor-researcher |
 | Synthesizers | 1 | research-synthesizer |
 | Planners | 1 | planner |
 | Roadmappers | 1 | roadmapper |
 | Executors | 1 | executor |
-| Checkers | 3 | plan-checker, integration-checker, ui-checker |
-| Verifiers | 1 | verifier |
-| Auditors | 2 | nyquist-auditor, ui-auditor |
+| Checkers | 1 | ui-checker |
+| Verifiers | 1 | verifier (scope: general/plan/integration/nyquist) |
+| Auditors | 1 | ui-auditor |
 | Mappers | 1 | codebase-mapper |
 | Debuggers | 1 | debugger |
 
@@ -30,39 +30,13 @@ GSD uses a multi-agent architecture where thin orchestrators (workflow files) sp
 
 ### gsd-project-researcher
 
-**Role:** Researches domain ecosystem before roadmap creation.
-
-| Property | Value |
-|----------|-------|
-| **Spawned by** | `/gsd:new-project`, `/gsd:new-milestone` |
-| **Parallelism** | 4 instances (stack, features, architecture, pitfalls) |
-| **Tools** | Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp (context7) |
-| **Model (balanced)** | Sonnet |
-| **Produces** | `.planning/research/STACK.md`, `FEATURES.md`, `ARCHITECTURE.md`, `PITFALLS.md` |
-
-**Capabilities:**
-- Web search for current ecosystem information
-- Context7 MCP integration for library documentation
-- Writes research documents directly to disk (reduces orchestrator context load)
+**Consolidated into gsd-research-orchestrator** (scope: project). See [gsd-research-orchestrator](#gsd-research-orchestrator) below.
 
 ---
 
 ### gsd-phase-researcher
 
-**Role:** Researches how to implement a specific phase before planning.
-
-| Property | Value |
-|----------|-------|
-| **Spawned by** | `/gsd:plan-phase` |
-| **Parallelism** | 4 instances (same focus areas as project researcher) |
-| **Tools** | Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp (context7) |
-| **Model (balanced)** | Sonnet |
-| **Produces** | `{phase}-RESEARCH.md` |
-
-**Capabilities:**
-- Reads CONTEXT.md to focus research on user's decisions
-- Investigates implementation patterns for the specific phase domain
-- Detects test infrastructure for Nyquist validation mapping
+**Consolidated into gsd-research-orchestrator** (scope: phase). See [gsd-research-orchestrator](#gsd-research-orchestrator) below.
 
 ---
 
@@ -215,41 +189,13 @@ GSD uses a multi-agent architecture where thin orchestrators (workflow files) sp
 
 ### gsd-plan-checker
 
-**Role:** Verifies plans will achieve phase goals before execution.
-
-| Property | Value |
-|----------|-------|
-| **Spawned by** | `/gsd:plan-phase` (verification loop, max 3 iterations) |
-| **Parallelism** | Single instance (iterative) |
-| **Tools** | Read, Bash, Glob, Grep |
-| **Model (balanced)** | Sonnet |
-| **Color** | Green |
-| **Produces** | PASS/FAIL verdict with specific feedback |
-
-**8 Verification Dimensions:**
-1. Requirement coverage
-2. Task atomicity
-3. Dependency ordering
-4. File scope
-5. Verification commands
-6. Context fit
-7. Gap detection
-8. Nyquist compliance (when enabled)
+**Consolidated into gsd-verifier** (scope: plan). See [gsd-verifier](#gsd-verifier) below.
 
 ---
 
 ### gsd-integration-checker
 
-**Role:** Verifies cross-phase integration and end-to-end flows.
-
-| Property | Value |
-|----------|-------|
-| **Spawned by** | `/gsd:audit-milestone` |
-| **Parallelism** | Single instance |
-| **Tools** | Read, Bash, Grep, Glob |
-| **Model (balanced)** | Sonnet |
-| **Color** | Blue |
-| **Produces** | Integration verification report |
+**Consolidated into gsd-verifier** (scope: integration). See [gsd-verifier](#gsd-verifier) below.
 
 ---
 
@@ -270,40 +216,29 @@ GSD uses a multi-agent architecture where thin orchestrators (workflow files) sp
 
 ### gsd-verifier
 
-**Role:** Verifies phase goal achievement through goal-backward analysis.
+**Role:** Unified verification agent handling plan validation, integration checks, Nyquist auditing, and general phase goal verification.
 
 | Property | Value |
 |----------|-------|
-| **Spawned by** | `/gsd:execute-phase` (after all executors complete) |
+| **Spawned by** | `/gsd:execute-phase`, `/gsd:plan-phase`, `/gsd:audit-milestone`, `/gsd:validate-phase` |
+| **Scope** | `general` (default), `plan`, `integration`, `nyquist` |
 | **Parallelism** | Single instance |
 | **Tools** | Read, Write, Bash, Grep, Glob |
 | **Model (balanced)** | Sonnet |
 | **Color** | Green |
-| **Produces** | `{phase}-VERIFICATION.md` |
+| **Produces** | `{phase}-VERIFICATION.md`, PASS/FAIL verdicts, test files (nyquist scope) |
 
 **Key behaviors:**
-- Checks codebase against phase goals, not just task completion
-- PASS/FAIL with specific evidence
-- Logs issues for `/gsd:verify-work` to address
+- **general**: Checks codebase against phase goals, not just task completion. PASS/FAIL with specific evidence.
+- **plan**: Verifies plans will achieve phase goals before execution (8 dimensions: requirement coverage, task atomicity, dependency ordering, file scope, verification commands, context fit, gap detection, Nyquist compliance).
+- **integration**: Verifies cross-phase integration and end-to-end flows.
+- **nyquist**: Fills Nyquist validation gaps by generating tests. Never modifies implementation code — only test files. Max 3 attempts per gap.
 
 ---
 
 ### gsd-nyquist-auditor
 
-**Role:** Fills Nyquist validation gaps by generating tests.
-
-| Property | Value |
-|----------|-------|
-| **Spawned by** | `/gsd:validate-phase` |
-| **Parallelism** | Single instance |
-| **Tools** | Read, Write, Edit, Bash, Grep, Glob |
-| **Model (balanced)** | Sonnet |
-| **Produces** | Test files, updated `VALIDATION.md` |
-
-**Key behaviors:**
-- Never modifies implementation code — only test files
-- Max 3 attempts per gap
-- Flags implementation bugs as escalations for user
+**Consolidated into gsd-verifier** (scope: nyquist). See [gsd-verifier](#gsd-verifier) above.
 
 ---
 
@@ -402,8 +337,7 @@ Communication style, decision patterns, debugging approach, UX preferences, vend
 
 | Agent | Read | Write | Edit | Bash | Grep | Glob | WebSearch | WebFetch | MCP |
 |-------|------|-------|------|------|------|------|-----------|----------|-----|
-| project-researcher | ✓ | ✓ | | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| phase-researcher | ✓ | ✓ | | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| research-orchestrator | ✓ | ✓ | | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | ui-researcher | ✓ | ✓ | | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | assumptions-analyzer | ✓ | | | ✓ | ✓ | ✓ | | | |
 | advisor-researcher | ✓ | | | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -411,18 +345,15 @@ Communication style, decision patterns, debugging approach, UX preferences, vend
 | planner | ✓ | ✓ | | ✓ | ✓ | ✓ | | ✓ | ✓ |
 | roadmapper | ✓ | ✓ | | ✓ | ✓ | ✓ | | | |
 | executor | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | | |
-| plan-checker | ✓ | | | ✓ | ✓ | ✓ | | | |
-| integration-checker | ✓ | | | ✓ | ✓ | ✓ | | | |
 | ui-checker | ✓ | | | ✓ | ✓ | ✓ | | | |
-| verifier | ✓ | ✓ | | ✓ | ✓ | ✓ | | | |
-| nyquist-auditor | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | | |
+| verifier | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | | |
 | ui-auditor | ✓ | ✓ | | ✓ | ✓ | ✓ | | | |
 | codebase-mapper | ✓ | ✓ | | ✓ | ✓ | ✓ | | | |
 | debugger | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | |
 | user-profiler | ✓ | | | | | | | | |
 
 **Principle of Least Privilege:**
-- Checkers are read-only (no Write/Edit) — they evaluate, never modify
+- Checkers (ui-checker) are read-only (no Write/Edit) — they evaluate, never modify
 - Researchers have web access — they need current ecosystem information
 - Executors have Edit — they modify code but not web access
 - Mappers have Write — they write analysis documents but not Edit (no code changes)

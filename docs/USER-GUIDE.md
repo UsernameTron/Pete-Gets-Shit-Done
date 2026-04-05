@@ -577,14 +577,11 @@ Example quick-task branching:
 | gsd-planner | Opus | Opus | Sonnet | Inherit |
 | gsd-roadmapper | Opus | Sonnet | Sonnet | Inherit |
 | gsd-executor | Opus | Sonnet | Sonnet | Inherit |
-| gsd-phase-researcher | Opus | Sonnet | Haiku | Inherit |
-| gsd-project-researcher | Opus | Sonnet | Haiku | Inherit |
+| gsd-research-orchestrator | Opus | Sonnet | Haiku | Inherit |
 | gsd-research-synthesizer | Sonnet | Sonnet | Haiku | Inherit |
 | gsd-debugger | Opus | Sonnet | Sonnet | Inherit |
 | gsd-codebase-mapper | Sonnet | Haiku | Haiku | Inherit |
 | gsd-verifier | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-plan-checker | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-integration-checker | Sonnet | Sonnet | Haiku | Inherit |
 
 **Profile philosophy:**
 - **quality** -- Opus for all decision-making agents, Sonnet for read-only verification. Use when quota is available and the work is critical.

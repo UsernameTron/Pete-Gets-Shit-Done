@@ -196,7 +196,7 @@ All 6 requirements verified complete:
 
 ## Tech Debt
 
-**Stale agent references in 13 active files**: v1.2 consolidated 5 agents into 2 (gsd-verifier, gsd-research-orchestrator), but references to old names persist in commands, docs, governance templates, and agent definitions. v1.8 fixed test-related references; remaining files are documentation and workflow definitions.
+~~**Stale agent references in 13 active files**~~: **Resolved** in v1.9 Phase 28. All active files now reference current agent names (gsd-verifier with scope parameter, gsd-research-orchestrator). Commands, docs, governance templates, and crew assessment updated across Plans 01 and 02.
 
 **DEVOPS-HANDOFF.md placeholder**: 22-line bootstrap text with contradictory claims ("No test suite yet", "No CI/CD pipeline yet"). Needs full rewrite to match project maturity.
 
