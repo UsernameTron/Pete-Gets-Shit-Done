@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: Ship Readiness & Hygiene
-status: shipped
+milestone: v2.0
+milestone_name: Intelligence Layer
+status: planning
 last_updated: "2026-04-05T00:00:00.000Z"
-last_activity: 2026-04-05 -- v1.9 milestone complete, archived, no active milestone
+last_activity: 2026-04-05 -- v2.0 milestone initialized, requirements defined, roadmap updated
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Active:** None — all milestones through v1.9 complete
+**Active:** v2.0 Intelligence Layer
 **Previous:** v1.9 Ship Readiness & Hygiene (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: —
+Phase: 30 — Dynamic Model Selection (not yet planned)
 Plan: —
-Status: No active milestone. v1.0 through v1.9 shipped.
-Last activity: 2026-04-05 — v1.9 milestone lifecycle completed (audit passed, archived)
+Status: Milestone initialized. Requirements defined. Awaiting phase planning.
+Last activity: 2026-04-05 — v2.0 milestone setup (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md)
 
-Progress: All milestones complete (v1.0–v1.9)
+Progress: 0/4 phases complete
 
 ## Milestone History
 
@@ -48,6 +48,6 @@ Progress: All milestones complete (v1.0–v1.9)
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.9 milestone lifecycle — audit passed (5/5 requirements), archived to milestones/v1.9-ROADMAP.md
-**Stopped at**: All milestones complete (v1.0–v1.9)
-**Next**: `/gsd:new-milestone` when ready to start next work, or merge current branch to main
+**Last action**: v2.0 milestone initialized — PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md updated
+**Stopped at**: Phase 30 not yet planned
+**Next**: `/gsd:plan-phase 30` to create PLAN.md files for Dynamic Model Selection

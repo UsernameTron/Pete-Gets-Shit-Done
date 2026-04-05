@@ -6,26 +6,28 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Active:** v1.9 Ship Readiness & Hygiene (2026-04-05)
+**Active:** v2.0 Intelligence Layer (2026-04-05)
 **Package:** `get-shit-done-cc` v1.30.0
 **Tests:** 2046 total (1913 unit + 133 E2E), all passing across 74 test files
-**Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
+**Coverage:** core.cjs 95.49% line / 90.87% branch, security.cjs 100% / 100%
 **Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-## Current Milestone: v1.9 Ship Readiness & Hygiene
+## Current Milestone: v2.0 Intelligence Layer
 
-**Goal:** Make every documentation file match reality — remove stale references, rewrite placeholder docs, ensure handoff-readiness.
+**Goal:** Make the GSD engine smarter — route models by task complexity, learn from execution history, adapt workflow behavior automatically.
 
 **Target features:**
-- Clean 13 active files of stale consolidated agent references
-- Update PROJECT.md Tech Debt section to reflect actual remaining debt
-- Rewrite DEVOPS-HANDOFF.md from placeholder to comprehensive handoff document
-- Sync all documentation metrics with current state
+- Dynamic model selection based on task complexity instead of static profile lookup
+- Task classification engine (trivial/standard/complex/critical) with signal extraction
+- Execution history capture in JSONL format with pattern detection
+- Adaptive workflow gates that tune research depth, verification rigor, and parallelization
+- Cost-awareness and routing transparency via debug logging
+- CLI commands for history inspection (list, stats, prune)
 
-## Active Requirements (v1.9)
+## Active Requirements (v2.0)
 
-*Requirements will be defined in REQUIREMENTS.md after PROJECT.md update.*
+See REQUIREMENTS.md for full requirement definitions (INTEL-01 through INTEL-23).
 
 <details>
 <summary><strong>v1.7 Requirements (13/13 validated)</strong></summary>
@@ -181,6 +183,10 @@ All 6 requirements verified complete:
 | 4→1 verification consolidation | Overlapping scopes unified into gsd-verifier with scope param | v1.2 Phase 6 |
 | 3-tier tool access | Explore (read), Research (+web), Modify (+write) applied to all agents | v1.2 Phase 6 |
 | Integration tests use real code paths | Prior incident where mock/prod divergence masked failures | v1.1 Phase 4 |
+| Optional taskContext for backward compat | New dynamic routing parameter must be optional — absent = exact v1.9 behavior | v2.0 Phase 30 |
+| JSONL for execution history | Append-only, zero-dep, line-by-line parseable, trivially rotatable — no SQLite | v2.0 Phase 32 |
+| Rule-based pattern detection | Zero-dependency constraint forbids ML libs — heuristic/rule-based only | v2.0 Phase 32 |
+| routing_strategy defaults to static | Existing users see zero behavior change until explicit opt-in | v2.0 Phase 30 |
 
 ## Context
 
@@ -193,12 +199,12 @@ All 6 requirements verified complete:
 - 15 source agents + 7 archived agents after v1.2 consolidation
 - 25 source files instrumented for coverage across lib, hooks, gsd-tools, bin, scripts
 - v1.3 added config migration system — configs auto-gain config_version on first load
+- v2.0 adds 2 new modules: classify.cjs (task classification), history.cjs (execution history)
+- v2.0 extends model-profiles.cjs with dynamicSelect(), core.cjs with optional taskContext
 
 ## Tech Debt
 
-~~**Stale agent references in 13 active files**~~: **Resolved** in v1.9 Phase 28. All active files now reference current agent names (gsd-verifier with scope parameter, gsd-research-orchestrator). Commands, docs, governance templates, and crew assessment updated across Plans 01 and 02.
-
-~~**DEVOPS-HANDOFF.md placeholder**~~: **Resolved** in v1.9 Phase 29. Rewritten from 22-line placeholder to 264-line comprehensive DevOps handoff document with all 12 sections and live-verified metrics (2046 tests, 95.49% coverage, 15 agents, 0 runtime deps).
+All prior tech debt items resolved through v1.9. No outstanding debt entering v2.0.
 
 ## Evolution
 
