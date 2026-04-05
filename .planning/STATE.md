@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.7
-milestone_name: End-to-End Integration Testing
-status: complete
-last_updated: "2026-04-04T00:00:00.000Z"
-last_activity: 2026-04-04 -- Phase 25 complete (Error Path & Edge Case Tests)
+milestone: v1.8
+milestone_name: Documentation & Accuracy
+status: active
+last_updated: "2026-04-05T00:00:00.000Z"
+last_activity: 2026-04-05 -- v1.8 milestone initialized
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-04)
+See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Active:** v1.7 End-to-End Integration Testing (2026-04-04) — COMPLETE
-**Previous:** v1.6 Maintainability (shipped 2026-04-04)
+**Active:** v1.8 Documentation & Accuracy (2026-04-05)
+**Previous:** v1.7 End-to-End Integration Testing (shipped 2026-04-04)
 
 ## Current Position
 
-Phase: Phase 25 — Error Path & Edge Case Tests (complete)
-Milestone: v1.7 End-to-End Integration Testing — complete
-Status: All 4 phases complete. 133 E2E tests across 10 test files covering infrastructure, core pipeline, utilities, lifecycle, failure modes, edge cases, and CI integration. All passing.
-Last activity: 2026-04-04 -- Phase 25 complete (Error Path & Edge Case Tests)
+Phase: None — milestone initializing
+Milestone: v1.8 Documentation & Accuracy — active
+Status: Milestone initialized. Fixing 19 test failures, syncing stale agent references, updating all documentation to match actual state.
+Last activity: 2026-04-05 -- v1.8 milestone initialized
 
-Progress: [##########] 4/4 phases | 4/4 plans | 13/13 requirements
+Progress: [..........] 0/0 phases | 0/0 plans | 0/0 requirements
 
 ## Milestone History
 
@@ -41,10 +41,11 @@ Progress: [##########] 4/4 phases | 4/4 plans | 13/13 requirements
 | v1.4 | Correctness & Robustness | 4 | 6 | 2026-04-04 |
 | v1.5 | Performance | 3 | 6 | 2026-04-04 |
 | v1.6 | Maintainability | 4 | 12 | 2026-04-04 |
+| v1.7 | End-to-End Integration Testing | 4 | 4 | 2026-04-04 |
 
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 25 complete — Error Path & Edge Case Tests (38 new, 133 total)
-**Stopped at**: v1.7 milestone complete, ready for archive
-**Next**: Milestone lifecycle — audit, archive v1.7
+**Last action**: v1.8 milestone initialized
+**Stopped at**: Defining requirements and roadmap
+**Next**: REQUIREMENTS.md and ROADMAP.md for v1.8

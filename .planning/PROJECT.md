@@ -6,30 +6,39 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Active:** v1.7 End-to-End Integration Testing (2026-04-04)
+**Active:** v1.8 Documentation & Accuracy (2026-04-05)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 259 passing (51 suites)
+**Tests:** 2046 total (1913 unit + 133 E2E), 2027 passing, 19 failing across 74 test files
 **Coverage:** core.cjs 94.26% line / 87.11% branch, security.cjs 100% line / 91.11% branch
-**Agents:** 15 source, 29 global, 7 archived — all tiered and quality-gated
+**Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 
-## Active Requirements (v1.7)
+## Active Requirements (v1.8)
 
-| Requirement | Category | Phase |
-|-------------|----------|-------|
-| E2E-01: Test harness with mocked LLM layer | Infrastructure | Phase 22 |
-| E2E-02: Fixture system for project scaffolding | Infrastructure | Phase 22 |
-| E2E-03: Assertion helpers (exit codes, file content, state) | Infrastructure | Phase 22 |
-| E2E-04: new-project end-to-end flow | Core Pipeline | Phase 23 |
-| E2E-05: discuss-phase through execute-phase pipeline | Core Pipeline | Phase 23 |
-| E2E-06: verify-work through ship pipeline | Core Pipeline | Phase 23 |
-| E2E-07: quick/fast/do command coverage | Utility Commands | Phase 24 |
-| E2E-08: progress/stats/health command coverage | Utility Commands | Phase 24 |
-| E2E-09: Milestone lifecycle (new/audit/complete/cleanup) | Lifecycle | Phase 24 |
-| E2E-10: Workstream management commands | Lifecycle | Phase 24 |
-| E2E-11: Failure mode handling and recovery | Error Paths | Phase 25 |
-| E2E-12: Edge case coverage (empty projects, corrupt state) | Error Paths | Phase 25 |
-| E2E-13: CI integration and regression gate | Error Paths | Phase 25 |
+*Requirements will be defined in REQUIREMENTS.md after PROJECT.md update.*
+
+<details>
+<summary><strong>v1.7 Requirements (13/13 validated)</strong></summary>
+
+All 13 requirements verified complete:
+
+| Requirement | Phase | Outcome |
+|-------------|-------|---------|
+| E2E-01: Test harness with mocked LLM layer | Phase 22 | Validated |
+| E2E-02: Fixture system for project scaffolding | Phase 22 | Validated |
+| E2E-03: Assertion helpers (exit codes, file content, state) | Phase 22 | Validated |
+| E2E-04: new-project end-to-end flow | Phase 23 | Validated |
+| E2E-05: discuss-phase through execute-phase pipeline | Phase 23 | Validated |
+| E2E-06: verify-work through ship pipeline | Phase 23 | Validated |
+| E2E-07: quick/fast/do command coverage | Phase 24 | Validated |
+| E2E-08: progress/stats/health command coverage | Phase 24 | Validated |
+| E2E-09: Milestone lifecycle (new/audit/complete/cleanup) | Phase 24 | Validated |
+| E2E-10: Workstream management commands | Phase 24 | Validated |
+| E2E-11: Failure mode handling and recovery | Phase 25 | Validated |
+| E2E-12: Edge case coverage (empty projects, corrupt state) | Phase 25 | Validated |
+| E2E-13: CI integration and regression gate | Phase 25 | Validated |
+
+</details>
 
 <details>
 <summary><strong>v1.6 Requirements (12/12 validated)</strong></summary>
@@ -177,8 +186,13 @@ All 6 requirements verified complete:
 
 ## Tech Debt
 
-All prior tech debt resolved in v1.6. No outstanding items.
-Current focus: comprehensive E2E integration test coverage for the full 57+ command surface.
+**19 test failures across 4 root causes** (identified in end-to-end analysis):
+1. **13 failures**: Stale agent references in MODEL_PROFILES, workflows, and test expectations (consolidated agents still referenced by old names)
+2. **2 failures**: gsd-validator-hub.md missing `color:` field, has forbidden `skills:` block
+3. **2 failures**: gsd-verifier.md missing `# hooks:` comment, 64KB exceeds 50K threshold
+4. **2 failures**: Missing plugin/agent directory structures expected by tests
+
+**Documentation inaccuracies**: PROJECT.md test counts stale, agent counts inconsistent, CLAUDE.md references need sync.
 
 ## Evolution
 
@@ -198,4 +212,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 -- v1.7 End-to-End Integration Testing milestone started*
+*Last updated: 2026-04-05 -- v1.8 Documentation & Accuracy milestone started*
