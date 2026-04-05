@@ -1,68 +1,50 @@
 # Requirements: get-shit-done-cc
 
-**Defined:** 2026-04-04
+**Defined:** 2026-04-05
 **Core Value:** Zero-dependency spec-driven development plugin for Claude Code
 
-## v1.7 Requirements
+## v1.8 Requirements
 
-Requirements for v1.7 End-to-End Integration Testing. Covers the full 57+ command surface with fully mocked LLM calls, exit code validation, and file assertion pass criteria.
+Requirements for v1.8 Documentation & Accuracy. Fixes 19 test failures from end-to-end analysis, syncs stale agent references, and updates all project documentation to match actual state.
 
-### Test Infrastructure
+### Test Failure Fixes
 
-- [x] **E2E-01**: Test harness with mocked LLM layer — create a test runner that intercepts all LLM/subagent calls, returns deterministic canned responses, and captures command invocations. Must support both sync and async code paths within the zero-dependency CommonJS constraint.
-- [x] **E2E-02**: Fixture system for project scaffolding — provide helpers that create temporary `.planning/` directories with valid STATE.md, ROADMAP.md, REQUIREMENTS.md, and PROJECT.md files in known states (empty project, mid-milestone, completed milestone). Fixtures must be disposable (auto-cleanup after test).
-- [x] **E2E-03**: Assertion helpers for exit codes, file content, and state — provide `assertExitCode(cmd, expected)`, `assertFileContains(path, pattern)`, `assertStateField(field, value)` and similar helpers that produce clear failure messages.
+- [ ] **DOC-01**: Fix stale agent references in MODEL_PROFILES and workflows — remove references to consolidated agents (gsd-plan-checker, gsd-integration-checker, gsd-nyquist-auditor, gsd-phase-researcher, gsd-project-researcher) and update test expectations to match current 15 active agents. Fixes 13 test failures.
+- [ ] **DOC-02**: Fix gsd-validator-hub.md frontmatter — add missing `color:` field, remove forbidden `skills:` block. Fixes 2 test failures.
+- [ ] **DOC-03**: Fix gsd-verifier.md compliance — add missing `# hooks:` comment, reduce file size below 50K threshold. Fixes 2 test failures.
+- [ ] **DOC-04**: Fix missing directory structures expected by tests — ensure plugin/agent directories exist where tests expect them. Fixes 2 test failures.
 
-### Core Pipeline Tests
+### Documentation Accuracy
 
-- [x] **E2E-04**: new-project end-to-end flow — test that `gsd:new-project` creates all required `.planning/` files (PROJECT.md, STATE.md, ROADMAP.md, REQUIREMENTS.md) with valid frontmatter and expected sections.
-- [x] **E2E-05**: discuss-phase through execute-phase pipeline — test the full discuss → plan → execute pipeline for a single phase. Verify CONTEXT.md creation, PLAN.md generation with valid frontmatter, plan execution producing SUMMARY.md, and STATE.md progress updates.
-- [x] **E2E-06**: verify-work through ship pipeline — test that verify-work reads PLAN.md acceptance criteria and produces VERIFICATION.md, and that ship creates a properly formatted PR description from phase artifacts.
-
-### Utility & Lifecycle Tests
-
-- [x] **E2E-07**: quick/fast/do command coverage — test that `/gsd:quick` produces atomic commits, `/gsd:fast` executes inline without subagents, and `/gsd:do` routes freeform text to the correct GSD command.
-- [x] **E2E-08**: progress/stats/health command coverage — test that `/gsd:progress` shows current state and routes correctly, `/gsd:stats` produces accurate phase/plan/requirement counts, and `/gsd:health` detects and reports `.planning/` directory issues.
-- [x] **E2E-09**: Milestone lifecycle (new/audit/complete/cleanup) — test the full lifecycle: `new-milestone` creates fresh state, `audit-milestone` verifies requirements coverage, `complete-milestone` archives correctly, `cleanup` removes phase directories.
-- [x] **E2E-10**: Workstream management commands — test that `workstreams` can list/create/switch/status workstreams, verify workspace isolation, and confirm state files are independent per workstream.
-
-### Error Path & Edge Case Tests
-
-- [x] **E2E-11**: Failure mode handling and recovery — test behavior when: plan execution fails mid-task (verify partial state preserved), state files are locked (verify lock diagnostics), and subagent returns error (verify graceful degradation).
-- [x] **E2E-12**: Edge case coverage — test behavior with: empty project (no `.planning/`), corrupt STATE.md (invalid YAML frontmatter), missing ROADMAP.md, phase directory without PLAN.md, and version mismatch between STATE.md and ROADMAP.md.
-- [x] **E2E-13**: CI integration and regression gate — create a test runner entry point (`npm run test:e2e`) that runs all E2E tests, produces exit code 0/1, and can be wired into CI. Include a smoke test subset (`npm run test:e2e:smoke`) for fast feedback.
+- [ ] **DOC-05**: Update CLAUDE.md with accurate metrics — correct test counts, agent counts, and coverage numbers to match current state.
+- [ ] **DOC-06**: Update README.md with accurate project state — test counts, agent counts, milestone history through v1.7.
+- [ ] **DOC-07**: Sync init new-milestone output — fix `current_milestone` and `latest_completed_milestone` values in gsd-tools.cjs to reflect actual STATE.md/ROADMAP.md state.
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Real LLM calls in tests | Fully mocked — deterministic, fast, no API costs |
-| UI/visual testing | CLI-only — no rendering to test |
-| Performance benchmarking | Separate concern — v1.7 is correctness, not speed |
-| Cross-platform CI matrix | Single-platform (macOS) sufficient for integration tests |
+| New functionality | Documentation-only milestone — no new features |
+| Refactoring | Only changes needed to fix test failures and documentation |
+| Coverage improvements | Separate concern — coverage targets met in v1.3-v1.6 |
+| New test creation | Only fixing existing test expectations, not adding tests |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| E2E-01 | Phase 22 | Complete |
-| E2E-02 | Phase 22 | Complete |
-| E2E-03 | Phase 22 | Complete |
-| E2E-04 | Phase 23 | Complete |
-| E2E-05 | Phase 23 | Complete |
-| E2E-06 | Phase 23 | Complete |
-| E2E-07 | Phase 24 | Complete |
-| E2E-08 | Phase 24 | Complete |
-| E2E-09 | Phase 24 | Complete |
-| E2E-10 | Phase 24 | Complete |
-| E2E-11 | Phase 25 | Complete |
-| E2E-12 | Phase 25 | Complete |
-| E2E-13 | Phase 25 | Complete |
+| DOC-01 | Phase 26 | Pending |
+| DOC-02 | Phase 26 | Pending |
+| DOC-03 | Phase 26 | Pending |
+| DOC-04 | Phase 26 | Pending |
+| DOC-05 | Phase 27 | Pending |
+| DOC-06 | Phase 27 | Pending |
+| DOC-07 | Phase 27 | Pending |
 
 **Coverage:**
-- v1.7 requirements: 13 total
-- Mapped to phases: 13/13
+- v1.8 requirements: 7 total
+- Mapped to phases: 7/7
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-04-04*
+*Requirements defined: 2026-04-05*

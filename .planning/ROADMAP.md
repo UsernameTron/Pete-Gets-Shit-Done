@@ -13,7 +13,21 @@
 
 ## Current Milestone
 
-None — ready for next milestone.
+**v1.8 Documentation & Accuracy** (2026-04-05)
+
+Fix 19 test failures from end-to-end analysis, sync stale agent references, and update all documentation to match actual state. Documentation-only — no new features.
+
+### Phase 26 — Test Failure Fixes
+
+Fix all 19 test failures across 4 root causes: stale agent references in MODEL_PROFILES (13), gsd-validator-hub frontmatter (2), gsd-verifier compliance (2), missing directory structures (2).
+
+**Requirements:** DOC-01, DOC-02, DOC-03, DOC-04
+
+### Phase 27 — Documentation Sync
+
+Update CLAUDE.md, README.md, and gsd-tools.cjs with accurate metrics, agent counts, and milestone state. Ensure `init new-milestone` reports correct current/completed milestone values.
+
+**Requirements:** DOC-05, DOC-06, DOC-07
 
 ---
-*Last updated: 2026-04-04 -- v1.7 End-to-End Integration Testing complete*
+*Last updated: 2026-04-05 -- v1.8 Documentation & Accuracy initialized*
