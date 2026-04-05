@@ -16,7 +16,7 @@ const LIB_DIR = path.join(__dirname, '..', 'get-shit-done', 'bin', 'lib');
 const LAYERS = {
   0: ['model-profiles.cjs', 'security.cjs', 'classify.cjs'],
   1: ['core.cjs'],
-  2: ['frontmatter.cjs', 'config.cjs', 'state.cjs'],
+  2: ['frontmatter.cjs', 'config.cjs', 'state.cjs', 'history.cjs'],
 };
 
 /**

@@ -586,6 +586,36 @@ async function runCommand(command, args, cwd, raw) {
       break;
     }
 
+    case 'history': {
+      const history = require('./lib/history.cjs');
+      const subcommand = args[1];
+      if (subcommand === 'list') {
+        const flags = parseNamedArgs(args, ['agent', 'outcome', 'limit'], []);
+        const filters = {};
+        if (flags.agent) filters.agent = flags.agent;
+        if (flags.outcome) filters.outcome = flags.outcome;
+        if (flags.limit) filters.limit = parseInt(flags.limit, 10);
+        const result = history.queryHistory(cwd, filters);
+        history.formatHistoryList(result.records, raw);
+      } else if (subcommand === 'stats') {
+        const result = history.queryHistory(cwd, {});
+        const patterns = history.detectPatterns(cwd);
+        history.formatHistoryStats(result.records, patterns, raw);
+      } else if (subcommand === 'prune') {
+        const keepFlag = parseNamedArgs(args, ['keep'], []);
+        const keepCount = keepFlag.keep ? parseInt(keepFlag.keep, 10) : 500;
+        const result = history.pruneHistory(cwd, keepCount);
+        if (raw) {
+          console.log(JSON.stringify(result));
+        } else {
+          console.log(`Pruned ${result.pruned} records. ${result.remaining} remaining.`);
+        }
+      } else {
+        error('Unknown history subcommand. Available: list, stats, prune');
+      }
+      break;
+    }
+
     case 'phases': {
       const subcommand = args[1];
       if (subcommand === 'list') {
