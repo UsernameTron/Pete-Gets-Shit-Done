@@ -14,7 +14,7 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 <downstream_awareness>
 **CONTEXT.md feeds into:**
 
-1. **gsd-phase-researcher** — Reads CONTEXT.md to know WHAT to research
+1. **gsd-research-orchestrator** (scope: phase) — Reads CONTEXT.md to know WHAT to research
 2. **gsd-planner** — Reads CONTEXT.md to know WHAT decisions are locked
 
 **Your job:** Capture decisions clearly enough that downstream agents can act on them

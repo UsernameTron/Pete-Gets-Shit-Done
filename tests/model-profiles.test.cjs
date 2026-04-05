@@ -21,9 +21,8 @@ describe('MODEL_PROFILES', () => {
   test('contains all expected GSD agents', () => {
     const expectedAgents = [
       'gsd-planner', 'gsd-roadmapper', 'gsd-executor',
-      'gsd-phase-researcher', 'gsd-project-researcher', 'gsd-research-synthesizer',
+      'gsd-research-orchestrator', 'gsd-research-synthesizer',
       'gsd-debugger', 'gsd-codebase-mapper', 'gsd-verifier',
-      'gsd-plan-checker', 'gsd-integration-checker', 'gsd-nyquist-auditor',
       'gsd-ui-researcher', 'gsd-ui-checker', 'gsd-ui-auditor',
     ];
     for (const agent of expectedAgents) {
@@ -87,7 +86,7 @@ describe('getAgentToModelMapForProfile', () => {
   test('returns correct models for budget profile', () => {
     const map = getAgentToModelMapForProfile('budget');
     assert.strictEqual(map['gsd-planner'], 'sonnet');
-    assert.strictEqual(map['gsd-phase-researcher'], 'haiku');
+    assert.strictEqual(map['gsd-research-orchestrator'], 'haiku');
   });
 
   test('returns correct models for quality profile', () => {

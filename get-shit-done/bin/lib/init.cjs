@@ -171,9 +171,9 @@ function cmdInitPlanPhase(cwd, phase, raw) {
 
   const result = {
     // Models
-    researcher_model: resolveModelInternal(cwd, 'gsd-phase-researcher'),
+    researcher_model: resolveModelInternal(cwd, 'gsd-research-orchestrator'),
     planner_model: resolveModelInternal(cwd, 'gsd-planner'),
-    checker_model: resolveModelInternal(cwd, 'gsd-plan-checker'),
+    checker_model: resolveModelInternal(cwd, 'gsd-verifier'),
 
     // Workflow flags
     research_enabled: config.research,
@@ -311,7 +311,7 @@ function cmdInitNewProject(cwd, raw) {
 
   const result = {
     // Models
-    researcher_model: resolveModelInternal(cwd, 'gsd-project-researcher'),
+    researcher_model: resolveModelInternal(cwd, 'gsd-research-orchestrator'),
     synthesizer_model: resolveModelInternal(cwd, 'gsd-research-synthesizer'),
     roadmapper_model: resolveModelInternal(cwd, 'gsd-roadmapper'),
 
@@ -361,7 +361,7 @@ function cmdInitNewMilestone(cwd, raw) {
 
   const result = {
     // Models
-    researcher_model: resolveModelInternal(cwd, 'gsd-project-researcher'),
+    researcher_model: resolveModelInternal(cwd, 'gsd-research-orchestrator'),
     synthesizer_model: resolveModelInternal(cwd, 'gsd-research-synthesizer'),
     roadmapper_model: resolveModelInternal(cwd, 'gsd-roadmapper'),
 
@@ -420,7 +420,7 @@ function cmdInitQuick(cwd, description, raw) {
     // Models
     planner_model: resolveModelInternal(cwd, 'gsd-planner'),
     executor_model: resolveModelInternal(cwd, 'gsd-executor'),
-    checker_model: resolveModelInternal(cwd, 'gsd-plan-checker'),
+    checker_model: resolveModelInternal(cwd, 'gsd-verifier'),
     verifier_model: resolveModelInternal(cwd, 'gsd-verifier'),
 
     // Config
@@ -513,7 +513,7 @@ function cmdInitVerifyWork(cwd, phase, raw) {
   const result = {
     // Models
     planner_model: resolveModelInternal(cwd, 'gsd-planner'),
-    checker_model: resolveModelInternal(cwd, 'gsd-plan-checker'),
+    checker_model: resolveModelInternal(cwd, 'gsd-verifier'),
 
     // Config
     commit_docs: config.commit_docs,

@@ -228,7 +228,7 @@ Steps:
 3. Follow the workflow steps to produce PLAN.md files for this phase.
 4. If research is enabled in config, run the research step first.
 5. Spawn a gsd-planner subagent via Task() to create the plans.
-6. If plan-checker is enabled, spawn a gsd-plan-checker subagent to verify.
+6. If plan-checker is enabled, spawn a gsd-verifier subagent to verify (scope: plan).
 7. Commit plan files when complete.
 
 Important: You are running in the background. Do NOT use AskUserQuestion — make autonomous decisions based on project context. If you hit a blocker, write it to STATE.md as a blocker and stop. Do NOT silently work around permission or file access errors — let them fail so the manager can surface them with resolution hints."

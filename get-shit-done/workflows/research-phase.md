@@ -1,12 +1,12 @@
 <purpose>
-Research how to implement a phase. Spawns gsd-phase-researcher with phase context.
+Research how to implement a phase. Spawns gsd-research-orchestrator (scope: phase) with phase context.
 
 Standalone research command. For most workflows, use `/gsd:plan-phase` which integrates research automatically.
 </purpose>
 
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-- gsd-phase-researcher — Researches technical approaches for a phase
+- gsd-research-orchestrator — Researches technical approaches for a phase (scope: phase)
 </available_agent_types>
 
 <process>
@@ -16,7 +16,7 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 @~/.claude/get-shit-done/references/model-profile-resolution.md
 
 Resolve model for:
-- `gsd-phase-researcher`
+- `gsd-research-orchestrator`
 
 ## Step 1: Normalize and Validate Phase
 
@@ -68,7 +68,7 @@ Phase description: {description}
 <output>
 Write to: .planning/phases/${PHASE}-{slug}/${PHASE}-RESEARCH.md
 </output>",
-  subagent_type="gsd-phase-researcher",
+  subagent_type="gsd-research-orchestrator",
   model="{researcher_model}"
 )
 ```

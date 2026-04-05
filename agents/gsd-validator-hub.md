@@ -4,17 +4,11 @@ description: "Unified validation agent for both Claude Code extensions and agent
 tools: Read, Bash, Glob, Grep
 # Tier: Explore
 disallowedTools: Write, Edit
+color: blue
 model: haiku
 permissionMode: plan
 isolation: worktree
 maxTurns: 20
-skills:
-  - cc-ref-hooks
-  - cc-ref-settings
-  - cc-ref-permissions
-  - cc-ref-plugins
-  - cc-ref-skills
-  - cc-ref-subagents
 ---
 
 # GSD Validator Hub

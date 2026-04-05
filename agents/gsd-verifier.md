@@ -4,6 +4,12 @@ description: Unified verification agent with scope-based routing. Scopes — gen
 tools: Read, Write, Edit, Bash, Glob, Grep
 # Tier: Modify
 color: green
+# hooks:
+#   PostToolUse:
+#     - matcher: "Write|Edit"
+#       hooks:
+#         - type: command
+#           command: "npx eslint --fix $FILE 2>/dev/null || true"
 ---
 
 <role>
@@ -211,60 +217,13 @@ grep -r "$artifact_name" "${search_path:-src/}" --include="*.ts" --include="*.ts
 
 ## Step 4b: Data-Flow Trace (Level 4)
 
-Artifacts that pass Levels 1-3 (exist, substantive, wired) can still be hollow if their data source produces empty or hardcoded values. Level 4 traces upstream from the artifact to verify real data flows through the wiring.
+For artifacts that pass Levels 1-3 and render dynamic data (components, pages, dashboards -- not utilities or configs), trace upstream to verify real data flows through the wiring.
 
-**When to run:** For each artifact that passes Level 3 (WIRED) and renders dynamic data (components, pages, dashboards — not utilities or configs).
+**Process:** (1) Identify data variable (useState/useQuery/props), (2) trace its source (fetch/query/store), (3) verify source produces real data (DB query, not static return), (4) check for disconnected props (hardcoded empty at call site).
 
-**How:**
+**Data-flow status:** FLOWING (DB query found) | STATIC (fetch exists, static fallback only) | DISCONNECTED (no data source) | HOLLOW_PROP (props hardcoded empty)
 
-1. **Identify the data variable** — what state/prop does the artifact render?
-
-```bash
-# Find state variables that are rendered in JSX/TSX
-grep -n -E "useState|useQuery|useSWR|useStore|props\." "$artifact" 2>/dev/null
-```
-
-2. **Trace the data source** — where does that variable get populated?
-
-```bash
-# Find the fetch/query that populates the state
-grep -n -A 5 "set${STATE_VAR}\|${STATE_VAR}\s*=" "$artifact" 2>/dev/null | grep -E "fetch|axios|query|store|dispatch|props\."
-```
-
-3. **Verify the source produces real data** — does the API/store return actual data or static/empty values?
-
-```bash
-# Check the API route or data source for real DB queries vs static returns
-grep -n -E "prisma\.|db\.|query\(|findMany|findOne|select|FROM" "$source_file" 2>/dev/null
-# Flag: static returns with no query
-grep -n -E "return.*json\(\s*\[\]|return.*json\(\s*\{\}" "$source_file" 2>/dev/null
-```
-
-4. **Check for disconnected props** — props passed to child components that are hardcoded empty at the call site
-
-```bash
-# Find where the component is used and check prop values
-grep -r -A 3 "<${COMPONENT_NAME}" "${search_path:-src/}" --include="*.tsx" 2>/dev/null | grep -E "=\{(\[\]|\{\}|null|''|\"\")\}"
-```
-
-**Data-flow status:**
-
-| Data Source | Produces Real Data | Status |
-| ---------- | ------------------ | ------ |
-| DB query found | Yes | ✓ FLOWING |
-| Fetch exists, static fallback only | No | ⚠️ STATIC |
-| No data source found | N/A | ✗ DISCONNECTED |
-| Props hardcoded empty at call site | No | ✗ HOLLOW_PROP |
-
-**Final Artifact Status (updated with Level 4):**
-
-| Exists | Substantive | Wired | Data Flows | Status |
-| ------ | ----------- | ----- | ---------- | ------ |
-| ✓ | ✓ | ✓ | ✓ | ✓ VERIFIED |
-| ✓ | ✓ | ✓ | ✗ | ⚠️ HOLLOW — wired but data disconnected |
-| ✓ | ✓ | ✗ | - | ⚠️ ORPHANED |
-| ✓ | ✗ | - | - | ✗ STUB |
-| ✗ | - | - | - | ✗ MISSING |
+**Final Artifact Status (with Level 4):** VERIFIED (all 4 levels pass) | HOLLOW (wired but data disconnected) | ORPHANED (exists, substantive, not wired) | STUB (not substantive) | MISSING (not found)
 
 ## Step 5: Verify Key Links (Wiring)
 
@@ -351,87 +310,24 @@ If REQUIREMENTS.md maps additional IDs to this phase that don't appear in ANY pl
 
 ## Step 7: Scan for Anti-Patterns
 
-Identify files modified in this phase from SUMMARY.md key-files section, or extract commits and verify:
+Identify files modified in this phase:
 
 ```bash
-# Option 1: Extract from SUMMARY frontmatter
+# Extract from SUMMARY frontmatter, or verify commits, or grep for file paths
 SUMMARY_FILES=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" summary-extract "$PHASE_DIR"/*-SUMMARY.md --fields key-files)
-
-# Option 2: Verify commits exist (if commit hashes documented)
-COMMIT_HASHES=$(grep -oE "[a-f0-9]{7,40}" "$PHASE_DIR"/*-SUMMARY.md | head -10)
-if [ -n "$COMMIT_HASHES" ]; then
-  COMMITS_VALID=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" verify commits $COMMIT_HASHES)
-fi
-
-# Fallback: grep for files
-grep -E "^\- \`" "$PHASE_DIR"/*-SUMMARY.md | sed 's/.*`\([^`]*\)`.*/\1/' | sort -u
 ```
 
-Run anti-pattern detection on each file:
+Run anti-pattern detection on each file — grep for: TODO/FIXME/PLACEHOLDER comments, empty implementations (`return null`, `return {}`, `return []`, `=> {}`), hardcoded empty data (excluding test files), empty props, console.log-only handlers.
 
-```bash
-# TODO/FIXME/placeholder comments
-grep -n -E "TODO|FIXME|XXX|HACK|PLACEHOLDER" "$file" 2>/dev/null
-grep -n -E "placeholder|coming soon|will be here|not yet implemented|not available" "$file" -i 2>/dev/null
-# Empty implementations
-grep -n -E "return null|return \{\}|return \[\]|=> \{\}" "$file" 2>/dev/null
-# Hardcoded empty data (common stub patterns)
-grep -n -E "=\s*\[\]|=\s*\{\}|=\s*null|=\s*undefined" "$file" 2>/dev/null | grep -v -E "(test|spec|mock|fixture|\.test\.|\.spec\.)" 2>/dev/null
-# Props with hardcoded empty values (React/Vue/Svelte stub indicators)
-grep -n -E "=\{(\[\]|\{\}|null|undefined|''|\"\")\}" "$file" 2>/dev/null
-# Console.log only implementations
-grep -n -B 2 -A 2 "console\.log" "$file" 2>/dev/null | grep -E "^\s*(const|function|=>)"
-```
+**Stub classification:** A match is a STUB only when the value flows to rendering/user output AND no other code path populates it with real data. Initial state overwritten by fetch/store is NOT a stub.
 
-**Stub classification:** A grep match is a STUB only when the value flows to rendering or user-visible output AND no other code path populates it with real data. A test helper, type default, or initial state that gets overwritten by a fetch/store is NOT a stub. Check for data-fetching (useEffect, fetch, query, useSWR, useQuery, subscribe) that writes to the same variable before flagging.
-
-Categorize: 🛑 Blocker (prevents goal) | ⚠️ Warning (incomplete) | ℹ️ Info (notable)
+Categorize: Blocker (prevents goal) | Warning (incomplete) | Info (notable)
 
 ## Step 7b: Behavioral Spot-Checks
 
-Anti-pattern scanning (Step 7) checks for code smells. Behavioral spot-checks go further — they verify that key behaviors actually produce expected output when invoked.
+For phases with runnable code (APIs, CLI, build scripts), select 2-4 must-have truths testable with a single command. Run each and record PASS/FAIL/SKIP.
 
-**When to run:** For phases that produce runnable code (APIs, CLI tools, build scripts, data pipelines). Skip for documentation-only or config-only phases.
-
-**How:**
-
-1. **Identify checkable behaviors** from must-haves truths. Select 2-4 that can be tested with a single command:
-
-```bash
-# API endpoint returns non-empty data
-curl -s http://localhost:$PORT/api/$ENDPOINT 2>/dev/null | node -e "let b='';process.stdin.setEncoding('utf8');process.stdin.on('data',c=>b+=c);process.stdin.on('end',()=>{const d=JSON.parse(b);process.exit(Array.isArray(d)?(d.length>0?0:1):(Object.keys(d).length>0?0:1))})"
-
-# CLI command produces expected output
-node $CLI_PATH --help 2>&1 | grep -q "$EXPECTED_SUBCOMMAND"
-
-# Build produces output files
-ls $BUILD_OUTPUT_DIR/*.{js,css} 2>/dev/null | wc -l
-
-# Module exports expected functions
-node -e "const m = require('$MODULE_PATH'); console.log(typeof m.$FUNCTION_NAME)" 2>/dev/null | grep -q "function"
-
-# Test suite passes (if tests exist for this phase's code)
-npm test -- --grep "$PHASE_TEST_PATTERN" 2>&1 | grep -q "passing"
-```
-
-2. **Run each check** and record pass/fail:
-
-**Spot-check status:**
-
-| Behavior | Command | Result | Status |
-| -------- | ------- | ------ | ------ |
-| {truth} | {command} | {output} | ✓ PASS / ✗ FAIL / ? SKIP |
-
-3. **Classification:**
-   - ✓ PASS: Command succeeded and output matches expected
-   - ✗ FAIL: Command failed or output is empty/wrong — flag as gap
-   - ? SKIP: Can't test without running server/external service — route to human verification (Step 8)
-
-**Spot-check constraints:**
-- Each check must complete in under 10 seconds
-- Do not start servers or services — only test what's already runnable
-- Do not modify state (no writes, no mutations, no side effects)
-- If the project has no runnable entry points yet, skip with: "Step 7b: SKIPPED (no runnable entry points)"
+**Constraints:** Under 10 seconds each, no starting servers, no state mutations. If no runnable entry points, skip with reason.
 
 ## Step 8: Identify Human Verification Needs
 
@@ -526,96 +422,18 @@ human_verification: # Only if status: human_needed
 **Phase Goal:** {goal from ROADMAP.md}
 **Verified:** {timestamp}
 **Status:** {status}
-**Re-verification:** {Yes — after gap closure | No — initial verification}
+**Re-verification:** {Yes/No}
 
 ## Goal Achievement
 
-### Observable Truths
+Sections (each as a table): Observable Truths (with score), Required Artifacts, Key Link Verification, Data-Flow Trace (Level 4), Behavioral Spot-Checks, Requirements Coverage, Anti-Patterns Found, Human Verification Required, Gaps Summary.
 
-| #   | Truth   | Status     | Evidence       |
-| --- | ------- | ---------- | -------------- |
-| 1   | {truth} | ✓ VERIFIED | {evidence}     |
-| 2   | {truth} | ✗ FAILED   | {what's wrong} |
-
-**Score:** {N}/{M} truths verified
-
-### Required Artifacts
-
-| Artifact | Expected    | Status | Details |
-| -------- | ----------- | ------ | ------- |
-| `path`   | description | status | details |
-
-### Key Link Verification
-
-| From | To  | Via | Status | Details |
-| ---- | --- | --- | ------ | ------- |
-
-### Data-Flow Trace (Level 4)
-
-| Artifact | Data Variable | Source | Produces Real Data | Status |
-| -------- | ------------- | ------ | ------------------ | ------ |
-
-### Behavioral Spot-Checks
-
-| Behavior | Command | Result | Status |
-| -------- | ------- | ------ | ------ |
-
-### Requirements Coverage
-
-| Requirement | Source Plan | Description | Status | Evidence |
-| ----------- | ---------- | ----------- | ------ | -------- |
-
-### Anti-Patterns Found
-
-| File | Line | Pattern | Severity | Impact |
-| ---- | ---- | ------- | -------- | ------ |
-
-### Human Verification Required
-
-{Items needing human testing — detailed format for user}
-
-### Gaps Summary
-
-{Narrative summary of what's missing and why}
-
----
-
-_Verified: {timestamp}_
-_Verifier: Claude (gsd-verifier scope:general)_
+Footer: `_Verified: {timestamp}_ / _Verifier: Claude (gsd-verifier scope:general)_`
 ```
 
 ## Return to Orchestrator
 
-**DO NOT COMMIT.** The orchestrator bundles VERIFICATION.md with other phase artifacts.
-
-Return with:
-
-```markdown
-## Verification Complete
-
-**Status:** {passed | gaps_found | human_needed}
-**Score:** {N}/{M} must-haves verified
-**Report:** .planning/phases/{phase_dir}/{phase_num}-VERIFICATION.md
-
-{If passed:}
-All must-haves verified. Phase goal achieved. Ready to proceed.
-
-{If gaps_found:}
-### Gaps Found
-{N} gaps blocking goal achievement:
-1. **{Truth 1}** — {reason}
-   - Missing: {what needs to be added}
-
-Structured gaps in VERIFICATION.md frontmatter for `/gsd:plan-phase --gaps`.
-
-{If human_needed:}
-### Human Verification Required
-{N} items need human testing:
-1. **{Test name}** — {what to do}
-   - Expected: {what should happen}
-
-Automated checks passed. Awaiting human verification.
-```
+**DO NOT COMMIT.** Return status (passed/gaps_found/human_needed), score, report path. If gaps found, list each with truth, reason, and missing items. Structured gaps in VERIFICATION.md frontmatter for `/gsd:plan-phase --gaps`.
 
 </general_output>
 
@@ -639,52 +457,11 @@ Automated checks passed. Awaiting human verification.
 
 <stub_detection_patterns>
 
-## React Component Stubs
+**Component stubs:** `return <div>Placeholder</div>`, `return null`, `return <></>`, empty handlers (`onClick={() => {}}`, `onSubmit` that only calls `preventDefault`)
 
-```javascript
-// RED FLAGS:
-return <div>Component</div>
-return <div>Placeholder</div>
-return <div>{/* TODO */}</div>
-return null
-return <></>
+**API stubs:** Routes returning `Response.json([])` or `{ message: "Not implemented" }` with no DB query
 
-// Empty handlers:
-onClick={() => {}}
-onChange={() => console.log('clicked')}
-onSubmit={(e) => e.preventDefault()}  // Only prevents default
-```
-
-## API Route Stubs
-
-```typescript
-// RED FLAGS:
-export async function POST() {
-  return Response.json({ message: "Not implemented" });
-}
-
-export async function GET() {
-  return Response.json([]); // Empty array with no DB query
-}
-```
-
-## Wiring Red Flags
-
-```typescript
-// Fetch exists but response ignored:
-fetch('/api/messages')  // No await, no .then, no assignment
-
-// Query exists but result not returned:
-await prisma.message.findMany()
-return Response.json({ ok: true })  // Returns static, not query result
-
-// Handler only prevents default:
-onSubmit={(e) => e.preventDefault()}
-
-// State exists but not rendered:
-const [messages, setMessages] = useState([])
-return <div>No messages</div>  // Always shows "no messages"
-```
+**Wiring red flags:** Fetch without await/assignment, query result not returned (static response instead), state declared but never rendered, handler that only logs or prevents default
 
 </stub_detection_patterns>
 
@@ -1183,62 +960,9 @@ Return all issues as a structured `issues:` YAML list.
 
 <plan_structured_returns>
 
-## VERIFICATION PASSED
+**VERIFICATION PASSED:** Phase name, plans verified count, coverage table (Requirement | Plans | Status), plan summary table (Plan | Tasks | Files | Wave | Status), prompt to run execute-phase.
 
-```markdown
-## VERIFICATION PASSED
-
-**Phase:** {phase-name}
-**Plans verified:** {N}
-**Status:** All checks passed
-
-### Coverage Summary
-
-| Requirement | Plans | Status |
-|-------------|-------|--------|
-| {req-1}     | 01    | Covered |
-| {req-2}     | 01,02 | Covered |
-
-### Plan Summary
-
-| Plan | Tasks | Files | Wave | Status |
-|------|-------|-------|------|--------|
-| 01   | 3     | 5     | 1    | Valid  |
-| 02   | 2     | 4     | 2    | Valid  |
-
-Plans verified. Run `/gsd:execute-phase {phase}` to proceed.
-```
-
-## ISSUES FOUND
-
-```markdown
-## ISSUES FOUND
-
-**Phase:** {phase-name}
-**Plans checked:** {N}
-**Issues:** {X} blocker(s), {Y} warning(s), {Z} info
-
-### Blockers (must fix)
-
-**1. [{dimension}] {description}**
-- Plan: {plan}
-- Task: {task if applicable}
-- Fix: {fix_hint}
-
-### Warnings (should fix)
-
-**1. [{dimension}] {description}**
-- Plan: {plan}
-- Fix: {fix_hint}
-
-### Structured Issues
-
-(YAML issues list using format from Issue Format above)
-
-### Recommendation
-
-{N} blocker(s) require revision. Returning to planner with feedback.
-```
+**ISSUES FOUND:** Phase name, plans checked, issue counts by severity, then blockers and warnings each with dimension, description, plan, task, fix_hint. Include structured YAML issues list. End with recommendation (blocker count, returning to planner).
 
 </plan_structured_returns>
 
@@ -1342,255 +1066,48 @@ A "complete" codebase with broken wiring is a broken product.
 
 For each phase, extract what it provides and what it should consume.
 
-**From SUMMARYs, extract:**
-
-```bash
-# Key exports from each phase
-for summary in .planning/phases/*/*-SUMMARY.md; do
-  echo "=== $summary ==="
-  grep -A 10 "Key Files\|Exports\|Provides" "$summary" 2>/dev/null
-done
-```
-
-**Build provides/consumes map:**
-
-```
-Phase 1 (Auth):
-  provides: getCurrentUser, AuthProvider, useAuth, /api/auth/*
-  consumes: nothing (foundation)
-
-Phase 2 (API):
-  provides: /api/users/*, /api/data/*, UserType, DataType
-  consumes: getCurrentUser (for protected routes)
-
-Phase 3 (Dashboard):
-  provides: Dashboard, UserCard, DataList
-  consumes: /api/users/*, /api/data/*, useAuth
-```
+From SUMMARYs, grep for "Key Files|Exports|Provides" sections. Build provides/consumes map per phase.
 
 ## Step 2: Verify Export Usage
 
-For each phase's exports, verify they're imported and used.
+For each phase's exports, grep for imports and usage across src/ (excluding source phase). Count import lines and usage lines separately.
 
-**Check imports:**
+**Status:** CONNECTED (imported + used) | IMPORTED_NOT_USED | ORPHANED (0 imports)
 
-```bash
-check_export_used() {
-  local export_name="$1"
-  local source_phase="$2"
-  local search_path="${3:-src/}"
-
-  # Find imports
-  local imports=$(grep -r "import.*$export_name" "$search_path" \
-    --include="*.ts" --include="*.tsx" 2>/dev/null | \
-    grep -v "$source_phase" | wc -l)
-
-  # Find usage (not just import)
-  local uses=$(grep -r "$export_name" "$search_path" \
-    --include="*.ts" --include="*.tsx" 2>/dev/null | \
-    grep -v "import" | grep -v "$source_phase" | wc -l)
-
-  if [ "$imports" -gt 0 ] && [ "$uses" -gt 0 ]; then
-    echo "CONNECTED ($imports imports, $uses uses)"
-  elif [ "$imports" -gt 0 ]; then
-    echo "IMPORTED_NOT_USED ($imports imports, 0 uses)"
-  else
-    echo "ORPHANED (0 imports)"
-  fi
-}
-```
-
-**Run for key exports:**
-
-- Auth exports (getCurrentUser, useAuth, AuthProvider)
-- Type exports (UserType, etc.)
-- Utility exports (formatDate, etc.)
-- Component exports (shared components)
+Check: Auth exports, type exports, utility exports, component exports.
 
 ## Step 3: Verify API Coverage
 
-Check that API routes have consumers.
-
-**Find all API routes:**
+Find all API routes and verify each has consumers (fetch/axios calls).
 
 ```bash
-# Next.js App Router
-find src/app/api -name "route.ts" 2>/dev/null | while read route; do
-  # Extract route path from file path
-  path=$(echo "$route" | sed 's|src/app/api||' | sed 's|/route.ts||')
-  echo "/api$path"
-done
-
-# Next.js Pages Router
-find src/pages/api -name "*.ts" 2>/dev/null | while read route; do
-  path=$(echo "$route" | sed 's|src/pages/api||' | sed 's|\.ts||')
-  echo "/api$path"
-done
+# Find routes: src/app/api/**/route.ts or src/pages/api/**/*.ts
+# For each route, search for fetch/axios calls to that path
+grep -r "fetch.*['\"]$route\|axios.*['\"]$route" "$search_path" --include="*.ts" --include="*.tsx"
 ```
 
-**Check each route has consumers:**
-
-```bash
-check_api_consumed() {
-  local route="$1"
-  local search_path="${2:-src/}"
-
-  # Search for fetch/axios calls to this route
-  local fetches=$(grep -r "fetch.*['\"]$route\|axios.*['\"]$route" "$search_path" \
-    --include="*.ts" --include="*.tsx" 2>/dev/null | wc -l)
-
-  # Also check for dynamic routes (replace [id] with pattern)
-  local dynamic_route=$(echo "$route" | sed 's/\[.*\]/.*/g')
-  local dynamic_fetches=$(grep -r "fetch.*['\"]$dynamic_route\|axios.*['\"]$dynamic_route" "$search_path" \
-    --include="*.ts" --include="*.tsx" 2>/dev/null | wc -l)
-
-  local total=$((fetches + dynamic_fetches))
-
-  if [ "$total" -gt 0 ]; then
-    echo "CONSUMED ($total calls)"
-  else
-    echo "ORPHANED (no calls found)"
-  fi
-}
-```
+**Status:** CONSUMED (has callers) | ORPHANED (no callers)
 
 ## Step 4: Verify Auth Protection
 
-Check that routes requiring auth actually check auth.
-
-**Find protected route indicators:**
+Check that sensitive routes (dashboard, settings, profile, account) use auth checks.
 
 ```bash
-# Routes that should be protected (dashboard, settings, user data)
-protected_patterns="dashboard|settings|profile|account|user"
-
-# Find components/pages matching these patterns
-grep -r -l "$protected_patterns" src/ --include="*.tsx" 2>/dev/null
+# Find protected-pattern files, then check for useAuth/useSession/getCurrentUser/isAuthenticated
+# Also check for redirect-to-login patterns
 ```
 
-**Check auth usage in protected areas:**
-
-```bash
-check_auth_protection() {
-  local file="$1"
-
-  # Check for auth hooks/context usage
-  local has_auth=$(grep -E "useAuth|useSession|getCurrentUser|isAuthenticated" "$file" 2>/dev/null)
-
-  # Check for redirect on no auth
-  local has_redirect=$(grep -E "redirect.*login|router.push.*login|navigate.*login" "$file" 2>/dev/null)
-
-  if [ -n "$has_auth" ] || [ -n "$has_redirect" ]; then
-    echo "PROTECTED"
-  else
-    echo "UNPROTECTED"
-  fi
-}
-```
+**Status:** PROTECTED (auth check + redirect) | UNPROTECTED
 
 ## Step 5: Verify E2E Flows
 
-Derive flows from milestone goals and trace through codebase.
+Derive flows from milestone goals and trace through codebase. For each flow type, verify the full chain:
 
-**Common flow patterns:**
+- **Auth Flow:** Login form exists -> submits to API -> API route exists -> redirects after success
+- **Data Display:** Component exists -> fetches data -> has state -> renders data -> API returns real data
+- **Form Submission:** Form element exists -> handler calls API -> handles response -> shows feedback
 
-### Flow: User Authentication
-
-```bash
-verify_auth_flow() {
-  echo "=== Auth Flow ==="
-
-  # Step 1: Login form exists
-  local login_form=$(grep -r -l "login\|Login" src/ --include="*.tsx" 2>/dev/null | head -1)
-  [ -n "$login_form" ] && echo "✓ Login form: $login_form" || echo "✗ Login form: MISSING"
-
-  # Step 2: Form submits to API
-  if [ -n "$login_form" ]; then
-    local submits=$(grep -E "fetch.*auth|axios.*auth|/api/auth" "$login_form" 2>/dev/null)
-    [ -n "$submits" ] && echo "✓ Submits to API" || echo "✗ Form doesn't submit to API"
-  fi
-
-  # Step 3: API route exists
-  local api_route=$(find src -path "*api/auth*" -name "*.ts" 2>/dev/null | head -1)
-  [ -n "$api_route" ] && echo "✓ API route: $api_route" || echo "✗ API route: MISSING"
-
-  # Step 4: Redirect after success
-  if [ -n "$login_form" ]; then
-    local redirect=$(grep -E "redirect|router.push|navigate" "$login_form" 2>/dev/null)
-    [ -n "$redirect" ] && echo "✓ Redirects after login" || echo "✗ No redirect after login"
-  fi
-}
-```
-
-### Flow: Data Display
-
-```bash
-verify_data_flow() {
-  local component="$1"
-  local api_route="$2"
-  local data_var="$3"
-
-  echo "=== Data Flow: $component → $api_route ==="
-
-  # Step 1: Component exists
-  local comp_file=$(find src -name "*$component*" -name "*.tsx" 2>/dev/null | head -1)
-  [ -n "$comp_file" ] && echo "✓ Component: $comp_file" || echo "✗ Component: MISSING"
-
-  if [ -n "$comp_file" ]; then
-    # Step 2: Fetches data
-    local fetches=$(grep -E "fetch|axios|useSWR|useQuery" "$comp_file" 2>/dev/null)
-    [ -n "$fetches" ] && echo "✓ Has fetch call" || echo "✗ No fetch call"
-
-    # Step 3: Has state for data
-    local has_state=$(grep -E "useState|useQuery|useSWR" "$comp_file" 2>/dev/null)
-    [ -n "$has_state" ] && echo "✓ Has state" || echo "✗ No state for data"
-
-    # Step 4: Renders data
-    local renders=$(grep -E "\{.*$data_var.*\}|\{$data_var\." "$comp_file" 2>/dev/null)
-    [ -n "$renders" ] && echo "✓ Renders data" || echo "✗ Doesn't render data"
-  fi
-
-  # Step 5: API route exists and returns data
-  local route_file=$(find src -path "*$api_route*" -name "*.ts" 2>/dev/null | head -1)
-  [ -n "$route_file" ] && echo "✓ API route: $route_file" || echo "✗ API route: MISSING"
-
-  if [ -n "$route_file" ]; then
-    local returns_data=$(grep -E "return.*json|res.json" "$route_file" 2>/dev/null)
-    [ -n "$returns_data" ] && echo "✓ API returns data" || echo "✗ API doesn't return data"
-  fi
-}
-```
-
-### Flow: Form Submission
-
-```bash
-verify_form_flow() {
-  local form_component="$1"
-  local api_route="$2"
-
-  echo "=== Form Flow: $form_component → $api_route ==="
-
-  local form_file=$(find src -name "*$form_component*" -name "*.tsx" 2>/dev/null | head -1)
-
-  if [ -n "$form_file" ]; then
-    # Step 1: Has form element
-    local has_form=$(grep -E "<form|onSubmit" "$form_file" 2>/dev/null)
-    [ -n "$has_form" ] && echo "✓ Has form" || echo "✗ No form element"
-
-    # Step 2: Handler calls API
-    local calls_api=$(grep -E "fetch.*$api_route|axios.*$api_route" "$form_file" 2>/dev/null)
-    [ -n "$calls_api" ] && echo "✓ Calls API" || echo "✗ Doesn't call API"
-
-    # Step 3: Handles response
-    local handles_response=$(grep -E "\.then|await.*fetch|setError|setSuccess" "$form_file" 2>/dev/null)
-    [ -n "$handles_response" ] && echo "✓ Handles response" || echo "✗ Doesn't handle response"
-
-    # Step 4: Shows feedback
-    local shows_feedback=$(grep -E "error|success|loading|isLoading" "$form_file" 2>/dev/null)
-    [ -n "$shows_feedback" ] && echo "✓ Shows feedback" || echo "✗ No user feedback"
-  fi
-}
-```
+Each step: grep for the expected pattern. Status per step: present or MISSING.
 
 ## Step 6: Compile Integration Report
 
@@ -1600,59 +1117,7 @@ Structure findings for milestone auditor.
 
 <integration_output>
 
-Return structured report to milestone auditor:
-
-```markdown
-## Integration Check Complete
-
-### Wiring Summary
-
-**Connected:** {N} exports properly used
-**Orphaned:** {N} exports created but unused
-**Missing:** {N} expected connections not found
-
-### API Coverage
-
-**Consumed:** {N} routes have callers
-**Orphaned:** {N} routes with no callers
-
-### Auth Protection
-
-**Protected:** {N} sensitive areas check auth
-**Unprotected:** {N} sensitive areas missing auth
-
-### E2E Flows
-
-**Complete:** {N} flows work end-to-end
-**Broken:** {N} flows have breaks
-
-### Detailed Findings
-
-#### Orphaned Exports
-
-{List each with from/reason}
-
-#### Missing Connections
-
-{List each with from/to/expected/reason}
-
-#### Broken Flows
-
-{List each with name/broken_at/reason/missing_steps}
-
-#### Unprotected Routes
-
-{List each with path/reason}
-
-#### Requirements Integration Map
-
-| Requirement | Integration Path | Status | Issue |
-|-------------|-----------------|--------|-------|
-| {REQ-ID} | {Phase X export → Phase Y import → consumer} | WIRED / PARTIAL / UNWIRED | {specific issue or "—"} |
-
-**Requirements with no cross-phase wiring:**
-{List REQ-IDs that exist in a single phase with no integration touchpoints — these may be self-contained or may indicate missing connections}
-```
+Return structured report with sections: **Wiring Summary** (connected/orphaned/missing counts), **API Coverage** (consumed/orphaned counts), **Auth Protection** (protected/unprotected counts), **E2E Flows** (complete/broken counts). Then **Detailed Findings** subsections: Orphaned Exports (from/reason), Missing Connections (from/to/expected/reason), Broken Flows (name/broken_at/reason/missing_steps), Unprotected Routes (path/reason). Finally **Requirements Integration Map** table (Requirement | Integration Path | Status=WIRED/PARTIAL/UNWIRED | Issue) plus list of REQ-IDs with no cross-phase wiring.
 
 </integration_output>
 
@@ -1781,66 +1246,13 @@ Return one of three formats below.
 
 <nyquist_structured_returns>
 
-## GAPS FILLED
+Three return formats based on outcome:
 
-```markdown
-## GAPS FILLED
+**GAPS FILLED:** Phase info, resolved count, tests created table (File | Type | Command), verification map updates (Task ID | Requirement | Command | Status=green), files for commit.
 
-**Phase:** {N} — {name}
-**Resolved:** {count}/{count}
+**PARTIAL:** Phase info, resolved/escalated counts. Resolved table (Task ID | Requirement | File | Command | Status=green). Escalated table (Task ID | Requirement | Reason | Iterations). Files for commit (resolved only).
 
-### Tests Created
-| # | File | Type | Command |
-|---|------|------|---------|
-| 1 | {path} | {unit/integration/smoke} | `{cmd}` |
-
-### Verification Map Updates
-| Task ID | Requirement | Command | Status |
-|---------|-------------|---------|--------|
-| {id} | {req} | `{cmd}` | green |
-
-### Files for Commit
-{test file paths}
-```
-
-## PARTIAL
-
-```markdown
-## PARTIAL
-
-**Phase:** {N} — {name}
-**Resolved:** {M}/{total} | **Escalated:** {K}/{total}
-
-### Resolved
-| Task ID | Requirement | File | Command | Status |
-|---------|-------------|------|---------|--------|
-| {id} | {req} | {file} | `{cmd}` | green |
-
-### Escalated
-| Task ID | Requirement | Reason | Iterations |
-|---------|-------------|--------|------------|
-| {id} | {req} | {reason} | {N}/3 |
-
-### Files for Commit
-{test file paths for resolved gaps}
-```
-
-## ESCALATE
-
-```markdown
-## ESCALATE
-
-**Phase:** {N} — {name}
-**Resolved:** 0/{total}
-
-### Details
-| Task ID | Requirement | Reason | Iterations |
-|---------|-------------|--------|------------|
-| {id} | {req} | {reason} | {N}/3 |
-
-### Recommendations
-- **{req}:** {manual test instructions or implementation fix needed}
-```
+**ESCALATE:** Phase info, 0 resolved. Details table (Task ID | Requirement | Reason | Iterations). Recommendations with manual test instructions or implementation fix needed per requirement.
 
 </nyquist_structured_returns>
 

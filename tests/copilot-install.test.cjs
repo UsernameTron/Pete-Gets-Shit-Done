@@ -709,7 +709,7 @@ describe('Copilot agent conversion - real files', () => {
   });
 
   test('converts agent with mcp wildcard tools correctly', () => {
-    const content = fs.readFileSync(path.join(agentsSrc, 'gsd-phase-researcher.md'), 'utf8');
+    const content = fs.readFileSync(path.join(agentsSrc, 'gsd-research-orchestrator.md'), 'utf8');
     const result = convertClaudeAgentToCopilotAgent(content);
 
     const toolsLine = result.split('\n').find(l => l.startsWith('tools:'));
@@ -719,7 +719,7 @@ describe('Copilot agent conversion - real files', () => {
     assert.ok(toolsLine.includes("'read'"), 'Read mapped');
   });
 
-  test('all 18 agents convert without error', () => {
+  test('all 15 agents convert without error', () => {
     const agents = fs.readdirSync(agentsSrc)
       .filter(f => f.startsWith('gsd-') && f.endsWith('.md'));
     const expectedAgentCount = fs.readdirSync(agentsSrc)
@@ -1167,18 +1167,15 @@ describe('E2E: Copilot full install verification', () => {
       'gsd-codebase-mapper.agent.md',
       'gsd-debugger.agent.md',
       'gsd-executor.agent.md',
-      'gsd-integration-checker.agent.md',
-      'gsd-nyquist-auditor.agent.md',
-      'gsd-phase-researcher.agent.md',
-      'gsd-plan-checker.agent.md',
       'gsd-planner.agent.md',
-      'gsd-project-researcher.agent.md',
+      'gsd-research-orchestrator.agent.md',
       'gsd-research-synthesizer.agent.md',
       'gsd-roadmapper.agent.md',
       'gsd-ui-auditor.agent.md',
       'gsd-ui-checker.agent.md',
       'gsd-ui-researcher.agent.md',
       'gsd-user-profiler.agent.md',
+      'gsd-validator-hub.agent.md',
       'gsd-verifier.agent.md',
     ].sort();
     assert.deepStrictEqual(gsdAgents, expected);

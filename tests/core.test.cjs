@@ -232,7 +232,7 @@ describe('resolveModelInternal', () => {
 
   describe('model profile structural validation', () => {
     test('all known agents resolve to a valid string for each profile', () => {
-      const knownAgents = ['gsd-planner', 'gsd-executor', 'gsd-phase-researcher', 'gsd-codebase-mapper'];
+      const knownAgents = ['gsd-planner', 'gsd-executor', 'gsd-research-orchestrator', 'gsd-codebase-mapper'];
       const profiles = ['quality', 'balanced', 'budget', 'inherit'];
       const validValues = ['inherit', 'sonnet', 'haiku', 'opus'];
 
@@ -249,7 +249,7 @@ describe('resolveModelInternal', () => {
     });
 
     test('inherit profile forces all known agents to inherit model', () => {
-      const knownAgents = ['gsd-planner', 'gsd-executor', 'gsd-phase-researcher', 'gsd-codebase-mapper'];
+      const knownAgents = ['gsd-planner', 'gsd-executor', 'gsd-research-orchestrator', 'gsd-codebase-mapper'];
       writeConfig({ model_profile: 'inherit' });
       for (const agent of knownAgents) {
         assert.strictEqual(resolveModelInternal(tmpDir, agent), 'inherit');

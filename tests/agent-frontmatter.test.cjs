@@ -231,27 +231,27 @@ describe('AGENT: required frontmatter fields', () => {
 // ─── CLAUDE.md Compliance ───────────────────────────────────────────────────
 
 describe('CLAUDEMD: CLAUDE.md compliance enforcement', () => {
-  test('gsd-plan-checker has Dimension 10: CLAUDE.md Compliance', () => {
-    const content = fs.readFileSync(path.join(AGENTS_DIR, 'gsd-plan-checker.md'), 'utf-8');
+  test('gsd-verifier has Dimension 10: CLAUDE.md Compliance', () => {
+    const content = fs.readFileSync(path.join(AGENTS_DIR, 'gsd-verifier.md'), 'utf-8');
     assert.ok(
       content.includes('Dimension 10: CLAUDE.md Compliance'),
-      'gsd-plan-checker must have Dimension 10 for CLAUDE.md compliance checking'
+      'gsd-verifier must have Dimension 10 for CLAUDE.md compliance checking'
     );
     assert.ok(
-      content.includes('claude_md_compliance'),
-      'gsd-plan-checker must use claude_md_compliance as dimension identifier'
+      content.includes('CLAUDE.md compliance checked'),
+      'gsd-verifier must use CLAUDE.md compliance checked in success criteria'
     );
   });
 
-  test('gsd-phase-researcher has CLAUDE.md enforcement directive', () => {
-    const content = fs.readFileSync(path.join(AGENTS_DIR, 'gsd-phase-researcher.md'), 'utf-8');
+  test('gsd-research-orchestrator has CLAUDE.md enforcement directive', () => {
+    const content = fs.readFileSync(path.join(AGENTS_DIR, 'gsd-research-orchestrator.md'), 'utf-8');
     assert.ok(
       content.includes('CLAUDE.md enforcement'),
-      'gsd-phase-researcher must enforce CLAUDE.md directives during research'
+      'gsd-research-orchestrator must enforce CLAUDE.md directives during research'
     );
     assert.ok(
       content.includes('Project Constraints (from CLAUDE.md)'),
-      'gsd-phase-researcher must output a Project Constraints section from CLAUDE.md'
+      'gsd-research-orchestrator must output a Project Constraints section from CLAUDE.md'
     );
   });
 
@@ -268,7 +268,7 @@ describe('CLAUDEMD: CLAUDE.md compliance enforcement', () => {
   });
 
   test('all three agents read CLAUDE.md in project_context', () => {
-    const agents = ['gsd-plan-checker', 'gsd-phase-researcher', 'gsd-executor'];
+    const agents = ['gsd-verifier', 'gsd-research-orchestrator', 'gsd-executor'];
     for (const agent of agents) {
       const content = fs.readFileSync(path.join(AGENTS_DIR, agent + '.md'), 'utf-8');
       assert.ok(
@@ -334,20 +334,20 @@ describe('VERIFY: data-flow trace, environment audit, and behavioral spot-checks
     );
   });
 
-  test('gsd-phase-researcher has Step 2.6: Environment Availability Audit', () => {
-    const content = fs.readFileSync(path.join(AGENTS_DIR, 'gsd-phase-researcher.md'), 'utf-8');
+  test('gsd-research-orchestrator has Step 2.6: Environment Availability Audit', () => {
+    const content = fs.readFileSync(path.join(AGENTS_DIR, 'gsd-research-orchestrator.md'), 'utf-8');
     assert.ok(
       content.includes('Step 2.6: Environment Availability Audit'),
-      'gsd-phase-researcher must have Step 2.6 for environment availability auditing'
+      'gsd-research-orchestrator must have Step 2.6 for environment availability auditing'
     );
     assert.ok(
       content.includes('Environment Availability'),
-      'gsd-phase-researcher must include Environment Availability section in RESEARCH.md template'
+      'gsd-research-orchestrator must include Environment Availability section in RESEARCH.md template'
     );
   });
 
-  test('gsd-phase-researcher success criteria include environment audit', () => {
-    const content = fs.readFileSync(path.join(AGENTS_DIR, 'gsd-phase-researcher.md'), 'utf-8');
+  test('gsd-research-orchestrator success criteria include environment audit', () => {
+    const content = fs.readFileSync(path.join(AGENTS_DIR, 'gsd-research-orchestrator.md'), 'utf-8');
     assert.ok(
       content.includes('Environment availability audited'),
       'success criteria must include environment availability audit step'
