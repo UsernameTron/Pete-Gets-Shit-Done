@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Intelligence Layer
 status: executing
-last_updated: "2026-04-05T21:26:02Z"
-last_activity: 2026-04-05 — Phase 30 PLAN-01 complete (MODEL_TIERS + dynamicSelect)
+last_updated: "2026-04-05T23:15:00Z"
+last_activity: 2026-04-05 — Phase 30 complete (all 3 plans, INTEL-01 through INTEL-06)
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 3
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 
 ## Current Position
 
-Phase: 30 — Dynamic Model Selection (executing)
-Plan: 1/3 complete (PLAN-01 done, PLAN-02 next)
-Status: PLAN-01 complete — MODEL_TIERS and dynamicSelect() implemented with 17 tests.
-Last activity: 2026-04-05 — Phase 30 PLAN-01 complete (INTEL-02, INTEL-03)
+Phase: 30 — Dynamic Model Selection (COMPLETE)
+Plan: 3/3 complete
+Status: All Phase 30 requirements (INTEL-01 through INTEL-06) implemented and tested. 53 new tests, 1966 total, 0 failures.
+Last activity: 2026-04-05 — Phase 30 complete
 
-Progress: 0/4 phases complete | 1/3 plans in Phase 30
+Progress: 1/4 phases complete | Phase 31 next (Task Classification & Adaptive Workflows)
 
 ## Milestone History
 
@@ -49,10 +49,13 @@ Progress: 0/4 phases complete | 1/3 plans in Phase 30
 
 - **dynamicSelect internal access:** Uses _modelProfiles directly after _initialize() instead of MODEL_PROFILES getter — avoids redundant getter overhead.
 - **Profile bounding:** Quality profile never downgrades, budget caps at balanced — respects user cost/quality intent.
+- **Lazy require in dynamic branch:** `require('./model-profiles.cjs')` inside `resolveModelInternal()` dynamic branch avoids circular deps and is only loaded when routing_strategy !== 'static'.
+- **buildTaskContext signature:** Takes `(phaseInfo, planInventory, reqIds, config)` — reqIds is separate because `phase_req_ids` is a local variable in init commands, not a property of phaseInfo.
+- **planInventory null for plan-phase:** `cmdInitPlanPhase()` passes null for planInventory since it creates plans — complexity driven by requirement count only, biasing toward quality models.
 
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 30 PLAN-01 complete — MODEL_TIERS + dynamicSelect() with 17 tests
-**Stopped at**: Completed PLAN-01, ready for PLAN-02
-**Next**: Execute PLAN-02 (config wiring, routing_strategy, init integration)
+**Last action**: Phase 30 complete — all 3 plans executed, 53 new tests, 1966 total
+**Stopped at**: Phase 30 complete, continuing autonomous workflow
+**Next**: Discuss/plan/execute Phase 31 (Task Classification & Adaptive Workflows)

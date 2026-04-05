@@ -1255,5 +1255,206 @@ describe('findProjectRoot integration via --cwd', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// buildTaskContext unit tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+const { buildTaskContext } = require('../get-shit-done/bin/lib/init.cjs');
+
+describe('buildTaskContext', () => {
+  test('returns undefined when routing_strategy is static (default)', () => {
+    const result = buildTaskContext(
+      { phase_name: 'API' }, ['plan1.md'], 'REQ-01', { routing_strategy: 'static' }
+    );
+    assert.strictEqual(result, undefined);
+  });
+
+  test('returns undefined when routing_strategy is absent (defaults to static)', () => {
+    const result = buildTaskContext(
+      { phase_name: 'API' }, ['plan1.md'], 'REQ-01', {}
+    );
+    assert.strictEqual(result, undefined);
+  });
+
+  test('returns trivial for 1 plan and 1 requirement', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Setup' }, ['plan1.md'], 'REQ-01', { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'trivial');
+  });
+
+  test('returns standard for 2 plans and 4 requirements', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Core' },
+      ['plan1.md', 'plan2.md'],
+      'R-01, R-02, R-03, R-04',
+      { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'standard');
+  });
+
+  test('returns complex for 5 plans and 3 requirements', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Build' },
+      ['p1.md', 'p2.md', 'p3.md', 'p4.md', 'p5.md'],
+      'R-01, R-02, R-03',
+      { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'complex');
+  });
+
+  test('returns complex for 0 plans and 7 requirements', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Reqs' },
+      [],
+      'R-01, R-02, R-03, R-04, R-05, R-06, R-07',
+      { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'complex');
+  });
+
+  test('returns critical for 8 plans and 10 requirements', () => {
+    const plans = Array.from({ length: 8 }, (_, i) => `plan-${i}.md`);
+    const reqs = Array.from({ length: 10 }, (_, i) => `R-${i + 1}`).join(', ');
+    const result = buildTaskContext(
+      { phase_name: 'Launch' }, plans, reqs, { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'critical');
+  });
+
+  test('handles null phaseInfo gracefully', () => {
+    const result = buildTaskContext(
+      null, ['plan1.md'], 'REQ-01', { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'trivial');
+    assert.strictEqual(result.phase_name, '');
+    assert.strictEqual(result.signals.phase_name, '');
+  });
+
+  test('handles null planInventory gracefully (counts as 0 plans)', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Test' }, null, 'R-01', { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.signals.plan_count, 0);
+  });
+
+  test('returns correct shape with complexity, signals, and phase_name', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Deploy' },
+      ['p1.md', 'p2.md'],
+      'D-01, D-02, D-03',
+      { routing_strategy: 'dynamic' }
+    );
+    assert.ok(result.complexity, 'should have complexity');
+    assert.ok(result.signals, 'should have signals');
+    assert.strictEqual(typeof result.signals.plan_count, 'number');
+    assert.strictEqual(typeof result.signals.requirement_count, 'number');
+    assert.strictEqual(typeof result.signals.phase_name, 'string');
+    assert.strictEqual(result.phase_name, 'Deploy');
+    assert.strictEqual(result.signals.plan_count, 2);
+    assert.strictEqual(result.signals.requirement_count, 3);
+  });
+
+  test('handles empty reqIds string', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Empty' }, [], '', { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.signals.requirement_count, 0);
+    assert.strictEqual(result.complexity, 'trivial');
+  });
+
+  test('handles null reqIds', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Null' }, [], null, { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.signals.requirement_count, 0);
+    assert.strictEqual(result.complexity, 'trivial');
+  });
+});
+
+describe('init command taskContext wiring', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('execute-phase with static routing returns string model fields', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '03-api');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '03-01-PLAN.md'), '# Plan');
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: EX-01, EX-02\n**Plans:** 1 plans\n'
+    );
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(typeof output.executor_model, 'string');
+    assert.strictEqual(typeof output.verifier_model, 'string');
+  });
+
+  test('execute-phase with dynamic routing returns string model fields', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '03-api');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '03-01-PLAN.md'), '# Plan');
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: EX-01, EX-02\n**Plans:** 1 plans\n'
+    );
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath)
+      ? JSON.parse(fs.readFileSync(configPath, 'utf8'))
+      : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, routing_strategy: 'dynamic' }, null, 2));
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(typeof output.executor_model, 'string');
+    assert.strictEqual(typeof output.verifier_model, 'string');
+  });
+
+  test('plan-phase with static routing returns string model fields', () => {
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: CP-01, CP-02\n**Plans:** 0 plans\n'
+    );
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(typeof output.researcher_model, 'string');
+    assert.strictEqual(typeof output.planner_model, 'string');
+    assert.strictEqual(typeof output.checker_model, 'string');
+  });
+
+  test('plan-phase with dynamic routing returns string model fields', () => {
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: CP-01, CP-02\n**Plans:** 0 plans\n'
+    );
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath)
+      ? JSON.parse(fs.readFileSync(configPath, 'utf8'))
+      : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, routing_strategy: 'dynamic' }, null, 2));
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(typeof output.researcher_model, 'string');
+    assert.strictEqual(typeof output.planner_model, 'string');
+    assert.strictEqual(typeof output.checker_model, 'string');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // roadmap analyze command
 // ─────────────────────────────────────────────────────────────────────────────

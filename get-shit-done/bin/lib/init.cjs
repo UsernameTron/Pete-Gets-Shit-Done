@@ -41,6 +41,39 @@ function withProjectRoot(cwd, result) {
   return result;
 }
 
+/**
+ * Extract task complexity signals from phase and plan metadata.
+ * Returns a taskContext object for resolveModelInternal().
+ * @param {Object} phaseInfo - Phase metadata (may be null)
+ * @param {Array|null} planInventory - PLAN files in phase directory
+ * @param {string|null} reqIds - Comma-separated requirement IDs
+ * @param {Object} config - Loaded config
+ * @returns {Object|undefined} taskContext or undefined if routing_strategy is static
+ */
+function buildTaskContext(phaseInfo, planInventory, reqIds, config) {
+  const strategy = config.routing_strategy || 'static';
+  if (strategy === 'static') return undefined;
+
+  const planCount = Array.isArray(planInventory) ? planInventory.length : 0;
+  const reqCount = reqIds ? reqIds.split(',').map(s => s.trim()).filter(Boolean).length : 0;
+  const phaseName = phaseInfo?.phase_name || '';
+
+  let complexity = 'standard';
+  if (planCount >= 7 && reqCount >= 8) {
+    complexity = 'critical';
+  } else if (planCount >= 4 || reqCount >= 6) {
+    complexity = 'complex';
+  } else if (planCount <= 1 && reqCount <= 2) {
+    complexity = 'trivial';
+  }
+
+  return {
+    complexity,
+    signals: { plan_count: planCount, requirement_count: reqCount, phase_name: phaseName },
+    phase_name: phaseName,
+  };
+}
+
 function cmdInitExecutePhase(cwd, phase, raw) {
   if (!phase) {
     error('phase required for init execute-phase');
@@ -75,11 +108,12 @@ function cmdInitExecutePhase(cwd, phase, raw) {
     ? reqMatch[1].replace(/[\[\]]/g, '').split(',').map(s => s.trim()).filter(Boolean).join(', ')
     : null;
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
+  const taskContext = buildTaskContext(phaseInfo, phaseInfo?.plans, phase_req_ids, config);
 
   const result = {
     // Models
-    executor_model: resolveModelInternal(cwd, 'gsd-executor'),
-    verifier_model: resolveModelInternal(cwd, 'gsd-verifier'),
+    executor_model: resolveModelInternal(cwd, 'gsd-executor', taskContext),
+    verifier_model: resolveModelInternal(cwd, 'gsd-verifier', taskContext),
 
     // Config flags
     commit_docs: config.commit_docs,
@@ -168,12 +202,13 @@ function cmdInitPlanPhase(cwd, phase, raw) {
     ? reqMatch[1].replace(/[\[\]]/g, '').split(',').map(s => s.trim()).filter(Boolean).join(', ')
     : null;
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
+  const taskContext = buildTaskContext(phaseInfo, null, phase_req_ids, config);
 
   const result = {
     // Models
-    researcher_model: resolveModelInternal(cwd, 'gsd-research-orchestrator'),
-    planner_model: resolveModelInternal(cwd, 'gsd-planner'),
-    checker_model: resolveModelInternal(cwd, 'gsd-verifier'),
+    researcher_model: resolveModelInternal(cwd, 'gsd-research-orchestrator', taskContext),
+    planner_model: resolveModelInternal(cwd, 'gsd-planner', taskContext),
+    checker_model: resolveModelInternal(cwd, 'gsd-verifier', taskContext),
 
     // Workflow flags
     research_enabled: config.research,
@@ -1924,6 +1959,7 @@ function cmdAgentSkills(cwd, agentType, raw) {
 }
 
 module.exports = {
+  buildTaskContext,
   cmdInitExecutePhase,
   cmdInitPlanPhase,
   cmdInitNewProject,
