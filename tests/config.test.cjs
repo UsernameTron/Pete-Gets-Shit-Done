@@ -765,3 +765,43 @@ describe('config-set workflow.skip_discuss', () => {
     assert.strictEqual(output, true);
   });
 });
+
+// ─── config-set (routing_strategy) ────────────────────────────────────────────
+
+describe('config-set routing_strategy', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    runGsdTools('config-ensure-section', tmpDir);
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('routing_strategy is a valid config key', () => {
+    const result = runGsdTools('config-set routing_strategy dynamic', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const config = readConfig(tmpDir);
+    assert.strictEqual(config.routing_strategy, 'dynamic');
+  });
+
+  test('routing_strategy can be set to auto', () => {
+    const result = runGsdTools('config-set routing_strategy auto', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const config = readConfig(tmpDir);
+    assert.strictEqual(config.routing_strategy, 'auto');
+  });
+
+  test('routing_strategy can be set back to static', () => {
+    runGsdTools('config-set routing_strategy dynamic', tmpDir);
+    const result = runGsdTools('config-set routing_strategy static', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const config = readConfig(tmpDir);
+    assert.strictEqual(config.routing_strategy, 'static');
+  });
+});

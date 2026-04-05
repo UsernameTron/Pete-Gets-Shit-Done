@@ -415,6 +415,7 @@ function loadConfig(cwd) {
   const configPath = path.join(cwd, '.planning', 'config.json');
   const defaults = {
     model_profile: 'balanced',
+    routing_strategy: 'static',
     commit_docs: true,
     search_gitignored: false,
     branching_strategy: 'none',
@@ -498,6 +499,7 @@ function loadConfig(cwd) {
 
     return deepFreeze({
       model_profile: get('model_profile') ?? defaults.model_profile,
+      routing_strategy: get('routing_strategy') ?? defaults.routing_strategy,
       commit_docs: (() => {
         const explicit = get('commit_docs', { section: 'planning', field: 'commit_docs' });
         // If explicitly set in config, respect the user's choice
@@ -1268,24 +1270,44 @@ const MODEL_ALIAS_MAP = {
   'haiku': 'claude-haiku-3-5',
 };
 
-function resolveModelInternal(cwd, agentType) {
+function resolveModelInternal(cwd, agentType, taskContext) {
   const config = loadConfig(cwd);
 
-  // Check per-agent override first — always respected regardless of resolve_model_ids.
+  // 1. User overrides always win — regardless of resolve_model_ids or routing_strategy.
   // Users who set fully-qualified model IDs (e.g., "openai/gpt-5.4") get exactly that.
   const override = config.model_overrides?.[agentType];
   if (override) {
     return override;
   }
 
-  // resolve_model_ids: "omit" — return empty string so the runtime uses its configured
+  // 2. resolve_model_ids: "omit" — return empty string so the runtime uses its configured
   // default model. For non-Claude runtimes (OpenCode, Codex, etc.) that don't recognize
   // Claude aliases (opus/sonnet/haiku/inherit). Set automatically during install. See #1156.
   if (config.resolve_model_ids === 'omit') {
     return '';
   }
 
-  // Fall back to profile lookup
+  // 3. Dynamic routing — only when taskContext provided AND routing_strategy !== 'static'
+  const strategy = config.routing_strategy || 'static';
+  if (taskContext && strategy !== 'static') {
+    const { dynamicSelect } = require('./model-profiles.cjs');
+    const result = dynamicSelect(agentType, taskContext, config);
+
+    // INTEL-06: Log routing rationale via debugLog
+    debugLog('MODEL_ROUTE', `agent=${agentType} strategy=${strategy} ${result.rationale} → ${result.alias}`, { agent: agentType, tier: result.tier });
+
+    if (taskContext.complexity === 'critical') {
+      debugLog('MODEL_ROUTE_CRITICAL', `CRITICAL override: agent=${agentType} forced to quality tier`, { agent: agentType });
+    }
+
+    const alias = result.alias;
+    if (config.resolve_model_ids) {
+      return MODEL_ALIAS_MAP[alias] || alias;
+    }
+    return alias;
+  }
+
+  // 4. Static profile lookup — existing v1.9 behavior (unchanged)
   const profile = String(config.model_profile || 'balanced').toLowerCase();
   const agentModels = MODEL_PROFILES[agentType];
   if (!agentModels) return 'sonnet';
