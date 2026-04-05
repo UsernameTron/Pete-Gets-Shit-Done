@@ -10,12 +10,12 @@ Make the GSD engine smarter — route models by task complexity, learn from exec
 
 ### Phase 30 — Dynamic Model Selection
 
-- [ ] **INTEL-01**: Add `taskContext` optional parameter to `resolveModelInternal()` — when present, enables dynamic routing; when absent, preserves exact v1.9 behavior.
+- [x] **INTEL-01**: Add `taskContext` optional parameter to `resolveModelInternal()` — when present, enables dynamic routing; when absent, preserves exact v1.9 behavior.
 - [x] **INTEL-02**: Create `dynamicSelect(agentType, taskContext, config)` function in model-profiles.cjs that maps task signals (file count, plan complexity, phase type) to model tier selection.
 - [x] **INTEL-03**: Define complexity-to-tier mapping rules: `trivial` → budget tier, `standard` → balanced tier, `complex` → quality tier, `critical` → quality tier with override logging.
-- [ ] **INTEL-04**: Add `routing_strategy` config key (values: `static`, `dynamic`, `auto`) defaulting to `static` so existing users see zero behavior change.
-- [ ] **INTEL-05**: Wire `taskContext` through `cmdInitExecutePhase()` and `cmdInitPlanPhase()` — extract signals from phase info, plan inventory, and roadmap requirements.
-- [ ] **INTEL-06**: Add cost-awareness: when `routing_strategy: 'dynamic'`, log model selection rationale to debug output via `debugLog()` so users can see why a model was chosen.
+- [x] **INTEL-04**: Add `routing_strategy` config key (values: `static`, `dynamic`, `auto`) defaulting to `static` so existing users see zero behavior change.
+- [x] **INTEL-05**: Wire `taskContext` through `cmdInitExecutePhase()` and `cmdInitPlanPhase()` — extract signals from phase info, plan inventory, and roadmap requirements.
+- [x] **INTEL-06**: Add cost-awareness: when `routing_strategy: 'dynamic'`, log model selection rationale to debug output via `debugLog()` so users can see why a model was chosen.
 
 ### Phase 31 — Task Classification & Adaptive Workflows
 
@@ -58,12 +58,12 @@ Make the GSD engine smarter — route models by task complexity, learn from exec
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INTEL-01 | Phase 30 | Pending |
+| INTEL-01 | Phase 30 | Complete |
 | INTEL-02 | Phase 30 | Complete |
 | INTEL-03 | Phase 30 | Complete |
-| INTEL-04 | Phase 30 | Pending |
-| INTEL-05 | Phase 30 | Pending |
-| INTEL-06 | Phase 30 | Pending |
+| INTEL-04 | Phase 30 | Complete |
+| INTEL-05 | Phase 30 | Complete |
+| INTEL-06 | Phase 30 | Complete |
 | INTEL-07 | Phase 31 | Pending |
 | INTEL-08 | Phase 31 | Pending |
 | INTEL-09 | Phase 31 | Pending |
