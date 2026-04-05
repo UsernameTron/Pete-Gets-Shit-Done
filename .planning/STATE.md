@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Maintainability
-status: executing
+status: complete
 last_updated: "2026-04-04T23:59:00.000Z"
-last_activity: 2026-04-04 -- Phase 19 complete (feature flags, validateShellArg wiring, truncation consumer)
+last_activity: 2026-04-04 -- All 4 phases complete. Milestone ready for closure.
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 5
+  completed_plans: 12
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,17 +18,34 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-04)
 
-**Active:** v1.6 Maintainability (2026-04-04)
+**Active:** v1.6 Maintainability (2026-04-04) — COMPLETE
 **Previous:** v1.5 Performance (shipped 2026-04-04)
 
 ## Current Position
 
-Phase: 19 complete, advancing to Phase 20
-Milestone: v1.6 Maintainability — executing
-Status: Phase 19 shipped. Phase 20 next (Skills System).
-Last activity: 2026-04-04 -- Phase 19 complete — feature flags, validateShellArg wiring (5 call sites), truncation detection
+Phase: All phases complete
+Milestone: v1.6 Maintainability — complete
+Status: All 12 requirements delivered across 4 phases. Ready for milestone closure.
+Last activity: 2026-04-04 -- Phase 21 complete — metadata alignment, v1.30.0 bump, marketplace audit
 
-Progress: [#####-----] 2/4 phases | 5/12 plans | 5/12 requirements
+Progress: [##########] 4/4 phases | 12/12 plans | 12/12 requirements
+
+## Phase 21 Results
+
+| Plan | Requirement | Status |
+|------|-------------|--------|
+| 21-01 | META-01 | Complete — plugin.json author aligned to TÂCHES |
+| 21-02 | META-02 | Complete — v1.30.0 bump + full v1.6 changelog |
+| 21-03 | META-03 | Complete — marketplace audit passed, all fields valid |
+
+## Phase 20 Results
+
+| Plan | Requirement | Status |
+|------|-------------|--------|
+| 20-01 | MAINT-03 | Complete — skills discovery from plugin directories |
+| 20-02 | MAINT-04 | Complete — orphaned skills audit + cleanup |
+| 20-03 | MAINT-05 | Complete — skill versioning with drift warnings |
+| 20-04 | MAINT-09 | Complete — skill-forge consolidated into core registry |
 
 ## Phase 19 Results
 
@@ -59,6 +76,6 @@ Progress: [#####-----] 2/4 phases | 5/12 plans | 5/12 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 19 complete — committing and advancing to Phase 20
-**Stopped at**: Autonomous execution of v1.6 — Phase 20 next
-**Next**: Discuss/plan/execute Phase 20 (MAINT-03, MAINT-04, MAINT-05, MAINT-09)
+**Last action**: All 4 phases complete — milestone closure in progress
+**Stopped at**: Autonomous execution of v1.6 — milestone completion
+**Next**: Archive milestone, update PROJECT.md, cleanup
