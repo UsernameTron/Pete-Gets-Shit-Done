@@ -73,12 +73,12 @@ Arguments: $ARGUMENTS (optional)
      gsd-planner .............. Creates executable phase plans with task breakdown
      gsd-roadmapper ........... Creates project roadmaps with phase breakdown
      gsd-assumptions-analyzer . Analyzes codebase for assumptions with evidence
-     gsd-plan-checker ......... Verifies plans achieve phase goal before execution
+     gsd-verifier (scope: plan)  Verifies plans achieve phase goal before execution
 
    RESEARCH
-     gsd-advisor-researcher ... Researches gray areas, produces comparison tables
-     gsd-phase-researcher ..... Researches how to implement a phase before planning
-     gsd-project-researcher ... Researches domain ecosystem before roadmap creation
+     gsd-advisor-researcher ........... Researches gray areas, produces comparison tables
+     gsd-research-orchestrator (scope: phase)   Researches how to implement a phase before planning
+     gsd-research-orchestrator (scope: project) Researches domain ecosystem before roadmap creation
      gsd-research-synthesizer . Synthesizes parallel researcher outputs into SUMMARY.md
 
    EXECUTION
@@ -87,9 +87,9 @@ Arguments: $ARGUMENTS (optional)
      gsd-codebase-mapper ...... Explores codebase, writes analysis to .planning/codebase/
 
    VALIDATION
-     gsd-verifier ............. Verifies phase goal achievement (goal-backward)
-     gsd-integration-checker .. Checks cross-phase integration
-     gsd-nyquist-auditor ...... Fills validation gaps in completed phases
+     gsd-verifier .................... Verifies phase goal achievement (goal-backward)
+     gsd-verifier (scope: integration)  Checks cross-phase integration
+     gsd-verifier (scope: nyquist) .... Fills validation gaps in completed phases
 
    UI/UX
      gsd-ui-researcher ........ Produces UI-SPEC.md design contracts
@@ -102,18 +102,18 @@ Arguments: $ARGUMENTS (optional)
    ─────────────────────────────────────────────────
    SPAWNING MAP (command → agents)
    ─────────────────────────────────────────────────
-     /gsd:new-project ...... project-researcher (×4) → research-synthesizer → roadmapper
-     /gsd:discuss-phase .... advisor-researcher, phase-researcher, assumptions-analyzer
-     /gsd:plan-phase ....... phase-researcher → planner → plan-checker
-     /gsd:execute-phase .... executor (+ debugger, verifier, nyquist-auditor on failure)
-     /gsd:verify-work ...... verifier, integration-checker
+     /gsd:new-project ...... research-orchestrator (×4) → research-synthesizer → roadmapper
+     /gsd:discuss-phase .... advisor-researcher, research-orchestrator, assumptions-analyzer
+     /gsd:plan-phase ....... research-orchestrator → planner → verifier (scope: plan)
+     /gsd:execute-phase .... executor (+ debugger, verifier, verifier scope: nyquist on failure)
+     /gsd:verify-work ...... verifier, verifier (scope: integration)
      /gsd:map-codebase ..... codebase-mapper (×4 parallel: tech, arch, quality, concerns)
      /gsd:quick ............ planner → executor → verifier (compressed pipeline)
      /gsd:ui-phase ......... ui-researcher → ui-checker
      /gsd:ui-review ........ ui-auditor
      /gsd:debug ............ debugger
      /gsd:profile-user ..... user-profiler
-     /gsd:validate-phase ... nyquist-auditor
+     /gsd:validate-phase ... verifier (scope: nyquist)
    ```
 
 ## Mode 2: Detail (agent name provided)
@@ -136,8 +136,8 @@ Arguments: $ARGUMENTS (optional)
      /gsd:execute-phase (re-planning on failure)
 
    Works with:
-     ← gsd-phase-researcher (provides RESEARCH.md input)
-     → gsd-plan-checker (validates output)
+     ← gsd-research-orchestrator (provides RESEARCH.md input)
+     → gsd-verifier (scope: plan) (validates output)
      → gsd-executor (consumes plans)
 
    Key responsibilities:
@@ -238,9 +238,9 @@ Spawn subagents to analyze the crew from multiple perspectives, then synthesize 
    Recommended workflow: /gsd:plan-phase → /gsd:execute-phase
 
    Agents that will activate:
-     gsd-phase-researcher — will research auth patterns (OAuth2, JWT, API keys)
+     gsd-research-orchestrator — will research auth patterns (OAuth2, JWT, API keys)
      gsd-planner — will create implementation plan
-     gsd-plan-checker — will verify plan covers security requirements
+     gsd-verifier (scope: plan) — will verify plan covers security requirements
      gsd-executor — will implement the auth layer
      gsd-verifier — will confirm auth works end-to-end
 

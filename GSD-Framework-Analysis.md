@@ -1,0 +1,567 @@
+# GSD Framework — Complete Analysis
+
+**Version:** 1.30.0 (`get-shit-done-cc` on npm)
+**Generated:** April 5, 2026
+**Supported Runtimes:** Claude Code, OpenCode, Gemini CLI, Codex, Copilot, Cursor, Antigravity
+
+---
+
+## What Is GSD?
+
+GSD (Get Shit Done) is a spec-driven development framework that turns AI coding agents into a structured engineering team. Instead of ad-hoc prompting, GSD enforces a repeatable lifecycle: gather context → plan → execute → verify → ship. Every step produces files (not just conversation), so your project state survives context window resets and session handoffs.
+
+Think of it as a project manager, QA team, and development workflow — all running inside your terminal through AI agents.
+
+---
+
+## How It Works (The Core Loop)
+
+```
+/gsd:new-project → Interviews you, researches the domain, creates PROJECT.md + ROADMAP.md
+    │
+    ▼
+/gsd:discuss-phase → Captures YOUR decisions for the next phase (produces CONTEXT.md)
+    │
+    ▼
+/gsd:plan-phase → Researches implementation, creates executable PLAN.md files
+    │
+    ▼
+/gsd:execute-phase → Runs each plan with atomic commits per task
+    │
+    ▼
+/gsd:verify-work → Validates the build through conversational UAT
+    │
+    ▼
+/gsd:ship → Creates PR, runs review, prepares for merge
+    │
+    ▼
+/gsd:audit-milestone → Verifies all phases meet original requirements
+    │
+    ▼
+/gsd:complete-milestone → Archives everything, preps for next version
+```
+
+At any point: `/gsd:next` figures out where you are and advances to the next logical step. `/gsd:progress` shows a visual dashboard of what's done vs. remaining.
+
+---
+
+## Slash Commands (61 Total)
+
+### Project Initialization (4 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:new-project` | Creates a brand new project from scratch. Interviews you about goals, researches the domain, generates PROJECT.md, REQUIREMENTS.md, and ROADMAP.md with numbered phases. | `/gsd:new-project` or `/gsd:new-project --auto` (skips questions, uses smart defaults) |
+| `/gsd:new-milestone` | Starts a new version cycle on an existing project. Updates PROJECT.md and routes to requirements gathering. | `/gsd:new-milestone v2.0 Notifications` |
+| `/gsd:map-codebase` | Analyzes an existing codebase with parallel mapper agents. Produces 7 documents covering stack, architecture, conventions, testing, integrations, structure, and concerns. | `/gsd:map-codebase` or `/gsd:map-codebase auth` (specific area) |
+| `/gsd:prime-patterns` | Boots a session with full project context plus knowledge base pattern injection. One command to get Claude fully oriented. | `/gsd:prime-patterns` or `/gsd:prime-patterns --patterns 1,7,10` |
+
+### Phase Planning (11 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:discuss-phase` | Gathers your decisions about HOW a phase should be built before any planning happens. Asks targeted questions, captures answers in CONTEXT.md. Your answers become non-negotiable constraints for the planner. | `/gsd:discuss-phase 3` or `/gsd:discuss-phase 3 --auto` (Claude picks defaults) |
+| `/gsd:plan-phase` | Creates detailed, executable PLAN.md files with task breakdowns and dependencies. Orchestrates research → planning → verification with up to 3 iteration loops. | `/gsd:plan-phase 3` or `/gsd:plan-phase 3 --research` (force fresh research) |
+| `/gsd:research-phase` | Deep-dives into how experts build something. Produces RESEARCH.md for complex/niche domains. Usually called automatically by plan-phase. | `/gsd:research-phase 3` |
+| `/gsd:ui-phase` | Generates a UI design contract (UI-SPEC.md) for frontend phases. Detects existing design systems, asks only unanswered design questions. | `/gsd:ui-phase 5` |
+| `/gsd:list-phase-assumptions` | Surfaces what Claude ASSUMES about your phase before planning starts. Purely conversational — no files created. | `/gsd:list-phase-assumptions 3` |
+| `/gsd:add-phase` | Adds a new phase to the end of your current milestone's roadmap. | `/gsd:add-phase "Add email notifications"` |
+| `/gsd:insert-phase` | Inserts urgent work as a decimal phase (e.g., 3.1) between existing phases. | `/gsd:insert-phase 3 "Hotfix auth bug"` |
+| `/gsd:remove-phase` | Removes an unstarted future phase and renumbers everything after it. | `/gsd:remove-phase 7` |
+| `/gsd:plan-milestone-gaps` | After a milestone audit identifies gaps, this creates new phases to close them. | `/gsd:plan-milestone-gaps` |
+| `/gsd:plant-seed` | Captures a forward-looking idea with trigger conditions. Seeds auto-surface during future milestones when conditions are met. | `/gsd:plant-seed "Add GraphQL layer when API hits 20+ endpoints"` |
+| `/gsd:review` | Sends your phase plan to external AI CLIs (Gemini, Codex) for cross-AI peer review. | `/gsd:review --phase 3 --all` |
+
+### Phase Execution (6 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:execute-phase` | Runs all plans in a phase using wave-based parallel execution. Independent tasks run simultaneously; dependent tasks wait. Atomic git commit per completed task. | `/gsd:execute-phase 3` or `/gsd:execute-phase 3 --wave 2` (start from wave 2) |
+| `/gsd:autonomous` | Runs ALL remaining phases end-to-end without stopping: discuss → plan → execute for each phase automatically. | `/gsd:autonomous` or `/gsd:autonomous --from 5` |
+| `/gsd:quick` | Executes a small ad-hoc task with GSD guarantees (atomic commits, state tracking) but skips optional agents. | `/gsd:quick "Add loading spinner to dashboard"` |
+| `/gsd:fast` | Executes a trivial task inline — no subagents, no planning overhead. For ≤3 file edits. | `/gsd:fast "Fix typo in README"` |
+| `/gsd:do` | Smart router: describe what you want in plain English, and it dispatches to the right /gsd command. | `/gsd:do "plan the next phase"` |
+| `/gsd:next` | Auto-detects where you are in the workflow and advances to the next logical step. | `/gsd:next` |
+
+### Verification & Quality (6 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:verify-work` | Validates built features through conversational UAT. Auto-diagnoses failures and creates fix plans. | `/gsd:verify-work 3` |
+| `/gsd:validate-phase` | Retroactively audits and fills validation gaps for a completed phase. Generates missing tests. | `/gsd:validate-phase 3` |
+| `/gsd:add-tests` | Generates unit and E2E tests for a completed phase. Classifies files, presents test plan, verifies with RED-GREEN cycle. | `/gsd:add-tests 3` |
+| `/gsd:ui-review` | Retroactive 6-pillar visual audit of implemented frontend code. Scores spacing, typography, color, copy, registry safety, implementation. | `/gsd:ui-review 5` |
+| `/gsd:audit-uat` | Cross-phase audit of ALL outstanding UAT items across the entire milestone. Finds pending, blocked, and human-needed items. | `/gsd:audit-uat` |
+| `/gsd:audit-milestone` | Verifies the entire milestone against original requirements. Checks cross-phase integration, requirements coverage. | `/gsd:audit-milestone v1.0` |
+
+### Milestone & Shipping (4 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:ship` | Creates a PR branch, runs review, and prepares for merge after verification passes. | `/gsd:ship 3` or `/gsd:ship v1.0` |
+| `/gsd:complete-milestone` | Archives the completed milestone (creates summary, git tag, cleans up phase dirs). | `/gsd:complete-milestone v1.0` |
+| `/gsd:finalize` | End-to-end project finalization: verify → archive → report → push → confirm clean. | `/gsd:finalize v2.2` |
+| `/gsd:milestone-summary` | Generates a human-friendly summary for team onboarding from archived milestone artifacts. | `/gsd:milestone-summary v1.0` |
+
+### Session & Progress Management (8 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:progress` | Shows project progress dashboard (progress bar, recent work, current position). Routes to next action. | `/gsd:progress` |
+| `/gsd:session-report` | Generates after-session summary with token usage estimates, work summary, and outcomes. | `/gsd:session-report` |
+| `/gsd:pause-work` | Creates structured handoff files when you need to stop mid-phase. Saves HANDOFF.json + .continue-here.md. | `/gsd:pause-work` |
+| `/gsd:resume-work` | Restores full context from a previous session's handoff files. | `/gsd:resume-work` |
+| `/gsd:thread` | Manages persistent context threads for cross-session work on a specific topic. | `/gsd:thread "auth-refactor"` |
+| `/gsd:stats` | Displays project statistics: phase counts, plan counts, git metrics, timeline. | `/gsd:stats` |
+| `/gsd:pr-branch` | Creates a clean PR branch by filtering out .planning/ commits — ready for code review. | `/gsd:pr-branch main` |
+| `/gsd:cleanup` | Archives phase directories from completed milestones into organized archive folders. | `/gsd:cleanup` |
+
+### Workspace Management (5 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:new-workspace` | Creates an isolated workspace with repo copies and independent .planning/ directory. | `/gsd:new-workspace --name feature-x --repos myapp,shared-lib` |
+| `/gsd:list-workspaces` | Lists all active GSD workspaces and their status. | `/gsd:list-workspaces` |
+| `/gsd:remove-workspace` | Removes a workspace and cleans up worktrees. | `/gsd:remove-workspace feature-x` |
+| `/gsd:portfolio` | Cross-project dashboard: scans all projects, shows status, recommends what to work on next. | `/gsd:portfolio` or `/gsd:portfolio --path ~/projects` |
+| `/gsd:workstreams` | Manages parallel workstreams within a project — list, create, switch, status, progress, complete. | `/gsd:workstreams` |
+
+### Debugging & Diagnostics (4 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:debug` | Systematic debugging with persistent state across context resets. Uses scientific hypothesis testing, not trial-and-error. | `/gsd:debug "Login fails with 403 after token refresh"` |
+| `/gsd:forensics` | Post-mortem investigation for failed GSD workflows. Analyzes git history, planning state, and artifacts to diagnose what went wrong. | `/gsd:forensics "Phase 5 execution produced broken output"` |
+| `/gsd:health` | Diagnoses .planning/ directory health and optionally repairs issues (missing files, invalid configs, orphaned plans). | `/gsd:health` or `/gsd:health --repair` |
+| `/gsd:crew` | Agent roster and capability map. Shows your available agents, self-assessments, and recommends which agent fits a task. | `/gsd:crew` or `/gsd:crew --recommend "build an API"` |
+
+### Task & Idea Capture (6 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:add-todo` | Captures a task from conversation context. Creates structured todo file, checks for duplicates. | `/gsd:add-todo "Refactor auth middleware"` |
+| `/gsd:check-todos` | Lists pending todos and lets you pick one to work on. Can route to immediate work, add to phase, or brainstorm. | `/gsd:check-todos` or `/gsd:check-todos auth` (filter) |
+| `/gsd:note` | Zero-friction idea capture. Append notes, list them, or promote a note to a full todo. | `/gsd:note "Consider caching strategy for API"` or `/gsd:note list` |
+| `/gsd:add-backlog` | Parks an idea in the backlog (assigned 999.x numbering so it doesn't interfere with active phases). | `/gsd:add-backlog "Internationalization support"` |
+| `/gsd:review-backlog` | Reviews parked backlog items and promotes selected ones to the active milestone. | `/gsd:review-backlog` |
+| `/gsd:manager` | Interactive command center for managing multiple phases from a single terminal. Dashboard with phase status grid. | `/gsd:manager` |
+
+### Configuration & Profiles (5 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:settings` | Interactive configuration of GSD workflow toggles and model profile. | `/gsd:settings` |
+| `/gsd:set-profile` | Switches the model profile used by GSD agents. Controls cost vs. quality tradeoff. | `/gsd:set-profile quality` (options: quality, balanced, budget, inherit) |
+| `/gsd:profile-user` | Generates a developer behavioral profile by analyzing your session messages across 8 dimensions. | `/gsd:profile-user` or `/gsd:profile-user --questionnaire` |
+| `/gsd:update` | Updates GSD to the latest version with changelog display. | `/gsd:update` |
+| `/gsd:reapply-patches` | Reapplies local modifications after a GSD update overwrites your customizations. | `/gsd:reapply-patches` |
+
+### Other (3 commands)
+
+| Command | What It Does | How to Use It |
+|---------|-------------|---------------|
+| `/gsd:help` | Shows available GSD commands and usage guide. | `/gsd:help` |
+| `/gsd:join-discord` | Join the GSD Discord community. | `/gsd:join-discord` |
+| `/gsd:set-profile` | *(See Configuration above)* | |
+
+---
+
+## Agents (15 Active + 7 Archived + 3 Internal)
+
+Agents are specialized AI workers spawned by GSD commands. Each gets a fresh 200K context window, a focused task, and specific tool permissions. They don't talk to you directly — they produce files and return results to the orchestrating command.
+
+### Research Agents
+
+| Agent | What It Does | Spawned By |
+|-------|-------------|------------|
+| **gsd-research-orchestrator** | Unified researcher with two modes: *phase scope* (how to build one feature) and *project scope* (domain ecosystem survey for new projects). Prioritizes Context7 docs over web search. | `/gsd:plan-phase`, `/gsd:research-phase`, `/gsd:new-project` |
+| **gsd-ui-researcher** | Produces UI design contracts (UI-SPEC.md) for frontend phases. Detects existing design systems, vets third-party component registries for suspicious patterns, pre-populates from upstream decisions. | `/gsd:ui-phase` |
+| **gsd-advisor-researcher** | Researches single gray-area decisions. Produces structured 5-column comparison tables with conditional recommendations grounded in your project context. | `/gsd:discuss-phase` (advisor mode) |
+| **gsd-research-synthesizer** | Combines outputs from 4 parallel research agents into a cohesive SUMMARY.md that informs roadmap creation. | `/gsd:new-project` |
+
+### Analysis Agents
+
+| Agent | What It Does | Spawned By |
+|-------|-------------|------------|
+| **gsd-assumptions-analyzer** | Deep-reads your codebase for a specific phase. Returns structured assumptions with file-path evidence citations and confidence levels. Read-only. | `/gsd:discuss-phase` (assumptions mode) |
+| **gsd-codebase-mapper** | Explores codebase for a specific focus area (tech, architecture, quality, concerns). Writes analysis documents directly to .planning/codebase/. | `/gsd:map-codebase` |
+| **gsd-user-profiler** | Analyzes your session messages across 8 behavioral dimensions to produce a scored developer profile with confidence levels. | `/gsd:profile-user` |
+
+### Planning Agents
+
+| Agent | What It Does | Spawned By |
+|-------|-------------|------------|
+| **gsd-planner** | Creates executable phase plans with task breakdown and dependency analysis. Plans are treated as prompts for the executor, not documentation. Your CONTEXT.md decisions are non-negotiable constraints. | `/gsd:plan-phase` |
+| **gsd-roadmapper** | Creates project roadmaps with phase breakdown. Maps every requirement to exactly one phase and validates 100% coverage — no orphaned requirements. | `/gsd:new-project` |
+
+### Execution Agents
+
+| Agent | What It Does | Spawned By |
+|-------|-------------|------------|
+| **gsd-executor** | Executes PLAN.md files atomically. Makes one git commit per completed task. Handles deviations automatically. Produces SUMMARY.md when done. | `/gsd:execute-phase` |
+| **gsd-debugger** | Investigates bugs using scientific hypothesis testing (not trial-and-error). Maintains persistent debug session state with checkpoints. | `/gsd:debug`, `/gsd:forensics` |
+
+### Verification Agents
+
+| Agent | What It Does | Spawned By |
+|-------|-------------|------------|
+| **gsd-verifier** | Unified verification agent with 4 scopes: *general* (did execution meet goals?), *plan* (is the plan solid before we execute?), *integration* (do phases work together?), *nyquist* (are there test coverage gaps?). | Multiple commands |
+| **gsd-ui-checker** | Validates UI-SPEC.md design contracts against 6 quality dimensions. Produces BLOCK/FLAG/PASS verdicts. Read-only — never modifies your spec. | `/gsd:ui-phase` |
+| **gsd-ui-auditor** | Retroactive 6-pillar visual audit of implemented frontend code. Scores each pillar 1-4 and identifies top 3 priority fixes. | `/gsd:ui-review` |
+| **gsd-validator-hub** | Unified structural validator for Claude Code extensions and agent ecosystem correctness. Mode-based routing via target parameter. Read-only. | Deployment gates, audits |
+
+### Archived Agents (7)
+
+These were consolidated into unified agents on 2026-04-03:
+
+| Old Agent | Absorbed Into | Scope Parameter |
+|-----------|--------------|----------------|
+| gsd-phase-researcher | gsd-research-orchestrator | `scope: phase` |
+| gsd-project-researcher | gsd-research-orchestrator | `scope: project` |
+| gsd-plan-checker | gsd-verifier | `scope: plan` |
+| gsd-integration-checker | gsd-verifier | `scope: integration` |
+| gsd-nyquist-auditor | gsd-verifier | `scope: nyquist` |
+| extension-validator | gsd-validator-hub | `target: extension` |
+| validator | gsd-validator-hub | `target: ecosystem` |
+
+### Internal Agents (3, in .claude/agents/)
+
+| Agent | What It Does |
+|-------|-------------|
+| **docs-sync** | Keeps README, CHANGELOG, CLAUDE.md, and architecture docs current after code changes. Scans git history, cross-references source of truth, updates only stale sections. |
+| **plugin-developer** | Builds and modifies GSD commands, skills, agents, hooks, and installer logic. Enforces zero-dependency CommonJS, Node 20+ constraints. |
+| **test-runner** | Runs the 2046-test suite, diagnoses failures, fixes test code. Uses Node.js built-in test runner (node:test). |
+
+---
+
+## Hooks (5)
+
+Hooks are JavaScript scripts that run automatically at specific points in the Claude Code lifecycle. GSD's hooks are all advisory (warn but don't block) except where noted.
+
+| Hook | Lifecycle Event | What It Does |
+|------|----------------|-------------|
+| **gsd-statusline** | SessionStart | Renders a status line showing your current model, active task, directory, and context window usage. Writes context metrics to a bridge file for other hooks to read. Displays update/stale-hook alerts. |
+| **gsd-context-monitor** | PostToolUse | Reads context usage from the statusline bridge file. Injects warnings to the agent when context drops below 35% remaining (WARNING) or 25% (CRITICAL). Debounced to avoid spam — severity escalation bypasses debounce. |
+| **gsd-prompt-guard** | PreToolUse | Scans content being written to .planning/ files for prompt injection patterns (14 regex patterns + invisible Unicode detection). Advisory warning only. |
+| **gsd-workflow-guard** | PreToolUse | Detects file edits happening outside a GSD workflow context (no active /gsd: command). Nudges you toward `/gsd:quick` or `/gsd:fast`. Disabled by default — enable in config. |
+| **gsd-check-update** | SessionStart | Background check for GSD version updates. Writes results to cache. Also detects stale hooks (hook version header doesn't match installed version). |
+
+### Known Hook Issues (from security review)
+
+- Hook version tracking (`{{GSD_VERSION}}`) placeholder never gets replaced during the build — version detection may be unreliable
+- Shell injection risk in gsd-check-update.js (spawned code)
+- Prompt injection patterns duplicated between gsd-prompt-guard.js and security.cjs
+- All guards are advisory-only — they warn but don't block dangerous content
+
+---
+
+## Workflows (~55 Definitions)
+
+Workflows are the internal instruction sets that slash commands load. When you type `/gsd:plan-phase 3`, Claude loads the `plan-phase.md` workflow which contains step-by-step instructions for what to do. These live in `get-shit-done/workflows/`.
+
+Most workflows map 1:1 to slash commands (the command is just a thin wrapper). The additional workflows not exposed as direct commands:
+
+| Workflow | What It Does |
+|----------|-------------|
+| **diagnose-issues** | Orchestrates parallel debug agents for UAT gaps (spawns gsd-debugger subagents) |
+| **discovery-phase** | Discovery/research phase template for early-stage projects |
+| **discuss-phase-assumptions** | Assumption analysis sub-workflow used by discuss-phase |
+| **execute-plan** | Executes a single PLAN.md (sub-unit of execute-phase) |
+| **node-repair** | Autonomous repair for failed task verification (strategies: RETRY, DECOMPOSE, PRUNE, ESCALATE) |
+| **resume-project** | Restores project state when returning after a break |
+| **transition** | Handles state transitions between workflow phases |
+| **verify-phase** | Per-phase verification sub-workflow |
+
+---
+
+## Reference Documents (15)
+
+These are internal specifications that workflows and agents reference for consistent behavior. Not user-facing commands, but they define how GSD works under the hood.
+
+| Reference | What It Defines |
+|-----------|----------------|
+| **checkpoints.md** | Checkpoint types: human-verify, decision, human-action, abort — with XML structure |
+| **continuation-format.md** | Handoff format for pausing/resuming (HANDOFF.json, .continue-here.md) |
+| **decimal-phase-calculation.md** | Math for decimal phase numbering (e.g., inserting 3.1 between 3 and 4) |
+| **git-integration.md** | Git branching strategies: none, phase branches, milestone branches, sub-repos |
+| **git-planning-commit.md** | Rules for committing .planning/ files |
+| **model-profile-resolution.md** | Logic for selecting which AI model each agent uses |
+| **model-profiles.md** | Model allocation profiles — Quality (Opus-heavy), Balanced (Opus plans/Sonnet code), Budget (Sonnet/Haiku), Inherit (runtime decides) |
+| **phase-argument-parsing.md** | How phase numbers are parsed (integers, decimals) |
+| **planning-config.md** | Full config.json schema and defaults |
+| **questioning.md** | Interview/questionnaire design patterns for discuss-phase |
+| **tdd.md** | Test-driven development patterns and verification gates |
+| **ui-brand.md** | Visual display patterns for CLI output formatting |
+| **user-profiling.md** | 8 behavioral dimensions for developer profiling with rating scales |
+| **verification-patterns.md** | Verification and quality assurance pattern library |
+| **workstream-flag.md** | Workstream handling for parallel execution |
+
+---
+
+## Templates (30+)
+
+Templates are pre-built file scaffolds that workflows fill in. They define the structure of every planning artifact GSD produces.
+
+### Phase/Project Templates (in get-shit-done/templates/)
+
+| Template | What It Scaffolds |
+|----------|------------------|
+| **project.md** | PROJECT.md — project charter with goals, constraints, tech stack |
+| **requirements.md** | REQUIREMENTS.md — numbered requirements with acceptance criteria |
+| **roadmap.md** | ROADMAP.md — phased delivery plan with milestones |
+| **context.md** | CONTEXT.md — user decisions captured during discuss-phase |
+| **research.md** | RESEARCH.md — ecosystem research findings |
+| **phase-prompt.md** | Phase execution prompt for agents |
+| **state.md** | STATE.md — living project memory |
+| **summary.md** / **summary-standard.md** / **summary-minimal.md** / **summary-complex.md** | SUMMARY.md — post-execution summaries at different detail levels |
+| **milestone.md** | Milestone definition with requirements mapping |
+| **milestone-archive.md** | Archived milestone record |
+| **UI-SPEC.md** | UI design contract template |
+| **UAT.md** | User acceptance testing checklist |
+| **VALIDATION.md** | Validation report template |
+| **DEBUG.md** | Debug session state template |
+| **discovery.md** | Discovery phase findings template |
+| **discussion-log.md** | Phase discussion log |
+| **continue-here.md** | Session continuation breadcrumb |
+| **user-profile.md** | Developer behavioral profile |
+| **user-setup.md** | User onboarding configuration |
+| **dev-preferences.md** | Developer preference capture |
+| **copilot-instructions.md** | Copilot-specific instruction template |
+| **claude-md.md** | CLAUDE.md project instructions template |
+| **config.json** | Default GSD configuration |
+| **debug-subagent-prompt.md** | Prompt template for spawning debug agents |
+| **planner-subagent-prompt.md** | Prompt template for spawning planner agents |
+| **verification-report.md** | Post-verification findings report |
+| **retrospective.md** | Milestone retrospective template |
+
+### Governance Templates (in governance/templates/)
+
+| Template | What It Scaffolds |
+|----------|------------------|
+| **global/CLAUDE.md** | Global CLAUDE.md with session management, coverage requirements, safety hooks (~360 lines) |
+| **global/settings-hooks.json** | 10 pre-configured hook definitions |
+| **global/settings-permissions.json** | Pre-configured allow/deny rules for tool permissions |
+| **project/CLAUDE.md** | Project-level CLAUDE.md template |
+| **project/README.md** | Project README template |
+| **project/lessons.md** | Lessons-learned tracking template |
+| **project/DEVOPS-HANDOFF.md** | DevOps handoff documentation |
+| **context/cli-reference.md** | CLI tools reference for agents |
+| **context/hooks-guide.md** | Hooks system guide |
+| **context/mcp-setup-guide.md** | MCP server setup guide |
+| **context/settings-reference.md** | Settings.json reference |
+| **context/skill-creation-guide.md** | Skill creation guide |
+| **context/subagent-guide.md** | Subagent design guide |
+
+---
+
+## Plugins (2 Bundled)
+
+### claude-code-factory
+
+An extension generation system inside GSD. Contains 38 skills and 10 specialist subagents for building Claude Code extensions. Located at `plugins/claude-code-factory/`.
+
+**What it does:** When you want to build a new Claude Code skill, agent, hook, or full extension — this plugin provides the scaffolding, validation, and best practices.
+
+**Key components:**
+- `skills/extension-guide/SKILL.md` — routing skill that directs you to the right builder
+- `agents/extension-builder.md` — agent that constructs extensions
+
+### claude-mcp-ecosystem (Subagent Lifecycle Suite)
+
+A comprehensive agent lifecycle management system. Located at `plugins/claude-mcp-ecosystem/`. Contains 9 commands, 7 skills, and 6 specialized agents.
+
+**What it does:** Provides patterns and tools for designing, building, testing, and maintaining multi-agent systems. This is the meta-layer: GSD uses agents, and this plugin helps you build agent systems of your own.
+
+**Subagent Lifecycle Agents:**
+| Agent | Role |
+|-------|------|
+| **architect** | Designs agent system architecture |
+| **scaffolder** | Generates agent file scaffolding |
+| **memory-seeder** | Populates agent memory/context |
+| **validator** | Tests agent structural correctness |
+| **auditor** | Cross-agent QA and pattern compliance |
+| **repo-doc-architect** | Generates repository documentation |
+
+**Project Templates:**
+- web-app.yaml, api-backend.yaml, mobile-app.yaml, data-dashboard.yaml, content-site.yaml, automation-pipeline.yaml
+
+---
+
+## Configuration
+
+GSD is configured via `.planning/config.json` in each project. Key settings:
+
+### Mode & Quality
+
+| Setting | Options | What It Controls |
+|---------|---------|-----------------|
+| `mode` | interactive / yolo | Whether GSD asks for confirmation at checkpoints or runs autonomously |
+| `granularity` | coarse / standard / fine | How detailed the planning breakdown is |
+| `model_profile` | quality / balanced / budget / inherit | Which AI models agents use (Opus vs Sonnet vs Haiku) |
+
+### Workflow Toggles (13)
+
+| Toggle | Default | What It Controls |
+|--------|---------|-----------------|
+| `research` | true | Whether plan-phase runs research first |
+| `plan_check` | true | Whether plans get verified before execution |
+| `verifier` | true | Whether post-execution verification runs |
+| `nyquist_validation` | true | Whether test coverage gap analysis runs |
+| `ui_phase` | true | Whether UI design contracts are generated for frontend phases |
+| `ui_safety_gate` | true | Whether third-party UI component registries get security-vetted |
+| `adaptive` | true | Whether GSD adjusts behavior based on your developer profile |
+| `context_warnings` | true | Whether context window usage warnings fire |
+| `parallelization` | true | Whether independent plans run in parallel waves |
+| `text_mode` | false | Disable rich formatting for remote/SSH sessions |
+| `discussion_log` | true | Whether discuss-phase creates a persistent log |
+| `assumption_analysis` | true | Whether discuss-phase runs codebase assumption analysis |
+| `workflow_guard` | false | Whether edits outside GSD workflows trigger warnings |
+
+### Git Strategy
+
+| Strategy | Behavior |
+|----------|----------|
+| `none` | All commits on current branch (default) |
+| `phase` | Creates a branch per phase |
+| `milestone` | Creates a branch per milestone |
+
+### Model Profiles Explained
+
+| Profile | Planning Agent | Code Agent | Research Agent | Cost Level |
+|---------|---------------|------------|---------------|-----------|
+| **quality** | Opus | Opus | Opus | Highest |
+| **balanced** | Opus | Sonnet | Sonnet | Medium |
+| **budget** | Sonnet | Sonnet | Haiku | Lowest |
+| **inherit** | Runtime default | Runtime default | Runtime default | Varies |
+
+---
+
+## State Management
+
+All project state lives in the `.planning/` directory as human-readable Markdown and JSON files. This is the key innovation — state survives context window resets, session handoffs, and even switching between AI runtimes.
+
+### Core State Files
+
+| File | What It Tracks |
+|------|---------------|
+| `.planning/PROJECT.md` | Project charter: goals, constraints, tech stack, key decisions, context |
+| `.planning/REQUIREMENTS.md` | Numbered requirements with acceptance criteria and status |
+| `.planning/ROADMAP.md` | Phase list with completion status |
+| `.planning/STATE.md` | Living memory: current position, last activity, milestone history |
+| `.planning/config.json` | Project-specific GSD configuration |
+
+### Per-Phase State
+
+Each phase gets its own directory (e.g., `.planning/phase-03/`) containing:
+- `CONTEXT.md` — Your decisions from discuss-phase
+- `RESEARCH.md` — Domain research findings
+- `PLAN.md` (or `PLAN-01.md`, `PLAN-02.md` for multi-plan phases) — Executable plan
+- `SUMMARY.md` — Post-execution report
+- `VALIDATION.md` — Verification results
+- `UI-SPEC.md` — UI design contract (frontend phases)
+- `UI-REVIEW.md` — Visual audit results (frontend phases)
+
+### Session State
+
+| File | Purpose |
+|------|---------|
+| `state/decisions.md` | Logged decisions with rationale |
+| `state/pattern-context.md` | Active architectural patterns |
+| `state/session-log.md` | Session activity log |
+
+---
+
+## Governance Layer
+
+The governance system provides project scaffolding, health monitoring, and standardization.
+
+### Scripts
+
+| Script | What It Does |
+|--------|-------------|
+| `governance/scripts/scaffold-project.sh` | Sets up a new project with proper .planning/ directory structure, CLAUDE.md, settings, and hooks |
+| `governance/scripts/install-plugins.sh` | Installs bundled plugins (code-factory, mcp-ecosystem) |
+| `governance/scripts/health-check.sh` | Validates project setup against governance requirements |
+
+### Test Suite
+
+The governance layer has its own test suite (5 shell scripts, 146 assertions) covering installation, scaffolding, health checks, plugin installation, and integration.
+
+---
+
+## CLI Tools (gsd-tools.cjs)
+
+A programmatic API with 17 domain modules that workflows and agents use under the hood. Not user-facing, but this is the engine that makes everything work.
+
+**Key modules:** state management (load/update/patch), phase CRUD, roadmap parsing, config read/write, model resolution, plan verification (8 dimensions), template filling, frontmatter YAML parsing, and compound context loading.
+
+---
+
+## Security Model
+
+### Defense-in-Depth Layers
+
+1. **Prompt injection scanning** — 14 regex patterns + invisible Unicode detection on all .planning/ file writes
+2. **Path traversal prevention** — Validates all file paths stay within project boundaries
+3. **Secrets scanning** — CI pipeline checks for exposed credentials
+4. **Branch protection hooks** — Governance hooks protect main/production branches
+5. **Third-party registry vetting** — UI components from external registries get security-scanned before inclusion
+6. **Advisory guards** — Workflow guard warns about edits outside GSD context
+
+### Test Coverage
+
+- 2,046 total tests (1,913 unit + 133 E2E)
+- Core module: 94.26% line coverage, 87.11% branch coverage
+- Security module: 100% line coverage, 91.11% branch coverage
+- 50+ dedicated security test cases
+
+---
+
+## Red Flags & Issues
+
+### Known Security Issues (from SECURITY_HOOKS_REVIEW.md)
+
+1. **CRITICAL:** Hook version tracking `{{GSD_VERSION}}` placeholder never gets replaced during build — version mismatch detection is broken
+2. **CRITICAL:** Potential shell injection risk in gsd-check-update.js
+3. **HIGH:** Prompt injection patterns are duplicated between gsd-prompt-guard.js and security.cjs (maintenance risk)
+4. **HIGH:** All security guards are advisory-only — they warn but never block
+
+### Potential Redundancy
+
+- **README.md vs README-gsd.md** — 88.8KB expanded README appears to duplicate the main README with minor differences. One should be the source of truth.
+- **commands/gsd/*.md vs get-shit-done/workflows/*.md** — Commands are thin wrappers that load workflows. Some have slight naming differences (e.g., `verify-work` command vs `verify-phase` workflow). This is by design (command = user interface, workflow = implementation), but the naming inconsistencies could confuse contributors.
+
+### Tech Debt Noted in PROJECT.md
+
+- DEVOPS-HANDOFF.md needs a rewrite (Phase 29, not yet started)
+- Stale agent references were resolved in v1.9 Phase 28
+
+---
+
+## Quick Reference Card
+
+### "I want to..." → Use this command
+
+| Goal | Command |
+|------|---------|
+| Start a new project | `/gsd:new-project` |
+| See where I left off | `/gsd:progress` or `/gsd:resume-work` |
+| Move to the next step | `/gsd:next` |
+| Plan the next phase | `/gsd:discuss-phase N` → `/gsd:plan-phase N` |
+| Build something | `/gsd:execute-phase N` |
+| Do something small quickly | `/gsd:fast "description"` |
+| Do something medium quickly | `/gsd:quick "description"` |
+| Run everything automatically | `/gsd:autonomous` |
+| Check if it works | `/gsd:verify-work N` |
+| Ship it | `/gsd:ship N` |
+| Debug a problem | `/gsd:debug "description"` |
+| Capture an idea | `/gsd:note "idea"` |
+| Add a task | `/gsd:add-todo "task"` |
+| See project stats | `/gsd:stats` |
+| Get help | `/gsd:help` |
+| Pause and come back later | `/gsd:pause-work` → `/gsd:resume-work` |
+| Describe what I want in English | `/gsd:do "whatever you want"` |
+
+---
+
+*This analysis was generated by exhaustively reading every file in the GSD Framework: 61 slash commands, 15 active agents, 7 archived agents, 3 internal agents, 5 hooks, ~55 workflows, 15 reference docs, 30+ templates, 2 bundled plugins, all documentation, all configuration, and all governance files.*

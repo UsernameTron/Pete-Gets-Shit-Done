@@ -142,9 +142,9 @@ Done when: all tasks in phase complete, `.planning/STATE.md` updated.
 
 10. `/gsd:verify-work` — Conversational UAT against acceptance criteria.
 11. GSD's built-in quality agents run automatically:
-    - **gsd-plan-checker** — Validates plan completeness before execution
-    - **gsd-verifier** — Validates implementation against spec
-    - **gsd-integration-checker** — Cross-component integration validation
+    - **gsd-verifier** (scope: plan) — Validates plan completeness before execution
+    - **gsd-verifier** (scope: integration) — Cross-component integration validation
+    - **gsd-verifier** (scope: nyquist) — Fills validation gaps in completed phases
 12. Governance hooks enforce standards (docs check, secrets scan, branch protection).
 
 Never mark a task complete without proving it works. "It should work" is not verification. Run the code. Check the output. Ask yourself: "Would a staff engineer approve this?" If the answer is uncertain, you are not done.

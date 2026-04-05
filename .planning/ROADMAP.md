@@ -11,17 +11,11 @@
 - **v1.6 Maintainability** (2026-04-04) -- 4 phases, 12 requirements. [Archive](milestones/v1.6-ROADMAP.md)
 - **v1.7 End-to-End Integration Testing** (2026-04-04) -- 4 phases, 13 requirements. [Archive](milestones/v1.7-ROADMAP.md)
 - **v1.8 Documentation & Accuracy** (2026-04-05) -- 2 phases, 7 requirements. [Archive](milestones/v1.8-ROADMAP.md)
+- **v1.9 Ship Readiness & Hygiene** (2026-04-05) -- 2 phases, 5 requirements. [Archive](milestones/v1.9-ROADMAP.md)
 
 ## Current Milestone
 
-None — between milestones. v1.8 shipped 2026-04-05.
-
-## Completed Milestone: v1.8
-
-**v1.8 Documentation & Accuracy** (2026-04-05) -- 2 phases, 7 requirements. Shipped.
-
-- Phase 26 — Test Failure Fixes: 19 failures fixed across 26 files (4 root causes)
-- Phase 27 — Documentation Sync: README metrics updated (15 agents, 373 suites, 1913 tests)
+None active. All milestones through v1.9 complete.
 
 ---
-*Last updated: 2026-04-05 -- v1.8 Documentation & Accuracy completed*
+*Last updated: 2026-04-05 -- v1.9 complete, no active milestone*

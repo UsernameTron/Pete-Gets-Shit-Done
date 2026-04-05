@@ -224,12 +224,12 @@ Orchestrator (workflow .md)
 
 | Category | Agents | Parallelism |
 |----------|--------|-------------|
-| **Researchers** | gsd-project-researcher, gsd-phase-researcher, gsd-ui-researcher, gsd-advisor-researcher | 4 parallel (stack, features, architecture, pitfalls); advisor spawns during discuss-phase |
+| **Researchers** | gsd-research-orchestrator (scope: phase/project), gsd-ui-researcher, gsd-advisor-researcher | 4 parallel (stack, features, architecture, pitfalls); advisor spawns during discuss-phase |
 | **Synthesizers** | gsd-research-synthesizer | Sequential (after researchers complete) |
 | **Planners** | gsd-planner, gsd-roadmapper | Sequential |
-| **Checkers** | gsd-plan-checker, gsd-integration-checker, gsd-ui-checker, gsd-nyquist-auditor | Sequential (verification loop, max 3 iterations) |
+| **Checkers** | gsd-ui-checker | Sequential (verification loop, max 3 iterations) |
 | **Executors** | gsd-executor | Parallel within waves, sequential across waves |
-| **Verifiers** | gsd-verifier | Sequential (after all executors complete) |
+| **Verifiers** | gsd-verifier (scope: general/plan/integration/nyquist) | Sequential (after all executors complete) |
 | **Mappers** | gsd-codebase-mapper | 4 parallel (tech, arch, quality, concerns) |
 | **Debuggers** | gsd-debugger | Sequential (interactive) |
 | **Auditors** | gsd-ui-auditor | Sequential |
