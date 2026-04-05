@@ -11,6 +11,8 @@ const assert = require('node:assert');
 const {
   MODEL_PROFILES,
   VALID_PROFILES,
+  MODEL_TIERS,
+  dynamicSelect,
   formatAgentToModelMapAsTable,
   getAgentToModelMapForProfile,
 } = require('../get-shit-done/bin/lib/model-profiles.cjs');
@@ -186,5 +188,126 @@ describe('lazy initialization', () => {
     const table = mod.formatAgentToModelMapAsTable({ 'gsd-test': 'opus' });
     assert.ok(table.includes('Agent'), 'should have Agent header');
     assert.ok(table.includes('Model'), 'should have Model header');
+  });
+});
+
+// ─── MODEL_TIERS ─────────────────────────────────────────────────────────────
+
+describe('MODEL_TIERS', () => {
+  test('contains all 4 complexity keys', () => {
+    const expectedKeys = ['trivial', 'standard', 'complex', 'critical'];
+    for (const key of expectedKeys) {
+      assert.ok(key in MODEL_TIERS, `Missing key: ${key}`);
+    }
+    assert.strictEqual(Object.keys(MODEL_TIERS).length, 4, 'should have exactly 4 keys');
+  });
+
+  test('maps to valid profile names', () => {
+    const validTiers = ['budget', 'balanced', 'quality'];
+    for (const [key, tier] of Object.entries(MODEL_TIERS)) {
+      assert.ok(
+        validTiers.includes(tier),
+        `${key} maps to invalid tier "${tier}" — expected one of ${validTiers.join(', ')}`
+      );
+    }
+  });
+
+  test('is frozen', () => {
+    assert.ok(Object.isFrozen(MODEL_TIERS), 'MODEL_TIERS should be frozen');
+  });
+
+  test('critical maps to same tier as complex', () => {
+    assert.strictEqual(MODEL_TIERS.critical, MODEL_TIERS.complex,
+      'critical and complex should both map to quality');
+  });
+});
+
+// ─── dynamicSelect() ─────────────────────────────────────────────────────────
+
+describe('dynamicSelect()', () => {
+  const balancedConfig = { model_profile: 'balanced' };
+  const qualityConfig = { model_profile: 'quality' };
+  const budgetConfig = { model_profile: 'budget' };
+
+  test('trivial complexity + balanced profile returns budget tier', () => {
+    const result = dynamicSelect('gsd-executor', { complexity: 'trivial' }, balancedConfig);
+    assert.strictEqual(result.tier, 'budget');
+    assert.strictEqual(result.alias, 'sonnet'); // gsd-executor budget = sonnet
+  });
+
+  test('standard complexity + balanced profile returns balanced tier', () => {
+    const result = dynamicSelect('gsd-executor', { complexity: 'standard' }, balancedConfig);
+    assert.strictEqual(result.tier, 'balanced');
+    assert.strictEqual(result.alias, 'sonnet'); // gsd-executor balanced = sonnet
+  });
+
+  test('complex complexity + balanced profile returns quality tier', () => {
+    const result = dynamicSelect('gsd-executor', { complexity: 'complex' }, balancedConfig);
+    assert.strictEqual(result.tier, 'quality');
+    assert.strictEqual(result.alias, 'opus'); // gsd-executor quality = opus
+  });
+
+  test('critical complexity + balanced profile returns quality tier', () => {
+    const result = dynamicSelect('gsd-executor', { complexity: 'critical' }, balancedConfig);
+    assert.strictEqual(result.tier, 'quality');
+    assert.strictEqual(result.alias, 'opus');
+  });
+
+  test('quality profile never downgrades — trivial stays at quality', () => {
+    const result = dynamicSelect('gsd-executor', { complexity: 'trivial' }, qualityConfig);
+    assert.strictEqual(result.tier, 'quality');
+    assert.strictEqual(result.alias, 'opus'); // gsd-executor quality = opus
+  });
+
+  test('budget profile caps at balanced — complex does not reach quality', () => {
+    const result = dynamicSelect('gsd-executor', { complexity: 'complex' }, budgetConfig);
+    assert.strictEqual(result.tier, 'balanced');
+    assert.strictEqual(result.alias, 'sonnet'); // gsd-executor balanced = sonnet
+  });
+
+  test('unknown agent returns default sonnet', () => {
+    const result = dynamicSelect('nonexistent-agent', { complexity: 'complex' }, balancedConfig);
+    assert.strictEqual(result.alias, 'sonnet');
+    assert.strictEqual(result.tier, 'balanced');
+    assert.ok(result.rationale.includes('unknown agent'), 'rationale should mention unknown agent');
+  });
+
+  test('null taskContext defaults to standard complexity', () => {
+    const result = dynamicSelect('gsd-executor', null, balancedConfig);
+    assert.strictEqual(result.tier, 'balanced'); // standard -> balanced
+    assert.strictEqual(result.alias, 'sonnet');
+  });
+
+  test('undefined taskContext defaults to standard complexity', () => {
+    const result = dynamicSelect('gsd-executor', undefined, balancedConfig);
+    assert.strictEqual(result.tier, 'balanced');
+  });
+
+  test('missing complexity field defaults to standard', () => {
+    const result = dynamicSelect('gsd-executor', {}, balancedConfig);
+    assert.strictEqual(result.tier, 'balanced'); // standard -> balanced
+  });
+
+  test('return shape has alias, tier, and rationale as strings', () => {
+    const result = dynamicSelect('gsd-planner', { complexity: 'complex' }, balancedConfig);
+    assert.strictEqual(typeof result.alias, 'string');
+    assert.strictEqual(typeof result.tier, 'string');
+    assert.strictEqual(typeof result.rationale, 'string');
+    assert.ok(result.rationale.includes('complexity='), 'rationale should include complexity');
+    assert.ok(result.rationale.includes('profile='), 'rationale should include profile');
+  });
+
+  test('rationale includes all decision factors', () => {
+    const result = dynamicSelect('gsd-verifier', { complexity: 'trivial' }, budgetConfig);
+    assert.ok(result.rationale.includes('complexity=trivial'));
+    assert.ok(result.rationale.includes('targetTier=budget'));
+    assert.ok(result.rationale.includes('effectiveTier='));
+    assert.ok(result.rationale.includes('profile=budget'));
+  });
+
+  test('config without model_profile defaults to balanced', () => {
+    const result = dynamicSelect('gsd-executor', { complexity: 'complex' }, {});
+    assert.strictEqual(result.tier, 'quality'); // complex -> quality, no profile override
+    assert.ok(result.rationale.includes('profile=balanced'));
   });
 });

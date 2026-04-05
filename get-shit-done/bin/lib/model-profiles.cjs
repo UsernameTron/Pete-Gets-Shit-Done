@@ -11,6 +11,13 @@
  * would be faster, use fewer tokens, and be less error-prone).
  */
 
+const MODEL_TIERS = Object.freeze({
+  trivial: 'budget',
+  standard: 'balanced',
+  complex: 'quality',
+  critical: 'quality',
+});
+
 let _initCount = 0;
 let _modelProfiles = null;
 let _validProfiles = null;
@@ -70,9 +77,42 @@ function getAgentToModelMapForProfile(normalizedProfile) {
   return agentToModelMap;
 }
 
+/**
+ * Select model tier based on task complexity signals.
+ * @param {string} agentType - Agent name (e.g., 'gsd-executor')
+ * @param {Object} taskContext - { complexity, signals, phase_name }
+ * @param {Object} config - Loaded config object
+ * @returns {{ alias: string, tier: string, rationale: string }}
+ */
+function dynamicSelect(agentType, taskContext, config) {
+  const complexity = taskContext?.complexity || 'standard';
+  const targetTier = MODEL_TIERS[complexity] || 'balanced';
+
+  _initialize();
+  const agentModels = _modelProfiles[agentType];
+  if (!agentModels) {
+    return { alias: 'sonnet', tier: 'balanced', rationale: 'unknown agent — default sonnet' };
+  }
+
+  const currentProfile = String(config.model_profile || 'balanced').toLowerCase();
+  let effectiveTier = targetTier;
+
+  if (currentProfile === 'quality') {
+    effectiveTier = 'quality';
+  } else if (currentProfile === 'budget' && targetTier === 'quality') {
+    effectiveTier = 'balanced';
+  }
+
+  const alias = agentModels[effectiveTier] || agentModels['balanced'] || 'sonnet';
+  const rationale = `complexity=${complexity} targetTier=${targetTier} effectiveTier=${effectiveTier} profile=${currentProfile}`;
+  return { alias, tier: effectiveTier, rationale };
+}
+
 const _exports = {
   formatAgentToModelMapAsTable,
   getAgentToModelMapForProfile,
+  dynamicSelect,
+  MODEL_TIERS,
   _getInitCount: () => _initCount,
 };
 
