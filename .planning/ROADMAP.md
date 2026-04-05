@@ -18,7 +18,7 @@
 
 ## Phases
 
-- [ ] **Phase 28: Stale Reference Cleanup** - Replace consolidated agent names across 13+ active files and sync tech debt documentation
+- [x] **Phase 28: Stale Reference Cleanup** - Replace consolidated agent names across 13+ active files and sync tech debt documentation
 - [ ] **Phase 29: DEVOPS-HANDOFF.md Rewrite** - Replace 22-line placeholder with comprehensive handoff document reflecting project maturity
 
 ## Phase Details
@@ -34,9 +34,9 @@
   4. All existing tests continue to pass after reference updates
 **Plans:** 3 plans (2 waves)
 Plans:
-- [ ] 28-01-PLAN.md — Update command files and governance CLAUDE.md (research-phase, plan-phase, crew, governance template)
-- [ ] 28-02-PLAN.md — Update docs/ files and clean up crew assessment artifacts
-- [ ] 28-03-PLAN.md — Update PROJECT.md Tech Debt section for accuracy
+- [x] 28-01-PLAN.md — Update command files and governance CLAUDE.md (research-phase, plan-phase, crew, governance template)
+- [x] 28-02-PLAN.md — Update docs/ files and clean up crew assessment artifacts
+- [x] 28-03-PLAN.md — Update PROJECT.md Tech Debt section for accuracy
 
 ### Phase 29: DEVOPS-HANDOFF.md Rewrite
 **Goal**: A new developer or DevOps engineer can understand the project's build, test, deploy, and security posture from DEVOPS-HANDOFF.md alone
@@ -51,8 +51,8 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 28. Stale Reference Cleanup | 0/3 | Not started | - |
+| 28. Stale Reference Cleanup | 3/3 | Complete | 2026-04-05 |
 | 29. DEVOPS-HANDOFF.md Rewrite | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-04-05 -- Phase 28 planned (3 plans, 2 waves)*
+*Last updated: 2026-04-05 -- Phase 28 complete (3/3 plans, 13 files updated)*

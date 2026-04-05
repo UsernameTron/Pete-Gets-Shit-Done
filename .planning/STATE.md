@@ -4,12 +4,12 @@ milestone: v1.9
 milestone_name: Ship Readiness & Hygiene
 status: active
 last_updated: "2026-04-05T00:00:00.000Z"
-last_activity: 2026-04-05 -- Milestone v1.9 started
+last_activity: 2026-04-05 -- Phase 28 complete, Phase 29 next
 progress:
   total_phases: 2
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 
 ## Current Position
 
-Phase: 28 — Stale Reference Cleanup (not started)
+Phase: 29 — DEVOPS-HANDOFF.md Rewrite (not started)
 Plan: —
-Status: Roadmap defined, ready for planning
-Last activity: 2026-04-05 — ROADMAP.md written for v1.9
+Status: Phase 28 complete, continuing autonomous execution
+Last activity: 2026-04-05 — Phase 28 executed (3 plans, 13 files updated, 1 deleted)
 
-Progress: [..........] 0/2 phases | 0/5 requirements
+Progress: [=====.....] 1/2 phases | 3/5 requirements
 
 ## Milestone History
 
@@ -47,6 +47,6 @@ Progress: [..........] 0/2 phases | 0/5 requirements
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: ROADMAP.md written for v1.9 (2 phases, 5 requirements)
-**Stopped at**: Roadmap complete
-**Next**: `/gsd:plan-phase 28` to plan Stale Reference Cleanup
+**Last action**: Phase 28 executed — stale agent references replaced across 13 files
+**Stopped at**: Phase 28 complete, autonomous workflow continuing
+**Next**: Phase 29 — DEVOPS-HANDOFF.md Rewrite (discuss → plan → execute)
