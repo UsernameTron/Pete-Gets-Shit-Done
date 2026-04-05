@@ -25,5 +25,10 @@ v1.8 Documentation & Accuracy milestone archived. All 9 milestones (v1.0-v1.8) s
 ## Session Handoff
 
 **State tracking**: `.planning/STATE.md` is canonical.
-**Branch**: `chore/session-wrap-0403` (finalized, ready for PR)
-**Next**: `/gsd:new-milestone` or `/gsd:ship` to create PR
+**Branch**: `chore/session-wrap-0403` — 4 commits pushed, CI re-running
+**Commits this session**:
+1. `3e5856c` — c8 coverage config moved to `.c8rc.json` (Windows CI 0% coverage fix)
+2. `3068398` — Archived phase plans allowlisted in prompt injection scanner
+3. `b0f4e7d` — Author restored to "Pete Connor" across 3 manifests
+4. `02ea838` — Windows path separator fix in planningPaths test assertion
+**Next**: Confirm CI green, then `/gsd:ship` to create PR or `/gsd:new-milestone`
