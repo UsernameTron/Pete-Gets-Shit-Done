@@ -32,7 +32,11 @@
   2. PROJECT.md Tech Debt section lists only genuinely remaining debt -- no items already resolved by prior milestones
   3. CLAUDE.md Phase 3 quality gates section references `gsd-verifier` (with scope parameter) instead of deleted agent names
   4. All existing tests continue to pass after reference updates
-**Plans**: TBD
+**Plans:** 3 plans (2 waves)
+Plans:
+- [ ] 28-01-PLAN.md — Update command files and CLAUDE.md files (research-phase, plan-phase, crew, CLAUDE.md, governance template)
+- [ ] 28-02-PLAN.md — Update docs/ files and clean up crew assessment artifacts
+- [ ] 28-03-PLAN.md — Update PROJECT.md Tech Debt section for accuracy
 
 ### Phase 29: DEVOPS-HANDOFF.md Rewrite
 **Goal**: A new developer or DevOps engineer can understand the project's build, test, deploy, and security posture from DEVOPS-HANDOFF.md alone
@@ -47,8 +51,8 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 28. Stale Reference Cleanup | 0/TBD | Not started | - |
+| 28. Stale Reference Cleanup | 0/3 | Not started | - |
 | 29. DEVOPS-HANDOFF.md Rewrite | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-04-05 -- v1.9 Ship Readiness & Hygiene milestone started*
+*Last updated: 2026-04-05 -- Phase 28 planned (3 plans, 2 waves)*
