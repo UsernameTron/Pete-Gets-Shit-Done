@@ -30,11 +30,11 @@
 **Success Criteria** (what must be TRUE):
   1. Searching the codebase for `gsd-plan-checker`, `gsd-integration-checker`, `gsd-nyquist-auditor`, `gsd-phase-researcher`, and `gsd-project-researcher` returns zero hits in active (non-archived) files
   2. PROJECT.md Tech Debt section lists only genuinely remaining debt -- no items already resolved by prior milestones
-  3. CLAUDE.md Phase 3 quality gates section references `gsd-verifier` (with scope parameter) instead of deleted agent names
+  3. governance/templates/global/CLAUDE.md Phase 3 quality gates section references `gsd-verifier` (with scope parameter) instead of deleted agent names
   4. All existing tests continue to pass after reference updates
 **Plans:** 3 plans (2 waves)
 Plans:
-- [ ] 28-01-PLAN.md — Update command files and CLAUDE.md files (research-phase, plan-phase, crew, CLAUDE.md, governance template)
+- [ ] 28-01-PLAN.md — Update command files and governance CLAUDE.md (research-phase, plan-phase, crew, governance template)
 - [ ] 28-02-PLAN.md — Update docs/ files and clean up crew assessment artifacts
 - [ ] 28-03-PLAN.md — Update PROJECT.md Tech Debt section for accuracy
 
