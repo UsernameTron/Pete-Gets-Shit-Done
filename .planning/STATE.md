@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Maintainability
-status: complete
+status: shipped
 last_updated: "2026-04-04T23:59:00.000Z"
-last_activity: 2026-04-04 -- All 4 phases complete. Milestone ready for closure.
+last_activity: 2026-04-04 -- v1.6 milestone archived and closed.
 progress:
   total_phases: 4
   completed_phases: 4
@@ -72,10 +72,11 @@ Progress: [##########] 4/4 phases | 12/12 plans | 12/12 requirements
 | v1.3 | Security Hardening & Coverage | 4 | 4 | 2026-04-04 |
 | v1.4 | Correctness & Robustness | 4 | 6 | 2026-04-04 |
 | v1.5 | Performance | 3 | 6 | 2026-04-04 |
+| v1.6 | Maintainability | 4 | 12 | 2026-04-04 |
 
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: All 4 phases complete — milestone closure in progress
-**Stopped at**: Autonomous execution of v1.6 — milestone completion
-**Next**: Archive milestone, update PROJECT.md, cleanup
+**Last action**: v1.6 milestone archived and closed
+**Stopped at**: All milestones through v1.6 shipped
+**Next**: Run `/gsd:new-milestone` to start next cycle
