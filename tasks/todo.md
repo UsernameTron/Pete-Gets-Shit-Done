@@ -1,28 +1,29 @@
 # Todo
 
-## Current Status: Between Milestones — v1.1 Shipped, Remote Synced
+## Current Status: Between Milestones -- v1.8 Archived
 
-v1.1 Testing & Hardening milestone fully archived, tagged, and merged.
-README.md fully populated with governance, plugins, skills, and 57-command GSD table.
-Git history includes enforcement contracts (3 commits above initial squash).
-Remote GitHub repo force-pushed to match local (unrelated histories resolved).
+v1.8 Documentation & Accuracy milestone archived. All 9 milestones (v1.0-v1.8) shipped.
+1913 tests passing across 373 suites. 15 active agents, 7 archived.
 
 ## Open Items
 
-All resolved. No open items.
+- [ ] Decide next milestone direction (`/gsd:new-milestone`)
 
-## Completed (This Session)
+## Completed
 
-- [x] Force-push local main to GitHub remote (unrelated histories)
-- [x] Remove stale worktree `.claude/worktrees/vigorous-kapitsa`
-- [x] Delete branch `claude/vigorous-kapitsa`
-- [x] Delete branch `chore/session-wrap-final`
-- [x] Verify single `main` branch on local and remote
+- [x] v1.0 Post-Merge Cleanup (2026-03-26)
+- [x] v1.1 Testing & Hardening (2026-03-26)
+- [x] v1.2 Agent Quality & Consolidation (2026-04-04)
+- [x] v1.3 Security Hardening & Coverage (2026-04-04)
+- [x] v1.4 Correctness & Robustness (2026-04-04)
+- [x] v1.5 Performance (2026-04-04)
+- [x] v1.6 Maintainability (2026-04-04)
+- [x] v1.7 End-to-End Integration Testing (2026-04-04)
+- [x] v1.8 Documentation & Accuracy (2026-04-05)
+- [x] Project finalized via /gsd:finalize (2026-04-05)
 
 ## Session Handoff
 
 **State tracking**: `.planning/STATE.md` is canonical.
-**Branch**: `main` at `40a7cab` (clean, remote synced)
-**Tags**: `v1.0`, `v1.1` on initial commit
-**Remote**: `origin/main` aligned via force-push (2026-04-03)
-**Next**: `/gsd:new-milestone` to start the next cycle
+**Branch**: `chore/session-wrap-0403` (finalized, ready for PR)
+**Next**: `/gsd:new-milestone` or `/gsd:ship` to create PR

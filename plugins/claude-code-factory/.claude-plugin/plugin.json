@@ -1,0 +1,6 @@
+{
+  "name": "claude-code-factory",
+  "description": "Extension generation — skills, hooks, agents, plugins, MCP configs, CI/CD pipelines, dev team recipes",
+  "version": "1.0.0",
+  "author": { "name": "TÂCHES" }
+}

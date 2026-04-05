@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Documentation & Accuracy
-status: completed
+status: archived
 last_updated: "2026-04-05T00:00:00.000Z"
 last_activity: 2026-04-05 -- v1.8 milestone completed
 progress:
