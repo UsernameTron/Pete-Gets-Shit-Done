@@ -795,6 +795,54 @@ If the installer crashes with `EPERM: operation not permitted, scandir` on Windo
 
 ---
 
+## Intelligence Layer (v2.0)
+
+GSD v2.0 adds optional intelligence features that make the engine smarter about model selection, task classification, and workflow adaptation.
+
+### Quick Start
+
+All intelligence features are **off by default**. To enable:
+
+1. Edit `.planning/config.json`
+2. Set `routing_strategy` to `dynamic` (or `auto` for history-aware routing)
+3. Set `adaptive` to `true` for task classification and workflow gate adjustment
+
+Or via CLI:
+
+```bash
+node gsd-tools.cjs config-set routing_strategy dynamic
+node gsd-tools.cjs config-set adaptive true
+```
+
+### Dynamic Model Routing
+
+Instead of using the same model tier for every task, dynamic routing selects models based on task complexity:
+
+- Simple config changes get fast, cheap models (budget tier)
+- Standard development gets balanced models
+- Complex architectural work gets the most capable models (quality tier)
+
+The classification considers file count, requirement count, phase type, dependency depth, and historical failure rates. See the [Model Profiles reference](../get-shit-done/references/model-profiles.md#dynamic-model-routing) for the full signal list and scoring algorithm.
+
+### Execution History
+
+GSD tracks execution outcomes in `.planning/history/executions.jsonl`. Each record captures phase, plan, agent, model used, duration, outcome (pass/fail/partial), and error codes.
+
+CLI commands:
+
+- `gsd-tools history list` -- show recent executions
+- `gsd-tools history stats` -- show patterns and pass rates
+- `gsd-tools history prune` -- clean old records (keeps latest 500 by default)
+
+When `routing_strategy` is set to `auto`, history patterns influence model selection. The engine detects:
+
+- **Failing phases** (>30% failure rate over 3+ executions) -- promotes budget tier to balanced
+- **Agent tier mismatches** (>50% failure on budget/balanced models) -- promotes to quality tier
+
+History auto-rotates when the file exceeds 1,000 records, keeping the latest 500.
+
+---
+
 ## Recovery Quick Reference
 
 | Problem | Solution |
@@ -833,6 +881,8 @@ For reference, here is what GSD creates in your project:
   todos/
     pending/              # Captured ideas awaiting work
     done/                 # Completed todos
+  history/
+    executions.jsonl      # Execution history (JSONL, auto-rotates at 1000 records)
   debug/                  # Active debug sessions
     resolved/             # Archived debug sessions
   codebase/               # Brownfield codebase mapping (from /gsd:map-codebase)

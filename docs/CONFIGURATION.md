@@ -80,6 +80,8 @@ GSD stores project settings in `.planning/config.json`. Created during `/gsd:new
 | `mode` | enum | `interactive`, `yolo` | `interactive` | `yolo` auto-approves decisions; `interactive` confirms at each step |
 | `granularity` | enum | `coarse`, `standard`, `fine` | `standard` | Controls phase count: `coarse` (3-5), `standard` (5-8), `fine` (8-12) |
 | `model_profile` | enum | `quality`, `balanced`, `budget`, `inherit` | `balanced` | Model tier for each agent (see [Model Profiles](#model-profiles)) |
+| `routing_strategy` | enum | `static`, `dynamic`, `auto` | `static` | Controls how the engine selects models for agent tasks (see [Dynamic Model Routing](#dynamic-model-routing)) |
+| `adaptive` | boolean | `true`, `false` | `false` | Feature flag for adaptive workflow behavior (see [Adaptive Workflow](#adaptive-workflow)) |
 
 > **Note:** `granularity` was renamed from `depth` in v1.22.3. Existing configs are auto-migrated.
 
@@ -381,6 +383,58 @@ The intent is the same as the Claude profile tiers -- use a stronger model for p
 | `balanced` | Opus for planning only, Sonnet for everything else | Normal development (default) |
 | `budget` | Sonnet for code-writing, Haiku for research/verification | High-volume work, less critical phases |
 | `inherit` | All agents use current session model | Dynamic model switching, **non-Anthropic providers** (OpenRouter, local models) |
+
+---
+
+## Dynamic Model Routing
+
+### routing_strategy
+
+- **Type**: string
+- **Values**: `static`, `dynamic`, `auto`
+- **Default**: `static`
+- **Added in**: v2.0 (config_version 2)
+
+Controls how the engine selects models for agent tasks.
+
+- `static`: Uses the `model_profile` mapping (v1.9 behavior, zero overhead)
+- `dynamic`: Classifies task complexity via `classifyTask()` and routes to the appropriate model tier
+- `auto`: Dynamic routing enhanced by execution history analysis via `detectPatterns()`
+
+When set to `dynamic` or `auto`, the engine runs `extractSignals()` and `classifyTask()` before each agent spawn. The resulting complexity level (trivial, standard, complex, critical) maps to a model tier (budget, balanced, quality) via `dynamicSelect()`. The user's `model_profile` still acts as a ceiling/floor constraint.
+
+Migration: Existing configs are automatically migrated to config_version 2. The `routing_strategy` key is added with value `static` if not present, preserving existing behavior.
+
+### adaptive
+
+- **Type**: boolean
+- **Default**: `false`
+- **Added in**: v2.0 (config_version 2)
+
+Feature flag for adaptive workflow behavior. When `true`:
+
+- Task classification runs during init commands
+- `adaptWorkflowGates()` returns config overrides based on complexity:
+  - **trivial**: `skip_research: true`, `plan_checker_enabled: false`, `verification_rigor: 'light'`
+  - **standard**: No overrides (default behavior)
+  - **complex**: `verification_rigor: 'thorough'`, `parallelization_wave_size: 2`
+  - **critical**: `verification_rigor: 'thorough'`, `parallelization_wave_size: 1`, `force_quality_tier: true`
+- Classification result is included in init output
+
+Requires: `routing_strategy` set to `dynamic` or `auto` for full effect.
+
+---
+
+## Config Versioning
+
+GSD uses a versioned migration system for `config.json`. The current version is **2**.
+
+| Version | Changes |
+|---------|---------|
+| 0 → 1 | Migrated `depth` to `granularity`, `multiRepo` to `sub_repos` |
+| 1 → 2 | Added `routing_strategy: 'static'` and `adaptive: false` defaults |
+
+Migrations run automatically on `loadConfig()`. Existing values are never overwritten — only missing keys are added with their defaults.
 
 ---
 
