@@ -154,6 +154,22 @@ He uses Obsidian for knowledge management. His portfolio site is airealitycheck.
 
 ---
 
+## Utility Commands
+
+| Command | What it does |
+|---------|--------------|
+| `/learn <query>` | Search agentskill.sh for skills matching a keyword |
+| `/learn @owner/slug` | Install a specific skill by author and name |
+| `/learn list` | Show installed skills from agentskill.sh |
+| `/learn update` | Check for and apply updates to installed skills |
+| `/learn remove <slug>` | Uninstall a skill |
+| `/learn feedback <slug> <1-5> [msg]` | Rate a skill after using it |
+| `/learn` | Context-aware skill recommendations for current project |
+| `/learn trending` | Show trending skills |
+| `/learn scan [path]` | Security scan a skill before installing |
+
+---
+
 ## What Not to Do
 
 Do not produce output that is "good enough." Pete operates at a level where deliverables go to PE boards, C-suite stakeholders, and job interviewers. Everything should be production-grade.
