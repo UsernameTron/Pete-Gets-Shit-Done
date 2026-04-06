@@ -45,7 +45,7 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 
 ## Tests and Coverage
 
-- **Framework**: Jest
+- **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
 - **Scale**: ~403 test suites, ~2069 assertions
 - **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
 - **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
@@ -73,7 +73,7 @@ Three project-scoped specialists live in `.claude/agents/`:
 
 GSD also ships 15 built-in agents activated by the execution engine:
 
-`gsd-verifier`, `gsd-planner`, `gsd-executor`, `gsd-debugger`, `gsd-codebase-mapper`, `gsd-plan-checker`, `gsd-integration-checker`, `gsd-nyquist-detector`, `gsd-research`, `gsd-pr-reviewer`, `gsd-commit-analyzer`, `gsd-workstream-manager`, `gsd-milestone-manager`, `gsd-health-checker`, `gsd-stats-reporter`
+`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
 
 ---
 

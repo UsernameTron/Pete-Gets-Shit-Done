@@ -132,8 +132,8 @@ Sandbox modes are defined in `bin/install.js` (Codex config) and agent frontmatt
 
 ## Command System
 
-**GSD Slash Commands (60+ total):**
-- Defined as Markdown files in `commands/gsd/*.md` (60 commands)
+**GSD Slash Commands (61 total):**
+- Defined as Markdown files in `commands/gsd/*.md` (61 commands)
 - Additional commands in `get-shit-done/commands/gsd/` and plugin command directories
 - Commands are meta-prompts that guide AI runtime behavior through structured Markdown
 
