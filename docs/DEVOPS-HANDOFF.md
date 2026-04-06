@@ -126,7 +126,10 @@ Coverage is collected via `c8` with configuration in `.c8rc.json`.
 
 | Module | Line Coverage | Branch Coverage |
 |--------|--------------|-----------------|
-| `core.cjs` | 95.49% | 90.87% |
+| `core.cjs` | 95.60% | 90.84% |
+| `classify.cjs` | 98.20% | 85.43% |
+| `history.cjs` | 96.13% | 90.82% |
+| `model-profiles.cjs` | 100.00% | 92.30% |
 | `security.cjs` | 100.00% | 100.00% |
 
 ### Coverage Standards
@@ -263,7 +266,7 @@ This is a **CLI plugin**, not a deployed service. There is no server to monitor,
 
 | Item | Status | Details |
 |------|--------|---------|
-| CLAUDE.md Phase 3 quality gates | Active | Project CLAUDE.md still references `gsd-plan-checker` and `gsd-integration-checker` in Phase 3 Quality Gates section; should reference `gsd-verifier` with scope parameters |
+| CLAUDE.md Phase 3 quality gates | Resolved (v2.0) | Updated to reference `gsd-verifier` with scope parameters |
 | Stale agent references | Resolved (v1.9 Phase 28) | All 13 active files updated to use current agent names |
 | CI/CD pipeline | Deferred | No automated test/publish pipeline; appropriate for current project stage |
 
