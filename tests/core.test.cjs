@@ -1980,6 +1980,246 @@ describe('resolveModelInternal — resolve_model_ids', () => {
   });
 });
 
+// ─── resolveModelInternal — dynamic routing ──────────────────────────────────
+
+describe('resolveModelInternal — dynamic routing', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  function writeConfig(obj) {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify(obj, null, 2)
+    );
+  }
+
+  test('backward compat: no taskContext returns same as v1.9 static path', () => {
+    writeConfig({ model_profile: 'balanced' });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor');
+    assert.strictEqual(result, 'sonnet');
+  });
+
+  test('routing_strategy: static ignores taskContext', () => {
+    writeConfig({ model_profile: 'balanced', routing_strategy: 'static' });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor', { complexity: 'complex' });
+    // Static path: balanced profile for gsd-executor is sonnet
+    assert.strictEqual(result, 'sonnet');
+  });
+
+  test('routing_strategy: dynamic with trivial complexity returns budget tier alias', () => {
+    writeConfig({ model_profile: 'balanced', routing_strategy: 'dynamic' });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor', { complexity: 'trivial' });
+    // dynamicSelect: trivial -> budget tier, gsd-executor budget = 'sonnet'
+    assert.strictEqual(result, 'sonnet');
+  });
+
+  test('routing_strategy: dynamic with complex complexity returns quality tier alias', () => {
+    writeConfig({ model_profile: 'balanced', routing_strategy: 'dynamic' });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor', { complexity: 'complex' });
+    // dynamicSelect: complex -> quality tier, gsd-executor quality = 'opus'
+    assert.strictEqual(result, 'opus');
+  });
+
+  test('routing_strategy: auto behaves same as dynamic', () => {
+    writeConfig({ model_profile: 'balanced', routing_strategy: 'auto' });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor', { complexity: 'complex' });
+    assert.strictEqual(result, 'opus');
+  });
+
+  test('model_overrides take precedence over dynamic routing', () => {
+    writeConfig({
+      model_profile: 'balanced',
+      routing_strategy: 'dynamic',
+      model_overrides: { 'gsd-executor': 'haiku' },
+    });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor', { complexity: 'complex' });
+    assert.strictEqual(result, 'haiku');
+  });
+
+  test('resolve_model_ids: omit returns empty string regardless of taskContext', () => {
+    writeConfig({
+      resolve_model_ids: 'omit',
+      routing_strategy: 'dynamic',
+    });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor', { complexity: 'complex' });
+    assert.strictEqual(result, '');
+  });
+
+  test('resolve_model_ids: true with dynamic routing returns full model ID', () => {
+    writeConfig({
+      resolve_model_ids: true,
+      routing_strategy: 'dynamic',
+      model_profile: 'balanced',
+    });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor', { complexity: 'complex' });
+    // complex -> quality tier -> gsd-executor quality = 'opus' -> MODEL_ALIAS_MAP['opus'] = 'claude-opus-4-0'
+    assert.strictEqual(result, 'claude-opus-4-0');
+  });
+
+  test('routing_strategy: static with taskContext still returns static profile result', () => {
+    writeConfig({ model_profile: 'quality', routing_strategy: 'static' });
+    const result = resolveModelInternal(tmpDir, 'gsd-executor', { complexity: 'trivial' });
+    // Static path ignores taskContext: quality profile for gsd-executor = 'opus'
+    assert.strictEqual(result, 'opus');
+  });
+
+  test('loadConfig returns routing_strategy: static by default', () => {
+    // No config file — defaults used
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.routing_strategy, 'static');
+  });
+
+  test('loadConfig returns routing_strategy from config when set', () => {
+    writeConfig({ routing_strategy: 'dynamic' });
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.routing_strategy, 'dynamic');
+  });
+
+  test('dynamic routing with critical complexity returns quality tier', () => {
+    writeConfig({ model_profile: 'balanced', routing_strategy: 'dynamic' });
+    const result = resolveModelInternal(tmpDir, 'gsd-planner', { complexity: 'critical' });
+    // critical -> quality tier, gsd-planner quality = 'opus'
+    assert.strictEqual(result, 'opus');
+  });
+
+  test('dynamic routing with standard complexity returns balanced tier', () => {
+    writeConfig({ model_profile: 'balanced', routing_strategy: 'dynamic' });
+    const result = resolveModelInternal(tmpDir, 'gsd-codebase-mapper', { complexity: 'standard' });
+    // standard -> balanced tier, gsd-codebase-mapper balanced = 'haiku'
+    assert.strictEqual(result, 'haiku');
+  });
+});
+
+// ─── loadConfig — workflow.adaptive feature flag ─────────────────────────────
+
+describe('loadConfig — workflow.adaptive feature flag', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  function writeConfig(obj) {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify(obj, null, 2)
+    );
+  }
+
+  test('loadConfig returns adaptive: false by default', () => {
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.adaptive, false);
+  });
+
+  test('loadConfig returns adaptive: true when config has it', () => {
+    writeConfig({ workflow: { adaptive: true } });
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(config.adaptive, true);
+  });
+
+  test('config with workflow.adaptive passes validation via config-set', () => {
+    writeConfig({ workflow: { adaptive: false } });
+    const config = loadConfig(tmpDir);
+    assert.strictEqual(typeof config.adaptive, 'boolean');
+  });
+});
+
+// ─── resolveModelInternal — debug logging ────────────────────────────────────
+
+describe('resolveModelInternal — debug logging', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  function writeConfig(obj) {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify(obj, null, 2)
+    );
+  }
+
+  test('debugLog is called with MODEL_ROUTE code on dynamic path', () => {
+    writeConfig({ routing_strategy: 'dynamic', model_profile: 'balanced' });
+    const { spawnSync } = require('child_process');
+    const script = `
+      const { resolveModelInternal } = require('./get-shit-done/bin/lib/core.cjs');
+      resolveModelInternal(${JSON.stringify(tmpDir)}, 'gsd-executor', { complexity: 'complex' });
+    `;
+    const proc = spawnSync('node', ['-e', script], {
+      cwd: path.join(__dirname, '..'),
+      env: { ...process.env, GSD_DEBUG: '1' },
+      encoding: 'utf-8',
+    });
+    assert.ok(proc.stderr.includes('[GSD:MODEL_ROUTE]'), `Expected MODEL_ROUTE in stderr, got: ${proc.stderr}`);
+    assert.ok(proc.stderr.includes('agent=gsd-executor'), `Expected agent name in stderr, got: ${proc.stderr}`);
+  });
+
+  test('debugLog emits MODEL_ROUTE_CRITICAL for critical complexity', () => {
+    writeConfig({ routing_strategy: 'dynamic', model_profile: 'balanced' });
+    const { spawnSync } = require('child_process');
+    const script = `
+      const { resolveModelInternal } = require('./get-shit-done/bin/lib/core.cjs');
+      resolveModelInternal(${JSON.stringify(tmpDir)}, 'gsd-executor', { complexity: 'critical' });
+    `;
+    const proc = spawnSync('node', ['-e', script], {
+      cwd: path.join(__dirname, '..'),
+      env: { ...process.env, GSD_DEBUG: '1' },
+      encoding: 'utf-8',
+    });
+    assert.ok(proc.stderr.includes('[GSD:MODEL_ROUTE_CRITICAL]'), `Expected MODEL_ROUTE_CRITICAL in stderr, got: ${proc.stderr}`);
+    assert.ok(proc.stderr.includes('CRITICAL override'), `Expected 'CRITICAL override' in stderr, got: ${proc.stderr}`);
+  });
+
+  test('no debug log on static path', () => {
+    writeConfig({ routing_strategy: 'static', model_profile: 'balanced' });
+    const { spawnSync } = require('child_process');
+    const script = `
+      const { resolveModelInternal } = require('./get-shit-done/bin/lib/core.cjs');
+      resolveModelInternal(${JSON.stringify(tmpDir)}, 'gsd-executor');
+    `;
+    const proc = spawnSync('node', ['-e', script], {
+      cwd: path.join(__dirname, '..'),
+      env: { ...process.env, GSD_DEBUG: '1' },
+      encoding: 'utf-8',
+    });
+    assert.ok(!proc.stderr.includes('[GSD:MODEL_ROUTE]'), `Expected no MODEL_ROUTE in stderr, got: ${proc.stderr}`);
+  });
+
+  test('no debug log when GSD_DEBUG is not set', () => {
+    writeConfig({ routing_strategy: 'dynamic', model_profile: 'balanced' });
+    const { spawnSync } = require('child_process');
+    const script = `
+      const { resolveModelInternal } = require('./get-shit-done/bin/lib/core.cjs');
+      resolveModelInternal(${JSON.stringify(tmpDir)}, 'gsd-executor', { complexity: 'complex' });
+    `;
+    const env = { ...process.env };
+    delete env.GSD_DEBUG;
+    const proc = spawnSync('node', ['-e', script], {
+      cwd: path.join(__dirname, '..'),
+      env,
+      encoding: 'utf-8',
+    });
+    assert.ok(!proc.stderr.includes('[GSD:MODEL_ROUTE]'), `Expected no MODEL_ROUTE in stderr when GSD_DEBUG unset, got: ${proc.stderr}`);
+  });
+});
+
 // ─── SEC-05: Coverage Expansion — extractOneLinerFromBody ─────────────────────
 
 describe('extractOneLinerFromBody', () => {
@@ -2089,25 +2329,27 @@ describe('config migration system', () => {
     cleanup(tmpDir);
   });
 
-  test('unversioned config gets migrated to v1 with config_version stamp', () => {
+  test('unversioned config gets migrated through all versions to CONFIG_VERSION', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
     fs.writeFileSync(configPath, JSON.stringify({ depth: 'quick' }));
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.config_version, CONFIG_VERSION);
   });
 
-  test('config already at v1 skips migration', () => {
+  test('config at v1 gets migrated to v2 with intelligence layer keys', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
     const original = { config_version: 1, granularity: 'standard' };
     fs.writeFileSync(configPath, JSON.stringify(original));
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.config_version, 2);
     assert.strictEqual(raw.granularity, 'standard');
+    assert.strictEqual(raw.routing_strategy, 'static');
+    assert.strictEqual(raw.adaptive, false);
   });
 
-  test('depth + multiRepo both migrated in single pass', () => {
+  test('depth + multiRepo both migrated in single pass (chains through to v2)', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
     // Create a sub-repo directory so detectSubRepos finds something
     const subDir = path.join(tmpDir, 'sub-project');
@@ -2116,7 +2358,7 @@ describe('config migration system', () => {
     fs.writeFileSync(configPath, JSON.stringify({ depth: 'standard', multiRepo: true }));
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(raw.config_version, 1);
+    assert.strictEqual(raw.config_version, CONFIG_VERSION);
     assert.strictEqual(raw.granularity, 'standard');
     assert.ok(!('depth' in raw));
     // multiRepo should be removed if sub_repos were detected
@@ -2171,6 +2413,94 @@ describe('config migration system', () => {
       assert.strictEqual(typeof m.migrate, 'function');
       assert.ok(m.to > m.from, 'to must be greater than from');
     }
+  });
+});
+
+// ─── Config Migration v1 -> v2 ──────────────────────────────────────────────
+
+describe('Config migration v1 -> v2', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('v1 config gets routing_strategy and adaptive added', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, model_profile: 'balanced' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.routing_strategy, 'static');
+    assert.strictEqual(raw.adaptive, false);
+    assert.strictEqual(raw.config_version, 2);
+  });
+
+  test('v1 config preserves existing routing_strategy', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, routing_strategy: 'dynamic' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.routing_strategy, 'dynamic');
+  });
+
+  test('v1 config preserves existing adaptive', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, adaptive: true }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.adaptive, true);
+  });
+
+  test('v0 config runs both migrations (chains 0->1->2)', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ depth: 'comprehensive' }));
+    loadConfig(tmpDir);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.granularity, 'fine', 'depth->granularity from 0->1');
+    assert.strictEqual(raw.routing_strategy, 'static', 'routing_strategy from 1->2');
+    assert.strictEqual(raw.adaptive, false, 'adaptive from 1->2');
+    assert.strictEqual(raw.config_version, 2);
+    assert.ok(!('depth' in raw), 'depth key should be removed by 0->1');
+  });
+
+  test('v2 config is not mutated', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const original = { config_version: 2, routing_strategy: 'auto', adaptive: true };
+    fs.writeFileSync(configPath, JSON.stringify(original));
+    const beforeContent = fs.readFileSync(configPath, 'utf-8');
+    loadConfig(tmpDir);
+    const afterContent = fs.readFileSync(configPath, 'utf-8');
+    assert.strictEqual(beforeContent, afterContent, 'config.json should not be rewritten');
+    const raw = JSON.parse(afterContent);
+    assert.strictEqual(raw.config_version, 2);
+    assert.strictEqual(raw.routing_strategy, 'auto');
+    assert.strictEqual(raw.adaptive, true);
+  });
+
+  test('missing config.json returns defaults with v2 keys', () => {
+    // tmpDir has .planning/ but no config.json
+    const result = loadConfig(tmpDir);
+    assert.strictEqual(result.routing_strategy, 'static');
+    assert.strictEqual(result.adaptive, false);
+  });
+
+  test('migration is idempotent (loadConfig twice on same v1 config)', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, model_profile: 'balanced' }));
+    const first = loadConfig(tmpDir);
+    const second = loadConfig(tmpDir);
+    assert.strictEqual(first.routing_strategy, second.routing_strategy);
+    assert.strictEqual(first.adaptive, second.adaptive);
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 2);
+  });
+
+  test('CONFIG_VERSION is 2', () => {
+    assert.strictEqual(CONFIG_VERSION, 2);
   });
 });
 

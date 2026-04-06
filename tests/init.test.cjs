@@ -1255,5 +1255,512 @@ describe('findProjectRoot integration via --cwd', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// buildTaskContext unit tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+const { buildTaskContext } = require('../get-shit-done/bin/lib/init.cjs');
+
+describe('buildTaskContext', () => {
+  test('returns undefined when routing_strategy is static (default)', () => {
+    const result = buildTaskContext(
+      { phase_name: 'API' }, ['plan1.md'], 'REQ-01', { routing_strategy: 'static' }
+    );
+    assert.strictEqual(result, undefined);
+  });
+
+  test('returns undefined when routing_strategy is absent (defaults to static)', () => {
+    const result = buildTaskContext(
+      { phase_name: 'API' }, ['plan1.md'], 'REQ-01', {}
+    );
+    assert.strictEqual(result, undefined);
+  });
+
+  test('returns trivial for 1 plan and 1 requirement', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Setup' }, ['plan1.md'], 'REQ-01', { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'trivial');
+  });
+
+  test('returns standard for 2 plans and 4 requirements', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Core' },
+      ['plan1.md', 'plan2.md'],
+      'R-01, R-02, R-03, R-04',
+      { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'standard');
+  });
+
+  test('returns complex for 5 plans and 3 requirements', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Build' },
+      ['p1.md', 'p2.md', 'p3.md', 'p4.md', 'p5.md'],
+      'R-01, R-02, R-03',
+      { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'complex');
+  });
+
+  test('returns complex for 0 plans and 7 requirements', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Reqs' },
+      [],
+      'R-01, R-02, R-03, R-04, R-05, R-06, R-07',
+      { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'complex');
+  });
+
+  test('returns critical for 8 plans and 10 requirements', () => {
+    const plans = Array.from({ length: 8 }, (_, i) => `plan-${i}.md`);
+    const reqs = Array.from({ length: 10 }, (_, i) => `R-${i + 1}`).join(', ');
+    const result = buildTaskContext(
+      { phase_name: 'Launch' }, plans, reqs, { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'critical');
+  });
+
+  test('handles null phaseInfo gracefully', () => {
+    const result = buildTaskContext(
+      null, ['plan1.md'], 'REQ-01', { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.complexity, 'trivial');
+    assert.strictEqual(result.phase_name, '');
+    assert.strictEqual(result.signals.phase_name, '');
+  });
+
+  test('handles null planInventory gracefully (counts as 0 plans)', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Test' }, null, 'R-01', { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.signals.plan_count, 0);
+  });
+
+  test('returns correct shape with complexity, signals, and phase_name', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Deploy' },
+      ['p1.md', 'p2.md'],
+      'D-01, D-02, D-03',
+      { routing_strategy: 'dynamic' }
+    );
+    assert.ok(result.complexity, 'should have complexity');
+    assert.ok(result.signals, 'should have signals');
+    assert.strictEqual(typeof result.signals.plan_count, 'number');
+    assert.strictEqual(typeof result.signals.requirement_count, 'number');
+    assert.strictEqual(typeof result.signals.phase_name, 'string');
+    assert.strictEqual(result.phase_name, 'Deploy');
+    assert.strictEqual(result.signals.plan_count, 2);
+    assert.strictEqual(result.signals.requirement_count, 3);
+  });
+
+  test('handles empty reqIds string', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Empty' }, [], '', { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.signals.requirement_count, 0);
+    assert.strictEqual(result.complexity, 'trivial');
+  });
+
+  test('handles null reqIds', () => {
+    const result = buildTaskContext(
+      { phase_name: 'Null' }, [], null, { routing_strategy: 'dynamic' }
+    );
+    assert.strictEqual(result.signals.requirement_count, 0);
+    assert.strictEqual(result.complexity, 'trivial');
+  });
+});
+
+describe('init command taskContext wiring', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('execute-phase with static routing returns string model fields', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '03-api');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '03-01-PLAN.md'), '# Plan');
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: EX-01, EX-02\n**Plans:** 1 plans\n'
+    );
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(typeof output.executor_model, 'string');
+    assert.strictEqual(typeof output.verifier_model, 'string');
+  });
+
+  test('execute-phase with dynamic routing returns string model fields', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '03-api');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '03-01-PLAN.md'), '# Plan');
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: EX-01, EX-02\n**Plans:** 1 plans\n'
+    );
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath)
+      ? JSON.parse(fs.readFileSync(configPath, 'utf8'))
+      : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, routing_strategy: 'dynamic' }, null, 2));
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(typeof output.executor_model, 'string');
+    assert.strictEqual(typeof output.verifier_model, 'string');
+  });
+
+  test('plan-phase with static routing returns string model fields', () => {
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: CP-01, CP-02\n**Plans:** 0 plans\n'
+    );
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(typeof output.researcher_model, 'string');
+    assert.strictEqual(typeof output.planner_model, 'string');
+    assert.strictEqual(typeof output.checker_model, 'string');
+  });
+
+  test('plan-phase with dynamic routing returns string model fields', () => {
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: CP-01, CP-02\n**Plans:** 0 plans\n'
+    );
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath)
+      ? JSON.parse(fs.readFileSync(configPath, 'utf8'))
+      : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, routing_strategy: 'dynamic' }, null, 2));
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(typeof output.researcher_model, 'string');
+    assert.strictEqual(typeof output.planner_model, 'string');
+    assert.strictEqual(typeof output.checker_model, 'string');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Task classification wiring (INTEL-10, INTEL-12)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('task_classification in init execute-phase (INTEL-10, INTEL-12)', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Create a phase with plans and a ROADMAP with requirements
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '03-api');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '03-01-PLAN.md'), '---\nstatus: pending\nfiles_to_modify:\n  - src/a.js\n  - src/b.js\n---\n# Plan 1');
+    fs.writeFileSync(path.join(phaseDir, '03-02-PLAN.md'), '---\nstatus: pending\ndepends_on: [1]\nfiles_to_modify:\n  - src/c.js\n---\n# Plan 2');
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: EX-01, EX-02, EX-03\n**Plans:** 2 plans\n'
+    );
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('adaptive: false does not include task_classification', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: false } }, null, 2));
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.task_classification, null, 'task_classification should be null when adaptive is false');
+  });
+
+  test('no adaptive key does not include task_classification', () => {
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.task_classification, null, 'task_classification should be null when adaptive is not set');
+  });
+
+  test('adaptive: true includes task_classification object', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.ok(output.task_classification !== null, 'task_classification should not be null when adaptive is true');
+    assert.strictEqual(typeof output.task_classification, 'object');
+  });
+
+  test('task_classification has shape: { complexity, signals, confidence }', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const tc = JSON.parse(result.output).task_classification;
+    assert.ok('complexity' in tc, 'task_classification should have complexity');
+    assert.ok('signals' in tc, 'task_classification should have signals');
+    assert.ok('confidence' in tc, 'task_classification should have confidence');
+  });
+
+  test('task_classification.complexity is one of: trivial, standard, complex, critical', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const tc = JSON.parse(result.output).task_classification;
+    const validLevels = ['trivial', 'standard', 'complex', 'critical'];
+    assert.ok(validLevels.includes(tc.complexity), `complexity "${tc.complexity}" should be one of ${validLevels.join(', ')}`);
+  });
+
+  test('task_classification.signals contains plan_count and requirement_count', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const signals = JSON.parse(result.output).task_classification.signals;
+    assert.ok('plan_count' in signals, 'signals should have plan_count');
+    assert.ok('requirement_count' in signals, 'signals should have requirement_count');
+    assert.strictEqual(signals.plan_count, 2, 'should detect 2 plans');
+    assert.strictEqual(signals.requirement_count, 3, 'should detect 3 requirements');
+  });
+
+  test('task_classification.confidence is between 0 and 1', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const tc = JSON.parse(result.output).task_classification;
+    assert.ok(tc.confidence >= 0 && tc.confidence <= 1, `confidence ${tc.confidence} should be between 0 and 1`);
+  });
+});
+
+describe('task_classification in init plan-phase (INTEL-10, INTEL-12)', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Create phase directory (no plans yet — this is plan-phase)
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '03-api'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: CP-01, CP-02, CP-03\n**Plans:** 0 plans\n'
+    );
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('adaptive: false has null task_classification', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: false } }, null, 2));
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.task_classification, null);
+  });
+
+  test('adaptive: true includes task_classification', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.ok(output.task_classification !== null, 'task_classification should not be null');
+    assert.strictEqual(typeof output.task_classification, 'object');
+  });
+
+  test('task_classification has expected shape', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const tc = JSON.parse(result.output).task_classification;
+    assert.ok('complexity' in tc, 'should have complexity');
+    assert.ok('signals' in tc, 'should have signals');
+    assert.ok('confidence' in tc, 'should have confidence');
+  });
+
+  test('plan-phase task_classification.signals.plan_count is 0 (no plans yet)', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const tc = JSON.parse(result.output).task_classification;
+    assert.strictEqual(tc.signals.plan_count, 0, 'plan-phase passes null planInventory so plan_count should be 0');
+  });
+
+  test('classification varies by requirement count (more reqs -> higher complexity)', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    // Few requirements -> lower complexity
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: R-01\n**Plans:** 0 plans\n'
+    );
+    const r1 = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(r1.success, `Command failed: ${r1.error}`);
+    const tc1 = JSON.parse(r1.output).task_classification;
+
+    // Many requirements -> higher or equal complexity
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\n### Phase 3: API\n**Goal:** Build API\n**Requirements**: R-01, R-02, R-03, R-04, R-05, R-06, R-07, R-08, R-09\n**Plans:** 0 plans\n'
+    );
+    const r2 = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(r2.success, `Command failed: ${r2.error}`);
+    const tc2 = JSON.parse(r2.output).task_classification;
+
+    const levels = ['trivial', 'standard', 'complex', 'critical'];
+    assert.ok(levels.indexOf(tc2.complexity) >= levels.indexOf(tc1.complexity),
+      `More requirements should yield >= complexity: "${tc1.complexity}" vs "${tc2.complexity}"`);
+  });
+
+  test('task_classification.confidence is between 0 and 1', () => {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, workflow: { ...(existing.workflow || {}), adaptive: true } }, null, 2));
+
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const tc = JSON.parse(result.output).task_classification;
+    assert.ok(tc.confidence >= 0 && tc.confidence <= 1, `confidence ${tc.confidence} should be between 0 and 1`);
+  });
+});
+
+// ─── init history wiring (INTEL-16, INTEL-18) ────────────────────────────────
+
+describe('init history wiring (INTEL-16, INTEL-18)', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  function setConfig(overrides) {
+    const configPath = path.join(tmpDir, '.planning', 'config.json');
+    const existing = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    fs.writeFileSync(configPath, JSON.stringify({ ...existing, ...overrides }, null, 2));
+  }
+
+  function writeHistory(records) {
+    const histDir = path.join(tmpDir, '.planning', 'history');
+    fs.mkdirSync(histDir, { recursive: true });
+    const lines = records.map(r => JSON.stringify(r)).join('\n') + '\n';
+    fs.writeFileSync(path.join(histDir, 'executions.jsonl'), lines);
+  }
+
+  const historyFixture = [
+    { timestamp: '2026-01-01T00:00:00Z', phase: 3, plan: 1, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 1000, outcome: 'fail', error_code: null, files_changed: 0 },
+    { timestamp: '2026-01-01T00:01:00Z', phase: 3, plan: 1, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 1100, outcome: 'fail', error_code: null, files_changed: 0 },
+    { timestamp: '2026-01-01T00:02:00Z', phase: 3, plan: 1, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 900, outcome: 'fail', error_code: null, files_changed: 0 },
+    { timestamp: '2026-01-01T00:03:00Z', phase: 3, plan: 2, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 1200, outcome: 'pass', error_code: null, files_changed: 2 },
+    { timestamp: '2026-01-01T00:04:00Z', phase: 3, plan: 2, agent: 'gsd-executor', model_used: 'haiku', duration_ms: 800, outcome: 'pass', error_code: null, files_changed: 1 },
+  ];
+
+  test('cmdInitExecutePhase with adaptive: true and history supplies failureRate', () => {
+    writeHistory(historyFixture);
+    setConfig({ workflow: { adaptive: true } });
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.ok(output.task_classification, 'should have task_classification when adaptive');
+    // failureRate = 3/5 = 0.6 — classifyTask uses this to influence confidence/complexity
+    assert.ok(output.task_classification.signals, 'should have classification signals');
+  });
+
+  test('cmdInitExecutePhase with routing_strategy auto includes historyHints in model selection', () => {
+    writeHistory(historyFixture);
+    setConfig({ routing_strategy: 'auto', workflow: { adaptive: true } });
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    // With historyHints containing agent_tier_mismatch for gsd-executor,
+    // dynamicSelect should promote executor model. The output contains resolved models.
+    assert.ok(output.executor_model || output.planner_model, 'should have model selections');
+  });
+
+  test('cmdInitPlanPhase with adaptive: true supplies failureRate from history', () => {
+    writeHistory(historyFixture);
+    setConfig({ workflow: { adaptive: true } });
+    const result = runGsdTools('init plan-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    assert.ok(output.task_classification, 'should have task_classification when adaptive');
+    assert.ok(output.task_classification.signals, 'should have classification signals');
+  });
+
+  test('cmdInitExecutePhase with adaptive: true and no history file returns successfully', () => {
+    // No writeHistory — history file does not exist
+    setConfig({ workflow: { adaptive: true } });
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command should succeed without history: ${result.error}`);
+    const output = JSON.parse(result.output);
+    // Should still have classification but failureRate was null
+    assert.ok(output.task_classification, 'should have task_classification even without history');
+  });
+
+  test('history module errors are caught — init still succeeds with malformed JSONL', () => {
+    // Write malformed JSONL that parseJsonlSafe will skip
+    const histDir = path.join(tmpDir, '.planning', 'history');
+    fs.mkdirSync(histDir, { recursive: true });
+    fs.writeFileSync(path.join(histDir, 'executions.jsonl'), 'not-json\n{broken\n');
+    setConfig({ workflow: { adaptive: true } });
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command should succeed despite malformed history: ${result.error}`);
+  });
+
+  test('cmdInitExecutePhase with adaptive: false and routing_strategy: static does not load history', () => {
+    writeHistory(historyFixture);
+    // Default config — adaptive: false, routing_strategy: 'static' (or absent)
+    const result = runGsdTools('init execute-phase 3', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+    const output = JSON.parse(result.output);
+    // Without adaptive or auto routing, task_classification should be null
+    assert.strictEqual(output.task_classification, null, 'should not have task_classification with static routing');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // roadmap analyze command
 // ─────────────────────────────────────────────────────────────────────────────

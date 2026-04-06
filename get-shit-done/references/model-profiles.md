@@ -133,3 +133,66 @@ Claude Code's `"opus"` alias maps to a specific model version. Organizations may
 
 **Why `inherit` profile?**
 Some runtimes (including OpenCode) let users switch models at runtime (`/model`). The `inherit` profile keeps all GSD subagents aligned to that live selection.
+
+---
+
+## Dynamic Model Routing
+
+When `routing_strategy` is set to `dynamic` or `auto`, the engine uses task signals to select models instead of static profile mappings.
+
+### How It Works
+
+1. **Classification**: `classifyTask()` analyzes phase metadata, plan inventory, and requirement count to produce a complexity level (trivial, standard, complex, critical) with a confidence score
+2. **Routing**: `dynamicSelect()` maps complexity to a model tier:
+   - `trivial` → budget tier (haiku-class)
+   - `standard` → balanced tier (sonnet-class)
+   - `complex` → quality tier (opus-class)
+   - `critical` → quality tier with override logging
+3. **History influence** (auto mode only): When execution history exists, past failure rates and model performance inform tier selection via `detectPatterns()`
+
+### Routing Strategies
+
+| Strategy | Behavior |
+|----------|----------|
+| `static` (default) | Uses `model_profile` mapping. v1.9 behavior. |
+| `dynamic` | Classification-based routing. Ignores `model_profile` for agent selection. |
+| `auto` | Dynamic routing enhanced by execution history patterns. |
+
+### Classification Signals
+
+`extractSignals()` gathers the following from phase and plan metadata:
+
+| Signal | Source | Description |
+|--------|--------|-------------|
+| `file_count` | Plan `files_to_modify` arrays | Number of files across all plans in the phase |
+| `requirement_count` | Context `reqIds` string | Number of requirements scoped to the phase |
+| `phase_type` | Phase name keyword matching | Inferred type: research, planning, execution, verification, documentation, integration, maintenance |
+| `dependency_depth` | Plan `depends_on` arrays | Count of plans with inter-plan dependencies |
+| `historical_failure_rate` | Context passthrough | Failure rate from execution history (null if unavailable) |
+| `plan_count` | Plan inventory length | Number of plans in the phase |
+
+### Complexity Levels
+
+`classifyTask()` applies weighted scoring (plan_count: 2.0, requirement_count: 2.0, phase_type: 1.5, dependency_depth: 1.0, historical_failure_rate: 1.5) and maps the raw score to a level:
+
+| Level | Raw Score | Typical Indicators |
+|-------|-----------|-------------------|
+| trivial | < 3 | Low file count, few requirements, simple phase type |
+| standard | 3 – 5 | Moderate signals, no strong complexity indicators |
+| complex | 6 – 9 | High file count OR many requirements OR research/integration phase |
+| critical | ≥ 10 | Multiple strong signals OR high historical failure rate |
+
+### Profile Ceiling and Floor
+
+`dynamicSelect()` respects the user's `model_profile` setting as a constraint:
+
+- If `model_profile` is `quality`, the effective tier is always `quality` (ceiling)
+- If `model_profile` is `budget` and dynamic routing selects `quality`, the effective tier is capped at `balanced` (floor)
+- Otherwise, the dynamic tier is used as-is
+
+### History-Based Tier Promotion (auto mode)
+
+When `routing_strategy` is `auto`, `dynamicSelect()` checks history patterns from `detectPatterns()`:
+
+- **Agent tier mismatch**: If an agent has >50% failure rate on budget/balanced models, promote to `quality`
+- **Failing phase**: If the current phase has >30% failure rate and the effective tier is `budget`, promote to `balanced`

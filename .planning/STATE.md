@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: Ship Readiness & Hygiene
+milestone: v2.0
+milestone_name: Intelligence Layer
 status: shipped
-last_updated: "2026-04-05T00:00:00.000Z"
-last_activity: 2026-04-05 -- v1.9 milestone complete, archived, no active milestone
+last_updated: "2026-04-05T23:59:00.000Z"
+last_activity: 2026-04-05 -- v2.0 milestone archived and tagged
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 13
+  completed_plans: 13
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Active:** None — all milestones through v1.9 complete
+**Shipped:** v2.0 Intelligence Layer (2026-04-05)
 **Previous:** v1.9 Ship Readiness & Hygiene (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: —
-Plan: —
-Status: No active milestone. v1.0 through v1.9 shipped.
-Last activity: 2026-04-05 — v1.9 milestone lifecycle completed (audit passed, archived)
+Phase: None — between milestones
+Plan: N/A
+Status: v2.0 milestone shipped and archived. Ready for next milestone.
+Last activity: 2026-04-05 -- Milestone archived, tagged v2.0
 
-Progress: All milestones complete (v1.0–v1.9)
+Progress: 4/4 phases complete | 13/13 plans | 23/23 requirements | Milestone archived
 
 ## Milestone History
 
@@ -44,10 +44,19 @@ Progress: All milestones complete (v1.0–v1.9)
 | v1.7 | End-to-End Integration Testing | 4 | 4 | 2026-04-04 |
 | v1.8 | Documentation & Accuracy | 2 | 0 | 2026-04-05 |
 | v1.9 | Ship Readiness & Hygiene | 2 | 4 | 2026-04-05 |
+| v2.0 | Intelligence Layer | 4 | 13 | 2026-04-05 |
+
+## Decisions
+
+- **dynamicSelect internal access:** Uses _modelProfiles directly after _initialize() instead of MODEL_PROFILES getter — avoids redundant getter overhead.
+- **Profile bounding:** Quality profile never downgrades, budget caps at balanced — respects user cost/quality intent.
+- **Lazy require in dynamic branch:** `require('./model-profiles.cjs')` inside `resolveModelInternal()` dynamic branch avoids circular deps and is only loaded when routing_strategy !== 'static'.
+- **buildTaskContext signature:** Takes `(phaseInfo, planInventory, reqIds, config)` — reqIds is separate because `phase_req_ids` is a local variable in init commands, not a property of phaseInfo.
+- **planInventory null for plan-phase:** `cmdInitPlanPhase()` passes null for planInventory since it creates plans — complexity driven by requirement count only, biasing toward quality models.
 
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v1.9 milestone lifecycle — audit passed (5/5 requirements), archived to milestones/v1.9-ROADMAP.md
-**Stopped at**: All milestones complete (v1.0–v1.9)
-**Next**: `/gsd:new-milestone` when ready to start next work, or merge current branch to main
+**Last action**: v2.0 milestone archived, tagged, and committed
+**Stopped at**: Between milestones — v2.0 shipped
+**Next**: `/gsd:new-milestone` to define v2.1, or `/gsd:cleanup` to archive phase directories

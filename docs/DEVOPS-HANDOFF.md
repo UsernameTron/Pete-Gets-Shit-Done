@@ -69,7 +69,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Script | Purpose |
 |--------|---------|
-| `npm test` | Run 1,913 unit tests via `scripts/run-tests.cjs` |
+| `npm test` | Run 2,069 unit tests via `scripts/run-tests.cjs` |
 | `npm run test:e2e` | Run 133 E2E integration tests via `scripts/run-e2e-tests.cjs` |
 | `npm run test:e2e:smoke` | Run E2E smoke subset (12 tests) |
 | `npm run test:coverage` | Unit tests with text + JSON coverage report |
@@ -83,9 +83,9 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Metric | Count |
 |--------|-------|
-| Unit tests | 1,913 |
+| Unit tests | 2,069 |
 | E2E tests | 133 |
-| **Total tests** | **2,046** |
+| **Total tests** | **2,202** |
 | Unit test files | 74 |
 | E2E test files | 11 |
 | **Total test files** | **85** |
@@ -126,7 +126,10 @@ Coverage is collected via `c8` with configuration in `.c8rc.json`.
 
 | Module | Line Coverage | Branch Coverage |
 |--------|--------------|-----------------|
-| `core.cjs` | 95.49% | 90.87% |
+| `core.cjs` | 95.60% | 90.84% |
+| `classify.cjs` | 98.20% | 85.43% |
+| `history.cjs` | 96.13% | 90.82% |
+| `model-profiles.cjs` | 100.00% | 92.30% |
 | `security.cjs` | 100.00% | 100.00% |
 
 ### Coverage Standards
@@ -213,6 +216,33 @@ Agent definitions are in `agents/*.md` with YAML frontmatter specifying name, de
 
 ---
 
+## Intelligence Layer (v2.0)
+
+Added in config_version 2. Three new modules provide optional intelligence features:
+
+| Module | Layer | Purpose |
+|--------|-------|---------|
+| `classify.cjs` | Layer 0 (zero dependencies) | Task classification: `extractSignals()`, `classifyTask()`, `adaptWorkflowGates()` |
+| `model-profiles.cjs` | Layer 0 | Dynamic model routing: `dynamicSelect()`, `MODEL_TIERS` mapping |
+| `history.cjs` | Layer 2 (imports `core.cjs`) | Execution history: `recordExecution()`, `queryHistory()`, `detectPatterns()`, `pruneHistory()` |
+
+### Execution History File Structure
+
+History is stored as JSONL at `.planning/history/executions.jsonl`. Each line is a JSON record with fields: `timestamp`, `phase`, `plan`, `agent`, `model_used`, `duration_ms`, `outcome` (pass/fail/partial), `error_code`, `files_changed`.
+
+Rotation policy: when the file exceeds 1,000 records, auto-rotates to keep the latest 500. Manual pruning available via `gsd-tools history prune [--keep N]`.
+
+### Configuration
+
+All intelligence features are opt-in. Controlled by two config keys added in the v1→v2 migration:
+
+| Key | Default | Effect |
+|-----|---------|--------|
+| `routing_strategy` | `static` | `static` = v1.9 behavior. `dynamic` = classification-based routing. `auto` = dynamic + history patterns. |
+| `adaptive` | `false` | When `true`, classification runs during init and workflow gates adjust per complexity. |
+
+---
+
 ## Deployment Maturity
 
 | Dimension | Status |
@@ -236,7 +266,7 @@ This is a **CLI plugin**, not a deployed service. There is no server to monitor,
 
 | Item | Status | Details |
 |------|--------|---------|
-| CLAUDE.md Phase 3 quality gates | Active | Project CLAUDE.md still references `gsd-plan-checker` and `gsd-integration-checker` in Phase 3 Quality Gates section; should reference `gsd-verifier` with scope parameters |
+| CLAUDE.md Phase 3 quality gates | Resolved (v2.0) | Updated to reference `gsd-verifier` with scope parameters |
 | Stale agent references | Resolved (v1.9 Phase 28) | All 13 active files updated to use current agent names |
 | CI/CD pipeline | Deferred | No automated test/publish pipeline; appropriate for current project stage |
 

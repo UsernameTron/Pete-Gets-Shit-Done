@@ -56,8 +56,9 @@ GSD is two layers in one install:
 |-------|-------------|------------|
 | Execution Engine | discuss → plan → execute → verify → ship | 57 commands, 15 agents, 5 hooks, wave-based parallel execution |
 | Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (45 skills, 10 subagents), 6 reference docs |
+| Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | classify.cjs, model-profiles.cjs, history.cjs — all opt-in, off by default |
 
-The execution engine handles *how* your code gets built. The governance framework handles *what rules it follows* while building it.
+The execution engine handles *how* your code gets built. The governance framework handles *what rules it follows* while building it. The intelligence layer makes the engine *smarter over time* — routing tasks to the right model tier and adapting workflow gates based on complexity and history.
 
 The full inventory:
 
@@ -70,7 +71,7 @@ The full inventory:
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
 | Test suites | 373 |
-| Test assertions | 1,913 |
+| Test assertions | 2,069 |
 | Reference docs | 6 (CLI, skills, hooks, MCP, settings, subagents) |
 
 ## Getting Started

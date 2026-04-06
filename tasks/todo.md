@@ -1,13 +1,14 @@
 # Todo
 
-## Current Status: Between Milestones -- v1.9 Archived
+## Current Status: v2.0 Intelligence Layer -- Phase 30 Pending
 
-v1.9 Ship Readiness & Hygiene milestone complete. All 10 milestones (v1.0-v1.9) shipped.
+v2.0 milestone initialized. 23 requirements (INTEL-01 through INTEL-23) across 4 phases (30-33).
 2046 tests passing (1913 unit + 133 E2E). 15 active agents, 7 archived.
 
 ## Open Items
 
-- [ ] Decide next milestone direction (`/gsd:new-milestone`)
+- [ ] Plan Phase 30 — Dynamic Model Selection (`/gsd:plan-phase 30`)
+- [ ] Execute Phases 30-33 (`/gsd:execute-phase`)
 - [ ] Merge `chore/session-wrap-0403` to main or create PR (`/gsd:ship`)
 
 ## Completed
@@ -23,13 +24,14 @@ v1.9 Ship Readiness & Hygiene milestone complete. All 10 milestones (v1.0-v1.9) 
 - [x] v1.8 Documentation & Accuracy (2026-04-05)
 - [x] v1.9 Ship Readiness & Hygiene (2026-04-05)
 - [x] Project finalized via /gsd:finalize (2026-04-05)
+- [x] v2.0 milestone initialized (2026-04-05)
 
 ## Session Handoff
 
 **State tracking**: `.planning/STATE.md` is canonical.
 **Branch**: `chore/session-wrap-0403`
-**v1.9 work this session**:
-- Phase 28: Stale Reference Cleanup (3 plans, 13 files updated, 1 deleted)
-- Phase 29: DEVOPS-HANDOFF.md rewrite (22 → 264 lines, live metrics)
-- Milestone lifecycle: audit passed (5/5 requirements), archived
-**Next**: Merge to main or `/gsd:new-milestone`
+**v2.0 setup this session**:
+- Milestone defined: Intelligence Layer (smarter routing, learning, adaptive workflows)
+- 23 requirements (INTEL-01 through INTEL-23) across 4 phases
+- PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md updated
+**Next**: `/gsd:plan-phase 30` for Dynamic Model Selection

@@ -12,10 +12,7 @@
 - **v1.7 End-to-End Integration Testing** (2026-04-04) -- 4 phases, 13 requirements. [Archive](milestones/v1.7-ROADMAP.md)
 - **v1.8 Documentation & Accuracy** (2026-04-05) -- 2 phases, 7 requirements. [Archive](milestones/v1.8-ROADMAP.md)
 - **v1.9 Ship Readiness & Hygiene** (2026-04-05) -- 2 phases, 5 requirements. [Archive](milestones/v1.9-ROADMAP.md)
-
-## Current Milestone
-
-None active. All milestones through v1.9 complete.
+- **v2.0 Intelligence Layer** (2026-04-05) -- 4 phases, 23 requirements. [Archive](milestones/v2.0-ROADMAP.md)
 
 ---
-*Last updated: 2026-04-05 -- v1.9 complete, no active milestone*
+*Last updated: 2026-04-05 -- v2.0 Intelligence Layer shipped*

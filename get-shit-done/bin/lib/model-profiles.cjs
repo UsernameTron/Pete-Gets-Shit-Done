@@ -11,6 +11,13 @@
  * would be faster, use fewer tokens, and be less error-prone).
  */
 
+const MODEL_TIERS = Object.freeze({
+  trivial: 'budget',
+  standard: 'balanced',
+  complex: 'quality',
+  critical: 'quality',
+});
+
 let _initCount = 0;
 let _modelProfiles = null;
 let _validProfiles = null;
@@ -70,9 +77,66 @@ function getAgentToModelMapForProfile(normalizedProfile) {
   return agentToModelMap;
 }
 
+/**
+ * Select model tier based on task complexity signals.
+ * @param {string} agentType - Agent name (e.g., 'gsd-executor')
+ * @param {Object} taskContext - { complexity, signals, phase_name }
+ * @param {Object} config - Loaded config object
+ * @returns {{ alias: string, tier: string, rationale: string }}
+ */
+function dynamicSelect(agentType, taskContext, config) {
+  const complexity = taskContext?.complexity || 'standard';
+  const targetTier = MODEL_TIERS[complexity] || 'balanced';
+
+  _initialize();
+  const agentModels = _modelProfiles[agentType];
+  if (!agentModels) {
+    return { alias: 'sonnet', tier: 'balanced', rationale: 'unknown agent — default sonnet' };
+  }
+
+  const currentProfile = String(config.model_profile || 'balanced').toLowerCase();
+  let effectiveTier = targetTier;
+
+  if (currentProfile === 'quality') {
+    effectiveTier = 'quality';
+  } else if (currentProfile === 'budget' && targetTier === 'quality') {
+    effectiveTier = 'balanced';
+  }
+
+  let rationale = `complexity=${complexity} targetTier=${targetTier} effectiveTier=${effectiveTier} profile=${currentProfile}`;
+
+  // History-based tier promotion (INTEL-16)
+  // When routing_strategy is 'auto' and history shows high failure rates,
+  // promote the tier to reduce failures
+  if (taskContext?.historyHints) {
+    const hints = taskContext.historyHints;
+    // Check if this specific agent has a tier mismatch pattern
+    const agentPattern = hints.patterns.find(
+      p => p.type === 'agent_tier_mismatch' && p.agent === agentType
+    );
+    if (agentPattern && effectiveTier !== 'quality') {
+      effectiveTier = 'quality';
+      rationale += ` history-promoted=true (${agentPattern.evidence})`;
+    }
+    // Check if the current phase has high failure rate
+    const phasePattern = hints.patterns.find(
+      p => p.type === 'failing_phase'
+    );
+    if (phasePattern && hints.failureRate > 0.3 && effectiveTier === 'budget') {
+      effectiveTier = 'balanced';
+      rationale += ` phase-promoted=true (failure_rate=${hints.failureRate})`;
+    }
+  }
+
+  const alias = agentModels[effectiveTier] || agentModels['balanced'] || 'sonnet';
+  return { alias, tier: effectiveTier, rationale };
+}
+
 const _exports = {
   formatAgentToModelMapAsTable,
   getAgentToModelMapForProfile,
+  dynamicSelect,
+  MODEL_TIERS,
   _getInitCount: () => _initCount,
 };
 

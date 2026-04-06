@@ -41,6 +41,39 @@ function withProjectRoot(cwd, result) {
   return result;
 }
 
+/**
+ * Extract task complexity signals from phase and plan metadata.
+ * Returns a taskContext object for resolveModelInternal().
+ * @param {Object} phaseInfo - Phase metadata (may be null)
+ * @param {Array|null} planInventory - PLAN files in phase directory
+ * @param {string|null} reqIds - Comma-separated requirement IDs
+ * @param {Object} config - Loaded config
+ * @returns {Object|undefined} taskContext or undefined if routing_strategy is static
+ */
+function buildTaskContext(phaseInfo, planInventory, reqIds, config) {
+  const strategy = config.routing_strategy || 'static';
+  if (strategy === 'static') return undefined;
+
+  const planCount = Array.isArray(planInventory) ? planInventory.length : 0;
+  const reqCount = reqIds ? reqIds.split(',').map(s => s.trim()).filter(Boolean).length : 0;
+  const phaseName = phaseInfo?.phase_name || '';
+
+  let complexity = 'standard';
+  if (planCount >= 7 && reqCount >= 8) {
+    complexity = 'critical';
+  } else if (planCount >= 4 || reqCount >= 6) {
+    complexity = 'complex';
+  } else if (planCount <= 1 && reqCount <= 2) {
+    complexity = 'trivial';
+  }
+
+  return {
+    complexity,
+    signals: { plan_count: planCount, requirement_count: reqCount, phase_name: phaseName },
+    phase_name: phaseName,
+  };
+}
+
 function cmdInitExecutePhase(cwd, phase, raw) {
   if (!phase) {
     error('phase required for init execute-phase');
@@ -75,11 +108,57 @@ function cmdInitExecutePhase(cwd, phase, raw) {
     ? reqMatch[1].replace(/[\[\]]/g, '').split(',').map(s => s.trim()).filter(Boolean).join(', ')
     : null;
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
+  const taskContext = buildTaskContext(phaseInfo, phaseInfo?.plans, phase_req_ids, config);
+
+  // Historical failure rate for classification and routing (INTEL-18)
+  let failureRate = null;
+  let historyHints = null;
+  if (config.adaptive || config.routing_strategy === 'auto') {
+    try {
+      const history = require('./history.cjs');
+      const phaseNum = phaseInfo?.phase_number;
+      if (phaseNum != null) {
+        const phaseRecords = history.queryHistory(cwd, {
+          phaseRange: [phaseNum, phaseNum],
+        });
+        if (phaseRecords.total > 0) {
+          const failures = phaseRecords.records.filter(r => r.outcome === 'fail').length;
+          failureRate = failures / phaseRecords.total;
+        }
+      }
+      // History hints for dynamic routing (INTEL-16)
+      if (config.routing_strategy === 'auto') {
+        const patterns = history.detectPatterns(cwd);
+        historyHints = {
+          failureRate,
+          patterns: patterns.patterns || [],
+          summary: patterns.summary || null,
+        };
+      }
+    } catch {
+      // History module unavailable or history file missing — degrade gracefully
+    }
+  }
+
+  if (historyHints && taskContext) {
+    taskContext.historyHints = historyHints;
+  }
+
+  // Task classification for adaptive workflows (INTEL-10, INTEL-12)
+  let task_classification = null;
+  if (config.adaptive) {
+    const { classifyTask } = require('./classify.cjs');
+    const classContext = {
+      reqIds: phase_req_ids,
+      failureRate,
+    };
+    task_classification = classifyTask(phaseInfo, phaseInfo?.plans, classContext);
+  }
 
   const result = {
     // Models
-    executor_model: resolveModelInternal(cwd, 'gsd-executor'),
-    verifier_model: resolveModelInternal(cwd, 'gsd-verifier'),
+    executor_model: resolveModelInternal(cwd, 'gsd-executor', taskContext),
+    verifier_model: resolveModelInternal(cwd, 'gsd-verifier', taskContext),
 
     // Config flags
     commit_docs: config.commit_docs,
@@ -98,6 +177,7 @@ function cmdInitExecutePhase(cwd, phase, raw) {
     phase_name: phaseInfo?.phase_name || null,
     phase_slug: phaseInfo?.phase_slug || null,
     phase_req_ids,
+    task_classification,
 
     // Plan inventory
     plans: phaseInfo?.plans || [],
@@ -168,12 +248,58 @@ function cmdInitPlanPhase(cwd, phase, raw) {
     ? reqMatch[1].replace(/[\[\]]/g, '').split(',').map(s => s.trim()).filter(Boolean).join(', ')
     : null;
   const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
+  const taskContext = buildTaskContext(phaseInfo, null, phase_req_ids, config);
+
+  // Historical failure rate for classification and routing (INTEL-18)
+  let failureRate = null;
+  let historyHints = null;
+  if (config.adaptive || config.routing_strategy === 'auto') {
+    try {
+      const history = require('./history.cjs');
+      const phaseNum = phaseInfo?.phase_number;
+      if (phaseNum != null) {
+        const phaseRecords = history.queryHistory(cwd, {
+          phaseRange: [phaseNum, phaseNum],
+        });
+        if (phaseRecords.total > 0) {
+          const failures = phaseRecords.records.filter(r => r.outcome === 'fail').length;
+          failureRate = failures / phaseRecords.total;
+        }
+      }
+      // History hints for dynamic routing (INTEL-16)
+      if (config.routing_strategy === 'auto') {
+        const patterns = history.detectPatterns(cwd);
+        historyHints = {
+          failureRate,
+          patterns: patterns.patterns || [],
+          summary: patterns.summary || null,
+        };
+      }
+    } catch {
+      // History module unavailable or history file missing — degrade gracefully
+    }
+  }
+
+  if (historyHints && taskContext) {
+    taskContext.historyHints = historyHints;
+  }
+
+  // Task classification for adaptive workflows (INTEL-10, INTEL-12)
+  let task_classification = null;
+  if (config.adaptive) {
+    const { classifyTask } = require('./classify.cjs');
+    const classContext = {
+      reqIds: phase_req_ids,
+      failureRate,
+    };
+    task_classification = classifyTask(phaseInfo, null, classContext);
+  }
 
   const result = {
     // Models
-    researcher_model: resolveModelInternal(cwd, 'gsd-research-orchestrator'),
-    planner_model: resolveModelInternal(cwd, 'gsd-planner'),
-    checker_model: resolveModelInternal(cwd, 'gsd-verifier'),
+    researcher_model: resolveModelInternal(cwd, 'gsd-research-orchestrator', taskContext),
+    planner_model: resolveModelInternal(cwd, 'gsd-planner', taskContext),
+    checker_model: resolveModelInternal(cwd, 'gsd-verifier', taskContext),
 
     // Workflow flags
     research_enabled: config.research,
@@ -190,6 +316,7 @@ function cmdInitPlanPhase(cwd, phase, raw) {
     phase_slug: phaseInfo?.phase_slug || null,
     padded_phase: phaseInfo?.phase_number ? normalizePhaseName(phaseInfo.phase_number) : null,
     phase_req_ids,
+    task_classification,
 
     // Existing artifacts
     has_research: phaseInfo?.has_research || false,
@@ -1924,6 +2051,7 @@ function cmdAgentSkills(cwd, agentType, raw) {
 }
 
 module.exports = {
+  buildTaskContext,
   cmdInitExecutePhase,
   cmdInitPlanPhase,
   cmdInitNewProject,
