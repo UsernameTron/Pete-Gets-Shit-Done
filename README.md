@@ -54,7 +54,7 @@ GSD is two layers in one install:
 
 | Layer | What it does | Components |
 |-------|-------------|------------|
-| Execution Engine | discuss → plan → execute → verify → ship | 57 commands, 15 agents, 5 hooks, wave-based parallel execution |
+| Execution Engine | discuss → plan → execute → verify → ship | 61 commands, 15 agents, 5 hooks, wave-based parallel execution |
 | Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (45 skills, 10 subagents), 6 reference docs |
 | Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | classify.cjs, model-profiles.cjs, history.cjs — all opt-in, off by default |
 
@@ -64,13 +64,13 @@ The full inventory:
 
 | Metric | Count |
 |--------|-------|
-| GSD commands | 57 |
+| GSD commands | 61 |
 | Specialized agents | 15 |
 | Runtime hooks | 15 (5 execution + 10 governance) |
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
-| Test suites | 373 |
+| Test suites | 403 |
 | Test assertions | 2,069 |
 | Reference docs | 6 (CLI, skills, hooks, MCP, settings, subagents) |
 
@@ -120,7 +120,7 @@ GSD is designed for frictionless automation. Run Claude Code with:
 
 ## Command Syntax
 
-Before we get into the 57 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
+Before we get into the 61 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
 
 | Runtime | Pattern | Example |
 |---------|---------|---------|
@@ -1095,7 +1095,7 @@ The governance template (`governance/templates/global/CLAUDE.md`) defines:
 
 All slash commands available across the three plugin systems.
 
-### GSD Commands (57)
+### GSD Commands (61)
 
 | Command | Description |
 |---------|-------------|
@@ -1109,11 +1109,13 @@ All slash commands available across the three plugin systems.
 | `/gsd:check-todos` | List pending todos and select one to work on |
 | `/gsd:cleanup` | Archive accumulated phase directories from completed milestones |
 | `/gsd:complete-milestone` | Archive completed milestone and prepare for next version |
+| `/gsd:crew` | Agent roster, capability map, and self-assessment with improvement plans |
 | `/gsd:debug` | Systematic debugging with persistent state across context resets |
 | `/gsd:discuss-phase` | Gather phase context through adaptive questioning before planning |
 | `/gsd:do` | Route freeform text to the right GSD command automatically |
 | `/gsd:execute-phase` | Execute all plans in a phase with wave-based parallelization |
 | `/gsd:fast` | Execute a trivial task inline — no subagents, no planning overhead |
+| `/gsd:finalize` | End-to-end project finalization — verify, archive, report, push, confirm clean |
 | `/gsd:forensics` | Post-mortem investigation for failed GSD workflows |
 | `/gsd:health` | Diagnose planning directory health and optionally repair issues |
 | `/gsd:help` | Show available GSD commands and usage guide |
@@ -1133,7 +1135,9 @@ All slash commands available across the three plugin systems.
 | `/gsd:plan-milestone-gaps` | Create phases to close all gaps identified by milestone audit |
 | `/gsd:plan-phase` | Create detailed phase plan (PLAN.md) with verification loop |
 | `/gsd:plant-seed` | Capture a forward-looking idea with trigger conditions for future milestones |
+| `/gsd:portfolio` | Cross-project dashboard — scan all projects, show status, git health, next recommendation |
 | `/gsd:pr-branch` | Create a clean PR branch by filtering out .planning/ commits |
+| `/gsd:prime-patterns` | Boot session with full context and inject matched KB v2.1 design patterns |
 | `/gsd:profile-user` | Generate developer behavioral profile and create Claude-discoverable artifacts |
 | `/gsd:progress` | Check project progress, show context, and route to next action |
 | `/gsd:quick` | Execute a quick task with GSD guarantees (atomic commits, state tracking) |

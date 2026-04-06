@@ -57,6 +57,6 @@ Progress: 4/4 phases complete | 13/13 plans | 23/23 requirements | Milestone arc
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: v2.0 milestone archived, tagged, and committed
-**Stopped at**: Between milestones — v2.0 shipped
-**Next**: `/gsd:new-milestone` to define v2.1, or `/gsd:cleanup` to archive phase directories
+**Last action**: Codebase mapping (7 docs), README update, CLAUDE.md audit+fix (6/10 → improved)
+**Stopped at**: Finalizing documentation refresh session — all docs updated, specialist review running
+**Next**: Commit docs, optionally `/gsd:new-milestone` to define v2.1
