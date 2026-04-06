@@ -6,28 +6,34 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Active:** v2.0 Intelligence Layer (2026-04-05)
+**Shipped:** v2.0 Intelligence Layer (2026-04-05)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2046 total (1913 unit + 133 E2E), all passing across 74 test files
-**Coverage:** core.cjs 95.49% line / 90.87% branch, security.cjs 100% / 100%
+**Tests:** 2069+ total, all passing
+**Coverage:** classify.cjs 98.2%, history.cjs 96.1%, model-profiles.cjs 100%, core.cjs 95.49%
 **Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
+**Config version:** 2 (migration chain: 0 -> 1 -> 2)
 
-## Current Milestone: v2.0 Intelligence Layer
+## Next Milestone
+
+No active milestone. Run `/gsd:new-milestone` to start the next cycle.
+
+<details>
+<summary><strong>v2.0 Intelligence Layer (23/23 requirements shipped)</strong></summary>
 
 **Goal:** Make the GSD engine smarter — route models by task complexity, learn from execution history, adapt workflow behavior automatically.
 
-**Target features:**
-- Dynamic model selection based on task complexity instead of static profile lookup
-- Task classification engine (trivial/standard/complex/critical) with signal extraction
-- Execution history capture in JSONL format with pattern detection
-- Adaptive workflow gates that tune research depth, verification rigor, and parallelization
-- Cost-awareness and routing transparency via debug logging
-- CLI commands for history inspection (list, stats, prune)
+**Key deliverables:**
+- Dynamic model routing via `dynamicSelect()` gated behind `routing_strategy` config
+- Task classification engine in `classify.cjs` (trivial/standard/complex/critical)
+- Execution history in `history.cjs` with JSONL storage, pattern detection, auto-rotation
+- Adaptive workflow gates adjusting research depth, verification rigor, parallelization
+- Config migration v1 -> v2 with safe defaults
+- CLI commands: `gsd-tools history list|stats|prune`
 
-## Active Requirements (v2.0)
+See [v2.0 Requirements Archive](milestones/v2.0-REQUIREMENTS.md) | [v2.0 Roadmap Archive](milestones/v2.0-ROADMAP.md)
 
-See REQUIREMENTS.md for full requirement definitions (INTEL-01 through INTEL-23).
+</details>
 
 <details>
 <summary><strong>v1.7 Requirements (13/13 validated)</strong></summary>
@@ -224,4 +230,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 -- v1.9 Ship Readiness & Hygiene complete*
+*Last updated: 2026-04-05 -- v2.0 Intelligence Layer shipped*

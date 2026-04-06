@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Intelligence Layer
-status: complete
-last_updated: "2026-04-05T23:55:00.000Z"
-last_activity: 2026-04-05 -- Phase 33 complete, all 4 phases done, milestone ready for lifecycle
+status: shipped
+last_updated: "2026-04-05T23:59:00.000Z"
+last_activity: 2026-04-05 -- v2.0 milestone archived and tagged
 progress:
   total_phases: 4
   completed_phases: 4
@@ -18,17 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Active:** v2.0 Intelligence Layer — COMPLETE
+**Shipped:** v2.0 Intelligence Layer (2026-04-05)
 **Previous:** v1.9 Ship Readiness & Hygiene (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: 33 (integration-testing) — COMPLETE
-Plan: 3 of 3 (all complete)
-Status: All phases complete. Milestone ready for audit/complete/cleanup.
-Last activity: 2026-04-05 -- Phase 33 verified and complete
+Phase: None — between milestones
+Plan: N/A
+Status: v2.0 milestone shipped and archived. Ready for next milestone.
+Last activity: 2026-04-05 -- Milestone archived, tagged v2.0
 
-Progress: 4/4 phases complete | All 13 plans executed and verified
+Progress: 4/4 phases complete | 13/13 plans | 23/23 requirements | Milestone archived
 
 ## Milestone History
 
@@ -57,6 +57,6 @@ Progress: 4/4 phases complete | All 13 plans executed and verified
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-0403`
-**Last action**: Phase 33 complete — all 3 plans executed (E2E+perf tests, config migration, docs), 2069 tests passing
-**Stopped at**: v2.0 milestone complete, running lifecycle (audit -> complete -> cleanup)
-**Next**: Milestone lifecycle completion, then ship
+**Last action**: v2.0 milestone archived, tagged, and committed
+**Stopped at**: Between milestones — v2.0 shipped
+**Next**: `/gsd:new-milestone` to define v2.1, or `/gsd:cleanup` to archive phase directories
