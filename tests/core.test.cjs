@@ -2163,7 +2163,7 @@ describe('resolveModelInternal — debug logging', () => {
       resolveModelInternal(${JSON.stringify(tmpDir)}, 'gsd-executor', { complexity: 'complex' });
     `;
     const proc = spawnSync('node', ['-e', script], {
-      cwd: '/Users/cpconnor/projects/Pete-Gets-Shit-Done',
+      cwd: path.join(__dirname, '..'),
       env: { ...process.env, GSD_DEBUG: '1' },
       encoding: 'utf-8',
     });
@@ -2179,7 +2179,7 @@ describe('resolveModelInternal — debug logging', () => {
       resolveModelInternal(${JSON.stringify(tmpDir)}, 'gsd-executor', { complexity: 'critical' });
     `;
     const proc = spawnSync('node', ['-e', script], {
-      cwd: '/Users/cpconnor/projects/Pete-Gets-Shit-Done',
+      cwd: path.join(__dirname, '..'),
       env: { ...process.env, GSD_DEBUG: '1' },
       encoding: 'utf-8',
     });
@@ -2195,7 +2195,7 @@ describe('resolveModelInternal — debug logging', () => {
       resolveModelInternal(${JSON.stringify(tmpDir)}, 'gsd-executor');
     `;
     const proc = spawnSync('node', ['-e', script], {
-      cwd: '/Users/cpconnor/projects/Pete-Gets-Shit-Done',
+      cwd: path.join(__dirname, '..'),
       env: { ...process.env, GSD_DEBUG: '1' },
       encoding: 'utf-8',
     });
@@ -2212,7 +2212,7 @@ describe('resolveModelInternal — debug logging', () => {
     const env = { ...process.env };
     delete env.GSD_DEBUG;
     const proc = spawnSync('node', ['-e', script], {
-      cwd: '/Users/cpconnor/projects/Pete-Gets-Shit-Done',
+      cwd: path.join(__dirname, '..'),
       env,
       encoding: 'utf-8',
     });
