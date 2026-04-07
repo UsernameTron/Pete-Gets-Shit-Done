@@ -7,7 +7,6 @@ v2.0 milestone shipped and archived (2026-04-05). Tag: v2.0.
 
 ## Open Items
 
-- [ ] Merge `chore/session-wrap-0403` to main or create PR (`/gsd:ship`)
 - [ ] Define next milestone (`/gsd:new-milestone`)
 
 ## Completed
@@ -25,14 +24,14 @@ v2.0 milestone shipped and archived (2026-04-05). Tag: v2.0.
 - [x] v2.0 Intelligence Layer (2026-04-05)
 - [x] Codebase mapping refresh (2026-04-06)
 - [x] README.md and CLAUDE.md refresh (2026-04-06)
+- [x] Merged PR #31 to main (2026-04-06)
 
 ## Session Handoff
 
 **State tracking**: `.planning/STATE.md` is canonical.
-**Branch**: `chore/session-wrap-0403`
+**Branch**: `main` (clean)
 **Last session (2026-04-06)**:
-- Codebase mapped (7 docs in .planning/codebase/)
-- README.md updated (commands 57→61, tests 373→403)
-- CLAUDE.md audited and improved
-- All pushed to origin
-**Next**: Merge branch to main or `/gsd:new-milestone` for v2.1
+- Merged PR #31 (`chore/session-wrap-0403` → `main`, 90 commits, 417 files)
+- Cleaned 3 orphaned worktree branches
+- All milestones v1.2–v2.0 now on main
+**Next**: `/gsd:new-milestone` for v2.1
