@@ -6,6 +6,77 @@ You are working with Pete Connor — AI transformation leader, MS in AI, CCXP/CC
 
 ---
 
+## Project Overview
+
+**get-shit-done** (GSD) is an execution engine and governance framework plugin for Claude Code. It wraps the full software delivery lifecycle — from ideation to merged PR — in a structured, repeatable pipeline with quality gates enforced at every phase.
+
+Key capabilities:
+- **61 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
+- **15 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, and others) handling quality, planning, and execution roles
+- **47+ Claude Code skills** covering command implementations, utilities, and governance workflows
+- **Wave-based parallel execution** — independent tasks run concurrently in waves; dependent tasks respect ordering automatically
+- **5-phase delivery lifecycle**: discuss → plan → execute → verify → ship, with explicit phase gates that cannot be skipped
+
+GSD is consumed as a Claude Code plugin. It is not a standalone application — it operates entirely inside Claude Code sessions.
+
+---
+
+## Architecture
+
+GSD is organized in three layers:
+
+```
+bin/          CLI entry points and installer scripts
+lib/          Core runtime
+  core.cjs          Phase orchestration and command routing
+  security.cjs      Secrets scanning and input validation
+  governance.cjs    Hook enforcement and quality gates
+  classify.cjs      v2.0 Intelligence Layer — task classification
+  model-profiles.cjs  v2.0 — model selection heuristics
+  history.cjs       v2.0 — session history and state persistence
+skills/       Command implementations (one file per GSD command)
+```
+
+The **v2.0 Intelligence Layer** (`classify.cjs`, `model-profiles.cjs`, `history.cjs`) adds adaptive task routing — GSD classifies incoming tasks and selects execution strategies based on complexity, history, and available resources.
+
+For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
+
+---
+
+## Tests and Coverage
+
+- **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
+- **Scale**: ~403 test suites, ~2069 assertions
+- **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
+- **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
+
+Run the full suite before any commit:
+
+```bash
+npm test
+npm run test:coverage
+```
+
+Do not treat overall coverage as passing if any individual module is below its threshold. Check per-module results. Security-critical modules (`security.cjs`, auth paths, input validation) must be at 95% or above.
+
+---
+
+## Deployed Agents
+
+Three project-scoped specialists live in `.claude/agents/`:
+
+| Agent | File | Role |
+|-------|------|------|
+| plugin-developer | `plugin-developer.md` | Builds and extends GSD commands and skills |
+| test-runner | `test-runner.md` | Runs test suites, diagnoses failures, writes coverage |
+| docs-sync | `docs-sync.md` | Keeps CLAUDE.md, README.md, and DEVOPS-HANDOFF.md current |
+
+GSD also ships 15 built-in agents activated by the execution engine:
+
+`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
+
+---
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default
@@ -120,7 +191,7 @@ When creating files, always check available skills and read the relevant SKILL.m
 
 When a task spans multiple domains, compose tools rather than doing everything manually. Chain MCP server calls with file operations with skill invocations in a single workflow. If a task requires reading from Obsidian, processing data in Python, and producing a styled DOCX, plan the full pipeline before starting, then execute each stage with the right tool.
 
-Use Desktop Commander for filesystem operations on Pete's local machine. Use the container filesystem for build artifacts and intermediate work. Know which filesystem you are operating on at all times and be explicit about it.
+Know which filesystem you are operating on at all times and be explicit about it. MCP filesystem tools operate on Pete's local machine; build artifacts and intermediate work live in the working directory.
 
 ---
 
@@ -136,7 +207,7 @@ Pete runs multiple MCP servers (Filesystem, Desktop Commander, Obsidian, and cus
 
 ### Skill and Plugin Architecture
 
-Pete maintains 40+ Claude Desktop skills and 40+ Claude Code skills. When building new skills, follow SKILL.md frontmatter conventions: `allowed-tools`, `context fork`, `disable-model-invocation`, `user-invocable`, `$ARGUMENTS`, and `!command` syntax. Skills must have precise trigger descriptions to avoid collisions. Use the skill-forge protocol for production-grade skill engineering.
+Pete maintains 40+ Claude Desktop skills and 47+ Claude Code skills. When building new skills, follow SKILL.md frontmatter conventions: `allowed-tools`, `context fork`, `disable-model-invocation`, `user-invocable`, `$ARGUMENTS`, and `!command` syntax. Skills must have precise trigger descriptions to avoid collisions. Use the skill-forge protocol for production-grade skill engineering.
 
 ### Multi-Agent Orchestration
 
