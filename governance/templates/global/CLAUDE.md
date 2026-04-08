@@ -223,7 +223,7 @@ Use `tasks/lessons.md` for persistent cross-session rules. Use `.planning/STATE.
 
 ### Context Compaction
 
-When context usage exceeds 50%, proactively run /compact before continuing work. Preserve: current task state, active plan steps, file paths being worked on, and any error context. Discard: completed steps, exploratory reads, resolved debugging traces. Never wait for auto-compact to trigger — compact manually at logical breakpoints between steps.
+When context usage exceeds 75%, proactively run /compact before continuing work. Preserve: current task state, active plan steps, file paths being worked on, and any error context. Discard: completed steps, exploratory reads, resolved debugging traces. Never wait for auto-compact to trigger — compact manually at logical breakpoints between steps.
 
 ---
 
