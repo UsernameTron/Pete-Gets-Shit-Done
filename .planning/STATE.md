@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: System Audit & Debt Closure
-status: executing
-last_updated: "2026-04-09T23:02:58.381Z"
-last_activity: 2026-04-09 -- Phase 35 execution started
+status: verifying
+last_updated: "2026-04-09T23:07:46.271Z"
+last_activity: 2026-04-09
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
-  percent: 20
+  completed_plans: 3
+  percent: 40
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 
 ## Current Position
 
-Phase: 35 (confirmation-audit) — EXECUTING
-Plan: 1 of 1
-Status: Executing Phase 35
-Last activity: 2026-04-09 -- Phase 35 execution started
+Phase: 35 (confirmation-audit) — COMPLETE
+Plan: 1 of 1 (done)
+Status: Phase 35 complete. Both AUDIT-01 and AUDIT-02 PASS.
+Last activity: 2026-04-09 -- Phase 35 confirmation audit completed
 
-Progress: [██░░░░░░░░] 20% (1/5 phases)
+Progress: [████░░░░░░] 40% (2/5 phases)
 
 ## Milestone History
 
@@ -56,6 +56,8 @@ Progress: [██░░░░░░░░] 20% (1/5 phases)
 - **planInventory null for plan-phase:** `cmdInitPlanPhase()` passes null for planInventory since it creates plans — complexity driven by requirement count only, biasing toward quality models.
 - [Phase 34]: ~/CLAUDE.md is outside project repo -- change applied directly, not committable to project git
 - [Phase 34-01]: Reconstructed SUMMARY content from CREW-ASSESSMENT.md execution log and original PLAN files -- format matched to existing 06-01 and 06-05 SUMMARYs
+- [Phase 35]: Non-GSD user agent mismatches (5) noted but not in DEBT-01 scope -- deferred
+- [Phase 35]: Installed vs source ship.md discrepancy is deployment gap, not code defect
 
 ## Session Handoff
 
