@@ -204,6 +204,17 @@ When all 5 conditions hold, the rollout mechanism is: merge branch → hook is a
 4. Update `.planning/STATE.md` Session Handoff block.
 5. **STOP** — do not open a PR. Pete reviews the diff.
 
+### Resume Checkpoint
+
+- **Current commit**: `f2b0e22`
+- **Branch**: `feat/lesson-capture-enforcement` (6 ahead of main, clean)
+- **Status**: Plan committed, awaiting implementation approval — **APPROVAL GIVEN** (2026-04-09 session 2). Paused before Commit 1 due to context budget, per spec-vs-reality discipline.
+- **Next action**: **Commit 1** — `feat(hooks): tighten lesson-capture phrase matcher`.
+  - Scope: rewrite `countSignals`; add tiered matcher with imperative + subject + negation-proximity rules; add speaker-turn gate; build replay fixture from the 6 known 2026-04-09 false positives; +42 tests; prove 0 false positives on replay; full suite must stay green (currently 2094/2094).
+- **Following action**: **Commit 2** — `feat(agents): add lesson-capture subagent`.
+  - Scope per Layer 2 spec section b (this doc, above).
+- **Hard rule on resume**: Do NOT start Commit 2 until Commit 1 ships green. Do NOT open PR until both commits land + `.planning/STATE.md` Session Handoff updated. Fresh session: run `/prime`, then re-read this "Resume Checkpoint" and section (a) of the Layer 2 spec before touching code.
+
 ### Risk Register
 
 | Risk | Mitigation |
