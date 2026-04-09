@@ -25,3 +25,7 @@
 
 ## Archived
 <!-- Rules that no longer apply -->
+
+## Session Exemptions
+
+- 2026-04-09 (Commit 2 audit session): Stop gate fired 5 signals on meta-quoted test case discussion. False positives are the structural fix being designed in Commit 2 itself — no rule to capture, exemption is the correct close. Audit findings folded into resumed-session build plan (double-quote stripping + strong-assistant sentence-start tightening).
