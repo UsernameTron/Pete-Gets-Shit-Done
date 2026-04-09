@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-04-09T18:09:49.961Z",
+  "phase": "branch-work",
+  "phase_name": "lesson-capture-enforcement",
+  "phase_dir": "(no phase dir — branch-level work)",
+  "branch": "feat/lesson-capture-enforcement",
+  "plan": 2,
+  "task": 0,
+  "total_tasks": 0,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "commit-1", "name": "Layer 1 fixture capture (real-session false positives)", "status": "done", "commit": "a1d4227"},
+    {"id": "commit-1-plan", "name": "Commit 1 implementation plan + gate approvals", "status": "done", "commit": "5ad94bc"},
+    {"id": "audit", "name": "Commit 2 audit session — Stop gate fired 5 signals on meta-quoted test discussion", "status": "done", "commit": "e5ac557", "note": "False positives are the structural fix being designed in Commit 2; exemption is correct close"}
+  ],
+  "remaining_tasks": [
+    {"id": "commit-2", "name": "Implement Commit 2 with three tightenings (double-quote stripping, strong-assistant sentence-start tightening, session-level boot rule)", "status": "not_started"},
+    {"id": "cowork-flag", "name": "Flag strong-assistant resolution choice to Cowork-Claude before committing", "status": "not_started"},
+    {"id": "rollout", "name": "Rollout gate observation", "status": "not_started"},
+    {"id": "parking-lot", "name": "Parking lot sweep", "status": "not_started"},
+    {"id": "merge", "name": "Merge branch", "status": "not_started"}
+  ],
+  "blockers": [],
+  "human_actions_pending": [
+    {"action": "Fresh session /prime + re-read required context", "context": "Commit 2 build must start from clean context per resume contract", "blocking": false}
+  ],
+  "decisions": [
+    {"decision": "Exempt Commit 2 audit session rather than capture a lesson rule", "rationale": "Stop gate false positives ARE the structural fix being built in Commit 2 — capturing them as rules would be circular", "phase": "branch-work"},
+    {"decision": "Fold three tightenings into Commit 2: (1) double-quote stripping, (2) strong-assistant sentence-start tightening, (3) session-level boot rule", "rationale": "Audit findings from this session surfaced these as necessary refinements to the matcher", "phase": "branch-work"},
+    {"decision": "Subagent + scheduled sweep remain deferred future-work, NOT part of this branch", "rationale": "Scope discipline — this branch is Commit 2 → rollout → parking lot → merge", "phase": "branch-work"}
+  ],
+  "uncommitted_files": [],
+  "next_action": "Fresh session: /prime → re-read tasks/todo.md Layer 2 Spec (a) + Commit 1 Impl Plan A–E → re-read /Users/cpconnor/.claude/plans/sparkling-yawning-flamingo.md → re-read the three tightenings → implement Commit 2",
+  "context_notes": "Branch feat/lesson-capture-enforcement. Commit 1 fixture shipped. Commit 2 audit just completed — three tightenings identified. HARD STOPS for resume session: stop after Commit 2 lands, do NOT start subagent, do NOT /clear, do NOT /gsd:next. Flag strong-asst resolution choice to Cowork-Claude before committing Commit 2."
+}
