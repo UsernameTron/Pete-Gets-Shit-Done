@@ -568,13 +568,24 @@ Implementation proceeds per section F after the fixture is built and Pete eyebal
 ## Session Handoff
 
 **State tracking**: `.planning/STATE.md` is canonical.
-**Branch**: `feat/lesson-capture-enforcement` (clean, 2 commits ahead of main)
-**Last session (2026-04-09)**: Layer 1 of lesson-capture Stop gate
-- Built `.claude/hooks/lesson-capture-gate.cjs` (364 lines, 5 exported pure helpers)
-- Wired project-scoped Stop hook in `.claude/settings.json` (additive to user-global `gsd-lessons-check.sh`)
-- 25 tests in `tests/lesson-capture-gate.test.cjs`, all green; full suite 2094/2094 across 403 suites
-- Caught and fixed `deriveSlug` spec-vs-reality bug (spec said `'-' + cwd.replaceAll('/', '-')` which double-dashes; actual Claude Code slug uses single leading dash)
-- Captured 2 lessons: spec-vs-reality discipline, signal-detection false-positive findings
-- Commits: `d0ae43c` (feat: hook + tests), `5a0de6f` (docs: lessons)
-**Layer 2 deferred**: Phrase-set tightening — bare keyword matching on `don't`/`stop`/`no,` inflates false positives on instructional text. Gate fired on its own build session with 6 false signals. Refine before long-term enablement.
-**Next**: Layer 2 of lesson-capture-enforcement (phrase-set refinement + lesson-capture subagent), OR resume `/gsd:discuss-phase 34` on `feat/v2.1-write-once-perimeters`. Pete's call.
+**Branch**: `feat/lesson-capture-enforcement` (clean, 13 commits ahead of main)
+
+**Last session (2026-04-09 Commit 1 fixture)**: Fixture extraction and commit — only deliverable.
+- Popped `stash@{0}` (fixture awaiting approval from prior session)
+- Verified integrity: 702,750 bytes, 300 turns (88/93/119), 0 raw emails, 3 section markers at lines 1/90/184
+- Patched `tests/fixtures/README.md` regeneration section (was pointing at git history — wrong after gitignore)
+- Added `scripts/build-layer1-fixture.cjs` to `.gitignore` under new "Layer 2 fixture tooling" block (script stays on disk for regen)
+- Single atomic commit `a1d4227` — `.gitignore` + README + fixture, 390 insertions across 3 files
+- `stash@{1}` (phase-34-scratch-preserve) and `stash@{2}` (pete-scratch Phase 34 copy) untouched per branch-isolation rule
+- Commits this session: `d93afb7` (post-/prime exemption), `a1d4227` (fixture)
+
+**Next session — Commit 2 of Layer 2**: hook tightening + matcher unit tests, single atomic commit.
+- Target: `.claude/hooks/lesson-capture-gate.cjs` — replace bare-substring `countSignals` with three-tier intent-aware matcher per Layer 2 spec (Strong bare-fire / Medium rebuttal-marker-required / Weak dropped), sentence segmentation, one-sentence rebuttal lookback, speaker-turn adjacency gate, Tier 3 boot-session exclusion
+- New tests against `tests/fixtures/layer1-false-positives.jsonl`: 0 Tier 1 + 0 Tier 2 signals required on all 3 sections (Tier 3 boot exclusion suppresses sections 2 and 3 outright)
+- Plus the +63 synthetic test plan from `tasks/todo.md` Section F (positive + negative cases for each tier, rebuttal-marker edges, T33 bare-`stop` suppression, sentence-start imperative rules)
+- Full test suite must stay green (currently 2094/2094 across 403 suites)
+- Then STOP. No PR until Commit 1 + Commit 2 both land and STATE.md updates follow.
+
+**Do not touch**:
+- `stash@{1}`, `stash@{2}` (phase-34 work on `feat/v2.1-write-once-perimeters`)
+- Branch switch — stay on `feat/lesson-capture-enforcement` until both commits ship
