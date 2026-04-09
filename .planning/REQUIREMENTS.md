@@ -42,21 +42,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEBT-06 | — | Pending |
-| DEBT-07 | — | Pending |
-| DEBT-08 | — | Pending |
-| AUDIT-01 | — | Pending |
-| AUDIT-02 | — | Pending |
-| AUDIT-03 | — | Pending |
-| AUDIT-04 | — | Pending |
-| AUDIT-05 | — | Pending |
-| AUDIT-06 | — | Pending |
-| AUDIT-07 | — | Pending |
+| DEBT-06 | Phase 34 | Pending |
+| DEBT-07 | Phase 34 | Pending |
+| DEBT-08 | Phase 34 | Pending |
+| AUDIT-01 | Phase 35 | Pending |
+| AUDIT-02 | Phase 35 | Pending |
+| AUDIT-03 | Phase 36 | Pending |
+| AUDIT-04 | Phase 36 | Pending |
+| AUDIT-05 | Phase 36 | Pending |
+| AUDIT-06 | Phase 37 | Pending |
+| AUDIT-07 | Phase 38 | Pending |
 
 **Coverage:**
 - v2.1 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10
+- Mapped to phases: 10
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-09*
