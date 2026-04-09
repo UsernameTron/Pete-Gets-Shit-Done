@@ -18,6 +18,7 @@
 ## Session Exemptions
 <!-- Single-line justifications when a session legitimately has no rule to capture -->
 - [2026-04-09] Session was a `/gsd:prime-patterns` boot only — no corrections from operator, no implementation work. Signal is a known false positive per the 2026-04-09 signal-detection lesson.
+- [2026-04-09] Second `/gsd:prime-patterns` boot after /clear — 1 signal fired on boot context, no operator corrections, no implementation. Same known false positive class; Layer 2 Commit 1 is the fix.
 
 ## Archived
 <!-- Rules that no longer apply -->
