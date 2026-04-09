@@ -518,15 +518,32 @@ For each of the 24 committed spec cases (12 positive + 12 negative), trace the d
 
 If any case fails, STOP and re-plan before writing code. Known flag: positive case #4 requires prior-sentence rebuttal marker lookup.
 
-### Approval gate
+### Approval gate — SIGNED OFF 2026-04-09
 
-**Pete must explicitly approve this plan before implementation begins.** Specifically:
-1. Confirm Option 1 spec reconciliation is correct (or override).
-2. Confirm the T33 tightening (bare sentence-start `stop` does not fire) is acceptable (or override).
-3. Confirm the prior-sentence rebuttal marker extension (for committed spec positive #4) is acceptable (or override to a different resolution).
-4. Confirm the 3-section fixture contents are a fair recreation of the known false positives (I am synthesizing because raw transcripts were never captured).
+All 4 gate questions approved by Pete. Approvals recorded inline:
 
-Once all four are signed off, implementation proceeds per section F.
+**Q1 — Spec reconciliation (Option 1 charitable reading): APPROVED.**
+Strong tier stays bare-fire for explicit correction tokens. The committed Layer 2 spec's "imperative + subject + negation proximity" language describes **Medium tier semantics**, not a redefinition of Strong. Medium is where ambiguity lives and where proximity rules earn their keep. Do not weaken Strong.
+
+**Q2 — T33 tightening (bare sentence-start `stop` does not fire): APPROVED.**
+Stricter than a literal reading of committed spec but matches its intent (reduce FPs without losing real corrections). `stop` as a bare imperative is overwhelmingly noise (`"stop the server"`, `"stop here"`, `"stopping"`). Real corrections use `"stop doing X"`, `"no, stop"`, or co-occur with a Strong token — all handled by the Medium-tier rebuttal-marker requirement. **Intentional tightening; documented in T33 rationale.**
+
+**Q3 — Prior-sentence rebuttal marker lookup: APPROVED.**
+Extending the rebuttal-marker search one sentence back within the same turn is the right call. `"you're wrong. don't touch deriveSlug."` is one correction in two sentences — Strong `you're wrong` establishes correction intent for the whole turn and Medium `don't` inherits that context. **One-sentence lookback is the minimum viable context window. DO NOT extend to multi-sentence or cross-turn lookback** — that would reintroduce the FP class Layer 2 is designed to eliminate.
+
+**Q4 — Fixture synthesis: OVERRIDE. Pull raw transcripts from session logs.**
+Do NOT synthesize. Spec-vs-reality discipline from 2026-04-09: test against real bytes, not remembered semantics. Extract the 3 target sessions from `~/.claude/projects/-Users-cpconnor-projects-Pete-Gets-Shit-Done/*.jsonl`, scrub PII/secrets, preserve exact token content. If any session file is unrecoverable, STOP and report — do not synthesize a replacement. Add `tests/fixtures/README.md` documenting provenance, capture date, and scrubbing policy.
+
+**Session file mapping (confirmed by timestamp cross-reference with git log):**
+- Layer 1 build session: `4d282829-c4db-48f4-8030-99dc2886145d.jsonl` (2026-04-09T15:14:40Z–15:58:04Z, 368 lines) → produced d0ae43c, 5a0de6f, 9edc92a
+- First /gsd:prime-patterns boot: `981c1e5f-d49e-48e5-8607-772513ccaa68.jsonl` (15:59:03Z–16:10:22Z, 342 lines) → produced dfd0d93, f2b0e22, 88a9534
+- Second /gsd:prime-patterns boot (this session): `3beb55a1-2941-4dfd-b9ef-192f7e5350b7.jsonl` (16:11:13Z–present, 247+ lines) → produced 18cf220, 615512b
+
+All 3 files present and readable. No unrecoverable sessions.
+
+**Note on Section D of this plan:** the synthesized excerpts shown in Section D are now superseded by the real-transcript extraction. Section D's *structure* (three delimited sections, `parseTranscript`-compatible JSONL shape, `countSignals === 0` target) still applies; only the *contents* change to real scrubbed bytes.
+
+Implementation proceeds per section F after the fixture is built and Pete eyeballs the section headers + turn counts per section.
 
 ---
 
