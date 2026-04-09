@@ -1,13 +1,23 @@
 # Todo
 
-## Current Status: v2.0 Intelligence Layer -- Shipped
+## Current Status: v2.0 Intelligence Layer -- Shipped + Lesson-Capture PR Open
 
 v2.0 milestone shipped and archived (2026-04-05). Tag: v2.0.
-2069 tests passing across 403 suites. 15 active agents, 7 archived.
+2178 tests passing across ~480 suites (109 new in lesson-capture-gate).
 
 ## Open Items
 
+- [ ] Merge PR #32 after Windows CI goes green (pushed colon fix `1860027`)
+- [ ] Squash fixup commits on `feat/lesson-capture-enforcement` before merge (3 commits post-squash: `dd3c21a` + `832fbb0` + `1860027`)
+- [ ] Update STATE.md after merge
 - [ ] Define next milestone (`/gsd:new-milestone`)
+
+## Session Handoff — 2026-04-09
+
+**Branch**: `feat/lesson-capture-enforcement` @ `1860027` (pushed, PR #32 open)
+**Status**: PR open, awaiting Windows CI green after colon fix. macOS + Ubuntu all green.
+**Remaining fixup**: 3 commits on branch after the squash (`dd3c21a`). Before merge, either squash-amend or let GitHub squash-merge handle it.
+**Next session**: `/prime` → check PR #32 CI → merge if green → update STATE.md → define next milestone
 
 ---
 
