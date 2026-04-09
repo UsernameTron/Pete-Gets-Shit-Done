@@ -11,6 +11,18 @@
  *
  * Infrastructure failures (missing transcript, unreadable files) never
  * block — they log to stderr and exit 0.
+ *
+ * Commit 2 — tiered matcher:
+ *   - Strong user tokens fire regardless of speaker context.
+ *   - Medium user tokens require a speaker-turn transition from assistant
+ *     to operator AND a rebuttal marker in the current or prior sentence
+ *     within the same turn.
+ *   - Strong assistant tokens fire only sentence-initial or after ", ".
+ *   - Session-level boot rule: if any of the first 5 user turns contains
+ *     a Claude Code boot command marker, the whole session returns 0.
+ *   - Per-turn boot detection handles mixed/concatenated transcripts.
+ *   - stripCode also strips ≤200-char double-quoted spans to kill
+ *     meta-quoted example phrases.
  */
 
 'use strict';
@@ -19,69 +31,266 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-// ---------- Correction signal sets ----------
+// ---------- Frozen correction phrase sets ----------
 
-const USER_SIGNALS = [
+const STRONG_USER = Object.freeze([
   "you're wrong",
   "that's wrong",
-  "no,",
+  "that's not right",
+  "that's not correct",
+  "that's not what i said",
+  "you missed",
+  "re-read",
   "incorrect",
+]);
+
+const STRONG_USER_SENTENCE_START = Object.freeze([
+  "i said ",
+]);
+
+const MEDIUM_USER = Object.freeze([
   "don't",
   "stop",
-  "actually",
-  "re-read",
-  "you missed",
   "try again",
-  "that's not",
-  "i said",
-  "correction",
-];
+]);
 
-const ASSISTANT_SIGNALS = [
+const STRONG_ASSISTANT = Object.freeze([
   "you're right",
   "my mistake",
   "i was wrong",
-  "correcting",
   "let me fix",
-];
+  "correcting",
+]);
+
+// Documented-for-audit: these tokens NEVER fire as correction signals.
+// `no,`/`wrong.` still act as rebuttal markers inside hasRebuttalMarker.
+const DROPPED_FROM_SIGNAL_SET = Object.freeze([
+  "correction",
+  "actually",
+  "no,",
+]);
+
+const BOOT_COMMAND_MARKERS = Object.freeze([
+  "<command-name>/gsd:prime-patterns",
+  "<command-name>/clear",
+  "<command-name>/prime",
+  "<command-name>/wrap",
+  "<command-name>/gsd:",
+]);
 
 const FOUR_HOURS_MS = 4 * 3600 * 1000;
 
 // ---------- Pure helpers (exported for tests) ----------
 
 /**
- * Strip fenced code blocks and inline backtick spans from text so
- * signal phrases inside code samples don't trigger false positives.
+ * Strip fenced code blocks, inline backtick spans, and short double-quoted
+ * spans (≤200 chars) so meta-discussion that quotes example phrases doesn't
+ * fire correction signals.
  */
 function stripCode(text) {
   if (typeof text !== 'string') return '';
   return text
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/~~~[\s\S]*?~~~/g, ' ')
-    .replace(/`[^`]*`/g, ' ');
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/"[^"\n]{1,200}"/g, ' ');
 }
 
 /**
- * Count distinct correction signals in a list of messages.
- * Dedup is per (message_index, phrase) pair — the same phrase repeated
- * inside one message counts once.
+ * Split text into lowercased sentence-sized chunks on ., !, ?, newlines.
+ * Returns a de-whitespaced, non-empty array.
+ */
+function splitSentences(text) {
+  if (typeof text !== 'string' || !text) return [];
+  return text
+    .split(/[.!?\n]+/)
+    .map(s => s.trim().toLowerCase())
+    .filter(s => s.length > 0);
+}
+
+/**
+ * Return true if the sentence contains a rebuttal marker — the signal
+ * that what follows is a correction rather than a description.
+ */
+function hasRebuttalMarker(sentence) {
+  if (typeof sentence !== 'string' || !sentence) return false;
+  if (sentence.includes('no,') || sentence.includes('no.')) return true;
+  if (sentence.includes('wrong,') || sentence.includes('wrong.')) return true;
+  if (sentence.includes('— ')) return true;
+  if (sentence.includes(' you ')) return true;
+  if (sentence.startsWith('you ')) return true;
+  return false;
+}
+
+/**
+ * A turn is a boot turn if:
+ *   (a) content contains a known Claude Code boot command marker, OR
+ *   (b) both <command-name> and <local-command-stdout> sibling tags exist, OR
+ *   (c) the turn was dominated by <system-reminder>/<command-*> blocks and
+ *       the residual trimmed content is <20 chars.
+ *
+ * Clause (c) only triggers when such blocks were actually present — a bare
+ * "you're wrong" message is NOT a boot turn.
+ */
+function isBootTurn(msg) {
+  if (!msg || typeof msg.content !== 'string') return false;
+  const content = msg.content;
+
+  for (const marker of BOOT_COMMAND_MARKERS) {
+    if (content.includes(marker)) return true;
+  }
+
+  if (content.includes('<command-name>') && content.includes('<local-command-stdout>')) {
+    return true;
+  }
+
+  if (/<system-reminder>|<command-/.test(content)) {
+    const stripped = content
+      .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '')
+      .replace(/<command-[a-z-]+>[\s\S]*?<\/command-[a-z-]+>/g, '')
+      .trim();
+    if (stripped.length < 20) return true;
+  }
+
+  return false;
+}
+
+/**
+ * Classify a turn for tier matching.
+ *   - 'skip'      — malformed / non-user-or-assistant
+ *   - 'boot'      — boot or boot-dominated turn, contributes zero
+ *   - 'assistant' — assistant turn, strong-assistant tier only
+ *   - 'operator'  — user turn, full tier processing
+ */
+function classifyTurn(msg /* , prevRole */) {
+  if (!msg || typeof msg.content !== 'string') return 'skip';
+  if (msg.role !== 'user' && msg.role !== 'assistant') return 'skip';
+  if (isBootTurn(msg)) return 'boot';
+  return msg.role === 'assistant' ? 'assistant' : 'operator';
+}
+
+/**
+ * Strong tier — returns a Set of matched phrases for the given sentence.
+ * For user turns: STRONG_USER as substring + STRONG_USER_SENTENCE_START as prefix.
+ * For assistant turns: STRONG_ASSISTANT only sentence-initial OR preceded by ", ".
+ */
+function matchStrongTier(sentence, role) {
+  const matches = new Set();
+  if (typeof sentence !== 'string' || !sentence) return matches;
+
+  if (role === 'user') {
+    for (const phrase of STRONG_USER) {
+      if (sentence.includes(phrase)) matches.add(phrase);
+    }
+    for (const phrase of STRONG_USER_SENTENCE_START) {
+      if (sentence.startsWith(phrase)) matches.add(phrase);
+    }
+    return matches;
+  }
+
+  if (role === 'assistant') {
+    for (const phrase of STRONG_ASSISTANT) {
+      if (sentence.startsWith(phrase)) {
+        matches.add(phrase);
+        continue;
+      }
+      const idx = sentence.indexOf(phrase);
+      if (idx > 0 && sentence.slice(0, idx).includes(', ')) {
+        matches.add(phrase);
+      }
+    }
+  }
+
+  return matches;
+}
+
+/**
+ * Medium tier — only contributes when `licensed` is true (caller has
+ * verified speaker-turn adjacency + rebuttal marker).
+ * A phrase fires if it is sentence-initial with content after it, OR
+ * a rebuttal marker appears before the phrase in the sentence.
+ */
+function matchMediumTier(sentence, licensed) {
+  const matches = new Set();
+  if (!licensed || typeof sentence !== 'string' || !sentence) return matches;
+
+  for (const phrase of MEDIUM_USER) {
+    if (sentence.startsWith(phrase)) {
+      if (sentence.length > phrase.length) matches.add(phrase);
+      continue;
+    }
+    const idx = sentence.indexOf(phrase);
+    if (idx > 0) {
+      const prefix = sentence.slice(0, idx);
+      if (/(no[,.]|wrong[,.]|— )/.test(prefix)) {
+        matches.add(phrase);
+      }
+    }
+  }
+
+  return matches;
+}
+
+/**
+ * Count distinct correction signals in a list of messages using the
+ * tiered matcher. Session-level boot early return + per-turn classification
+ * + per-sentence Set dedup with one-sentence rebuttal lookback.
  *
  * @param {Array<{role: 'user'|'assistant', content: string}>} messages
  * @returns {number}
  */
 function countSignals(messages) {
-  let total = 0;
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-    if (!msg || typeof msg.content !== 'string') continue;
-    const cleaned = stripCode(msg.content).toLowerCase();
-    const phrases = msg.role === 'assistant' ? ASSISTANT_SIGNALS : USER_SIGNALS;
-    const matched = new Set();
-    for (const phrase of phrases) {
-      if (cleaned.includes(phrase)) matched.add(phrase);
+  if (!Array.isArray(messages) || messages.length === 0) return 0;
+
+  // Tightening 3: session-level boot early return.
+  // If any of the first 5 user turns matches a boot command marker,
+  // the whole session is contractually non-correcting.
+  let userTurnsSeen = 0;
+  for (let i = 0; i < messages.length && userTurnsSeen < 5; i++) {
+    const m = messages[i];
+    if (!m || m.role !== 'user' || typeof m.content !== 'string') continue;
+    userTurnsSeen++;
+    for (const marker of BOOT_COMMAND_MARKERS) {
+      if (m.content.includes(marker)) return 0;
     }
-    total += matched.size;
   }
+
+  let total = 0;
+  let prevRole = null;
+
+  for (const msg of messages) {
+    const cls = classifyTurn(msg, prevRole);
+    if (cls === 'skip' || cls === 'boot') {
+      if (msg && msg.role) prevRole = msg.role;
+      continue;
+    }
+
+    const cleaned = stripCode(msg.content);
+    const sentences = splitSentences(cleaned);
+
+    let priorSentence = '';
+    for (const sentence of sentences) {
+      const matches = new Set();
+
+      for (const hit of matchStrongTier(sentence, msg.role)) {
+        matches.add(hit);
+      }
+
+      if (cls === 'operator' && prevRole === 'assistant') {
+        const licensed =
+          hasRebuttalMarker(sentence) || hasRebuttalMarker(priorSentence);
+        for (const hit of matchMediumTier(sentence, licensed)) {
+          matches.add(hit);
+        }
+      }
+
+      total += matches.size;
+      priorSentence = sentence;
+    }
+
+    prevRole = msg.role;
+  }
+
   return total;
 }
 
@@ -119,7 +328,6 @@ function checkLessonsWindow(lessonsPath, firstTimestamp, now = Date.now()) {
     };
   }
 
-  // Fallback: 4-hour window from now
   return {
     updated: now - lessonsMtimeMs < FOUR_HOURS_MS,
     lessonsMtimeMs,
@@ -169,8 +377,6 @@ function parseTranscript(raw) {
       firstTimestamp = obj.timestamp || obj.ts || null;
     }
 
-    // Claude Code transcripts: {type: "user"|"assistant", message: {role, content}}
-    // Also support simpler {role, content} shapes for tests.
     const role = obj.role || (obj.message && obj.message.role) || obj.type;
     if (role !== 'user' && role !== 'assistant') continue;
 
@@ -247,7 +453,6 @@ function writeDebugLog(entry) {
 // ---------- Main ----------
 
 function main() {
-  // Read JSON payload from stdin
   let payload = {};
   try {
     const raw = fs.readFileSync(0, 'utf8');
@@ -358,6 +563,19 @@ exports.countSignals = countSignals;
 exports.checkLessonsWindow = checkLessonsWindow;
 exports.deriveSlug = deriveSlug;
 exports.parseTranscript = parseTranscript;
+
+exports.STRONG_USER = STRONG_USER;
+exports.STRONG_USER_SENTENCE_START = STRONG_USER_SENTENCE_START;
+exports.MEDIUM_USER = MEDIUM_USER;
+exports.STRONG_ASSISTANT = STRONG_ASSISTANT;
+exports.DROPPED_FROM_SIGNAL_SET = DROPPED_FROM_SIGNAL_SET;
+exports.splitSentences = splitSentences;
+exports.hasRebuttalMarker = hasRebuttalMarker;
+exports.isBootTurn = isBootTurn;
+exports.classifyTurn = classifyTurn;
+exports.findFallbackTranscript = findFallbackTranscript;
+exports.hasValidExemption = hasValidExemption;
+exports.writeDebugLog = writeDebugLog;
 
 if (require.main === module) {
   main();
