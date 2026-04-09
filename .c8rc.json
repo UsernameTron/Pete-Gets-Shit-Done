@@ -4,7 +4,8 @@
     "get-shit-done/bin/gsd-tools.cjs",
     "bin/install.js",
     "hooks/*.js",
-    "scripts/build-hooks.js"
+    "scripts/build-hooks.js",
+    ".claude/hooks/lesson-capture-gate.cjs"
   ],
   "exclude": [
     "hooks/dist/**",
