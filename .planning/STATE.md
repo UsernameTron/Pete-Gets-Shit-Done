@@ -56,19 +56,13 @@ Progress: [░░░░░░░░░░] 0% (0/5 phases)
 
 ## Session Handoff
 
-**Branch**: `feat/lesson-capture-enforcement` @ `0171a8e` (11 ahead of main, clean)
-**Last action (2026-04-09 session continuation)**: Commit 1 Implementation Plan written and Pete-approved (4 gate questions signed off). Session file mapping confirmed for 3 target JSONL files. Secrets scan clean (only one email to scrub). Fixture build deferred to next session at 78% context budget per 40% hard rule.
-**Status**: Plan locked + approvals durable in git. Fixture extraction designed but not executed. Hook/test code UNTOUCHED — still at 18cf220 state for matcher file.
+**Branch**: `feat/lesson-capture-enforcement` @ `15e4d06` (14 ahead of main, clean)
+**Last action (2026-04-09)**: v2.1 milestone initialized — PROJECT.md updated, REQUIREMENTS.md created (10 reqs), ROADMAP.md created (5 phases: 34-38), Phase 34 CONTEXT.md written.
+**Status**: Milestone v2.1 fully scoped and committed. Phase 34 has CONTEXT.md. No plans or execution started yet.
 **Next (first action of next session)**:
-  1. `/prime` then read `tasks/todo.md` → `## Commit 1 Implementation Plan` → `### Approval gate — SIGNED OFF 2026-04-09`
-  2. Build Python extractor: walk 3 JSONL files in order, filter `type in ('user','assistant')`, preserve `{type,timestamp,message:{role,content}}` exactly, scrub `cpeteconnor@gmail.com` only in section 1, emit section markers
-  3. Write `tests/fixtures/layer1-false-positives.jsonl` + `tests/fixtures/README.md`
-  4. Commit `test(fixtures): capture Layer 1 lesson-capture false positives from real sessions`
-  5. STOP and show section headers + turn counts for operator eyeball review
-  6. Proceed to hook/test code per plan section F
-**Session file mapping (DO NOT re-derive)**:
-  - Section 1 Layer 1 build: `4d282829-c4db-48f4-8030-99dc2886145d.jsonl` (15:14:40Z–15:58:04Z, 368 lines)
-  - Section 2 First prime-patterns boot: `981c1e5f-d49e-48e5-8607-772513ccaa68.jsonl` (15:59:03Z–16:10:22Z, 342 lines)
-  - Section 3 Second prime-patterns boot (self): `3beb55a1-2941-4dfd-b9ef-192f7e5350b7.jsonl` (16:11:13Z–present)
-**Commits this session**: 615512b (plan), 5ad94bc (approvals), 0171a8e (exemption)
-**Prior context (for reference)**: v2.0 Intelligence Layer shipped 2026-04-05, tagged v2.0, merged via PR #31 on 2026-04-06. Layer 1 of lesson-capture landed on this branch earlier 2026-04-09.
+  1. `/gsd:autonomous` — picks up at Phase 34, runs discuss→plan→execute for all 5 phases
+  2. All phases are infrastructure/audit — discuss will be auto-skipped (contexts auto-generated)
+  3. After all 5 phases: lifecycle runs (audit→complete→cleanup)
+**Commits this session**: b924fe2 (milestone start), ccab2e7 (requirements), 15e4d06 (roadmap)
+**Note**: `.planning/phases/` is gitignored — phase artifacts are local working files. Committed state is in ROADMAP.md, STATE.md, REQUIREMENTS.md.
+**Parallel work**: lesson-capture-enforcement branch also has in-flight work (fixture extraction per tasks/todo.md) — that's separate from v2.1 milestone.
