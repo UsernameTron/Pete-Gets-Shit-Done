@@ -53,3 +53,6 @@ analysis/
 TO-DOS.md
 /research.claude/
 commands.html
+
+# Layer 2 fixture tooling (regenerate on demand)
+scripts/build-layer1-fixture.cjs
