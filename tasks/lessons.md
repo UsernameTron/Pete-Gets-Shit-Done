@@ -29,3 +29,4 @@
 ## Session Exemptions
 
 - 2026-04-09 (Commit 2 audit session): Stop gate fired 5 signals on meta-quoted test case discussion. False positives are the structural fix being designed in Commit 2 itself — no rule to capture, exemption is the correct close. Audit findings folded into resumed-session build plan (double-quote stripping + strong-assistant sentence-start tightening).
+- 2026-04-09 (post-audit /prime boot): Single signal on boot-only session — no operator corrections, no implementation, only CLAUDE.md/lessons/todo/STATE/session-log reads + handoff report. Known false-positive class pending Commit 2 matcher fix.
