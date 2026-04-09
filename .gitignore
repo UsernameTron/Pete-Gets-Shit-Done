@@ -22,8 +22,16 @@ animation/
 # Governance templates are tracked
 # (Root CLAUDE.md is also tracked — it's the project governance file)
 
-# Local test installs
-.claude/
+# .claude/ — governance files committed (agents, hooks, settings.json)
+# Runtime state and personal config stay local:
+.claude/.DS_Store
+.claude/agent-memory/
+.claude/settings.local.json
+.claude/worktrees/
+.claude/**/*.log
+.claude/tmp/
+.claude/cache/
+.claude/state/
 
 # Internal planning documents (STATE.md is committed; everything else is local)
 .planning/phases/
