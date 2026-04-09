@@ -62,9 +62,9 @@ Plans:
   2. All 61 GSD commands are reachable via skill routing with no orphaned or dead-end commands
   3. All configured hooks fire on their intended events with correct matchers (verified by trigger test)
   4. Zero agents reference absorbed/archived agents that no longer exist
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 36-01-PLAN.md -- Audit 15 GSD source agents (YAML, tiers, quality, stale refs)
+- [x] 36-01-PLAN.md -- Audit 15 GSD source agents (YAML, tiers, quality, stale refs)
 - [ ] 36-02-PLAN.md -- Audit 61 GSD commands (routing) and 16 hooks (configuration)
 
 ### Phase 37: Test & Coverage Verification
@@ -97,7 +97,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 34. Debt Closure | v2.1 | 2/2 | Complete    | 2026-04-09 |
 | 35. Confirmation Audit | v2.1 | 1/1 | Complete    | 2026-04-09 |
-| 36. System Component Audit | v2.1 | 0/0 | Not started | - |
+| 36. System Component Audit | v2.1 | 1/2 | In Progress|  |
 | 37. Test & Coverage Verification | v2.1 | 0/0 | Not started | - |
 | 38. Documentation Accuracy | v2.1 | 0/0 | Not started | - |
 

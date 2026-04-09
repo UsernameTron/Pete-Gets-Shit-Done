@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: System Audit & Debt Closure
 status: executing
-last_updated: "2026-04-09T23:17:19.376Z"
-last_activity: 2026-04-09 -- Phase 36 execution started
+last_updated: "2026-04-09T23:20:44.048Z"
+last_activity: 2026-04-09
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
   percent: 40
 ---
 
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 ## Current Position
 
 Phase: 36 (system-component-audit) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 36
-Last activity: 2026-04-09 -- Phase 36 execution started
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-09
 
 Progress: [████░░░░░░] 40% (2/5 phases)
 
@@ -58,6 +58,7 @@ Progress: [████░░░░░░] 40% (2/5 phases)
 - [Phase 34-01]: Reconstructed SUMMARY content from CREW-ASSESSMENT.md execution log and original PLAN files -- format matched to existing 06-01 and 06-05 SUMMARYs
 - [Phase 35]: Non-GSD user agent mismatches (5) noted but not in DEBT-01 scope -- deferred
 - [Phase 35]: Installed vs source ship.md discrepancy is deployment gap, not code defect
+- [Phase 36]: Applied Phase 35 precedent for tier classification of agents bridging Modify/Full boundaries
 
 ## Session Handoff
 

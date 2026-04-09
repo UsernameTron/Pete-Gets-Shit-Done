@@ -17,7 +17,7 @@ Requirements for System Audit & Debt Closure milestone. Each maps to roadmap pha
 
 - [x] **AUDIT-01**: Verify v1.4 DEBT-01 resolved INT-01 — all 15 agents have consistent tier labels matching tool grants
 - [x] **AUDIT-02**: Verify v1.4 DEBT-04 resolved INT-02 — gsd-validator-hub reachable through workflow routing
-- [ ] **AUDIT-03**: All 15 source agents have valid YAML frontmatter, correct tool grants, and quality sections
+- [x] **AUDIT-03**: All 15 source agents have valid YAML frontmatter, correct tool grants, and quality sections
 - [ ] **AUDIT-04**: All 61 GSD commands reachable via skill routing with no orphaned or dead commands
 - [ ] **AUDIT-05**: All hooks functional — matchers fire correctly for configured events
 - [ ] **AUDIT-06**: Full test suite passes with coverage thresholds met (90% overall, 80%/module, 95% security)
@@ -47,7 +47,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEBT-08 | Phase 34 | Complete |
 | AUDIT-01 | Phase 35 | Complete |
 | AUDIT-02 | Phase 35 | Complete |
-| AUDIT-03 | Phase 36 | Pending |
+| AUDIT-03 | Phase 36 | Complete |
 | AUDIT-04 | Phase 36 | Pending |
 | AUDIT-05 | Phase 36 | Pending |
 | AUDIT-06 | Phase 37 | Pending |
