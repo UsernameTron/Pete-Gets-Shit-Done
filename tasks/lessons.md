@@ -17,6 +17,7 @@
 
 ## Session Exemptions
 <!-- Single-line justifications when a session legitimately has no rule to capture -->
+- [2026-04-09] Session was a `/gsd:prime-patterns` boot only — no corrections from operator, no implementation work. Signal is a known false positive per the 2026-04-09 signal-detection lesson.
 
 ## Archived
 <!-- Rules that no longer apply -->
