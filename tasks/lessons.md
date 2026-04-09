@@ -21,6 +21,7 @@
 - [2026-04-09] Second `/gsd:prime-patterns` boot after /clear — 1 signal fired on boot context, no operator corrections, no implementation. Same known false positive class; Layer 2 Commit 1 is the fix.
 - [2026-04-09] Commit 1 planning session (continuation) — signals will fire on the plan text itself (Strong phrases quoted inside matcher design, test cases, and rollback criteria). No operator corrections in this session; Pete approved the plan unchanged. Committed 615512b (plan), 5ad94bc (approvals). Stopped before fixture build at 78% context budget per hard rule. This session's transcript is itself Section 3 of the fixture to be built next session.
 - [2026-04-09] Post-/clear `/prime` boot session — no operator corrections, no implementation work, only CLAUDE.md/lessons/todo/session-log reads and a status report. Single signal is the known false-positive class pending Commit 1 fix.
+- [2026-04-09] Second post-/clear `/prime` boot session (after fixture commit) — no operator corrections, no implementation, only status reads + handoff report. Flagged stale STATE.md but took no action. Single signal is the known false-positive class pending Commit 2 matcher fix.
 
 ## Archived
 <!-- Rules that no longer apply -->
