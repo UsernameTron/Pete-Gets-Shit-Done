@@ -14,9 +14,15 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
 
-## Next Milestone
+## Current Milestone: v2.1 System Audit & Debt Closure
 
-No active milestone. Run `/gsd:new-milestone` to start the next cycle.
+**Goal:** Close all remaining tech debt from v1.2 audit, verify v1.4 fixes landed correctly, and conduct a comprehensive system-level audit of the full v1.0-v2.0 feature surface.
+
+**Target features:**
+- Close 3 remaining v1.2 debt items (missing SUMMARYs, stale CLAUDE.md references, missing Nyquist VALIDATION.md)
+- Verify v1.4 DEBT-01 and DEBT-04 resolved INT-01 and INT-02 (confirmation audit)
+- Full system audit: all 15 agents validated, all 61 commands reachable, all hooks functional, all tests passing, coverage thresholds met
+- Documentation accuracy sweep across CLAUDE.md (global + project), README.md, DEVOPS-HANDOFF.md
 
 <details>
 <summary><strong>v2.0 Intelligence Layer (23/23 requirements shipped)</strong></summary>
@@ -230,4 +236,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 -- v2.0 Intelligence Layer shipped*
+*Last updated: 2026-04-09 -- v2.1 System Audit & Debt Closure started*

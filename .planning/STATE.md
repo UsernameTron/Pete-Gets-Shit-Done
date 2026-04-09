@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Intelligence Layer
-status: shipped
-last_updated: "2026-04-06T12:00:00.000Z"
-last_activity: 2026-04-06 -- Finalization complete, docs refreshed, all pushed
+milestone: v2.1
+milestone_name: System Audit & Debt Closure
+status: defining_requirements
+last_updated: "2026-04-09T00:00:00.000Z"
+last_activity: 2026-04-09 -- Milestone v2.1 started
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-05)
+See: .planning/PROJECT.md (updated 2026-04-09)
 
-**Shipped:** v2.0 Intelligence Layer (2026-04-05)
-**Previous:** v1.9 Ship Readiness & Hygiene (shipped 2026-04-05)
+**Current:** v2.1 System Audit & Debt Closure
+**Previous:** v2.0 Intelligence Layer (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: None — between milestones
-Plan: N/A
-Status: v2.0 milestone shipped and archived. Ready for next milestone.
-Last activity: 2026-04-05 -- Milestone archived, tagged v2.0
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v2.1
+Last activity: 2026-04-09 -- Milestone v2.1 started
 
-Progress: 4/4 phases complete | 13/13 plans | 23/23 requirements | Milestone archived
+Progress: 0/0 phases | Requirements in progress
 
 ## Milestone History
 
