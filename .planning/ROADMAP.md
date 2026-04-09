@@ -49,7 +49,9 @@ Plans:
   1. Every one of the 15 source agents has a tier label that matches its actual tool grants (no mismatches)
   2. gsd-validator-hub is reachable through at least one workflow routing path and responds correctly when invoked
   3. An audit report documents the verification of both INT-01 and INT-02 with pass/fail evidence
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 35-01-PLAN.md -- Audit agent tier labels + gsd-validator-hub routing
 
 ### Phase 36: System Component Audit
 **Goal**: All system components (agents, commands, hooks) are verified as correctly configured and functional
@@ -91,7 +93,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 34. Debt Closure | v2.1 | 2/2 | Complete    | 2026-04-09 |
-| 35. Confirmation Audit | v2.1 | 0/0 | Not started | - |
+| 35. Confirmation Audit | v2.1 | 0/1 | Planned | - |
 | 36. System Component Audit | v2.1 | 0/0 | Not started | - |
 | 37. Test & Coverage Verification | v2.1 | 0/0 | Not started | - |
 | 38. Documentation Accuracy | v2.1 | 0/0 | Not started | - |
