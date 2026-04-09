@@ -59,15 +59,15 @@ Progress: [██░░░░░░░░] 20% (1/5 phases)
 
 ## Session Handoff
 
-**Branch**: `feat/lesson-capture-enforcement` @ `15e4d06` (14 ahead of main, clean)
-**Last action (2026-04-09)**: v2.1 milestone initialized — PROJECT.md updated, REQUIREMENTS.md created (10 reqs), ROADMAP.md created (5 phases: 34-38), Phase 34 CONTEXT.md written.
-**Status**: Milestone v2.1 fully scoped and committed. Phase 34 has CONTEXT.md. No plans or execution started yet.
+**Branch**: `feat/lesson-capture-enforcement` @ `cebc3ff` (18 ahead of main, clean)
+**Last action (2026-04-09)**: Phase 34 (Debt Closure) completed. Phase 35 planned with 1 warning from verifier.
+**Status**: v2.1 autonomous execution in progress. Phase 34 done. Phase 35 has CONTEXT.md + 35-01-PLAN.md. Verifier flagged 1 warning: AUDIT-02 needs invocation test added (not just existence check). Plan revision needed before execution.
 **Next (first action of next session)**:
+  1. `/gsd:autonomous --from 35` — resumes autonomous execution from Phase 35
+  2. Phase 35 plan needs revision: verifier flagged that Task 2 checks gsd-validator-hub existence/routing but doesn't invoke it (ROADMAP requires "responds correctly when invoked")
+  3. After revision, execute Phase 35, then continue 36→37→38→lifecycle
+  4. All remaining phases are infrastructure/audit — discuss auto-skipped
 
-  1. `/gsd:autonomous` — picks up at Phase 34, runs discuss→plan→execute for all 5 phases
-  2. All phases are infrastructure/audit — discuss will be auto-skipped (contexts auto-generated)
-  3. After all 5 phases: lifecycle runs (audit→complete→cleanup)
-
-**Commits this session**: b924fe2 (milestone start), ccab2e7 (requirements), 15e4d06 (roadmap)
+**Commits this session**: 549d670 (Phase 34 plan), 4999534 (34-01 SUMMARYs), 6b55a01 (34-02 VALIDATION), cebc3ff (Phase 34 complete)
 **Note**: `.planning/phases/` is gitignored — phase artifacts are local working files. Committed state is in ROADMAP.md, STATE.md, REQUIREMENTS.md.
 **Parallel work**: lesson-capture-enforcement branch also has in-flight work (fixture extraction per tasks/todo.md) — that's separate from v2.1 milestone.
