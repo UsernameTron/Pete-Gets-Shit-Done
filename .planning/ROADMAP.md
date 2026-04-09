@@ -20,7 +20,7 @@
 
 ## Phases
 
-- [ ] **Phase 34: Debt Closure** - Backfill missing SUMMARYs, update stale agent references, create missing VALIDATION.md
+- [x] **Phase 34: Debt Closure** - Backfill missing SUMMARYs, update stale agent references, create missing VALIDATION.md (completed 2026-04-09)
 - [ ] **Phase 35: Confirmation Audit** - Verify v1.4 DEBT-01/DEBT-04 fixes resolved INT-01/INT-02
 - [ ] **Phase 36: System Component Audit** - Validate all agents, commands, and hooks are correctly configured
 - [ ] **Phase 37: Test & Coverage Verification** - Full test suite passes with all coverage thresholds met
@@ -36,10 +36,10 @@
   1. Phase 6 plans 02, 03, 04 each have a SUMMARY.md capturing what was built and verified
   2. Global CLAUDE.md files (project and user) reference gsd-verifier instead of deprecated gsd-plan-checker and gsd-integration-checker
   3. A Nyquist VALIDATION.md exists for Phase 6 (v1.2 milestone) documenting gap analysis results
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 34-01-PLAN.md -- Backfill Phase 6 SUMMARY.md files (plans 02, 03, 04)
-- [ ] 34-02-PLAN.md -- Fix stale agent refs in global CLAUDE.md + create Nyquist VALIDATION.md
+- [x] 34-01-PLAN.md -- Backfill Phase 6 SUMMARY.md files (plans 02, 03, 04)
+- [x] 34-02-PLAN.md -- Fix stale agent refs in global CLAUDE.md + create Nyquist VALIDATION.md
 
 ### Phase 35: Confirmation Audit
 **Goal**: Prior fixes from v1.4 are confirmed as fully resolved with no regressions
@@ -90,7 +90,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 34. Debt Closure | v2.1 | 0/2 | Planned | - |
+| 34. Debt Closure | v2.1 | 2/2 | Complete   | 2026-04-09 |
 | 35. Confirmation Audit | v2.1 | 0/0 | Not started | - |
 | 36. System Component Audit | v2.1 | 0/0 | Not started | - |
 | 37. Test & Coverage Verification | v2.1 | 0/0 | Not started | - |
