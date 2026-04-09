@@ -344,6 +344,8 @@ function checkLessonsWindow(lessonsPath, firstTimestamp, now = Date.now()) {
  */
 function deriveSlug(cwd) {
   let normalized = String(cwd || '');
+  // Normalize Windows backslashes to forward slashes
+  normalized = normalized.replace(/\\/g, '/');
   while (normalized.length > 1 && normalized.endsWith('/')) {
     normalized = normalized.slice(0, -1);
   }

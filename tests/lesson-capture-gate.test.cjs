@@ -233,7 +233,7 @@ test('payload transcript_path wins over fallback glob', () => {
   writeLessons(dir, '# Lessons\n', Date.now() - 10 * 3600 * 1000);
   // Create a "fallback" transcript in a fake HOME that WOULD trigger block
   const fakeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'lcg-home-'));
-  const slug = '-' + dir.replaceAll('/', '-');
+  const slug = deriveSlug(dir);
   const fakeProjDir = path.join(fakeHome, '.claude', 'projects', slug);
   fs.mkdirSync(fakeProjDir, { recursive: true });
   fs.writeFileSync(
@@ -994,7 +994,7 @@ test('writeDebugLog silently succeeds even on read-only directory', () => {
   // Calling with a cwd that lacks .claude/hooks should not throw
   const origCwd = process.cwd();
   try {
-    process.chdir('/');
+    process.chdir(os.tmpdir());
     // Should not throw — the catch block swallows the error
     writeDebugLog({ test: 'noop' });
   } finally {
@@ -1007,7 +1007,7 @@ test('writeDebugLog silently succeeds even on read-only directory', () => {
 test('main() exits 0 with no transcript (stdin empty, no fallback)', () => {
   const result = spawnSync(process.execPath, [HOOK_PATH], {
     input: JSON.stringify({ transcript_path: '/tmp/nonexistent-lcg-' + Date.now() + '.jsonl' }),
-    cwd: '/tmp',
+    cwd: os.tmpdir(),
     timeout: 5000,
   });
   assert.equal(result.status, 0);
@@ -1016,7 +1016,7 @@ test('main() exits 0 with no transcript (stdin empty, no fallback)', () => {
 test('main() exits 0 with empty stdin (parse fallback)', () => {
   const result = spawnSync(process.execPath, [HOOK_PATH], {
     input: '',
-    cwd: '/tmp',
+    cwd: os.tmpdir(),
     timeout: 5000,
   });
   assert.equal(result.status, 0);
@@ -1025,7 +1025,7 @@ test('main() exits 0 with empty stdin (parse fallback)', () => {
 test('main() exits 0 with malformed JSON stdin', () => {
   const result = spawnSync(process.execPath, [HOOK_PATH], {
     input: '{{not json}}',
-    cwd: '/tmp',
+    cwd: os.tmpdir(),
     timeout: 5000,
   });
   assert.equal(result.status, 0);
