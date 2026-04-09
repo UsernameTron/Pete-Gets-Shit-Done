@@ -36,7 +36,10 @@
   1. Phase 6 plans 02, 03, 04 each have a SUMMARY.md capturing what was built and verified
   2. Global CLAUDE.md files (project and user) reference gsd-verifier instead of deprecated gsd-plan-checker and gsd-integration-checker
   3. A Nyquist VALIDATION.md exists for Phase 6 (v1.2 milestone) documenting gap analysis results
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 34-01-PLAN.md -- Backfill Phase 6 SUMMARY.md files (plans 02, 03, 04)
+- [ ] 34-02-PLAN.md -- Fix stale agent refs in global CLAUDE.md + create Nyquist VALIDATION.md
 
 ### Phase 35: Confirmation Audit
 **Goal**: Prior fixes from v1.4 are confirmed as fully resolved with no regressions
@@ -87,7 +90,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 34. Debt Closure | v2.1 | 0/0 | Not started | - |
+| 34. Debt Closure | v2.1 | 0/2 | Planned | - |
 | 35. Confirmation Audit | v2.1 | 0/0 | Not started | - |
 | 36. System Component Audit | v2.1 | 0/0 | Not started | - |
 | 37. Test & Coverage Verification | v2.1 | 0/0 | Not started | - |
