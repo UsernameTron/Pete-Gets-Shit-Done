@@ -62,7 +62,10 @@ Plans:
   2. All 61 GSD commands are reachable via skill routing with no orphaned or dead-end commands
   3. All configured hooks fire on their intended events with correct matchers (verified by trigger test)
   4. Zero agents reference absorbed/archived agents that no longer exist
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 36-01-PLAN.md -- Audit 15 GSD source agents (YAML, tiers, quality, stale refs)
+- [ ] 36-02-PLAN.md -- Audit 61 GSD commands (routing) and 16 hooks (configuration)
 
 ### Phase 37: Test & Coverage Verification
 **Goal**: The full test suite is green and all coverage thresholds are met
