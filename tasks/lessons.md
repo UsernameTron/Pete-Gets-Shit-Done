@@ -12,6 +12,11 @@
 ### Learned Rules
 - [2026-03-25] [Git/Remote]: Never create a new GitHub repo when pushing — always ask Pete for the correct remote URL first. Existing repos may already be configured for the project. Triggered by: created `Pete-Gets-Shit-Done` repo instead of pushing to the existing `Petes-Get-Shit-Done-Coding-Automation`.
 - [2026-03-26] [CI/Ship]: Never mark a phase complete or merge a PR until all CI checks pass (green). If CI is failing, diagnose and fix before /gsd:ship or merge. "Tests pass locally" is not sufficient — CI must be green. Triggered by: multiple PRs shipped while CI checks were still pending or failing.
+- [2026-04-09] [Spec vs Reality]: When a design spec line contradicts observable on-disk state, trust reality over the spec and flag the delta back to the operator. Do not literally implement a spec that is provably wrong. Triggered by: `deriveSlug` spec said `'-' + cwd.replaceAll('/', '-')` which double-dashes absolute paths; the actual Claude Code project slug at `~/.claude/projects/-Users-cpconnor-projects-Pete-Gets-Shit-Done/` uses a single leading dash. Shipped the bug into test-runner instead of catching it while writing the function.
+- [2026-04-09] [Signal Detection]: Correction-phrase gates must distinguish instructional mentions ("don't touch X", "stop at Layer 1") from actual corrections ("don't do that — you're wrong"). Bare keyword matching on "don't"/"stop"/"no,"/"correction" inflates signal counts inside normal planning text. Fix: require a preceding corrective marker (e.g., phrase must follow "you" or start a sentence after a rebuttal), or drop the weakest phrases from the set, or weight by position in a user turn that follows an assistant turn. Triggered by: the lesson-capture gate fired with 6 signals on its own introduction session, where the only real correction was the deriveSlug fix.
+
+## Session Exemptions
+<!-- Single-line justifications when a session legitimately has no rule to capture -->
 
 ## Archived
 <!-- Rules that no longer apply -->
