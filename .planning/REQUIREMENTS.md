@@ -9,7 +9,7 @@ Requirements for System Audit & Debt Closure milestone. Each maps to roadmap pha
 
 ### Debt Closure
 
-- [ ] **DEBT-06**: Backfill missing SUMMARY.md files for Phase 6 plans 02, 03, 04 from CREW-ASSESSMENT.md records
+- [x] **DEBT-06**: Backfill missing SUMMARY.md files for Phase 6 plans 02, 03, 04 from CREW-ASSESSMENT.md records
 - [x] **DEBT-07**: Update global CLAUDE.md files to replace references to deprecated gsd-plan-checker and gsd-integration-checker with gsd-verifier
 - [x] **DEBT-08**: Create Nyquist VALIDATION.md for Phase 6 (v1.2 milestone)
 
@@ -42,7 +42,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEBT-06 | Phase 34 | Pending |
+| DEBT-06 | Phase 34 | Complete |
 | DEBT-07 | Phase 34 | Complete |
 | DEBT-08 | Phase 34 | Complete |
 | AUDIT-01 | Phase 35 | Pending |
