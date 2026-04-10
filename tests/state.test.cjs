@@ -1607,5 +1607,169 @@ Progress: [..........] 0%
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// signal-waiting / signal-resume commands
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('state signal-waiting', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('writes WAITING.json with all fields', () => {
+    const result = runGsdTools([
+      'state', 'signal-waiting',
+      '--type', 'decision_point',
+      '--question', 'Which approach?',
+      '--options', 'A|B|C',
+      '--phase', '5',
+    ], tmpDir);
+    assert.ok(result.success, `signal-waiting failed: ${result.error}`);
+
+    const waitingPath = path.join(tmpDir, '.planning', 'WAITING.json');
+    assert.ok(fs.existsSync(waitingPath), 'WAITING.json should exist');
+
+    const signal = JSON.parse(fs.readFileSync(waitingPath, 'utf-8'));
+    assert.strictEqual(signal.status, 'waiting');
+    assert.strictEqual(signal.type, 'decision_point');
+    assert.strictEqual(signal.question, 'Which approach?');
+    assert.deepStrictEqual(signal.options, ['A', 'B', 'C']);
+    assert.strictEqual(signal.phase, '5');
+    assert.ok(signal.since, 'since timestamp should be present');
+  });
+
+  test('writes WAITING.json with default type when none provided', () => {
+    const result = runGsdTools(['state', 'signal-waiting'], tmpDir);
+    assert.ok(result.success, `signal-waiting failed: ${result.error}`);
+
+    const waitingPath = path.join(tmpDir, '.planning', 'WAITING.json');
+    const signal = JSON.parse(fs.readFileSync(waitingPath, 'utf-8'));
+    assert.strictEqual(signal.type, 'decision_point');
+    assert.strictEqual(signal.question, null);
+    assert.deepStrictEqual(signal.options, []);
+    assert.strictEqual(signal.phase, null);
+  });
+
+  test('uses .gsd directory when it exists', () => {
+    const gsdDir = path.join(tmpDir, '.gsd');
+    fs.mkdirSync(gsdDir, { recursive: true });
+
+    const result = runGsdTools([
+      'state', 'signal-waiting',
+      '--type', 'checkpoint',
+      '--question', 'Ready?',
+    ], tmpDir);
+    assert.ok(result.success, `signal-waiting failed: ${result.error}`);
+
+    const gsdWaiting = path.join(gsdDir, 'WAITING.json');
+    assert.ok(fs.existsSync(gsdWaiting), 'WAITING.json should be in .gsd/');
+  });
+});
+
+describe('state signal-resume', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('removes WAITING.json from .planning/', () => {
+    const waitingPath = path.join(tmpDir, '.planning', 'WAITING.json');
+    fs.writeFileSync(waitingPath, '{"status":"waiting"}');
+
+    const result = runGsdTools(['state', 'signal-resume'], tmpDir);
+    assert.ok(result.success, `signal-resume failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.resumed, true);
+    assert.strictEqual(output.removed, true);
+    assert.ok(!fs.existsSync(waitingPath), 'WAITING.json should be removed');
+  });
+
+  test('removes WAITING.json from .gsd/', () => {
+    const gsdDir = path.join(tmpDir, '.gsd');
+    fs.mkdirSync(gsdDir, { recursive: true });
+    fs.writeFileSync(path.join(gsdDir, 'WAITING.json'), '{"status":"waiting"}');
+
+    const result = runGsdTools(['state', 'signal-resume'], tmpDir);
+    assert.ok(result.success, `signal-resume failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.resumed, true);
+    assert.strictEqual(output.removed, true);
+  });
+
+  test('returns removed=false when no WAITING.json exists', () => {
+    const result = runGsdTools(['state', 'signal-resume'], tmpDir);
+    assert.ok(result.success, `signal-resume failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.resumed, true);
+    assert.strictEqual(output.removed, false);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// begin-phase with Current Position lacking Plan line
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('state begin-phase Plan insertion', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('inserts Plan line when Current Position has Phase but no Plan', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'),
+      `# STATE
+
+**Current Phase:** 1
+**Status:** idle
+
+## Current Position
+
+Phase: 1 (Foundation)
+Status: idle
+Last activity: 2025-01-01
+
+## Decisions
+
+None yet.
+`
+    );
+
+    const result = runGsdTools([
+      'state', 'begin-phase',
+      '--phase', '5',
+      '--name', 'API',
+      '--plans', '3',
+    ], tmpDir);
+    assert.ok(result.success, `begin-phase failed: ${result.error}`);
+
+    const content = fs.readFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'), 'utf-8'
+    );
+    // Plan line should be inserted after the Phase line
+    assert.ok(/Plan: 1 of 3/m.test(content),
+      'Plan line should be inserted in Current Position');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // summary-extract command
 // ─────────────────────────────────────────────────────────────────────────────

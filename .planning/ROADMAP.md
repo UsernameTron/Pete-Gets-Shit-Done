@@ -13,6 +13,7 @@
 - **v1.8 Documentation & Accuracy** (2026-04-05) -- 2 phases, 7 requirements. [Archive](milestones/v1.8-ROADMAP.md)
 - **v1.9 Ship Readiness & Hygiene** (2026-04-05) -- 2 phases, 5 requirements. [Archive](milestones/v1.9-ROADMAP.md)
 - **v2.0 Intelligence Layer** (2026-04-05) -- 4 phases, 23 requirements. [Archive](milestones/v2.0-ROADMAP.md)
+- **v2.1 System Audit & Debt Closure** (2026-04-09 -> 2026-04-10) -- 5 phases, 10 requirements. [Archive](milestones/v2.1-ROADMAP.md)
 
 ---
-*Last updated: 2026-04-05 -- v2.0 Intelligence Layer shipped*
+*Last updated: 2026-04-10 -- v2.1 archived*

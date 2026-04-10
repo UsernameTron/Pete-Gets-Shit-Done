@@ -6,17 +6,35 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Shipped:** v2.0 Intelligence Layer (2026-04-05)
+**Shipped:** v2.1 System Audit & Debt Closure (2026-04-10)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2069+ total, all passing
-**Coverage:** classify.cjs 98.2%, history.cjs 96.1%, model-profiles.cjs 100%, core.cjs 95.49%
+**Tests:** 2377+ total, all passing
+**Coverage:** 90.41% overall, all modules >= 80%, security 100%
 **Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
+**Milestones shipped:** 12 (v1.0 through v2.1)
+**Total phases executed:** 38 across all milestones
 
 ## Next Milestone
 
-No active milestone. Run `/gsd:new-milestone` to start the next cycle.
+Not yet defined. Run `/gsd:new-milestone` to start.
+
+<details>
+<summary><strong>v2.1 System Audit & Debt Closure (10/10 requirements shipped)</strong></summary>
+
+**Goal:** Close all remaining tech debt from v1.2, verify v1.4 fixes, and conduct comprehensive system audit.
+
+**Key deliverables:**
+- Backfilled 3 missing Phase 6 SUMMARYs, fixed stale agent references, created Nyquist VALIDATION.md
+- Confirmed v1.4 DEBT-01/DEBT-04 fixes (15/15 agent tiers, validator-hub routing)
+- System audit: 15 agents, 61 commands, 16 hooks all validated
+- Coverage pushed to 90.41% overall, all modules >= 80%, security 100%
+- Documentation accuracy sweep across CLAUDE.md, README.md, DEVOPS-HANDOFF.md
+
+See [v2.1 Requirements Archive](milestones/v2.1-REQUIREMENTS.md) | [v2.1 Roadmap Archive](milestones/v2.1-ROADMAP.md)
+
+</details>
 
 <details>
 <summary><strong>v2.0 Intelligence Layer (23/23 requirements shipped)</strong></summary>
@@ -230,4 +248,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 -- v2.0 Intelligence Layer shipped*
+*Last updated: 2026-04-09 -- v2.1 System Audit & Debt Closure started*

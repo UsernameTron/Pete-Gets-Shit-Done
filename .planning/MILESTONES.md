@@ -1,5 +1,19 @@
 # Milestones
 
+## v2.1 System Audit & Debt Closure (Shipped: 2026-04-10)
+
+**Phases completed:** 5 phases, 7 plans, 8 tasks
+
+**Key accomplishments:**
+
+- Created 3 missing SUMMARY.md files for Phase 6 plans 02, 03, 04 using CREW-ASSESSMENT.md execution log data, closing the DEBT-06 project history gap
+- Replaced deprecated agent references in global CLAUDE.md and created Nyquist gap analysis for Phase 6 with 7/7 priorities verified
+- 15/15 GSD agents pass tier-vs-tools audit, gsd-validator-hub reachable via ship.md workflow routing
+- Automated 4-dimension audit of all 15 GSD source agents: YAML validity, tier/tool consistency, quality sections, and stale reference scan -- all 15 PASS
+- Audited 61 GSD commands for routing reachability and 16 hooks for configuration validity — all pass, 12 commands flagged as deployment gap
+
+---
+
 ## v1.6 Maintainability (Shipped: 2026-04-04)
 
 **Phases completed:** 4 phases (18-21), 12 plans, 12 requirements

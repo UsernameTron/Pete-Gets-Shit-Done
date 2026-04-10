@@ -1,5 +1,45 @@
 # Retrospective
 
+## v2.1 System Audit & Debt Closure (2026-04-10)
+
+### What Was Built
+
+- **Debt closure**: Backfilled 3 missing SUMMARY.md files for Phase 6, replaced deprecated agent references in global CLAUDE.md files, created Nyquist VALIDATION.md for v1.2 milestone.
+- **Confirmation audit**: Verified all 15 GSD agents have tier labels matching tool grants (DEBT-01/INT-01) and gsd-validator-hub is reachable via ship workflow (DEBT-04/INT-02).
+- **System component audit**: 4-dimension validation of 15 agents (YAML, tiers, quality sections, stale refs), 61 command routing reachability check, 16 hook configuration validation.
+- **Coverage verification**: Closed gaps in 6 library modules and install.js, achieving 90.41% overall with all modules >= 80% and security at 100%.
+- **Documentation accuracy**: Updated CLAUDE.md, README.md, DEVOPS-HANDOFF.md with current metrics and removed all stale references.
+
+### What Worked Well
+
+- **Rapid execution**: All 5 phases planned and executed in a single day (2026-04-09), with 8 plans across 10 requirements.
+- **Audit-as-verification**: The audit phases double as both verification and documentation — the audit reports themselves become the evidence trail.
+- **GSD pipeline maturity**: discuss -> plan -> execute -> verify cycle is now reliable enough for an entire audit milestone to run smoothly.
+
+### What Was Inefficient
+
+- **Phase 37/38 artifact gaps**: Phase 37 was missing a phase-level VERIFICATION.md (only had PLAN-VERIFICATION) and Phase 38 had no phase directory at all. Both were backfilled during milestone audit. Root cause: fast execution in later phases skipped artifact creation. Fix: verify-work should enforce VERIFICATION.md creation as a gate.
+- **REQUIREMENTS.md drift**: AUDIT-06 and AUDIT-07 remained unchecked/Pending despite work being complete. Similar to v1.1 checkbox drift. Fix: execute-phase should update REQUIREMENTS.md traceability table as tasks complete.
+
+### Patterns Established
+
+- **Audit milestone pattern**: A milestone dedicated to validating prior work is a legitimate and valuable milestone class. It catches tracking gaps, confirms cross-phase integration, and produces an evidence trail.
+- **3-source cross-reference**: Checking VERIFICATION.md + SUMMARY frontmatter + REQUIREMENTS.md traceability together catches gaps that any single source would miss.
+- **Nyquist exemption pattern**: Audit/docs milestones with no research phases can legitimately skip Nyquist VALIDATION.md without penalty.
+
+### Key Metrics
+
+| Metric | Before v2.1 | After v2.1 |
+|--------|-------------|------------|
+| Total tests | 2377 | 2377 (no regression) |
+| Overall coverage | ~90% | 90.41% (verified) |
+| Agents validated | 0 (assumed correct) | 15/15 confirmed |
+| Commands verified reachable | 0 (assumed correct) | 61/61 confirmed |
+| Hooks validated | 0 (assumed correct) | 16/16 confirmed |
+| Requirements shipped (cumulative) | 109 (v1.0-v2.0) | 119 (v1.0-v2.1) |
+
+---
+
 ## v1.1 Testing & Hardening (2026-03-26)
 
 ### What Was Built

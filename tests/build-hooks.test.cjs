@@ -83,21 +83,31 @@ describe('build-hooks script', () => {
     }
   });
 
-  // ── Full build script execution ────────────────────────────
+  // ── Full build script execution (in-process for coverage) ──
 
-  it('build script runs successfully and creates dist files', () => {
-    let stdout;
-    try {
-      stdout = execFileSync(process.execPath, [SCRIPT_PATH], {
-        encoding: 'utf8',
-        timeout: 10000,
-        cwd: path.join(__dirname, '..'),
-      });
-    } catch (e) {
-      assert.fail(`build-hooks.js failed with exit code ${e.status}: ${e.stderr}`);
+  it('build script runs in-process and creates dist files', () => {
+    // Require the script directly so c8 can instrument the coverage.
+    // build-hooks.js auto-executes build() on load — the happy path
+    // does not call process.exit, so this is safe.
+    //
+    // Remove dist dir first so build() exercises the mkdir path (lines 47-48)
+    const dist = path.join(HOOKS_DIR, 'dist');
+    if (fs.existsSync(dist)) {
+      fs.rmSync(dist, { recursive: true, force: true });
     }
 
-    assert.ok(stdout.includes('Build complete'), 'should report build complete');
+    const origLog = console.log;
+    const logs = [];
+    console.log = (...args) => logs.push(args.join(' '));
+    try {
+      // Clear require cache so it actually re-runs
+      delete require.cache[require.resolve(SCRIPT_PATH)];
+      require(SCRIPT_PATH);
+    } finally {
+      console.log = origLog;
+    }
+
+    assert.ok(logs.some(l => l.includes('Build complete')), 'should report build complete');
 
     // Verify dist files were created
     const distDir = path.join(HOOKS_DIR, 'dist');

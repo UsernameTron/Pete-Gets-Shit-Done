@@ -1,13 +1,19 @@
 # Todo
 
-## Current Status: v2.0 Intelligence Layer -- Shipped
+## Current Status: v2.1 System Audit & Debt Closure -- Phase 36 Executing
 
 v2.0 milestone shipped and archived (2026-04-05). Tag: v2.0.
-2069 tests passing across 403 suites. 15 active agents, 7 archived.
+PR #32 (lesson-capture enforcement) **MERGED** 2026-04-09 (commit `1a4e33c` on origin/main, all CI green).
+2178 tests passing across ~480 suites (109 new in lesson-capture-gate).
+
+v2.1 milestone in progress. See `.planning/STATE.md` and `.planning/HANDOFF.json` for current execution position. Branch `feat/lesson-capture-enforcement` is being reused as the v2.1 working branch (26 commits ahead of origin/main, all v2.1 phase work). Local HEAD is missing the PR #32 merge commit from main; rebase deferred — content is identical.
 
 ## Open Items
 
-- [ ] Define next milestone (`/gsd:new-milestone`)
+- [ ] Resume Phase 36-02 (AUDIT-04 + AUDIT-05) per `.planning/HANDOFF.json` — must run inline/interactive, NOT worktree-isolated
+- [ ] Complete Phases 37 (Test/Coverage) and 38 (Docs Accuracy)
+- [ ] v2.1 milestone lifecycle: audit → complete → cleanup
+- [ ] (Eventually) Rebase `feat/lesson-capture-enforcement` on origin/main before next PR, or cut a new branch for v2.1 ship
 
 ---
 

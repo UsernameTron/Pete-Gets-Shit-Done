@@ -270,9 +270,64 @@ describe('workstream set/get', () => {
   });
 });
 
+// ─── workstream set edge cases ────────────────────────────────────────────────
+
+describe('workstream set edge cases', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'real-ws');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n');
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('clears active workstream when name is empty', () => {
+    // First set a workstream
+    runGsdTools(['workstream', 'set', 'real-ws', '--raw'], tmpDir);
+    // Then clear it by passing no name (empty string)
+    const result = runGsdTools(['workstream', 'set', '', '--raw'], tmpDir);
+    assert.ok(result.success, `set clear failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.active, null);
+    assert.strictEqual(data.cleared, true);
+  });
+
+  test('returns not_found for non-existent workstream', () => {
+    const result = runGsdTools(['workstream', 'set', 'does-not-exist', '--raw'], tmpDir);
+    assert.ok(result.success, `set not-found failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.error, 'not_found');
+    assert.strictEqual(data.workstream, 'does-not-exist');
+  });
+});
+
+// ─── workstream progress flat mode ──────────────────────────────────────────
+
+describe('workstream progress flat mode', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    // No workstreams directory — flat mode
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('returns flat mode when no workstreams dir exists', () => {
+    const result = runGsdTools(['workstream', 'progress', '--raw'], tmpDir);
+    assert.ok(result.success, `progress flat failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.mode, 'flat');
+    assert.deepStrictEqual(data.workstreams, []);
+  });
+});
+
 // ─── Collision Detection ────────────────────────────────────────────────────
 
-describe('getOtherActiveWorkstreams', () => {
+describe('getOtherActiveWorkstreams via workstream complete', () => {
   let tmpDir;
 
   before(() => {
