@@ -4,7 +4,7 @@ milestone: v2.0
 milestone_name: Intelligence Layer
 status: shipped
 last_updated: "2026-04-06T12:00:00.000Z"
-last_activity: 2026-04-06 -- Finalization complete, docs refreshed, all pushed
+last_activity: 2026-04-10 -- Phase 37 plan 01 (quick-win coverage gaps) complete
 progress:
   total_phases: 4
   completed_phases: 4
@@ -53,6 +53,7 @@ Progress: 4/4 phases complete | 13/13 plans | 23/23 requirements | Milestone arc
 - **Lazy require in dynamic branch:** `require('./model-profiles.cjs')` inside `resolveModelInternal()` dynamic branch avoids circular deps and is only loaded when routing_strategy !== 'static'.
 - **buildTaskContext signature:** Takes `(phaseInfo, planInventory, reqIds, config)` — reqIds is separate because `phase_req_ids` is a local variable in init commands, not a property of phaseInfo.
 - **planInventory null for plan-phase:** `cmdInitPlanPhase()` passes null for planInventory since it creates plans — complexity driven by requirement count only, biasing toward quality models.
+- **CLI integration testing for coverage:** Phase 37 tests via runGsdTools (CLI) not direct function imports, matching existing patterns and providing true integration coverage.
 
 ## Session Handoff
 
