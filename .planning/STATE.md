@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: System Audit & Debt Closure
-status: executing
-last_updated: "2026-04-09T12:00:00.000Z"
-last_activity: 2026-04-09 -- Phase 37 complete, starting Phase 38 (Documentation Accuracy)
+status: complete
+last_updated: "2026-04-09T12:30:00.000Z"
+last_activity: 2026-04-09 -- All 5 phases complete. Milestone ready for audit and closure.
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
-  percent: 80
+  completed_phases: 5
+  total_plans: 8
+  completed_plans: 8
+  percent: 100
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -24,12 +24,11 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 
 ## Current Position
 
-Phase: 38 (documentation-accuracy) — NOT STARTED
-Plan: 0 of 0
-Status: Phase 37 complete. All coverage thresholds met. Moving to final phase.
-Last activity: 2026-04-09 -- Phase 37 gap fixed (build-hooks.js 81.7%), SUMMARYs written, phase closed
+Phase: ALL COMPLETE
+Status: All 5 phases of v2.1 milestone complete. Ready for milestone audit and closure.
+Last activity: 2026-04-09 -- Phase 38 docs updated, all success criteria verified
 
-Progress: [████████░░] 80% (4/5 phases complete)
+Progress: [██████████] 100% (5/5 phases complete)
 
 ## Milestone History
 
@@ -59,8 +58,7 @@ Progress: [████████░░] 80% (4/5 phases complete)
 ## Session Handoff
 
 **Branch**: `feat/lesson-capture-enforcement` (clean)
-**Last action (2026-04-09)**: Phase 37 closed — build-hooks.js gap fixed (81.7%), SUMMARYs written, ROADMAP updated.
-**Coverage**: overall 90.41%, install.js 80.63%, security.cjs 100%, build-hooks.js 81.7%
+**Last action (2026-04-09)**: v2.1 milestone all phases complete. Phase 37 gap fixed, Phase 38 docs updated.
+**Coverage**: overall 90.41%, all modules >= 80%, security 100%
 **Tests**: 2377 passing, 0 failures (454 suites)
-**Next**: Phase 38 — Documentation Accuracy (discuss -> plan -> execute)
-**Parallel work**: lesson-capture-enforcement fixture extraction (tasks/todo.md) is separate from v2.1 milestone.
+**Next**: Milestone audit -> complete-milestone -> cleanup -> ship
