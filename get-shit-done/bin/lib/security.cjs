@@ -177,8 +177,11 @@ function scanForInjection(text, opts = {}) {
       findings.push('Contains suspicious zero-width or invisible Unicode characters');
     }
 
-    // Check for extremely long strings that could be prompt stuffing
-    if (text.length > 50000) {
+    // Check for extremely long strings that could be prompt stuffing.
+    // Skipped for authored repo artifacts (agent/workflow/command definitions)
+    // where length is not an injection signal — those files are version-controlled
+    // and reviewed, not untrusted input.
+    if (text.length > 50000 && !opts.skipLengthCheck) {
       findings.push(`Suspicious text length: ${text.length} chars (potential prompt stuffing)`);
     }
   }

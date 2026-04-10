@@ -96,7 +96,7 @@ describe('codebase prompt injection scan', () => {
       if (ALLOWLIST.has(relPath)) continue;
 
       const content = fs.readFileSync(file, 'utf-8');
-      const result = scanForInjection(content, { strict: true });
+      const result = scanForInjection(content, { strict: true, skipLengthCheck: true });
 
       if (!result.clean) {
         findings.push({ file: relPath, issues: result.findings });
@@ -119,7 +119,7 @@ describe('codebase prompt injection scan', () => {
       if (ALLOWLIST.has(relPath)) continue;
 
       const content = fs.readFileSync(file, 'utf-8');
-      const result = scanForInjection(content, { strict: true });
+      const result = scanForInjection(content, { strict: true, skipLengthCheck: true });
 
       if (!result.clean) {
         findings.push({ file: relPath, issues: result.findings });
@@ -142,7 +142,7 @@ describe('codebase prompt injection scan', () => {
       if (ALLOWLIST.has(relPath)) continue;
 
       const content = fs.readFileSync(file, 'utf-8');
-      const result = scanForInjection(content, { strict: true });
+      const result = scanForInjection(content, { strict: true, skipLengthCheck: true });
 
       if (!result.clean) {
         findings.push({ file: relPath, issues: result.findings });
