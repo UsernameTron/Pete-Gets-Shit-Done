@@ -8,6 +8,7 @@ description: >
   to test-runner and docs-sync respectively.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
+permissionMode: default
 ---
 
 You are a plugin developer for get-shit-done-cc, a zero-dependency CommonJS npm
