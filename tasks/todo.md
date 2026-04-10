@@ -1,23 +1,19 @@
 # Todo
 
-## Current Status: v2.0 Intelligence Layer -- Shipped + Lesson-Capture PR Open
+## Current Status: v2.1 System Audit & Debt Closure -- Phase 36 Executing
 
 v2.0 milestone shipped and archived (2026-04-05). Tag: v2.0.
+PR #32 (lesson-capture enforcement) **MERGED** 2026-04-09 (commit `1a4e33c` on origin/main, all CI green).
 2178 tests passing across ~480 suites (109 new in lesson-capture-gate).
+
+v2.1 milestone in progress. See `.planning/STATE.md` and `.planning/HANDOFF.json` for current execution position. Branch `feat/lesson-capture-enforcement` is being reused as the v2.1 working branch (26 commits ahead of origin/main, all v2.1 phase work). Local HEAD is missing the PR #32 merge commit from main; rebase deferred — content is identical.
 
 ## Open Items
 
-- [ ] Merge PR #32 after Windows CI goes green (pushed colon fix `1860027`)
-- [ ] Squash fixup commits on `feat/lesson-capture-enforcement` before merge (3 commits post-squash: `dd3c21a` + `832fbb0` + `1860027`)
-- [ ] Update STATE.md after merge
-- [ ] Define next milestone (`/gsd:new-milestone`)
-
-## Session Handoff — 2026-04-09
-
-**Branch**: `feat/lesson-capture-enforcement` @ `1860027` (pushed, PR #32 open)
-**Status**: PR open, awaiting Windows CI green after colon fix. macOS + Ubuntu all green.
-**Remaining fixup**: 3 commits on branch after the squash (`dd3c21a`). Before merge, either squash-amend or let GitHub squash-merge handle it.
-**Next session**: `/prime` → check PR #32 CI → merge if green → update STATE.md → define next milestone
+- [ ] Resume Phase 36-02 (AUDIT-04 + AUDIT-05) per `.planning/HANDOFF.json` — must run inline/interactive, NOT worktree-isolated
+- [ ] Complete Phases 37 (Test/Coverage) and 38 (Docs Accuracy)
+- [ ] v2.1 milestone lifecycle: audit → complete → cleanup
+- [ ] (Eventually) Rebase `feat/lesson-capture-enforcement` on origin/main before next PR, or cut a new branch for v2.1 ship
 
 ---
 
