@@ -7,7 +7,6 @@ disallowedTools: Write, Edit
 color: blue
 model: haiku
 permissionMode: plan
-isolation: worktree
 maxTurns: 20
 ---
 

@@ -3,7 +3,7 @@ name: gsd-research-orchestrator
 description: "Unified research agent for both phase-level and project-level research. Accepts scope parameter (phase|project) to determine research mode, output format, and downstream consumers. Replaces gsd-phase-researcher and gsd-project-researcher."
 tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*, mcp__firecrawl__*, mcp__exa__*
 model: sonnet
-permissionMode: plan
+permissionMode: acceptEdits
 # Tier: Research
 color: cyan
 # hooks:
