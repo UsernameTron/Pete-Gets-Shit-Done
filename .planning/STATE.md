@@ -1,34 +1,35 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Intelligence Layer
-status: shipped
-last_updated: "2026-04-06T12:00:00.000Z"
-last_activity: 2026-04-10 -- Phase 37 plan 01 (quick-win coverage gaps) complete
+milestone: v2.1
+milestone_name: System Audit & Debt Closure
+status: executing
+last_updated: "2026-04-10T04:00:00.000Z"
+last_activity: 2026-04-10 -- Phase 37 both plans executed, build-hooks.js gap remains
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
+  total_phases: 5
+  completed_phases: 3
+  total_plans: 7
+  completed_plans: 7
+  percent: 60
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-05)
+See: .planning/PROJECT.md (updated 2026-04-09)
 
-**Shipped:** v2.0 Intelligence Layer (2026-04-05)
-**Previous:** v1.9 Ship Readiness & Hygiene (shipped 2026-04-05)
+**Current:** v2.1 System Audit & Debt Closure
+**Previous:** v2.0 Intelligence Layer (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: None — between milestones
-Plan: N/A
-Status: v2.0 milestone shipped and archived. Ready for next milestone.
-Last activity: 2026-04-05 -- Milestone archived, tagged v2.0
+Phase: 37 (test-coverage-verification) — EXECUTING (gap remaining)
+Plan: 2 of 2 complete
+Status: Both plans executed. build-hooks.js at 79.26% needs ~1% to cross 80% threshold.
+Last activity: 2026-04-10 -- Wave 1+2 merged, 2377 tests passing, 90.4% overall
 
-Progress: 4/4 phases complete | 13/13 plans | 23/23 requirements | Milestone archived
+Progress: [████████░░] 80% (4/5 phases — 37 needs gap fix before verification)
 
 ## Milestone History
 
@@ -57,9 +58,11 @@ Progress: 4/4 phases complete | 13/13 plans | 23/23 requirements | Milestone arc
 
 ## Session Handoff
 
-**Branch**: `feat/lesson-capture-enforcement` @ `812b855`
-**Last action (2026-04-10)**: Phase 37 Plan 02 complete -- install.js coverage raised from 68.13% to 80.63%, overall from 87.16% to 90.03%. 310 new tests added (2197 -> 2507), zero failures.
-**Status**: Phase 37-test-coverage-verification Plan 02 complete. Both plans (37-01, 37-02) done.
-**Commits this session**: f346fdd (Task 1: utils coverage), 812b855 (Task 2: converters + governance coverage)
-**Coverage results**: install.js 80.63%, overall 90.03%, security.cjs 100%. Pre-existing: build-hooks.js 79.26% (not caused by this plan).
-**Next**: Phase 37 verification, then ship.
+**Branch**: `feat/lesson-capture-enforcement` (clean)
+**Last action (2026-04-10)**: Phase 37 plans 01+02 both executed and merged from worktrees.
+**Status**: 3 of 4 AUDIT-06 criteria pass. build-hooks.js at 79.26% is the sole holdout.
+**Coverage**: overall 90.4%, install.js 80.63%, security.cjs 100%, build-hooks.js 79.26%
+**Tests**: 2377 passing, 0 failures (454 suites)
+**Gap**: build-hooks.js lines 37-41, 47-48, 58-60, 65-68, 75-77 (error handling for corrupted hook files). ~10-15 lines of test code needed.
+**Next**: Fix build-hooks.js gap -> run verifier -> mark phase 37 complete -> Phase 38 (docs accuracy)
+**Parallel work**: lesson-capture-enforcement fixture extraction (tasks/todo.md) is separate from v2.1 milestone.
