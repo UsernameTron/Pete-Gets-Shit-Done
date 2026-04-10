@@ -89,6 +89,13 @@ describe('build-hooks script', () => {
     // Require the script directly so c8 can instrument the coverage.
     // build-hooks.js auto-executes build() on load — the happy path
     // does not call process.exit, so this is safe.
+    //
+    // Remove dist dir first so build() exercises the mkdir path (lines 47-48)
+    const dist = path.join(HOOKS_DIR, 'dist');
+    if (fs.existsSync(dist)) {
+      fs.rmSync(dist, { recursive: true, force: true });
+    }
+
     const origLog = console.log;
     const logs = [];
     console.log = (...args) => logs.push(args.join(' '));
