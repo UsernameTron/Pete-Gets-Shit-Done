@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: System Audit & Debt Closure
-status: complete
-last_updated: "2026-04-09T12:30:00.000Z"
-last_activity: 2026-04-09 -- All 5 phases complete. Milestone ready for audit and closure.
+status: archived
+last_updated: "2026-04-10T04:30:00.000Z"
+last_activity: 2026-04-10 -- v2.1 milestone archived and completed
 progress:
   total_phases: 5
   completed_phases: 5
@@ -17,18 +17,19 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-09)
+See: .planning/PROJECT.md (updated 2026-04-10)
 
-**Current:** v2.1 System Audit & Debt Closure
+**Shipped:** v2.1 System Audit & Debt Closure (2026-04-10)
 **Previous:** v2.0 Intelligence Layer (shipped 2026-04-05)
+**Next milestone:** Not yet defined. Run `/gsd:new-milestone` to start.
 
 ## Current Position
 
-Phase: ALL COMPLETE
-Status: All 5 phases of v2.1 milestone complete. Ready for milestone audit and closure.
-Last activity: 2026-04-09 -- Phase 38 docs updated, all success criteria verified
+Phase: MILESTONE ARCHIVED
+Status: v2.1 completed, audited (10/10 requirements), archived to milestones/
+Last activity: 2026-04-10 -- milestone audit passed, archive created, retrospective written
 
-Progress: [██████████] 100% (5/5 phases complete)
+Progress: [██████████] 100% (5/5 phases, 10/10 requirements)
 
 ## Milestone History
 
@@ -45,20 +46,12 @@ Progress: [██████████] 100% (5/5 phases complete)
 | v1.8 | Documentation & Accuracy | 2 | 0 | 2026-04-05 |
 | v1.9 | Ship Readiness & Hygiene | 2 | 4 | 2026-04-05 |
 | v2.0 | Intelligence Layer | 4 | 13 | 2026-04-05 |
-
-## Decisions
-
-- **dynamicSelect internal access:** Uses _modelProfiles directly after _initialize() instead of MODEL_PROFILES getter — avoids redundant getter overhead.
-- **Profile bounding:** Quality profile never downgrades, budget caps at balanced — respects user cost/quality intent.
-- **Lazy require in dynamic branch:** `require('./model-profiles.cjs')` inside `resolveModelInternal()` dynamic branch avoids circular deps and is only loaded when routing_strategy !== 'static'.
-- **buildTaskContext signature:** Takes `(phaseInfo, planInventory, reqIds, config)` — reqIds is separate because `phase_req_ids` is a local variable in init commands, not a property of phaseInfo.
-- **planInventory null for plan-phase:** `cmdInitPlanPhase()` passes null for planInventory since it creates plans — complexity driven by requirement count only, biasing toward quality models.
-- **CLI integration testing for coverage:** Phase 37 tests via runGsdTools (CLI) not direct function imports, matching existing patterns and providing true integration coverage.
+| v2.1 | System Audit & Debt Closure | 5 | 8 | 2026-04-10 |
 
 ## Session Handoff
 
 **Branch**: `feat/lesson-capture-enforcement` (clean)
-**Last action (2026-04-09)**: v2.1 milestone all phases complete. Phase 37 gap fixed, Phase 38 docs updated.
+**Last action (2026-04-10)**: v2.1 milestone audited, archived, and completed. Retrospective written.
 **Coverage**: overall 90.41%, all modules >= 80%, security 100%
 **Tests**: 2377 passing, 0 failures (454 suites)
-**Next**: Milestone audit -> complete-milestone -> cleanup -> ship
+**Next**: Cleanup phase directories -> ship PR -> new milestone
