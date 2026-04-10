@@ -304,6 +304,82 @@ result: pending
     assert.strictEqual(output.summary.by_category.build_needed, 1);
   });
 
+  test('extracts bullet items from VERIFICATION with human_needed status', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '06-deploy');
+    fs.mkdirSync(phaseDir, { recursive: true });
+
+    fs.writeFileSync(path.join(phaseDir, '06-VERIFICATION.md'), `---
+status: human_needed
+phase: 06-deploy
+---
+
+## Human Verification
+
+- Verify the deployment pipeline triggers correctly on push
+- Check that rollback mechanism works under load
+`);
+
+    const result = runGsdTools('audit-uat --raw', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.summary.total_items, 2);
+    assert.strictEqual(output.results[0].items[0].category, 'human_uat');
+    assert.strictEqual(output.results[0].items[0].result, 'human_needed');
+  });
+
+  test('categorizes blocked item without specific blocked_by as generic blocked', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '07-perf');
+    fs.mkdirSync(phaseDir, { recursive: true });
+
+    fs.writeFileSync(path.join(phaseDir, '07-UAT.md'), `---
+status: partial
+phase: 07-perf
+started: 2025-01-01T00:00:00Z
+updated: 2025-01-01T00:00:00Z
+---
+
+## Tests
+
+### 1. Load Test
+expected: Handles 1000 RPS
+result: blocked
+blocked_by: unknown infrastructure issue
+`);
+
+    const result = runGsdTools('audit-uat --raw', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.results[0].items[0].category, 'blocked');
+  });
+
+  test('categorizes skipped item without matching reason as skipped_unresolved', () => {
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '08-misc');
+    fs.mkdirSync(phaseDir, { recursive: true });
+
+    fs.writeFileSync(path.join(phaseDir, '08-UAT.md'), `---
+status: partial
+phase: 08-misc
+started: 2025-01-01T00:00:00Z
+updated: 2025-01-01T00:00:00Z
+---
+
+## Tests
+
+### 1. Edge Case
+expected: Handles gracefully
+result: skipped
+reason: not enough time to test
+`);
+
+    const result = runGsdTools('audit-uat --raw', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.results[0].items[0].category, 'skipped_unresolved');
+  });
+
   test('ignores VERIFICATION files without human_needed or gaps_found status', () => {
     const phaseDir = path.join(tmpDir, '.planning', 'phases', '01-foundation');
     fs.mkdirSync(phaseDir, { recursive: true });
