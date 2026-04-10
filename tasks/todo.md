@@ -16,11 +16,12 @@ Archive tag: `archive/v2.1-write-once-perimeters-superseded` preserves abandoned
 - [ ] `/gsd:new-milestone` to start v2.2 cycle
 - [ ] Stop-hook sentinel for human-review gates (see tasks/lessons.md 2026-04-10 [Hook Design])
 
-## Session Handoff (2026-04-10 — post-cleanup)
+## Session Handoff (2026-04-10 — session 4)
 
-All v2.1 work shipped. README fixed. Branch state clean (main only).
-Superseded planning branch archived as annotated tag on origin.
-No blockers. Next session: `/gsd:new-milestone` to start v2.2.
+All v2.1 work shipped. No new milestone started — Pete deferred v2.2.
+Verified `/gsd:review --codex` workflow is ready for use once phase plans exist.
+Branch state: main only, clean. No blockers.
+Next session: `/gsd:new-milestone` when Pete is ready to define v2.2 scope.
 
 ---
 

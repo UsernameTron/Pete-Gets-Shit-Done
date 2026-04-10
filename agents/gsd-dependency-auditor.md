@@ -8,6 +8,12 @@ permissionMode: acceptEdits
 isolation: worktree
 maxTurns: 20
 # Tier: Modify
+# hooks:
+#   PostToolUse:
+#     - matcher: "Write|Edit"
+#       hooks:
+#         - type: command
+#           command: "npx eslint --fix $FILE 2>/dev/null || true"
 color: orange
 ---
 
@@ -251,6 +257,7 @@ If there is nothing useful to add, omit the DETAILED FINDINGS section entirely.
 8. **Do NOT recommend `npm audit fix --force` or equivalent.** That command breaks projects. Recommend specific upgrades with version numbers instead.
 9. **Do NOT exceed 10 WebFetch calls per run.** Registry lookups are optional enrichment, not core functionality.
 10. **Do NOT write any file except `.planning/dependencies/DEPENDENCIES-REPORT.md`.** That one file is your only Write target. You have `disallowedTools: Edit`, so modifying existing files is impossible — but do not try to work around that by Write-ing over existing files either. One report, one new file.
+11. **Do NOT use heredoc syntax in Bash commands** — never use `Bash(cat << 'EOF')` or heredoc. Use printf or write the file with the Write tool instead.
 </what_not_to_do>
 </anti_patterns>
 
