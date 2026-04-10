@@ -76,7 +76,10 @@ Plans:
   2. Overall coverage is at or above 90%
   3. No individual module falls below 80% coverage
   4. Security-critical modules (security.cjs, input validation paths) are at or above 95% coverage
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 37-01-PLAN.md -- Close coverage gaps in 6 library modules (build-hooks, state, uat, phase, workstream, profile-pipeline)
+- [ ] 37-02-PLAN.md -- Close install.js coverage gap (68% -> 80%+) and verify all AUDIT-06 thresholds
 
 ### Phase 38: Documentation Accuracy
 **Goal**: All project documentation accurately reflects the current v2.0 state of the system
@@ -98,7 +101,7 @@ Plans:
 | 34. Debt Closure | v2.1 | 2/2 | Complete    | 2026-04-09 |
 | 35. Confirmation Audit | v2.1 | 1/1 | Complete    | 2026-04-09 |
 | 36. System Component Audit | v2.1 | 2/2 | Complete | 2026-04-09 |
-| 37. Test & Coverage Verification | v2.1 | 0/0 | Not started | - |
+| 37. Test & Coverage Verification | v2.1 | 0/2 | Planning | - |
 | 38. Documentation Accuracy | v2.1 | 0/0 | Not started | - |
 
 ---
