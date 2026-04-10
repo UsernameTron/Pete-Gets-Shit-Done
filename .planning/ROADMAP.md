@@ -23,7 +23,7 @@
 - [x] **Phase 34: Debt Closure** - Backfill missing SUMMARYs, update stale agent references, create missing VALIDATION.md (completed 2026-04-09)
 - [x] **Phase 35: Confirmation Audit** - Verify v1.4 DEBT-01/DEBT-04 fixes resolved INT-01/INT-02 (completed 2026-04-09)
 - [x] **Phase 36: System Component Audit** - Validate all agents, commands, and hooks are correctly configured (completed 2026-04-09)
-- [ ] **Phase 37: Test & Coverage Verification** - Full test suite passes with all coverage thresholds met
+- [x] **Phase 37: Test & Coverage Verification** - Full test suite passes with all coverage thresholds met (completed 2026-04-09)
 - [ ] **Phase 38: Documentation Accuracy** - CLAUDE.md, README.md, DEVOPS-HANDOFF.md reflect current state
 
 ## Phase Details
@@ -76,10 +76,10 @@ Plans:
   2. Overall coverage is at or above 90%
   3. No individual module falls below 80% coverage
   4. Security-critical modules (security.cjs, input validation paths) are at or above 95% coverage
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 37-01-PLAN.md -- Close coverage gaps in 6 library modules (build-hooks, state, uat, phase, workstream, profile-pipeline)
-- [ ] 37-02-PLAN.md -- Close install.js coverage gap (68% -> 80%+) and verify all AUDIT-06 thresholds
+- [x] 37-01-PLAN.md -- Close coverage gaps in 6 library modules (build-hooks, state, uat, phase, workstream, profile-pipeline)
+- [x] 37-02-PLAN.md -- Close install.js coverage gap (68% -> 80%+) and verify all AUDIT-06 thresholds
 
 ### Phase 38: Documentation Accuracy
 **Goal**: All project documentation accurately reflects the current v2.0 state of the system
@@ -101,7 +101,7 @@ Plans:
 | 34. Debt Closure | v2.1 | 2/2 | Complete    | 2026-04-09 |
 | 35. Confirmation Audit | v2.1 | 1/1 | Complete    | 2026-04-09 |
 | 36. System Component Audit | v2.1 | 2/2 | Complete | 2026-04-09 |
-| 37. Test & Coverage Verification | v2.1 | 0/2 | Planning | - |
+| 37. Test & Coverage Verification | v2.1 | 2/2 | Complete | 2026-04-09 |
 | 38. Documentation Accuracy | v2.1 | 0/0 | Not started | - |
 
 ---

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: System Audit & Debt Closure
 status: executing
-last_updated: "2026-04-10T04:00:00.000Z"
-last_activity: 2026-04-10 -- Phase 37 both plans executed, build-hooks.js gap remains
+last_updated: "2026-04-09T12:00:00.000Z"
+last_activity: 2026-04-09 -- Phase 37 complete, starting Phase 38 (Documentation Accuracy)
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 7
   completed_plans: 7
-  percent: 60
+  percent: 80
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 
 ## Current Position
 
-Phase: 37 (test-coverage-verification) — EXECUTING (gap remaining)
-Plan: 2 of 2 complete
-Status: Both plans executed. build-hooks.js at 79.26% needs ~1% to cross 80% threshold.
-Last activity: 2026-04-10 -- Wave 1+2 merged, 2377 tests passing, 90.4% overall
+Phase: 38 (documentation-accuracy) — NOT STARTED
+Plan: 0 of 0
+Status: Phase 37 complete. All coverage thresholds met. Moving to final phase.
+Last activity: 2026-04-09 -- Phase 37 gap fixed (build-hooks.js 81.7%), SUMMARYs written, phase closed
 
-Progress: [████████░░] 80% (4/5 phases — 37 needs gap fix before verification)
+Progress: [████████░░] 80% (4/5 phases complete)
 
 ## Milestone History
 
@@ -59,10 +59,8 @@ Progress: [████████░░] 80% (4/5 phases — 37 needs gap fix 
 ## Session Handoff
 
 **Branch**: `feat/lesson-capture-enforcement` (clean)
-**Last action (2026-04-10)**: Phase 37 plans 01+02 both executed and merged from worktrees.
-**Status**: 3 of 4 AUDIT-06 criteria pass. build-hooks.js at 79.26% is the sole holdout.
-**Coverage**: overall 90.4%, install.js 80.63%, security.cjs 100%, build-hooks.js 79.26%
+**Last action (2026-04-09)**: Phase 37 closed — build-hooks.js gap fixed (81.7%), SUMMARYs written, ROADMAP updated.
+**Coverage**: overall 90.41%, install.js 80.63%, security.cjs 100%, build-hooks.js 81.7%
 **Tests**: 2377 passing, 0 failures (454 suites)
-**Gap**: build-hooks.js lines 37-41, 47-48, 58-60, 65-68, 75-77 (error handling for corrupted hook files). ~10-15 lines of test code needed.
-**Next**: Fix build-hooks.js gap -> run verifier -> mark phase 37 complete -> Phase 38 (docs accuracy)
+**Next**: Phase 38 — Documentation Accuracy (discuss -> plan -> execute)
 **Parallel work**: lesson-capture-enforcement fixture extraction (tasks/todo.md) is separate from v2.1 milestone.
