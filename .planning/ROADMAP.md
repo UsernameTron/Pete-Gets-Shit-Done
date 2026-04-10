@@ -72,7 +72,7 @@ Plans:
 **Depends on**: Phase 36
 **Requirements**: AUDIT-06
 **Success Criteria** (what must be TRUE):
-  1. Full test suite (2069+ tests) passes with zero failures
+  1. Full test suite (2377+ tests) passes with zero failures
   2. Overall coverage is at or above 90%
   3. No individual module falls below 80% coverage
   4. Security-critical modules (security.cjs, input validation paths) are at or above 95% coverage

@@ -8,8 +8,8 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 **Shipped:** v2.0 Intelligence Layer (2026-04-05)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2069+ total, all passing
-**Coverage:** classify.cjs 98.2%, history.cjs 96.1%, model-profiles.cjs 100%, core.cjs 95.49%
+**Tests:** 2377+ total, all passing
+**Coverage:** classify.cjs 98.2%, history.cjs 96.1%, model-profiles.cjs 100%, core.cjs 95.6%
 **Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)

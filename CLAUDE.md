@@ -46,7 +46,7 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 ## Tests and Coverage
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
-- **Scale**: ~403 test suites, ~2069 assertions
+- **Scale**: ~454 test suites, ~2377 assertions
 - **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
 - **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
 
