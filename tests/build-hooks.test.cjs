@@ -85,6 +85,28 @@ describe('build-hooks script', () => {
 
   // ── Full build script execution ────────────────────────────
 
+  it('build script creates dist directory when absent', () => {
+    const distDir = path.join(HOOKS_DIR, 'dist');
+    // Remove dist so the mkdir branch is exercised
+    if (fs.existsSync(distDir)) {
+      fs.rmSync(distDir, { recursive: true, force: true });
+    }
+
+    let stdout;
+    try {
+      stdout = execFileSync(process.execPath, [SCRIPT_PATH], {
+        encoding: 'utf8',
+        timeout: 10000,
+        cwd: path.join(__dirname, '..'),
+      });
+    } catch (e) {
+      assert.fail(`build-hooks.js failed with exit code ${e.status}: ${e.stderr}`);
+    }
+
+    assert.ok(fs.existsSync(distDir), 'dist directory should be created');
+    assert.ok(stdout.includes('Build complete'), 'should report build complete');
+  });
+
   it('build script runs successfully and creates dist files', () => {
     let stdout;
     try {

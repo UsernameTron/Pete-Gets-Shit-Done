@@ -181,6 +181,46 @@ function createSessionFile(dir, filename, contents, baseTimestamp) {
   fs.writeFileSync(path.join(dir, filename), lines.join('\n') + '\n');
 }
 
+describe('profile-sample error paths', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempDir('gsd-profile-err-');
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('fails when override path does not exist', () => {
+    const result = runGsdTools('profile-sample --path /tmp/nonexistent-gsd-dir-99999 --raw', tmpDir);
+    assert.ok(!result.success, 'should fail for nonexistent path');
+    assert.ok(result.error.includes('No Claude Code sessions found'), `error should mention no sessions: ${result.error}`);
+  });
+
+  test('fails when sessions directory has no project subdirectories', () => {
+    const emptyDir = path.join(tmpDir, 'empty-sessions');
+    fs.mkdirSync(emptyDir, { recursive: true });
+    // Create a file (not a directory) so it's not empty but has no valid project dirs
+    fs.writeFileSync(path.join(emptyDir, 'not-a-dir.txt'), 'hello');
+
+    const result = runGsdTools(`profile-sample --path ${emptyDir} --raw`, tmpDir);
+    assert.ok(!result.success, 'should fail for empty sessions dir');
+    assert.ok(result.error.includes('No project'), `error should mention no projects: ${result.error}`);
+  });
+
+  test('handles project directory with no session .jsonl files', () => {
+    const sessionsDir = path.join(tmpDir, 'projects');
+    const projectDir = path.join(sessionsDir, 'empty-project');
+    fs.mkdirSync(projectDir, { recursive: true });
+    fs.writeFileSync(path.join(projectDir, 'readme.txt'), 'no sessions here');
+
+    const result = runGsdTools(`profile-sample --path ${sessionsDir} --raw`, tmpDir);
+    assert.ok(!result.success, 'should fail when no projects have sessions');
+    assert.ok(result.error.includes('No projects with sessions'), `error: ${result.error}`);
+  });
+});
+
 describe('profile-sample command', () => {
   let tmpDir;
 

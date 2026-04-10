@@ -1771,6 +1771,90 @@ describe('phase complete milestone-scoped next-phase', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// phase complete: 4-column roadmap table and Completed Phases counter
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('phase complete with 4-column roadmap table', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    // Create phase 1 with PLAN and SUMMARY
+    const phaseDir = path.join(tmpDir, '.planning', 'phases', '01-setup');
+    fs.mkdirSync(phaseDir, { recursive: true });
+    fs.writeFileSync(path.join(phaseDir, '01-01-PLAN.md'), '---\nphase: 01\nplan: 01\n---\n# Plan\n');
+    fs.writeFileSync(path.join(phaseDir, '01-01-SUMMARY.md'), '---\nphase: 01\nplan: 01\n---\n# Summary\n');
+
+    // Phase 2 exists as next
+    const phase2Dir = path.join(tmpDir, '.planning', 'phases', '02-build');
+    fs.mkdirSync(phase2Dir, { recursive: true });
+    fs.writeFileSync(path.join(phase2Dir, '02-01-PLAN.md'), '---\nphase: 02\nplan: 01\n---\n# Plan\n');
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('updates 4-column roadmap progress table', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), `# Roadmap
+
+### Phase 1: Setup
+Do setup things.
+
+### Phase 2: Build
+Build the app.
+
+| Phase | Plans | Status | Completed |
+|-------|-------|--------|-----------|
+| 1. Setup | 1 | In Progress | |
+| 2. Build | 1 | Not Started | |
+`);
+
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), `# STATE
+
+**Current Phase:** 1
+**Current Phase Name:** Setup
+**Total Phases:** 2
+**Status:** In progress
+`);
+
+    const result = runGsdTools('phase complete 1', tmpDir);
+    assert.ok(result.success, `phase complete failed: ${result.error}`);
+
+    const roadmap = fs.readFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), 'utf-8');
+    assert.ok(/Complete/.test(roadmap), 'roadmap table should show Complete status');
+  });
+
+  test('increments Completed Phases counter in STATE.md', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), `# Roadmap
+
+### Phase 1: Setup
+Do setup things.
+
+### Phase 2: Build
+Build the app.
+`);
+
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), `# STATE
+
+**Current Phase:** 1
+**Current Phase Name:** Setup
+**Total Phases:** 2
+**Completed Phases:** 0
+**Progress:** 0%
+**Status:** In progress
+`);
+
+    const result = runGsdTools('phase complete 1', tmpDir);
+    assert.ok(result.success, `phase complete failed: ${result.error}`);
+
+    const stateContent = fs.readFileSync(path.join(tmpDir, '.planning', 'STATE.md'), 'utf-8');
+    assert.ok(/Completed Phases.*1/m.test(stateContent), 'Completed Phases should be incremented to 1');
+    assert.ok(/Progress.*50%/m.test(stateContent), 'Progress should be 50%');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // milestone complete command
 // ─────────────────────────────────────────────────────────────────────────────
 

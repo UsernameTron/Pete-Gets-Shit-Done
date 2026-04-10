@@ -1,35 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.1
-milestone_name: System Audit & Debt Closure
-status: executing
-last_updated: "2026-04-09T20:00:00.000Z"
-last_activity: 2026-04-09 -- Phase 36 verification running
+milestone: v2.0
+milestone_name: Intelligence Layer
+status: shipped
+last_updated: "2026-04-06T12:00:00.000Z"
+last_activity: 2026-04-10 -- Phase 37 plan 01 (quick-win coverage gaps) complete
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
-  percent: 60
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 13
+  completed_plans: 13
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-09)
+See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Current:** v2.1 System Audit & Debt Closure
-**Previous:** v2.0 Intelligence Layer (shipped 2026-04-05)
+**Shipped:** v2.0 Intelligence Layer (2026-04-05)
+**Previous:** v1.9 Ship Readiness & Hygiene (shipped 2026-04-05)
 
 ## Current Position
 
-Phase: 37 (test-coverage-verification) — READY
-Plan: 0 of 0 (plans TBD)
-Status: Phase 36 verified PASS, transitioning to Phase 37
-Last activity: 2026-04-09 -- Phase 36 verified, Phase 37 ready
+Phase: None — between milestones
+Plan: N/A
+Status: v2.0 milestone shipped and archived. Ready for next milestone.
+Last activity: 2026-04-05 -- Milestone archived, tagged v2.0
 
-Progress: [████░░░░░░] 40% (2/5 phases)
+Progress: 4/4 phases complete | 13/13 plans | 23/23 requirements | Milestone archived
 
 ## Milestone History
 
@@ -54,18 +53,23 @@ Progress: [████░░░░░░] 40% (2/5 phases)
 - **Lazy require in dynamic branch:** `require('./model-profiles.cjs')` inside `resolveModelInternal()` dynamic branch avoids circular deps and is only loaded when routing_strategy !== 'static'.
 - **buildTaskContext signature:** Takes `(phaseInfo, planInventory, reqIds, config)` — reqIds is separate because `phase_req_ids` is a local variable in init commands, not a property of phaseInfo.
 - **planInventory null for plan-phase:** `cmdInitPlanPhase()` passes null for planInventory since it creates plans — complexity driven by requirement count only, biasing toward quality models.
-- [Phase 34]: ~/CLAUDE.md is outside project repo -- change applied directly, not committable to project git
-- [Phase 34-01]: Reconstructed SUMMARY content from CREW-ASSESSMENT.md execution log and original PLAN files -- format matched to existing 06-01 and 06-05 SUMMARYs
-- [Phase 35]: Non-GSD user agent mismatches (5) noted but not in DEBT-01 scope -- deferred
-- [Phase 35]: Installed vs source ship.md discrepancy is deployment gap, not code defect
-- [Phase 36]: Applied Phase 35 precedent for tier classification of agents bridging Modify/Full boundaries
+- **CLI integration testing for coverage:** Phase 37 tests via runGsdTools (CLI) not direct function imports, matching existing patterns and providing true integration coverage.
 
 ## Session Handoff
 
-**Branch**: `feat/lesson-capture-enforcement` (clean)
-**Last action (2026-04-09)**: Phase 37 context gathered. Discuss-phase complete, ready for planning.
-**Status**: v2.1 Phase 37 (Test & Coverage Verification) — context captured, needs plan/execute cycle.
-**Next**: `/gsd:plan-phase 37` — then execute to close coverage gaps (86.73% -> 90%+).
-**Baseline (2026-04-09)**: 2178 tests passing, 86.73% overall coverage. Below-80% modules: install.js (68.13%), build-hooks.js (79.26%). Security (security.cjs): 100%.
-**Note**: `.planning/phases/` is gitignored — phase artifacts are local working files. Committed state is in ROADMAP.md, STATE.md, REQUIREMENTS.md.
-**Parallel work**: lesson-capture-enforcement branch also has in-flight work (fixture extraction per tasks/todo.md) — separate from v2.1 milestone.
+**Branch**: `feat/lesson-capture-enforcement` @ `0171a8e` (11 ahead of main, clean)
+**Last action (2026-04-09 session continuation)**: Commit 1 Implementation Plan written and Pete-approved (4 gate questions signed off). Session file mapping confirmed for 3 target JSONL files. Secrets scan clean (only one email to scrub). Fixture build deferred to next session at 78% context budget per 40% hard rule.
+**Status**: Plan locked + approvals durable in git. Fixture extraction designed but not executed. Hook/test code UNTOUCHED — still at 18cf220 state for matcher file.
+**Next (first action of next session)**:
+  1. `/prime` then read `tasks/todo.md` → `## Commit 1 Implementation Plan` → `### Approval gate — SIGNED OFF 2026-04-09`
+  2. Build Python extractor: walk 3 JSONL files in order, filter `type in ('user','assistant')`, preserve `{type,timestamp,message:{role,content}}` exactly, scrub `cpeteconnor@gmail.com` only in section 1, emit section markers
+  3. Write `tests/fixtures/layer1-false-positives.jsonl` + `tests/fixtures/README.md`
+  4. Commit `test(fixtures): capture Layer 1 lesson-capture false positives from real sessions`
+  5. STOP and show section headers + turn counts for operator eyeball review
+  6. Proceed to hook/test code per plan section F
+**Session file mapping (DO NOT re-derive)**:
+  - Section 1 Layer 1 build: `4d282829-c4db-48f4-8030-99dc2886145d.jsonl` (15:14:40Z–15:58:04Z, 368 lines)
+  - Section 2 First prime-patterns boot: `981c1e5f-d49e-48e5-8607-772513ccaa68.jsonl` (15:59:03Z–16:10:22Z, 342 lines)
+  - Section 3 Second prime-patterns boot (self): `3beb55a1-2941-4dfd-b9ef-192f7e5350b7.jsonl` (16:11:13Z–present)
+**Commits this session**: 615512b (plan), 5ad94bc (approvals), 0171a8e (exemption)
+**Prior context (for reference)**: v2.0 Intelligence Layer shipped 2026-04-05, tagged v2.0, merged via PR #31 on 2026-04-06. Layer 1 of lesson-capture landed on this branch earlier 2026-04-09.
