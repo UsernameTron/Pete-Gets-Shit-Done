@@ -63,8 +63,9 @@ Progress: [████░░░░░░] 40% (2/5 phases)
 ## Session Handoff
 
 **Branch**: `feat/lesson-capture-enforcement` (clean)
-**Last action (2026-04-09)**: Phase 36 verified PASS (4/4 criteria). ROADMAP, REQUIREMENTS, STATE updated. Transitioning to Phase 37.
-**Status**: v2.1 Phase 36 complete. Phase 37 (Test & Coverage Verification) ready — needs discuss/plan/execute cycle.
-**Next**: Phase 37 — run full test suite, verify coverage thresholds (90% overall, 80%/module, 95% security). Then Phase 38 (Documentation Accuracy).
+**Last action (2026-04-09)**: Phase 37 context gathered. Discuss-phase complete, ready for planning.
+**Status**: v2.1 Phase 37 (Test & Coverage Verification) — context captured, needs plan/execute cycle.
+**Next**: `/gsd:plan-phase 37` — then execute to close coverage gaps (86.73% -> 90%+).
+**Baseline (2026-04-09)**: 2178 tests passing, 86.73% overall coverage. Below-80% modules: install.js (68.13%), build-hooks.js (79.26%). Security (security.cjs): 100%.
 **Note**: `.planning/phases/` is gitignored — phase artifacts are local working files. Committed state is in ROADMAP.md, STATE.md, REQUIREMENTS.md.
 **Parallel work**: lesson-capture-enforcement branch also has in-flight work (fixture extraction per tasks/todo.md) — separate from v2.1 milestone.
