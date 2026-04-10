@@ -6,6 +6,13 @@
           { "type": "command", "command": "node .claude/hooks/lesson-capture-gate.cjs" }
         ]
       }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash scripts/gsd-agent-health-check.sh" }
+        ]
+      }
     ]
   }
 }
