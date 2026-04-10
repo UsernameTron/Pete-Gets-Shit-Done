@@ -1,3 +1,15 @@
 # GSD Agent Health Log
 # Written by scripts/gsd-agent-health-check.sh (SubagentStop hook)
 
+- 2026-04-10T22:37:18Z DRIFT: gsd-codebase-mapper.md differs between repo and installed (~51 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-debugger.md differs between repo and installed (~63 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-dependency-auditor.md differs between repo and installed (~9 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-ecosystem-auditor.md differs between repo and installed (~9 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-planner.md differs between repo and installed (~88 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-research-orchestrator.md differs between repo and installed (~54 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-research-synthesizer.md differs between repo and installed (~51 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-roadmapper.md differs between repo and installed (~60 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-ui-auditor.md differs between repo and installed (~51 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-ui-researcher.md differs between repo and installed (~51 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-validator-hub.md differs between repo and installed (~2 diff lines)
+- 2026-04-10T22:37:18Z DRIFT: gsd-verifier.md differs between repo and installed (~46 diff lines)
