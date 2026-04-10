@@ -1,19 +1,26 @@
 # Todo
 
-## Current Status: v2.1 System Audit & Debt Closure -- Phase 36 Executing
+## Current Status: Between Milestones — v2.1 Archived, Ready to Ship
 
-v2.0 milestone shipped and archived (2026-04-05). Tag: v2.0.
-PR #32 (lesson-capture enforcement) **MERGED** 2026-04-09 (commit `1a4e33c` on origin/main, all CI green).
-2178 tests passing across ~480 suites (109 new in lesson-capture-gate).
-
-v2.1 milestone in progress. See `.planning/STATE.md` and `.planning/HANDOFF.json` for current execution position. Branch `feat/lesson-capture-enforcement` is being reused as the v2.1 working branch (26 commits ahead of origin/main, all v2.1 phase work). Local HEAD is missing the PR #32 merge commit from main; rebase deferred — content is identical.
+v2.1 System Audit & Debt Closure: **COMPLETE** (2026-04-10). 10/10 requirements, 5/5 phases, 2377 tests, 90.41% coverage.
+v2.1 audit report: `.planning/milestones/v2.1-MILESTONE-AUDIT.md` — PASSED.
+Branch: `feat/lesson-capture-enforcement` (clean, carries all v2.1 work).
 
 ## Open Items
 
-- [ ] Resume Phase 36-02 (AUDIT-04 + AUDIT-05) per `.planning/HANDOFF.json` — must run inline/interactive, NOT worktree-isolated
-- [ ] Complete Phases 37 (Test/Coverage) and 38 (Docs Accuracy)
-- [ ] v2.1 milestone lifecycle: audit → complete → cleanup
-- [ ] (Eventually) Rebase `feat/lesson-capture-enforcement` on origin/main before next PR, or cut a new branch for v2.1 ship
+- [ ] Remove orphaned phase dirs (35-confirmation-audit/, 36-system-component-audit/, v2.1-INTEGRATION-CHECK.md)
+- [ ] Ship PR for `feat/lesson-capture-enforcement` branch (v2.1 scope — broader than branch name suggests)
+- [ ] `/gsd:new-milestone` to start next cycle
+
+## Session Handoff (2026-04-10)
+
+Pre-ship verification complete. All v2.1 tech debt items reviewed:
+- Items 1-2 (missing artifacts, stale checkboxes): fixed during audit
+- Item 3 (Nyquist gaps): N/A for audit milestone
+- Item 4 (12 missing installer commands): **FALSE POSITIVE** — audit compared wrong directory. All 12 installed. Decision recorded in state/decisions.md.
+- Item 5 (5 non-GSD agent tier mismatches): operator decision — outside GSD scope
+
+No blockers. Clean up orphaned dirs, ship PR, start next milestone.
 
 ---
 
