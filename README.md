@@ -110,11 +110,104 @@ npx get-shit-done-cc@latest
 
 ## Non-interactive Install (Docker, CI, Scripts)
 
+<details>
+<summary>Non-interactive Install (Docker, CI, Scripts)</summary>
+
+```bash
+# Claude Code
+npx get-shit-done-cc --claude --global   # Install to ~/.claude/
+npx get-shit-done-cc --claude --local    # Install to ./.claude/
+
+# OpenCode (open source, free models)
+npx get-shit-done-cc --opencode --global # Install to ~/.config/opencode/
+
+# Gemini CLI
+npx get-shit-done-cc --gemini --global   # Install to ~/.gemini/
+
+# Codex (skills-first)
+npx get-shit-done-cc --codex --global    # Install to ~/.codex/
+npx get-shit-done-cc --codex --local     # Install to ./.codex/
+
+# Copilot (GitHub Copilot CLI)
+npx get-shit-done-cc --copilot --global  # Install to ~/.github/
+npx get-shit-done-cc --copilot --local   # Install to ./.github/
+
+# Cursor CLI
+npx get-shit-done-cc --cursor --global   # Install to ~/.cursor/
+npx get-shit-done-cc --cursor --local    # Install to ./.cursor/
+
+# Antigravity (Google, skills-first, Gemini-based)
+npx get-shit-done-cc --antigravity --global # Install to ~/.gemini/antigravity/
+npx get-shit-done-cc --antigravity --local  # Install to ./.agent/
+
+# All runtimes
+npx get-shit-done-cc --all --global      # Install to all directories
+```
+
+Use `--global` (`-g`) or `--local` (`-l`) to skip the location prompt. Use `--claude`, `--opencode`, `--gemini`, `--codex`, `--copilot`, `--cursor`, `--antigravity`, or `--all` to skip the runtime prompt.
+
+</details>
+
 ## Development Installation
+
+<details>
+<summary>Development Installation</summary>
+
+Clone the repository and run the installer locally:
+
+```bash
+git clone https://github.com/UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git
+cd Petes-Get-Shit-Done-Coding-Automation
+node bin/install.js --claude --local
+```
+
+Installs to `./.claude/` for testing modifications before contributing.
+
+</details>
 
 ### Recommended: Skip Permissions Mode
 
 GSD is designed for frictionless automation. Run Claude Code with:
+
+```bash
+claude --dangerously-skip-permissions
+```
+
+> [!TIP]
+> This is how GSD is intended to be used — stopping to approve `date` and `git commit` 50 times defeats the purpose.
+
+<details>
+<summary>Alternative: Granular Permissions</summary>
+
+If you prefer not to use that flag, add this to your project's `.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(date:*)",
+      "Bash(echo:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(sort:*)",
+      "Bash(grep:*)",
+      "Bash(tr:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git tag:*)"
+    ]
+  }
+}
+```
+
+</details>
 
 ---
 
