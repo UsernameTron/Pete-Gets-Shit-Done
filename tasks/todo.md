@@ -1,26 +1,26 @@
 # Todo
 
-## Current Status: Between Milestones — v2.1 Archived, Ready to Ship
+## Current Status: v2.1 Shipped — Clean Main, Ready for v2.2
 
-v2.1 System Audit & Debt Closure: **COMPLETE** (2026-04-10). 10/10 requirements, 5/5 phases, 2377 tests, 90.41% coverage.
-v2.1 audit report: `.planning/milestones/v2.1-MILESTONE-AUDIT.md` — PASSED.
-Branch: `feat/lesson-capture-enforcement` (clean, carries all v2.1 work).
+v2.1 System Audit & Debt Closure: **SHIPPED** (2026-04-10). PR #34 squash-merged to main.
+README fix: **SHIPPED** (2026-04-10). PR #35 squash-merged to main — restored 3 empty sections.
+10/10 requirements, 5/5 phases, 2377 tests, 90.41% coverage. CI green on all 8 checks.
+Branch state: **main only** — all feature/chore branches deleted, stale remotes pruned.
+Archive tag: `archive/v2.1-write-once-perimeters-superseded` preserves abandoned planning branch.
 
 ## Open Items
 
-- [ ] Remove orphaned phase dirs (35-confirmation-audit/, 36-system-component-audit/, v2.1-INTEGRATION-CHECK.md)
-- [ ] Ship PR for `feat/lesson-capture-enforcement` branch (v2.1 scope — broader than branch name suggests)
-- [ ] `/gsd:new-milestone` to start next cycle
+- [x] ~~Ship PR for `feat/lesson-capture-enforcement` branch~~ — PR #34 merged
+- [x] ~~Fix empty README sections~~ — PR #35 merged (91106af)
+- [x] ~~Clean up stale local branches~~ — all deleted, remotes pruned
+- [ ] `/gsd:new-milestone` to start v2.2 cycle
+- [ ] Stop-hook sentinel for human-review gates (see tasks/lessons.md 2026-04-10 [Hook Design])
 
-## Session Handoff (2026-04-10)
+## Session Handoff (2026-04-10 — post-cleanup)
 
-Pre-ship verification complete. All v2.1 tech debt items reviewed:
-- Items 1-2 (missing artifacts, stale checkboxes): fixed during audit
-- Item 3 (Nyquist gaps): N/A for audit milestone
-- Item 4 (12 missing installer commands): **FALSE POSITIVE** — audit compared wrong directory. All 12 installed. Decision recorded in state/decisions.md.
-- Item 5 (5 non-GSD agent tier mismatches): operator decision — outside GSD scope
-
-No blockers. Clean up orphaned dirs, ship PR, start next milestone.
+All v2.1 work shipped. README fixed. Branch state clean (main only).
+Superseded planning branch archived as annotated tag on origin.
+No blockers. Next session: `/gsd:new-milestone` to start v2.2.
 
 ---
 
