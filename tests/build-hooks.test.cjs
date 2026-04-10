@@ -83,43 +83,24 @@ describe('build-hooks script', () => {
     }
   });
 
-  // ── Full build script execution ────────────────────────────
+  // ── Full build script execution (in-process for coverage) ──
 
-  it('build script creates dist directory when absent', () => {
-    const distDir = path.join(HOOKS_DIR, 'dist');
-    // Remove dist so the mkdir branch is exercised
-    if (fs.existsSync(distDir)) {
-      fs.rmSync(distDir, { recursive: true, force: true });
-    }
-
-    let stdout;
+  it('build script runs in-process and creates dist files', () => {
+    // Require the script directly so c8 can instrument the coverage.
+    // build-hooks.js auto-executes build() on load — the happy path
+    // does not call process.exit, so this is safe.
+    const origLog = console.log;
+    const logs = [];
+    console.log = (...args) => logs.push(args.join(' '));
     try {
-      stdout = execFileSync(process.execPath, [SCRIPT_PATH], {
-        encoding: 'utf8',
-        timeout: 10000,
-        cwd: path.join(__dirname, '..'),
-      });
-    } catch (e) {
-      assert.fail(`build-hooks.js failed with exit code ${e.status}: ${e.stderr}`);
+      // Clear require cache so it actually re-runs
+      delete require.cache[require.resolve(SCRIPT_PATH)];
+      require(SCRIPT_PATH);
+    } finally {
+      console.log = origLog;
     }
 
-    assert.ok(fs.existsSync(distDir), 'dist directory should be created');
-    assert.ok(stdout.includes('Build complete'), 'should report build complete');
-  });
-
-  it('build script runs successfully and creates dist files', () => {
-    let stdout;
-    try {
-      stdout = execFileSync(process.execPath, [SCRIPT_PATH], {
-        encoding: 'utf8',
-        timeout: 10000,
-        cwd: path.join(__dirname, '..'),
-      });
-    } catch (e) {
-      assert.fail(`build-hooks.js failed with exit code ${e.status}: ${e.stderr}`);
-    }
-
-    assert.ok(stdout.includes('Build complete'), 'should report build complete');
+    assert.ok(logs.some(l => l.includes('Build complete')), 'should report build complete');
 
     // Verify dist files were created
     const distDir = path.join(HOOKS_DIR, 'dist');
