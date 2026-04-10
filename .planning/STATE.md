@@ -62,16 +62,17 @@ Progress: [████░░░░░░] 40% (2/5 phases)
 
 ## Session Handoff
 
-**Branch**: `feat/lesson-capture-enforcement` @ `cebc3ff` (18 ahead of main, clean)
-**Last action (2026-04-09)**: Phase 34 (Debt Closure) completed. Phase 35 planned with 1 warning from verifier.
-**Status**: v2.1 autonomous execution in progress. Phase 34 done. Phase 35 has CONTEXT.md + 35-01-PLAN.md. Verifier flagged 1 warning: AUDIT-02 needs invocation test added (not just existence check). Plan revision needed before execution.
+**Branch**: `feat/lesson-capture-enforcement` @ `2b2c3b5` (19 ahead of main, clean)
+**Last action (2026-04-09)**: Phase 36 plan 36-02 executed (interactive mode). AUDIT-04 and AUDIT-05 appended to 36-AUDIT-REPORT.md. All 3 audits PASS.
+**Status**: v2.1 Phase 36 execution complete (both plans done). Phase verification not yet run (was invoked with `--no-transition`). Phases 37-38 remain.
 **Next (first action of next session)**:
 
-  1. `/gsd:autonomous --from 35` — resumes autonomous execution from Phase 35
-  2. Phase 35 plan needs revision: verifier flagged that Task 2 checks gsd-validator-hub existence/routing but doesn't invoke it (ROADMAP requires "responds correctly when invoked")
-  3. After revision, execute Phase 35, then continue 36→37→38→lifecycle
+  1. Run phase 36 verification: verifier agent checks AUDIT-03/04/05 against ROADMAP requirements
+  2. If verification passes, mark phase 36 complete in ROADMAP/STATE
+  3. Continue to Phase 37 (next in v2.1 roadmap)
   4. All remaining phases are infrastructure/audit — discuss auto-skipped
 
-**Commits this session**: 549d670 (Phase 34 plan), 4999534 (34-01 SUMMARYs), 6b55a01 (34-02 VALIDATION), cebc3ff (Phase 34 complete)
+**Commits this session**: 2b2c3b5 (STATE.md update for phase 36 execution start)
 **Note**: `.planning/phases/` is gitignored — phase artifacts are local working files. Committed state is in ROADMAP.md, STATE.md, REQUIREMENTS.md.
 **Parallel work**: lesson-capture-enforcement branch also has in-flight work (fixture extraction per tasks/todo.md) — that's separate from v2.1 milestone.
+**Phase 36 findings**: 61/61 commands reachable (12 deployment gaps — source-only, not in npm installer). 16/16 hooks valid. 15/15 agents valid. Non-blocking recommendations: add 12 source commands to installer, add `name:` frontmatter to 2 commands, improve help.md discoverability.
