@@ -6,6 +6,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **`gsd-dependency-auditor` agent** — Audits package dependencies for CVEs, staleness, and license compatibility. Supports npm/pnpm/yarn, pip/poetry/uv, cargo, go mod, bundler, composer. Returns BLOCK/FLAG/PASS verdicts and writes `.planning/dependencies/DEPENDENCIES-REPORT.md`. Follows validator-hub defense-in-depth pattern (haiku / acceptEdits / isolation: worktree / maxTurns: 20). Minor-version upsells explicitly prohibited to preserve scope discipline.
+- **`/gsd:audit-deps` command** — Slash command wrapper that spawns `gsd-dependency-auditor`, verifies report output, and commits to a `chore/dependency-audit-<ts>` branch. Flags: `--no-commit`, `--quiet`. Respects GSD pre-commit hook (no direct main commits).
+
+### Changed
+- **Agent hygiene rollout (P0)** — Added explicit `model:`, `permissionMode:`, `disallowedTools:`, `maxTurns:`, and `isolation:` declarations to 10 agents previously running on implicit defaults. Pattern follows the validator-hub gold standard surfaced by the agent-architecture-review audit (composite 3.4/5.0). Affected agents: `gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-executor`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-ui-checker`, `gsd-user-profiler`, `gsd-verifier`. Tier rationale: haiku for pattern-matching/validation, sonnet for judgment/synthesis, opus for deep-reasoning verifier.
+
 ## [1.30.0] - 2026-04-04
 
 ### Added
