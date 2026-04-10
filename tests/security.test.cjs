@@ -223,6 +223,13 @@ describe('scanForInjection', () => {
     assert.ok(!strict.clean);
     assert.ok(strict.findings.some(f => f.includes('Suspicious text length')));
   });
+
+  test('strict mode length check can be skipped via opts.skipLengthCheck', () => {
+    const longText = 'A'.repeat(60000);
+    const result = scanForInjection(longText, { strict: true, skipLengthCheck: true });
+    const lengthFindings = result.findings.filter(f => f.includes('Suspicious text length'));
+    assert.strictEqual(lengthFindings.length, 0, 'length check should be skipped when skipLengthCheck is true');
+  });
 });
 
 // ─── Prompt Sanitization ────────────────────────────────────────────────────
