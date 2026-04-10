@@ -147,6 +147,36 @@ describe('getGlobalDir all runtimes', () => {
     const result = mod.getGlobalDir('gemini');
     assert.ok(result.endsWith('.gemini'), 'gemini: ' + result);
   });
+
+  test('explicit dir overrides default for opencode', () => {
+    const result = mod.getGlobalDir('opencode', '/custom/opencode');
+    assert.strictEqual(result, '/custom/opencode');
+  });
+
+  test('explicit dir overrides default for gemini', () => {
+    const result = mod.getGlobalDir('gemini', '/custom/gemini');
+    assert.strictEqual(result, '/custom/gemini');
+  });
+
+  test('explicit dir overrides default for codex', () => {
+    const result = mod.getGlobalDir('codex', '/custom/codex');
+    assert.strictEqual(result, '/custom/codex');
+  });
+
+  test('explicit dir overrides default for copilot', () => {
+    const result = mod.getGlobalDir('copilot', '/custom/copilot');
+    assert.strictEqual(result, '/custom/copilot');
+  });
+
+  test('explicit dir overrides default for antigravity', () => {
+    const result = mod.getGlobalDir('antigravity', '/custom/antigravity');
+    assert.strictEqual(result, '/custom/antigravity');
+  });
+
+  test('explicit dir overrides default for claude', () => {
+    const result = mod.getGlobalDir('claude', '/custom/claude');
+    assert.strictEqual(result, '/custom/claude');
+  });
 });
 
 // ─── writeManifest ──────────────────────────────────────────────────────────
@@ -924,6 +954,107 @@ color: yellow
 Body here.`;
     const result = mod.convertClaudeToGeminiAgent(content);
     assert.ok(!result.includes('color:'), 'color field should be removed');
+  });
+});
+
+// ─── getGlobalDir with env vars ─────────────────────────────────────────────
+
+describe('getGlobalDir environment variable overrides', () => {
+  const envVars = [
+    'OPENCODE_CONFIG_DIR', 'OPENCODE_CONFIG', 'XDG_CONFIG_HOME',
+    'GEMINI_CONFIG_DIR', 'CODEX_HOME', 'COPILOT_CONFIG_DIR',
+    'ANTIGRAVITY_CONFIG_DIR', 'CURSOR_CONFIG_DIR', 'WINDSURF_CONFIG_DIR',
+    'CLAUDE_CONFIG_DIR'
+  ];
+  const savedEnv = {};
+
+  beforeEach(() => {
+    for (const key of envVars) {
+      savedEnv[key] = process.env[key];
+      delete process.env[key];
+    }
+  });
+
+  afterEach(() => {
+    for (const key of envVars) {
+      if (savedEnv[key] !== undefined) {
+        process.env[key] = savedEnv[key];
+      } else {
+        delete process.env[key];
+      }
+    }
+  });
+
+  test('opencode uses OPENCODE_CONFIG_DIR', () => {
+    process.env.OPENCODE_CONFIG_DIR = '/custom/opencode';
+    const result = mod.getGlobalDir('opencode');
+    assert.strictEqual(result, '/custom/opencode');
+  });
+
+  test('opencode uses OPENCODE_CONFIG dirname', () => {
+    process.env.OPENCODE_CONFIG = '/custom/dir/opencode.toml';
+    const result = mod.getGlobalDir('opencode');
+    assert.strictEqual(result, '/custom/dir');
+  });
+
+  test('opencode uses XDG_CONFIG_HOME', () => {
+    process.env.XDG_CONFIG_HOME = '/xdg/config';
+    const result = mod.getGlobalDir('opencode');
+    assert.strictEqual(result, path.join('/xdg/config', 'opencode'));
+  });
+
+  test('opencode defaults to ~/.config/opencode', () => {
+    const result = mod.getGlobalDir('opencode');
+    assert.ok(result.endsWith(path.join('.config', 'opencode')));
+  });
+
+  test('gemini uses GEMINI_CONFIG_DIR', () => {
+    process.env.GEMINI_CONFIG_DIR = '/custom/gemini';
+    const result = mod.getGlobalDir('gemini');
+    assert.strictEqual(result, '/custom/gemini');
+  });
+
+  test('codex uses CODEX_HOME', () => {
+    process.env.CODEX_HOME = '/custom/codex';
+    const result = mod.getGlobalDir('codex');
+    assert.strictEqual(result, '/custom/codex');
+  });
+
+  test('copilot uses COPILOT_CONFIG_DIR', () => {
+    process.env.COPILOT_CONFIG_DIR = '/custom/copilot';
+    const result = mod.getGlobalDir('copilot');
+    assert.strictEqual(result, '/custom/copilot');
+  });
+
+  test('antigravity uses ANTIGRAVITY_CONFIG_DIR', () => {
+    process.env.ANTIGRAVITY_CONFIG_DIR = '/custom/antigravity';
+    const result = mod.getGlobalDir('antigravity');
+    assert.strictEqual(result, '/custom/antigravity');
+  });
+
+  test('cursor uses CURSOR_CONFIG_DIR', () => {
+    process.env.CURSOR_CONFIG_DIR = '/custom/cursor';
+    const result = mod.getGlobalDir('cursor');
+    assert.strictEqual(result, '/custom/cursor');
+  });
+
+  test('windsurf uses WINDSURF_CONFIG_DIR', () => {
+    process.env.WINDSURF_CONFIG_DIR = '/custom/windsurf';
+    const result = mod.getGlobalDir('windsurf');
+    assert.strictEqual(result, '/custom/windsurf');
+  });
+
+  test('claude uses CLAUDE_CONFIG_DIR', () => {
+    process.env.CLAUDE_CONFIG_DIR = '/custom/claude';
+    const result = mod.getGlobalDir('claude');
+    assert.strictEqual(result, '/custom/claude');
+  });
+
+  test('tilde expansion works with env vars', () => {
+    process.env.GEMINI_CONFIG_DIR = '~/my-gemini';
+    const result = mod.getGlobalDir('gemini');
+    assert.ok(!result.includes('~'), 'tilde should be expanded');
+    assert.ok(result.includes('my-gemini'));
   });
 });
 
