@@ -1,5 +1,5 @@
 === GSD DEPENDENCY AUDIT REPORT ===
-Generated: 2026-04-10T21:15:00Z
+Generated: 2026-04-10T00:00:00Z
 Scope: npm
 Project root: /Users/cpconnor/projects/Pete-Gets-Shit-Done
 
@@ -22,78 +22,60 @@ Licenses:  PASS — 0 packages flagged
 (all tools present)
 
 --- RECOMMENDATIONS ---
-1. No action required. Continue with existing dependency strategy.
-2. Optional: Consider upgrading esbuild from 0.25.12 to 0.28.0 (minor version bump, adds features and fixes). This is a non-blocking enhancement.
-3. Re-audit monthly or after any dependency changes.
+1. No action required. Re-audit after any dependency change.
 
 === END REPORT ===
 
 ## DETAILED FINDINGS
 
 ### Project Structure
-- **Language**: JavaScript (Node.js >=20.0.0)
-- **Lockfile**: package-lock.json v3 present (reliable auditing possible)
-- **Direct dependencies**: 2
-  - Production: 1 (implicit, only devDependencies listed)
-  - Development: 2 (c8@11.0.0, esbuild@0.25.12)
-- **Transitive dependencies**: 80 (all dev/test support)
+- **Package manager**: npm
+- **Manifest**: package.json
+- **Lockfile**: package-lock.json (present and reliable)
+- **Project type**: Development-only (0 production dependencies, 2 development dependencies)
 
-### Security Audit Results
-npm audit reported **zero vulnerabilities** across all severity levels (critical, high, moderate, low).
-- No CVEs detected in any direct or transitive dependencies
-- No known security issues in c8@11.0.0 (ISC license, actively maintained)
-- No known security issues in esbuild@0.25.12 (MIT license, actively maintained)
+### Direct Dependencies Summary
+| Package | Current | Latest | Type | Status |
+|---------|---------|--------|------|--------|
+| c8 | 11.0.0 | 11.0.0 | dev | Current |
+| esbuild | 0.25.12 | 0.28.0 | dev | 2 minor versions behind |
 
-### Version Currency Analysis
+### Staleness Analysis
 
-**Direct Dependencies:**
-- **c8@11.0.0** (coverage tool)
-  - Current version: 11.0.0
-  - Latest version: 11.0.0 (up to date)
-  - Last release: 2026-02-25
-  - Status: PASS (no upgrade available)
+**esbuild@0.25.12 → 0.28.0 (minor version delta)**
+- Current: 0.25.12, released 2025-11-01
+- Latest: 0.28.0, released 2026-04-02
+- Type: dev dependency
+- Assessment: PASS (no flag) — This is a dev-only dependency. While it is 2 minor versions behind, minor-version upgrades for development tools do not constitute a security or staleness risk. The upgrade would be for feature/enhancement purposes, which falls outside the audit scope. The current version is recent (5 months old as of audit date) and has no known CVEs.
 
-- **esbuild@0.25.12** (bundler)
-  - Current version: 0.25.12
-  - Latest version: 0.28.0
-  - Wanted version: 0.25.12
-  - Last release: 2026-04-02
-  - Version delta: Minor (0.25 → 0.28, pre-1.0 semver)
-  - Status: PASS (minor version behind, non-blocking)
-  - Note: This is a minor version bump with feature additions. No breaking changes expected. Upgrade is optional and recommended only if new esbuild features are needed.
+**c8@11.0.0 (at latest)**
+- Current: 11.0.0, which is the latest version
+- Type: dev dependency
+- Assessment: PASS — No action needed.
 
-**Transitive Dependencies:**
-All transitive dependencies of c8 and esbuild are either:
-- Up-to-date (latest versions installed)
-- Deprecated but compatible (e.g., older yargs versions)
-- Native bindings with platform-specific variants (esbuild platform binaries)
-
-No transitive dependencies exceed the version staleness threshold (major version behind OR 2+ years without release).
+### Security Analysis
+- **npm audit result**: 0 vulnerabilities across all dependency levels
+- **Transitive dependencies**: 82 total (1 prod, 82 dev + optional)
+- **CVE count**: 0 critical, 0 high, 0 moderate, 0 low
+- **Audit confidence**: High (lockfile present, audit tool functioning)
 
 ### License Analysis
+**Direct dependencies:**
+- **c8@11.0.0**: ISC (permissive)
+- **esbuild@0.25.12**: MIT (permissive)
 
-**Direct Dependencies:**
-- **c8@11.0.0**: ISC license (permissive, PASS)
-- **esbuild@0.25.12**: MIT license (permissive, PASS)
+**Transitive dependencies**: All major transitive dependencies (via c8 and esbuild build chains) carry standard permissive licenses (MIT, Apache-2.0, ISC, BSD-*). No license conflicts detected.
 
-**Project License:**
-- **get-shit-done-cc**: MIT license (permissive, consistent with dependencies)
+**Project-wide license policy**: No LICENSE-POLICY.md or dependencies-policy.yml found. Audit uses default permissive policy.
 
-**License Policy:**
-No LICENSE-POLICY.md or dependencies-policy.yml found. Using default permissive license policy.
-All detected licenses are permissive (ISC, MIT). No copyleft, GPL, AGPL, or proprietary licenses detected.
-
-### Notes on Transitive Dependencies
-
-The dependency tree is shallow and well-maintained:
-- Most transitive deps from c8 are test-support utilities (istanbul, yargs, glob)
-- esbuild platform binaries are optional dependencies (marked UNMET for non-darwin platforms)
-- No monorepo structure or workspace complexity detected
+### Assessment Notes
+1. **Dev-only structure**: This project ships only development tooling (no runtime dependencies). All dependencies are used for testing (c8) and bundling (esbuild) during the build/test lifecycle. This is a safe, intentional design.
+2. **Transitive depth**: 82 transitive dependencies is typical for Node.js projects with c8 and esbuild, both of which have rich dependency trees. However, none of these transitive dependencies pose security or compliance risks.
+3. **Lockfile integrity**: The package-lock.json is present and well-formed, enabling deterministic installs.
+4. **Minor version lag**: esbuild@0.25.12 is 2 minor versions behind 0.28.0. Per audit policy, minor-version gaps are not flagged unless they fix a CVE or the package is 2+ years stale. Neither condition applies here.
 
 ### Audit Confidence
-
-**Reliability: HIGH**
-- lockfile present (package-lock.json v3)
-- npm audit tool verified all dependencies against npm security database
-- No network failures during audit
-- All audit tools installed and functional
+- **Lockfile present**: Yes
+- **Network stability**: Stable (no transient failures during audit)
+- **Audit tool**: npm 10.x (standard)
+- **Overall confidence**: High — all audit data is authoritative and complete.
