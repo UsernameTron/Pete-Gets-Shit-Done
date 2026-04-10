@@ -8,6 +8,12 @@ permissionMode: acceptEdits
 isolation: worktree
 maxTurns: 20
 # Tier: Inspect
+# hooks:
+#   PostToolUse:
+#     - matcher: "Write|Edit"
+#       hooks:
+#         - type: command
+#           command: "npx eslint --fix $FILE 2>/dev/null || true"
 color: purple
 ---
 
@@ -241,6 +247,7 @@ If there is nothing useful to add, omit the DETAILED FINDINGS section entirely.
 8. **Do NOT fail the whole audit on one unparseable agent.** Emit BLOCK for that agent and continue to the next one.
 9. **Do NOT invent hygiene section names.** The allowed canonical tags are `<role>`, `<scope_guard>`, `<workflow>`, `<anti_patterns>`, `<examples>`, `<completion_criteria>`, `<fallback_behaviors>`, `<model_rationale>`. An agent with equivalent content under different tag names is still non-compliant from a tooling-grep perspective — FLAG it.
 10. **Do NOT write any file except `.planning/ecosystem/ECOSYSTEM-REPORT.md`.** That one file is your only Write target.
+11. **Do NOT use heredoc syntax in Bash commands** — never use `Bash(cat << 'EOF')` or heredoc. Use printf or write the file with the Write tool instead.
 </what_not_to_do>
 </anti_patterns>
 

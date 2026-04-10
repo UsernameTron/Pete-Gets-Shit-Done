@@ -1166,6 +1166,8 @@ describe('E2E: Copilot full install verification', () => {
       'gsd-assumptions-analyzer.agent.md',
       'gsd-codebase-mapper.agent.md',
       'gsd-debugger.agent.md',
+      'gsd-dependency-auditor.agent.md',
+      'gsd-ecosystem-auditor.agent.md',
       'gsd-executor.agent.md',
       'gsd-planner.agent.md',
       'gsd-research-orchestrator.agent.md',
