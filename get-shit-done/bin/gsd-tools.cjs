@@ -301,7 +301,18 @@ async function main() {
       const captured = chunks.join('');
       let jsonStr = captured;
       if (jsonStr.startsWith('@file:')) {
-        jsonStr = fs.readFileSync(jsonStr.slice(6), 'utf-8');
+        const filePath = jsonStr.slice(6);
+        // SEC2-01: Allowlist — only project dir or gsd-*.json in tmpdir
+        const resolvedFile = path.resolve(filePath);
+        const tmpDir = require('os').tmpdir();
+        const inProject = resolvedFile.startsWith(path.resolve(cwd) + path.sep);
+        const inTmpGsd = resolvedFile.startsWith(tmpDir + path.sep)
+          && path.basename(resolvedFile).startsWith('gsd-')
+          && resolvedFile.endsWith('.json');
+        if (!inProject && !inTmpGsd) {
+          throw new Error(`@file: path not in allowlist: ${filePath}`);
+        }
+        jsonStr = fs.readFileSync(resolvedFile, 'utf-8');
       }
       try {
         const obj = JSON.parse(jsonStr);
