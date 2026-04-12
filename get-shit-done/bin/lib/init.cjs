@@ -4,8 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
-const { loadConfig, resolveModelInternal, findPhaseInternal, getRoadmapPhaseInternal, pathExistsInternal, generateSlugInternal, getMilestoneInfo, getMilestonePhaseFilter, stripShippedMilestones, extractCurrentMilestone, normalizePhaseName, matchesPhaseDir, planningPaths, planningDir, planningRoot, toPosixPath, output, error, checkAgentsInstalled, createFeatureFlags } = require('./core.cjs');
+const { loadConfig, resolveModelInternal, findPhaseInternal, getRoadmapPhaseInternal, pathExistsInternal, generateSlugInternal, getMilestoneInfo, getMilestonePhaseFilter, stripShippedMilestones, extractCurrentMilestone, normalizePhaseName, matchesPhaseDir, planningPaths, planningDir, planningRoot, toPosixPath, output, error, checkAgentsInstalled, createFeatureFlags, execGit, safeExec } = require('./core.cjs');
 const { extractFrontmatter } = require('./frontmatter.cjs');
 
 function getLatestCompletedMilestone(cwd) {
@@ -1333,8 +1332,8 @@ function detectChildRepos(dir) {
     if (fs.existsSync(gitDir)) {
       let hasUncommitted = false;
       try {
-        const status = execSync('git status --porcelain', { cwd: fullPath, encoding: 'utf8', timeout: 5000 });
-        hasUncommitted = status.trim().length > 0;
+        const result = execGit(fullPath, ['status', '--porcelain']);
+        hasUncommitted = result.stdout.trim().length > 0;
       } catch { /* intentional: git status check is best-effort for child repo detection */ }
       repos.push({ name: entry.name, path: fullPath, has_uncommitted: hasUncommitted });
     }
@@ -1352,8 +1351,8 @@ function cmdInitNewWorkspace(cwd, raw) {
   // Check if git worktree is available
   let worktreeAvailable = false;
   try {
-    execSync('git --version', { encoding: 'utf8', timeout: 5000, stdio: 'pipe' });
-    worktreeAvailable = true;
+    const gitCheck = safeExec('git', ['--version'], { timeout: 5000 });
+    worktreeAvailable = gitCheck.ok;
   } catch { /* intentional: git may not be installed — feature detection */ }
 
   const result = {
@@ -1455,8 +1454,8 @@ function cmdInitRemoveWorkspace(cwd, name, raw) {
     const repoPath = path.join(wsPath, repo.name);
     if (!fs.existsSync(repoPath)) continue;
     try {
-      const status = execSync('git status --porcelain', { cwd: repoPath, encoding: 'utf8', timeout: 5000, stdio: 'pipe' });
-      if (status.trim().length > 0) {
+      const gitResult = execGit(repoPath, ['status', '--porcelain']);
+      if (gitResult.stdout.trim().length > 0) {
         dirtyRepos.push(repo.name);
       }
     } catch { /* intentional: git status in workspace repo is best-effort */ }
