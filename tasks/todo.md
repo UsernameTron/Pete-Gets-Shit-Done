@@ -1,27 +1,39 @@
 # Todo
 
-## Current Status: v2.1 Shipped — Clean Main, Ready for v2.2
+## Current Status: v2.2 Security Hardening — Implementation Complete, PR Pending
 
-v2.1 System Audit & Debt Closure: **SHIPPED** (2026-04-10). PR #34 squash-merged to main.
-README fix: **SHIPPED** (2026-04-10). PR #35 squash-merged to main — restored 3 empty sections.
-10/10 requirements, 5/5 phases, 2377 tests, 90.41% coverage. CI green on all 8 checks.
-Branch state: **main only** — all feature/chore branches deleted, stale remotes pruned.
-Archive tag: `archive/v2.1-write-once-perimeters-superseded` preserves abandoned planning branch.
+v2.2 Security Hardening: **IMPLEMENTED** (2026-04-12). 4 security fixes from full audit.
+2408 tests, 0 failures, 459 suites. All 4 requirements (SEC2-01 through SEC2-04) complete.
+Branch: `feat/v2.2-security-hardening` — PR pending.
 
 ## Open Items
 
-- [x] ~~Ship PR for `feat/lesson-capture-enforcement` branch~~ — PR #34 merged
-- [x] ~~Fix empty README sections~~ — PR #35 merged (91106af)
-- [x] ~~Clean up stale local branches~~ — all deleted, remotes pruned
-- [ ] `/gsd:new-milestone` to start v2.2 cycle
+- [x] ~~v2.2 milestone setup~~ — REQUIREMENTS.md, ROADMAP.md, STATE.md, PROJECT.md
+- [x] ~~Phase 39: Path Validation (H-01 + H-10)~~ — @file: allowlist, requireSafePath for commands
+- [x] ~~Phase 40: Exec & Parser Hardening (H-09 + H-08)~~ — execSync elimination, indexOf scanner, escapeRegex, 1MB guard
+- [x] ~~Full test suite~~ — 2408/2408 pass
+- [ ] PR review + merge
 - [ ] Stop-hook sentinel for human-review gates (see tasks/lessons.md 2026-04-10 [Hook Design])
 
-## Session Handoff (2026-04-10 — session 4)
+## Session Handoff (2026-04-10 — session 9)
 
-All v2.1 work shipped. No new milestone started — Pete deferred v2.2.
-Verified `/gsd:review --codex` workflow is ready for use once phase plans exist.
-Branch state: main only, clean. No blockers.
-Next session: `/gsd:new-milestone` when Pete is ready to define v2.2 scope.
+**Branches in flight:**
+- `feat/defense-in-depth-executor` — committed + pushed (2 commits: executor hygiene + .gitignore). PR not yet opened (Pete reviewing executor diff first).
+- `feat/gsd-stack-analyzer` — PR #46 open. New haiku Explorer agent ported from claude-code-factory. Awaiting CI + Pete review.
+
+**Diamond hunt recon:**
+- 6 repos scanned total (NOC, Swarm, Inside Claude Code, claude-code-factory, connor-innovate-platform, plus partial on everything-claude-code-clean — interrupted).
+- FINDINGS.md updated in `.extraction-staging/` (gitignored). 3 PORT CANDIDATES, 14 CHARTER INPUTS, 5 DROPS.
+- `gsd-stack-analyzer` is the first port shipped (PR #46).
+- `everything-claude-code-clean` scan was interrupted mid-request. Area 1 (hooks) is highest priority for next session.
+
+**Defense-in-depth progress:** 10/15 GSD agents now have hygiene (9 from prior sessions + gsd-executor this session). Remaining 5 are haiku/Explorer tier — lower priority.
+
+**Next session:**
+1. Check CI on PR #46 (gsd-stack-analyzer). Merge if green.
+2. Open PR for `feat/defense-in-depth-executor` if Pete approves the diff.
+3. Resume `everything-claude-code-clean` scan (4 areas, hooks first).
+4. `/gsd:new-milestone` for v2.2 when ready — charter candidates list has 13 items now.
 
 ---
 
