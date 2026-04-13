@@ -1,38 +1,46 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-12T19:33:53.544Z",
+  "timestamp": "2026-04-13T19:43:26.363Z",
   "phase": "pre-milestone",
-  "phase_name": "v2.2 Security Hardening — milestone setup",
+  "phase_name": "v2.3 Hook Ecosystem + Security Guardian + Agent Quality — milestone setup",
   "phase_dir": null,
   "plan": 0,
   "task": 0,
   "total_tasks": 0,
   "status": "paused",
   "completed_tasks": [
-    {"id": 1, "name": "Full system audit completed and committed", "status": "done", "commit": "a33158b"},
-    {"id": 2, "name": "v2.2 scope defined (H-01, H-10, H-09, H-08)", "status": "done"},
-    {"id": 3, "name": "Implementation plan approved", "status": "done"},
-    {"id": 4, "name": "Feature branch created", "status": "done"}
+    {"id": 1, "name": "Session boot + STATE.md reconciliation (v2.2 marked shipped)", "status": "done"},
+    {"id": 2, "name": "v2.3 charter stash popped — .planning/v2.3-prompt-chain.md restored", "status": "done"},
+    {"id": 3, "name": "Milestone summary presented — 8 REQs, 4 phases, SEC3-xx prefix to avoid v2.2 SEC2-xx collision", "status": "done"},
+    {"id": 4, "name": "Pete approved scope (AskUserQuestion: Looks good) and approved Skip research", "status": "done"}
   ],
   "remaining_tasks": [
-    {"id": 5, "name": "Create REQUIREMENTS.md (4 reqs: SEC2-01 through SEC2-04)", "status": "not_started"},
-    {"id": 6, "name": "Create ROADMAP.md (Phase 39-40)", "status": "not_started"},
-    {"id": 7, "name": "Update PROJECT.md and STATE.md for v2.2", "status": "not_started"},
-    {"id": 8, "name": "Execute Phase 39: Path Validation (H-01 + H-10)", "status": "not_started"},
-    {"id": 9, "name": "Execute Phase 40: Execution & Parser Hardening (H-09 + H-08)", "status": "not_started"},
-    {"id": 10, "name": "Run full test suite + coverage verification", "status": "not_started"},
-    {"id": 11, "name": "Ship PR", "status": "not_started"}
+    {"id": 5, "name": "Archive v2.2 phase dirs to .planning/milestones/v2.2-phases/ (phases 39-path-validation, 40-execution-parser-hardening)", "status": "not_started"},
+    {"id": 6, "name": "Append v2.2 row to .planning/MILESTONES.md (currently stops at v2.1)", "status": "not_started"},
+    {"id": 7, "name": "Update PROJECT.md: collapse v2.2 to <details>, add Current Milestone v2.3 section, update 'Last updated' footer", "status": "not_started"},
+    {"id": 8, "name": "Finalize STATE.md for v2.3 (header milestone: v2.3, status: in_progress, reset progress to 0/4 phases, 0/8 REQs)", "status": "not_started"},
+    {"id": 9, "name": "Write .planning/REQUIREMENTS.md — 8 REQs grouped (HOOK-01/02/03, SEC3-01/02, QUAL-01/02/03), v2 deferred backlog, out of scope, empty traceability", "status": "not_started"},
+    {"id": 10, "name": "Commit 'docs: start milestone v2.3' (PROJECT.md, STATE.md, MILESTONES.md, v2.3-prompt-chain.md, archived phase dirs)", "status": "not_started"},
+    {"id": 11, "name": "Commit 'docs: define milestone v2.3 requirements' (REQUIREMENTS.md)", "status": "not_started"},
+    {"id": 12, "name": "Spawn gsd-roadmapper with planning_context (PROJECT.md, REQUIREMENTS.md, MILESTONES.md, config.json) — start phase 41, continue numbering, no --reset-phase-numbers", "status": "not_started"},
+    {"id": 13, "name": "Present roadmap, get approval via AskUserQuestion (Approve/Adjust/Review)", "status": "not_started"},
+    {"id": 14, "name": "Commit 'docs: create milestone v2.3 roadmap (4 phases)' (ROADMAP.md, STATE.md, REQUIREMENTS.md traceability)", "status": "not_started"},
+    {"id": 15, "name": "Display MILESTONE INITIALIZED confirmation with Next Up = /gsd:discuss-phase 41", "status": "not_started"}
   ],
   "blockers": [],
   "human_actions_pending": [],
   "decisions": [
-    {"decision": "2-phase structure: Phase 39 (path validation) + Phase 40 (exec/parser hardening)", "rationale": "Group by fix pattern — same security utility reuse within each phase", "phase": "pre-milestone"},
-    {"decision": "H-06 (core.cjs decomposition) and H-07 (install.js monolith) deferred to v2.3", "rationale": "Those are refactors, not security exposure", "phase": "pre-milestone"},
-    {"decision": "Use existing requireSafePath, safeExec, escapeRegex — no new utilities needed", "rationale": "All three already exist and are tested in security.cjs and core.cjs", "phase": "pre-milestone"},
-    {"decision": "@file: protocol gets allowlist (project dir OR gsd-*.json in tmpdir)", "rationale": "GSD output() writes temp files to os.tmpdir() with gsd- prefix — must not break that pipeline", "phase": "pre-milestone"},
-    {"decision": "Replace frontmatter regex with indexOf scanner", "rationale": "Eliminates ReDoS entirely with O(n) worst case, zero backtracking", "phase": "pre-milestone"}
+    {"decision": "Renumber REQ category prefix from SEC-xx → SEC3-xx (was SEC-01, SEC-02 in charter)", "rationale": "v1.3 already used SEC-01..SEC-06 and v2.2 used SEC2-01..SEC2-04. Using SEC3-xx keeps traceability clean across milestones.", "phase": "pre-milestone"},
+    {"decision": "Continue phase numbering (41-44), no --reset-phase-numbers", "rationale": "Default GSD behavior; matches charter's explicit Phase 41-44 labeling.", "phase": "pre-milestone"},
+    {"decision": "Skip research", "rationale": "Charter specifies exact source files (gsd-prompt-guard.js, config-protection.js, cost-tracker.js) and known patterns (agent-threat-model, 4D rubric). Adaptation work, not discovery.", "phase": "pre-milestone"},
+    {"decision": "Archive v2.2 phase dirs as part of kickoff commit rather than deferring to /gsd:complete-milestone", "rationale": "v2.2 shipped 2026-04-13 (PR #47 + #48 merged) but phases/39-*/40-* were never archived. Keep phases/ clean before writing 41-44 dirs.", "phase": "pre-milestone"},
+    {"decision": "Commit v2.3-prompt-chain.md as charter artifact in .planning/ rather than deleting like MILESTONE-CONTEXT.md", "rationale": "Contains ultrathink analysis + v2.4/v2.5+ deferred backlog worth preserving as historical context.", "phase": "pre-milestone"}
   ],
-  "uncommitted_files": [".planning/agent-health.log", "tasks/todo.md"],
-  "next_action": "Run /gsd:resume-work → finish milestone setup (REQUIREMENTS.md, ROADMAP.md, STATE.md, PROJECT.md) → execute Phase 39 → execute Phase 40 → ship",
-  "context_notes": "Audit report on branch docs/full-audit-2026-04-11 (pushed, no PR yet). Stash stack has .extraction-staging/ and old agent-health.log entries. The approved plan is in /Users/cpconnor/.claude/plans/synchronous-jumping-coral.md with full implementation details for all 4 fixes."
+  "uncommitted_files": [
+    ".planning/STATE.md (modified: v2.2-shipped reconciliation from session boot)",
+    ".planning/v2.3-prompt-chain.md (untracked: charter popped from stash@{0})",
+    ".planning/HANDOFF.json (modified: this file)"
+  ],
+  "next_action": "Run /gsd:resume-work → pick up at task id 5: archive v2.2 phase dirs, then continue through milestone setup (PROJECT.md, STATE.md, MILESTONES.md, REQUIREMENTS.md), commit, spawn gsd-roadmapper, approve roadmap, commit, display MILESTONE INITIALIZED",
+  "context_notes": "Pete invoked /gsd:new-milestone with full charter in .planning/v2.3-prompt-chain.md. Scope and research decision both confirmed via AskUserQuestion. All 8 requirements are pre-specified with explicit LOC estimates and source file paths — roadmapper should map cleanly: Phase 41={HOOK-01,HOOK-02,HOOK-03}, Phase 42={SEC3-01,SEC3-02}, Phase 43={QUAL-01,QUAL-02,QUAL-03}, Phase 44=audit/docs (no REQs). Branch is main, clean except for STATE.md mod + v2.3-prompt-chain.md untracked. v2.2 shipped via PR #47 (code) + PR #48 (audit)."
 }
