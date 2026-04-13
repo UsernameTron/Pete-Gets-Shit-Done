@@ -33,8 +33,8 @@
   - Agent registered in installer and referenced from README/CLAUDE.md agent inventory
   - Model: `sonnet` (pattern matching)
   - Agent scope is design-time review (not runtime — that is HOOK-01)
-- **Plans:** 1 plan
-  - [ ] 42-01-PLAN.md -- Threat model reference doc + security guardian agent + doc inventory updates
+- **Plans:** 1/1 plans complete
+  - [x] 42-01-PLAN.md -- Threat model reference doc + security guardian agent + doc inventory updates
 - **Status:** planned
 - **Complete:** false
 
