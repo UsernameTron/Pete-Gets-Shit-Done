@@ -1173,7 +1173,6 @@ describe('E2E: Copilot full install verification', () => {
       'gsd-research-orchestrator.agent.md',
       'gsd-research-synthesizer.agent.md',
       'gsd-roadmapper.agent.md',
-      'gsd-stack-analyzer.agent.md',
       'gsd-ui-auditor.agent.md',
       'gsd-ui-checker.agent.md',
       'gsd-ui-researcher.agent.md',
