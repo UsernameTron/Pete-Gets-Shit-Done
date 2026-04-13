@@ -1,5 +1,22 @@
 # Milestones
 
+## v2.2 Security Hardening (Shipped: 2026-04-13)
+
+**Phases completed:** 2 phases (39-40), 4 requirements
+
+**Key accomplishments:**
+
+- SEC2-01, SEC2-02: `@file:` allowlist + `requireSafePath` enforcement for command paths (Phase 39)
+- SEC2-03: `execSync` eliminated, `safeExec` everywhere with configurable timeouts (Phase 40)
+- SEC2-04: `indexOf` scanner + `escapeRegex` + 1MB guard in parser hardening (Phase 40)
+- All 4 high-severity audit findings (H-01, H-08, H-09, H-10) closed
+
+**Shipped via:** PR #47 (code) + PR #48 (audit). No on-disk phase artifacts — v2.2 was executed as direct fixes against audit findings rather than the standard PLAN/SUMMARY flow. Canonical record: `.planning/v2.2-MILESTONE-AUDIT.md`.
+
+**Deferred to v2.3:** H-06, H-07 (refactors, not exposure).
+
+---
+
 ## v2.1 System Audit & Debt Closure (Shipped: 2026-04-10)
 
 **Phases completed:** 5 phases, 7 plans, 8 tasks

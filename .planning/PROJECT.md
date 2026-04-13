@@ -6,16 +6,16 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.2 Security Hardening (started 2026-04-12)
-**Previous:** v2.1 System Audit & Debt Closure (shipped 2026-04-10)
+**Current milestone:** v2.3 Hook Ecosystem + Security Guardian + Agent Quality (started 2026-04-13)
+**Previous:** v2.2 Security Hardening (shipped 2026-04-13, PR #47 + #48)
 **Package:** `get-shit-done-cc` v1.30.0
 **Tests:** 2377+ total, all passing
 **Coverage:** 90.41% overall, all modules >= 80%, security 100%
 **Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
-**Milestones shipped:** 12 (v1.0 through v2.1)
-**Total phases executed:** 38 across all milestones
+**Milestones shipped:** 13 (v1.0 through v2.2)
+**Total phases executed:** 40 across all milestones
 
 ## Core Value
 
@@ -25,23 +25,41 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 Active requirements for the current milestone. Historical milestone requirements are captured in the collapsible sections below.
 
-### v2.2 Security Hardening (active)
+### v2.3 Hook Ecosystem + Security Guardian + Agent Quality (active)
 
 | ID | Title | Phase | Status |
 |----|-------|-------|--------|
-| SEC2-01 | `@file:` allowlist in path validation | Phase 39 | Shipped |
-| SEC2-02 | `requireSafePath` enforcement for commands | Phase 39 | Shipped |
-| SEC2-03 | `execSync` elimination, `safeExec` everywhere | Phase 40 | Shipped |
-| SEC2-04 | `indexOf` scanner + `escapeRegex` + 1MB guard | Phase 40 | Shipped |
+| HOOK-01 | Prompt injection detection hook (PreToolUse, 18 regex patterns) | Phase 41 | Pending |
+| HOOK-02 | Config-protection hook (blocks linter/formatter config edits) | Phase 41 | Pending |
+| HOOK-03 | Cost-tracker hook (JSONL token usage + USD to ~/.claude/metrics) | Phase 41 | Pending |
+| SEC3-01 | `gsd-security-guardian` agent (6-category threat model, 10/10 DiD) | Phase 42 | Pending |
+| SEC3-02 | Threat model reference doc at `references/agent-threat-model.md` | Phase 42 | Pending |
+| QUAL-01 | Extend `gsd-verifier` with 4D scoring rubric (sec/perf/corr/maint) | Phase 43 | Pending |
+| QUAL-02 | Three-part necessity gate in subagent creation workflow | Phase 43 | Pending |
+| QUAL-03 | Two-mode verify in `/gsd:verify-work` (compliance + schema) | Phase 43 | Pending |
 
-Deferred to v2.3: H-06, H-07 (refactors, not exposure).
+## Current Milestone: v2.3 Hook Ecosystem + Security Guardian + Agent Quality
 
-## Current Milestone: v2.2 Security Hardening
+**Goal:** Port high-value hooks from the ECC diamond hunt, fill the security Guardian gap with a new agent, and extend agent quality infrastructure with a scoring rubric, necessity gate, and two-mode verification.
+**Phases:** 4 (41 Hook Ports, 42 Security Guardian, 43 Agent Quality Infrastructure, 44 Milestone Audit + Docs)
+**Requirements:** 8 (HOOK-01/02/03, SEC3-01/02, QUAL-01/02/03)
+**Decisions:** REQ prefix `SEC3-xx` to avoid collision with v1.3 `SEC-xx` and v2.2 `SEC2-xx`. Continue phase numbering from 41 (no reset). Skip research phase — charter specifies exact source files and adaptation patterns.
+**Source material:** `gsd-prompt-guard.js` (connor-innovate-platform), `config-protection.js` + `cost-tracker.js` (everything-claude-code-clean), `security-threat-modeler` + `agent-architecture-review` skills (Inside Claude Code).
+
+<details>
+<summary><strong>v2.2 Security Hardening (4/4 requirements shipped)</strong></summary>
 
 **Goal:** Fix 4 high-severity security findings from the full system audit (H-01, H-10, H-09, H-08).
-**Phases:** 2 (Phase 39: Path Validation, Phase 40: Execution & Parser Hardening)
-**Requirements:** 4 (SEC2-01 through SEC2-04)
-**Decisions:** H-06/H-07 deferred to v2.3 (refactors, not security exposure). Reuse existing `requireSafePath`, `safeExec`, `escapeRegex`.
+
+**Key deliverables:**
+- SEC2-01: `@file:` allowlist in path validation (Phase 39)
+- SEC2-02: `requireSafePath` enforcement for command paths (Phase 39)
+- SEC2-03: `execSync` elimination — `safeExec` everywhere (Phase 40)
+- SEC2-04: `indexOf` scanner + `escapeRegex` + 1MB guard (Phase 40)
+
+**Shipped via:** PR #47 (code) + PR #48 (audit). Canonical record: `.planning/v2.2-MILESTONE-AUDIT.md`. Deferred to v2.3: H-06, H-07 (refactors, not exposure).
+
+</details>
 
 <details>
 <summary><strong>v2.1 System Audit & Debt Closure (10/10 requirements shipped)</strong></summary>
