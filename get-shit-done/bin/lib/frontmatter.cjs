@@ -4,20 +4,51 @@
 
 const fs = require('fs');
 const path = require('path');
-const { safeReadFile, normalizeMd, output, error } = require('./core.cjs');
+const { safeReadFile, normalizeMd, escapeRegex, output, error } = require('./core.cjs');
+
+// SEC2-04: Maximum input size for frontmatter parsing (1MB)
+const MAX_INPUT_SIZE = 1024 * 1024;
 
 // ─── Parsing engine ───────────────────────────────────────────────────────────
 
 function extractFrontmatter(content) {
   const frontmatter = {};
-  // Find ALL frontmatter blocks at the start of the file.
-  // If multiple blocks exist (corruption from CRLF mismatch), use the LAST one
-  // since it represents the most recent state sync.
-  const allBlocks = [...content.matchAll(/(?:^|\n)\s*---\r?\n([\s\S]+?)\r?\n---/g)];
-  const match = allBlocks.length > 0 ? allBlocks[allBlocks.length - 1] : null;
-  if (!match) return frontmatter;
+  // SEC2-04: Reject oversized input to prevent resource exhaustion
+  if (!content || content.length > MAX_INPUT_SIZE) return frontmatter;
 
-  const yaml = match[1];
+  // SEC2-04: indexOf-based scanner replaces regex with [\s\S]+? lazy quantifier.
+  // O(n) worst case, zero backtracking risk.
+  // Find ALL frontmatter blocks. If multiple exist (corruption), use the LAST one.
+  let yaml = null;
+  let searchFrom = 0;
+  while (searchFrom < content.length) {
+    // Find opening ---
+    let openIdx = content.indexOf('---', searchFrom);
+    if (openIdx === -1) break;
+    // Must be at start of line (position 0, or preceded by \n with optional whitespace)
+    if (openIdx > 0) {
+      const before = content[openIdx - 1];
+      if (before !== '\n') { searchFrom = openIdx + 3; continue; }
+    }
+    // Skip past --- and the newline after it
+    let bodyStart = openIdx + 3;
+    if (content[bodyStart] === '\r') bodyStart++;
+    if (content[bodyStart] === '\n') bodyStart++;
+    else { searchFrom = bodyStart; continue; }
+
+    // Find closing ---
+    let closeIdx = content.indexOf('\n---', bodyStart);
+    // Also check \r\n---
+    const closeIdxCR = content.indexOf('\r\n---', bodyStart);
+    if (closeIdxCR !== -1 && (closeIdx === -1 || closeIdxCR < closeIdx)) {
+      closeIdx = closeIdxCR;
+    }
+    if (closeIdx === -1) break;
+
+    yaml = content.slice(bodyStart, closeIdx);
+    searchFrom = closeIdx + 4;
+  }
+  if (!yaml) return frontmatter;
   const lines = yaml.split(/\r?\n/);
 
   // Stack to track nested objects: [{obj, key, indent}]
@@ -153,14 +184,27 @@ function reconstructFrontmatter(obj) {
 
 function spliceFrontmatter(content, newObj) {
   const yamlStr = reconstructFrontmatter(newObj);
-  const match = content.match(/^---\r?\n[\s\S]+?\r?\n---/);
-  if (match) {
-    return `---\n${yamlStr}\n---` + content.slice(match[0].length);
+  // SEC2-04: indexOf-based frontmatter boundary detection (replaces regex)
+  if (content.startsWith('---\n') || content.startsWith('---\r\n')) {
+    const bodyStart = content.indexOf('\n') + 1;
+    let closeIdx = content.indexOf('\n---', bodyStart);
+    const closeIdxCR = content.indexOf('\r\n---', bodyStart);
+    if (closeIdxCR !== -1 && (closeIdx === -1 || closeIdxCR < closeIdx)) {
+      closeIdx = closeIdxCR;
+    }
+    if (closeIdx !== -1) {
+      // Skip past the closing ---\n
+      let afterClose = closeIdx;
+      afterClose = content.indexOf('---', afterClose) + 3;
+      return `---\n${yamlStr}\n---` + content.slice(afterClose);
+    }
   }
   return `---\n${yamlStr}\n---\n\n` + content;
 }
 
 function parseMustHavesBlock(content, blockName) {
+  // SEC2-04: Reject oversized input
+  if (!content || content.length > MAX_INPUT_SIZE) return [];
   // Extract a specific block from must_haves in raw frontmatter YAML
   // Handles 3-level nesting: must_haves > artifacts/key_links > [{path, provides, ...}]
   const fmMatch = content.match(/^---\r?\n([\s\S]+?)\r?\n---/);
@@ -175,7 +219,8 @@ function parseMustHavesBlock(content, blockName) {
 
   // Find the block (e.g., "truths:", "artifacts:", "key_links:") under must_haves
   // It must be indented more than must_haves but we detect the actual indent dynamically
-  const blockPattern = new RegExp(`^(\\s+)${blockName}:\\s*$`, 'm');
+  // SEC2-04: Escape blockName to prevent regex injection
+  const blockPattern = new RegExp(`^(\\s+)${escapeRegex(blockName)}:\\s*$`, 'm');
   const blockMatch = yaml.match(blockPattern);
   if (!blockMatch) return [];
 

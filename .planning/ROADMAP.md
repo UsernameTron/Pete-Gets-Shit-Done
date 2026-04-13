@@ -1,5 +1,34 @@
 # Roadmap: get-shit-done-cc
 
+## Current Milestone: v2.2 Security Hardening
+
+**Started:** 2026-04-12
+**Goal:** Fix 4 high-severity security findings from the full system audit (H-01, H-10, H-09, H-08).
+**Requirements:** 4 (SEC2-01 through SEC2-04)
+
+### Phase 39: Path Validation
+- **Goal:** Contain `@file:` protocol arbitrary file read (H-01) and add path validation to unprotected commands (H-10)
+- **Requirements:** SEC2-01, SEC2-02
+- **Success criteria:**
+  - `@file:` protocol validates against allowlist (project dir + gsd-*.json in tmpdir)
+  - `cmdSummaryExtract` and `cmdTodoComplete` validate paths via `requireSafePath`
+  - Path traversal rejection tests pass
+- **Status:** not started
+- **Complete:** false
+
+### Phase 40: Execution & Parser Hardening
+- **Goal:** Replace raw `execSync` with safe wrappers (H-09) and harden frontmatter parser against ReDoS (H-08)
+- **Requirements:** SEC2-03, SEC2-04
+- **Success criteria:**
+  - All 3 `execSync` calls in init.cjs replaced with `safeExec`/`execGitValidated`
+  - Frontmatter regex parser replaced with indexOf scanner (O(n))
+  - `escapeRegex` applied to blockName injection point
+  - 1MB input size guard on frontmatter functions
+  - ReDoS timing tests confirm no catastrophic backtracking
+  - All existing tests pass
+- **Status:** not started
+- **Complete:** false
+
 ## Completed Milestones
 
 - **v1.0 Post-Merge Cleanup** (2026-03-25 -> 2026-03-26) -- 1 phase, 3 requirements. [Archive](milestones/v1.0-ROADMAP.md)
@@ -16,4 +45,4 @@
 - **v2.1 System Audit & Debt Closure** (2026-04-09 -> 2026-04-10) -- 5 phases, 10 requirements. [Archive](milestones/v2.1-ROADMAP.md)
 
 ---
-*Last updated: 2026-04-10 -- v2.1 archived*
+*Last updated: 2026-04-12 -- v2.2 milestone started*

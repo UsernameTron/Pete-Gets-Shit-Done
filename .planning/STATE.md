@@ -1,35 +1,41 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.1
-milestone_name: System Audit & Debt Closure
-status: archived
-last_updated: "2026-04-10T04:30:00.000Z"
-last_activity: 2026-04-10 -- v2.1 milestone archived and completed
+milestone: v2.2
+milestone_name: Security Hardening
+status: in_progress
+last_updated: "2026-04-12T20:00:00.000Z"
+last_activity: 2026-04-12 -- v2.2 milestone initialized
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 8
-  completed_plans: 8
-  percent: 100
+  total_phases: 2
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-10)
+See: .planning/PROJECT.md (updated 2026-04-12)
 
-**Shipped:** v2.1 System Audit & Debt Closure (2026-04-10)
-**Previous:** v2.0 Intelligence Layer (shipped 2026-04-05)
-**Next milestone:** Not yet defined. Run `/gsd:new-milestone` to start.
+**Current:** v2.2 Security Hardening (started 2026-04-12)
+**Previous:** v2.1 System Audit & Debt Closure (shipped 2026-04-10)
 
 ## Current Position
 
-Phase: MILESTONE ARCHIVED
-Status: v2.1 completed, audited (10/10 requirements), archived to milestones/
-Last activity: 2026-04-10 -- milestone audit passed, archive created, retrospective written
+Phase: Pre-execution — milestone infrastructure created
+Status: Ready for Phase 39 (Path Validation)
+Last activity: 2026-04-12 -- REQUIREMENTS.md, ROADMAP.md, STATE.md created
 
-Progress: [██████████] 100% (5/5 phases, 10/10 requirements)
+Progress: [░░░░░░░░░░] 0% (0/2 phases, 0/4 requirements)
+
+## Phase Status
+
+| Phase | Name | Status | Requirements |
+|-------|------|--------|--------------|
+| 39 | Path Validation | Not Started | SEC2-01, SEC2-02 |
+| 40 | Execution & Parser Hardening | Not Started | SEC2-03, SEC2-04 |
 
 ## Milestone History
 
@@ -50,8 +56,8 @@ Progress: [██████████] 100% (5/5 phases, 10/10 requirements)
 
 ## Session Handoff
 
-**Branch**: `feat/lesson-capture-enforcement` (clean)
-**Last action (2026-04-10)**: v2.1 milestone audited, archived, and completed. Retrospective written.
-**Coverage**: overall 90.41%, all modules >= 80%, security 100%
-**Tests**: 2377 passing, 0 failures (454 suites)
-**Next**: Cleanup phase directories -> ship PR -> new milestone
+**Branch**: `feat/v2.2-security-hardening` (dirty — milestone setup in progress)
+**Last action (2026-04-12)**: v2.2 milestone infrastructure created
+**Coverage**: 90.41% overall (baseline from v2.1)
+**Tests**: 2377 passing (baseline from v2.1)
+**Next**: Execute Phase 39 → Phase 40 → ship

@@ -7,7 +7,7 @@ const { execSync } = require('child_process');
 const { safeReadFile, loadConfig, isGitIgnored, execGit, normalizePhaseName, comparePhaseNum, getArchivedPhaseDirs, generateSlugInternal, getMilestoneInfo, getMilestonePhaseFilter, resolveModelInternal, stripShippedMilestones, extractCurrentMilestone, planningDir, planningPaths, toPosixPath, output, error, findPhaseInternal, extractOneLinerFromBody, getRoadmapPhaseInternal } = require('./core.cjs');
 const { extractFrontmatter } = require('./frontmatter.cjs');
 const { MODEL_PROFILES } = require('./model-profiles.cjs');
-const { validateShellArg } = require('./security.cjs');
+const { validateShellArg, requireSafePath } = require('./security.cjs');
 
 /**
  * Wrapper around execGit that validates user-derived arguments.
@@ -405,7 +405,8 @@ function cmdSummaryExtract(cwd, summaryPath, fields, raw) {
     error('summary-path required for summary-extract');
   }
 
-  const fullPath = path.join(cwd, summaryPath);
+  // SEC2-02: Validate path before use
+  const fullPath = requireSafePath(summaryPath, cwd, 'summary-path');
 
   if (!fs.existsSync(fullPath)) {
     output({ error: 'File not found', path: summaryPath }, raw);
@@ -717,7 +718,8 @@ function cmdTodoComplete(cwd, filename, raw) {
 
   const pendingDir = path.join(planningDir(cwd), 'todos', 'pending');
   const completedDir = path.join(planningDir(cwd), 'todos', 'completed');
-  const sourcePath = path.join(pendingDir, filename);
+  // SEC2-02: Validate filename doesn't traverse out of pending dir
+  const sourcePath = requireSafePath(filename, pendingDir, 'todo filename');
 
   if (!fs.existsSync(sourcePath)) {
     error(`Todo not found: ${filename}`);

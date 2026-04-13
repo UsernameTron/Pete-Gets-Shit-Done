@@ -6,7 +6,8 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Shipped:** v2.1 System Audit & Debt Closure (2026-04-10)
+**Current milestone:** v2.2 Security Hardening (started 2026-04-12)
+**Previous:** v2.1 System Audit & Debt Closure (shipped 2026-04-10)
 **Package:** `get-shit-done-cc` v1.30.0
 **Tests:** 2377+ total, all passing
 **Coverage:** 90.41% overall, all modules >= 80%, security 100%
@@ -16,9 +17,12 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 **Milestones shipped:** 12 (v1.0 through v2.1)
 **Total phases executed:** 38 across all milestones
 
-## Next Milestone
+## Current Milestone: v2.2 Security Hardening
 
-Not yet defined. Run `/gsd:new-milestone` to start.
+**Goal:** Fix 4 high-severity security findings from the full system audit (H-01, H-10, H-09, H-08).
+**Phases:** 2 (Phase 39: Path Validation, Phase 40: Execution & Parser Hardening)
+**Requirements:** 4 (SEC2-01 through SEC2-04)
+**Decisions:** H-06/H-07 deferred to v2.3 (refactors, not security exposure). Reuse existing `requireSafePath`, `safeExec`, `escapeRegex`.
 
 <details>
 <summary><strong>v2.1 System Audit & Debt Closure (10/10 requirements shipped)</strong></summary>
