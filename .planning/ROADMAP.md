@@ -1,31 +1,60 @@
 # Roadmap: get-shit-done-cc
 
-## Current Milestone: v2.2 Security Hardening
+## Current Milestone: v2.3 Hook Ecosystem + Security Guardian + Agent Quality
 
-**Started:** 2026-04-12
-**Goal:** Fix 4 high-severity security findings from the full system audit (H-01, H-10, H-09, H-08).
-**Requirements:** 4 (SEC2-01 through SEC2-04)
+**Started:** 2026-04-13
+**Goal:** Port high-value hooks from the ECC diamond hunt, fill the security Guardian gap with a new agent, and extend agent quality infrastructure with a scoring rubric, necessity gate, and two-mode verification.
+**Requirements:** 8 (HOOK-01/02/03, SEC3-01/02, QUAL-01/02/03)
 
-### Phase 39: Path Validation
-- **Goal:** Contain `@file:` protocol arbitrary file read (H-01) and add path validation to unprotected commands (H-10)
-- **Requirements:** SEC2-01, SEC2-02
+### Phase 41: Hook Ports
+- **Goal:** Port 3 high-ROI hooks from the ECC diamond hunt (prompt injection guard, config protection, cost tracker). Adapt source patterns to GSD's hook architecture and installer registration.
+- **Requirements:** HOOK-01, HOOK-02, HOOK-03
 - **Success criteria:**
-  - `@file:` protocol validates against allowlist (project dir + gsd-*.json in tmpdir)
-  - `cmdSummaryExtract` and `cmdTodoComplete` validate paths via `requireSafePath`
-  - Path traversal rejection tests pass
+  - 3 hooks live under `hooks/src/` following GSD hook style
+  - All bundled via `npm run build:hooks` into `hooks/dist/`
+  - All registered in `bin/install.js`
+  - All backed by tests (18 pattern cases for HOOK-01, ported test suites for HOOK-02/03)
+  - Zero external dependencies (Node.js built-ins only)
+  - `npm test` green with new tests included
+  - One commit per hook
 - **Status:** not started
 - **Complete:** false
 
-### Phase 40: Execution & Parser Hardening
-- **Goal:** Replace raw `execSync` with safe wrappers (H-09) and harden frontmatter parser against ReDoS (H-08)
-- **Requirements:** SEC2-03, SEC2-04
+### Phase 42: Security Guardian
+- **Goal:** Fill the security Guardian gap flagged by the diamond hunt. Ship a design-time security review agent plus a shared threat model reference doc that any GSD agent can cite.
+- **Requirements:** SEC3-01, SEC3-02
 - **Success criteria:**
-  - All 3 `execSync` calls in init.cjs replaced with `safeExec`/`execGitValidated`
-  - Frontmatter regex parser replaced with indexOf scanner (O(n))
-  - `escapeRegex` applied to blockName injection point
-  - 1MB input size guard on frontmatter functions
-  - ReDoS timing tests confirm no catastrophic backtracking
-  - All existing tests pass
+  - `get-shit-done/agents/gsd-security-guardian.md` exists at 10/10 defense-in-depth standard (matches plugin-developer/test-runner/docs-sync shape)
+  - Agent covers 6 threat categories (prompt injection, shell injection, path traversal, credential leakage, sandbox escape, resource exhaustion)
+  - `get-shit-done/references/agent-threat-model.md` documents all 6 with attack vectors + detection patterns + mitigation strategies
+  - Agent registered in installer and referenced from README/CLAUDE.md agent inventory
+  - Model: `sonnet` (pattern matching)
+  - Agent scope is design-time review (not runtime — that is HOOK-01)
+- **Status:** not started
+- **Complete:** false
+
+### Phase 43: Agent Quality Infrastructure
+- **Goal:** Extend GSD's quality tooling with (a) a 4D scoring rubric baked into the verifier, (b) a three-part necessity gate in the subagent creation workflow, and (c) two-mode verification (compliance + schema) in `/gsd:verify-work`.
+- **Requirements:** QUAL-01, QUAL-02, QUAL-03
+- **Success criteria:**
+  - `gsd-verifier.md` scores 4 dimensions (security 35%, perf 25%, correctness 25%, maint 15%) using 14 design pattern criteria
+  - Verifier emits per-dimension and total score in VERIFICATION.md; threshold defined (default >= 70 overall, no dimension < 50)
+  - Necessity gate (context pollution / parallelizability / specialization) runs before any new-agent proposal; documented in `references/`
+  - `/gsd:verify-work` supports `--mode=compliance`, `--mode=schema`, and default (both)
+  - VERIFICATION.md output has a section per mode
+  - Tests cover rubric application (per dimension), all three gate branches (PASS/FAIL/AMBIGUOUS), and both verify modes independently + combined
+- **Status:** not started
+- **Complete:** false
+
+### Phase 44: Milestone Audit + Documentation Sync
+- **Goal:** Validate that all 8 requirements are satisfied, update living documentation (CLAUDE.md, README.md, DEVOPS-HANDOFF.md) with v2.3 deliverables, and prepare milestone for archival.
+- **Requirements:** (validation phase — no REQs)
+- **Success criteria:**
+  - `gsd:audit-milestone` run; all 8 REQs cross-referenced against phase VERIFICATION.md files; report shows 8/8 satisfied
+  - All new hooks in installer; all new/modified agents at 10/10 standard; all modified workflows have updated tests
+  - CLAUDE.md, README.md, DEVOPS-HANDOFF.md reflect: 16 hooks (was 13), 16 agents (was 15), new rubric + gate + two-mode verify
+  - Coverage remains >= 90% overall; no module below 80%
+  - `npm test` green
 - **Status:** not started
 - **Complete:** false
 
@@ -43,6 +72,7 @@
 - **v1.9 Ship Readiness & Hygiene** (2026-04-05) -- 2 phases, 5 requirements. [Archive](milestones/v1.9-ROADMAP.md)
 - **v2.0 Intelligence Layer** (2026-04-05) -- 4 phases, 23 requirements. [Archive](milestones/v2.0-ROADMAP.md)
 - **v2.1 System Audit & Debt Closure** (2026-04-09 -> 2026-04-10) -- 5 phases, 10 requirements. [Archive](milestones/v2.1-ROADMAP.md)
+- **v2.2 Security Hardening** (2026-04-12 -> 2026-04-13) -- 2 phases, 4 requirements. Shipped via PR #47 (code) + PR #48 (audit). Canonical record: `.planning/v2.2-MILESTONE-AUDIT.md`.
 
 ---
-*Last updated: 2026-04-12 -- v2.2 milestone started*
+*Last updated: 2026-04-13 -- v2.3 milestone roadmap committed (4 phases)*
