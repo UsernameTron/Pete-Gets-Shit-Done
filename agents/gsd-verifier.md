@@ -408,6 +408,8 @@ gaps:
 
 ## Create VERIFICATION.md
 
+If status is `passed`, also include the Architecture Score section from the rubric (see `<scope_rubric>`).
+
 **ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
 
 Create `.planning/phases/{phase_dir}/{phase_num}-VERIFICATION.md`:
@@ -509,6 +511,90 @@ Footer: `_Verified: {timestamp}_ / _Verifier: Claude (gsd-verifier scope:general
 </general_success_criteria>
 
 </scope_general>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SCOPE: RUBRIC — 4D Architecture Scoring (post-general-pass)
+     ═══════════════════════════════════════════════════════════════ -->
+
+<scope_rubric>
+
+## 4D Architecture Scoring Rubric
+
+When general-scope verification completes with status `passed`, apply this rubric to score the phase's architectural quality. Skip if status is `gaps_found` (fix gaps first).
+
+### Dimensions and Weights
+
+| Dimension | Weight | Focus |
+|-----------|--------|-------|
+| Security | 35% | Threat resistance and defense-in-depth |
+| Performance | 25% | Resource efficiency and scalability |
+| Correctness | 25% | Behavioral accuracy and robustness |
+| Maintainability | 15% | Long-term readability and evolvability |
+
+### Scoring Criteria (14 total)
+
+**Security (35%) — 4 criteria:**
+1. **Prompt injection resistance** — Input sanitization, instruction boundary enforcement
+2. **Permission boundaries** — Least-privilege tool access, deny rules for sensitive paths
+3. **Secret handling** — No credentials in code/config, environment scrubbing for subprocesses
+4. **Input validation** — Shell metacharacter blocking, path containment, size limits
+
+**Performance (25%) — 3 criteria:**
+5. **Resource bounds** — maxTurns, timeouts, output size limits
+6. **Lazy loading** — Deferred initialization for expensive operations
+7. **Concurrency design** — Parallel wave execution, no unnecessary serialization
+
+**Correctness (25%) — 4 criteria:**
+8. **Error handling** — Explicit error paths, no silent catches, GsdError usage
+9. **Edge case coverage** — Empty inputs, corrupt state, race conditions
+10. **Type safety** — Consistent parameter shapes, validated config schemas
+11. **Test coverage** — Per-module thresholds met (80% general, 95% security)
+
+**Maintainability (15%) — 3 criteria:**
+12. **Naming clarity** — Intent-revealing names, consistent conventions
+13. **Single responsibility** — One concern per module/function, clean boundaries
+14. **Dependency hygiene** — Zero external deps maintained, no circular imports
+
+### Scoring Process
+
+For each criterion, assign 0-10:
+- **0-3:** Missing or fundamentally broken
+- **4-6:** Present but incomplete or inconsistent
+- **7-8:** Solid implementation with minor gaps
+- **9-10:** Exemplary, could serve as reference
+
+**Dimension score** = average of its criteria scores (0-100 scale)
+**Overall score** = weighted sum: (Security × 0.35) + (Performance × 0.25) + (Correctness × 0.25) + (Maintainability × 0.15)
+
+### Thresholds
+
+| Level | Threshold | Action |
+|-------|-----------|--------|
+| PASS | Overall >= 70, no dimension < 50 | Proceed to ship |
+| CONDITIONAL | Overall >= 60, or one dimension 40-49 | Flag concerns, proceed with acknowledgment |
+| FAIL | Overall < 60, or any dimension < 40 | Block — remediation required |
+
+### Output Format
+
+Include in VERIFICATION.md after the Goal Achievement section:
+
+```markdown
+## Architecture Score
+
+| Dimension | Weight | Score | Status |
+|-----------|--------|-------|--------|
+| Security | 35% | {score} | {PASS/CONDITIONAL/FAIL} |
+| Performance | 25% | {score} | {PASS/CONDITIONAL/FAIL} |
+| Correctness | 25% | {score} | {PASS/CONDITIONAL/FAIL} |
+| Maintainability | 15% | {score} | {PASS/CONDITIONAL/FAIL} |
+| **Overall** | **100%** | **{weighted}** | **{verdict}** |
+
+### Criteria Detail
+
+{For each criterion: name, score, brief justification}
+```
+
+</scope_rubric>
 
 <!-- ═══════════════════════════════════════════════════════════════
      SCOPE: PLAN — Pre-execution plan quality verification

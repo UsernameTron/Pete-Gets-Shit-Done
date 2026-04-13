@@ -37,6 +37,13 @@ AGENT_SKILLS_CHECKER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agen
 ```
 
 Parse JSON for: `planner_model`, `checker_model`, `commit_docs`, `phase_found`, `phase_dir`, `phase_number`, `phase_name`, `has_verification`, `uat_path`.
+
+**Mode detection from $ARGUMENTS:**
+- `--mode=compliance` → `verify_mode = "compliance"` (spec compliance only — existing UAT flow)
+- `--mode=schema` → `verify_mode = "schema"` (schema quality only — automated check)
+- No `--mode` flag → `verify_mode = "both"` (schema pre-flight, then compliance UAT)
+
+Strip `--mode=*` from $ARGUMENTS before phase number parsing.
 </step>
 
 <step name="check_active_session">
@@ -86,7 +93,65 @@ Provide a phase number to start testing (e.g., /gsd:verify-work 4)
 Continue to `create_uat_file`.
 </step>
 
+<step name="schema_check">
+**Automated schema quality check (runs when mode = schema or both):**
+
+This check is fully automated — no user interaction. It validates GSD conventions:
+
+1. **Agent frontmatter** — All `agents/gsd-*.md` files have required fields (name, description, tools, model, maxTurns)
+2. **Commit format** — Recent commits follow `type(scope): description` pattern
+3. **File locations** — New files placed in correct GSD directories (agents/, hooks/src/, references/, workflows/)
+4. **Test coverage** — Every new source file has a corresponding test file
+5. **SUMMARY.md** — Each completed plan has a SUMMARY.md in the phase directory
+
+```bash
+# Schema check implementation
+SCHEMA_PASS=true
+SCHEMA_ISSUES=""
+
+# Check 1: Agent frontmatter
+for agent in agents/gsd-*.md; do
+  for field in "name:" "description:" "tools:" "model:"; do
+    grep -q "^$field" "$agent" || SCHEMA_ISSUES="$SCHEMA_ISSUES\n- $agent missing $field"
+  done
+done
+
+# Check 2: Recent commit format (last 10 commits on this phase)
+git log --oneline -10 | while read line; do
+  echo "$line" | grep -qE "^[a-f0-9]+ (feat|fix|docs|test|chore|refactor|verify|plan)\(" || \
+    SCHEMA_ISSUES="$SCHEMA_ISSUES\n- Non-standard commit: $line"
+done
+
+# Check 3: SUMMARY.md for completed plans
+for plan in "$phase_dir"/*-PLAN.md; do
+  summary="${plan/PLAN/SUMMARY}"
+  [ -f "$summary" ] || SCHEMA_ISSUES="$SCHEMA_ISSUES\n- Missing SUMMARY for $(basename $plan)"
+done
+```
+
+**Output:** Append schema report to UAT file:
+
+```markdown
+## Schema Quality Check
+
+| Check | Result |
+|-------|--------|
+| Agent frontmatter | {PASS/issues} |
+| Commit format | {PASS/issues} |
+| File locations | {PASS/issues} |
+| Test coverage | {PASS/issues} |
+| SUMMARY.md | {PASS/issues} |
+
+{If any issues, list them}
+```
+
+**If mode = "schema" only:** Complete after schema check (skip UAT flow).
+**If mode = "both":** Continue to `find_summaries` after schema check completes.
+</step>
+
 <step name="find_summaries">
+**Skip if verify_mode = "schema"** — schema-only mode does not run the UAT flow.
+
 **Find what to test:**
 
 Use `phase_dir` from init (or run init if not already done).
@@ -359,6 +424,8 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "test({phase_num}): 
 Present summary:
 ```
 ## UAT Complete: Phase {phase}
+
+If schema check was run, include its results above the UAT results.
 
 | Result | Count |
 |--------|-------|
