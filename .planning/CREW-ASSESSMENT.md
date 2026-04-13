@@ -6,6 +6,8 @@ mode: diagnostic
 
 # GSD Crew Assessment — 2026-04-13
 
+> **Updated 2026-04-13:** reassessed after PR #39-45 defense-in-depth work. Original assessment read stale snapshot. Blocker #1 (gsd-ui-checker model field) struck — `model: haiku` is present in source and installed copy. Blocker #2 reclassified from blocker to active work item (quality gap, not hard blocker).
+
 Diagnostic report only. No remediation plans, no architectural proposals, no gray-area questions. Findings with citations.
 
 ---
@@ -109,7 +111,7 @@ Rubric (0–10): frontmatter completeness (2) + role clarity (2) + model_rationa
 | gsd-user-profiler | 9/10 | No explicit "mandatory read" instruction for reference doc |
 | gsd-stack-analyzer | 9/10 | `Bash` in tools list but scope_guard forbids modification — misleading |
 | gsd-validator-hub | 8/10 | Missing `isolation`, `maxTurns`; weak scope-selection handler |
-| gsd-ui-checker | 8/10 | **BLOCKER: no explicit `model:` field in frontmatter** |
+| gsd-ui-checker | 9/10 | ~~BLOCKER: no explicit `model:` field~~ — **STRUCK 2026-04-13**: `model: haiku` present at `agents/gsd-ui-checker.md:6` (source + installed copy verified). Original reading was stale. |
 | plugin-developer | 7/10 | No `permissionMode`, `maxTurns`, `isolation`, explicit `model`, `<anti_patterns>` |
 | test-runner | 7/10 | Same as plugin-developer |
 | docs-sync | 7/10 | Same as plugin-developer |
@@ -124,8 +126,12 @@ Rubric (0–10): frontmatter completeness (2) + role clarity (2) + model_rationa
 
 ### Blockers
 
-1. **`gsd-ui-checker` — missing `model:` field** (`agents/gsd-ui-checker.md:1-20`). Violates GSD "every agent must declare model explicitly" rule.
-2. **Three project agents missing defense-in-depth frontmatter** (`.claude/agents/plugin-developer.md`, `test-runner.md`, `docs-sync.md` — each has only `name`, `description`, `tools`).
+_All original blockers resolved or reclassified on 2026-04-13. None currently outstanding._
+
+### Active work items (reclassified 2026-04-13)
+
+1. ~~**`gsd-ui-checker` — missing `model:` field**~~ — **RESOLVED (stale reading).** Verified `model: haiku` present in source (`agents/gsd-ui-checker.md:6`) and installed copy (`~/.claude/agents/gsd-ui-checker.md:6`). Original assessment read a pre-PR-39 snapshot.
+2. **Three project agents need defense-in-depth hygiene upgrade** (`.claude/agents/plugin-developer.md`, `test-runner.md`, `docs-sync.md`). Current state has `name`, `description`, `tools`, `model`, `permissionMode` — not missing frontmatter. Gap is the deeper hygiene sections: `maxTurns`, `isolation`, `disallowedTools` in frontmatter plus `<role>`, `<scope_guard>`, `<anti_patterns>`, `<completion_criteria>` body blocks. Score 7/10. Quality gap, not a hard blocker — reclassified from blocker to active work item.
 
 ---
 
@@ -178,7 +184,7 @@ Verifier + validator: 13 spawns. Executor: 1 spawn. v2.1–v2.2 were audit-heavy
 | Coverage gaps | 7 lifecycle areas (incl. 3 with phantom agent references) |
 | Medium-severity overlaps | 1 (`validator-hub` ↔ `ecosystem-auditor`) |
 | Gold-standard agents (10/10) | 4 |
-| Blocking quality issues | 2 (`gsd-ui-checker` model field; 3 project agents hygiene) |
+| Blocking quality issues | 0 (both original blockers resolved 2026-04-13 — see Active work items) |
 | Ceremony-bypass phases | 3 (v2.0-P32, v2.1-P38, v2.2-P39+P40) |
 | Drift events | 1 (2026-04-10, 12 agents stale) |
 
