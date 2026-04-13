@@ -12,7 +12,7 @@ You are working with Pete Connor — AI transformation leader, MS in AI, CCXP/CC
 
 Key capabilities:
 - **61 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
-- **15 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, and others) handling quality, planning, and execution roles
+- **16 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-security-guardian, and others) handling quality, planning, and execution roles
 - **47+ Claude Code skills** covering command implementations, utilities, and governance workflows
 - **Wave-based parallel execution** — independent tasks run concurrently in waves; dependent tasks respect ordering automatically
 - **5-phase delivery lifecycle**: discuss → plan → execute → verify → ship, with explicit phase gates that cannot be skipped
@@ -71,9 +71,9 @@ Three project-scoped specialists live in `.claude/agents/`:
 | test-runner | `test-runner.md` | Runs test suites, diagnoses failures, writes coverage |
 | docs-sync | `docs-sync.md` | Keeps CLAUDE.md, README.md, and DEVOPS-HANDOFF.md current |
 
-GSD also ships 15 built-in agents activated by the execution engine:
+GSD also ships 16 built-in agents activated by the execution engine:
 
-`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
+`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-security-guardian`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
 
 ---
 
