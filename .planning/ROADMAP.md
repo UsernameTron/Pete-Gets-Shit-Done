@@ -17,9 +17,9 @@
   - Zero external dependencies (Node.js built-ins only)
   - `npm test` green with new tests included
   - One commit per hook
-- **Plans:** 1/2 plans executed
+- **Plans:** 2/2 plans complete
   - [x] 41-01-PLAN.md -- Enhance prompt guard (18 patterns, fail-closed) + port config protection
-  - [ ] 41-02-PLAN.md -- Port cost tracker + wire all hooks into build/installer
+  - [x] 41-02-PLAN.md -- Port cost tracker + wire all hooks into build/installer
 - **Status:** planned
 - **Complete:** false
 

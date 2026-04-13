@@ -122,7 +122,7 @@ v2.3 charter: `.planning/v2.3-prompt-chain.md`. Derived from ECC diamond hunt (h
 |-----|-------|--------|
 | HOOK-01 | 41 | Complete |
 | HOOK-02 | 41 | Complete |
-| HOOK-03 | 41 | Pending |
+| HOOK-03 | 41 | Complete |
 | SEC3-01 | 42 | Pending |
 | SEC3-02 | 42 | Pending |
 | QUAL-01 | 43 | Pending |
