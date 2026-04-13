@@ -1,0 +1,94 @@
+#!/usr/bin/env node
+// gsd-hook-version: {{GSD_VERSION}}
+// GSD Cost Tracker — PostToolUse hook
+// Appends lightweight session usage metrics to ~/.claude/metrics/costs.jsonl.
+// Logs token usage and estimated USD cost per tool call for session-level cost visibility.
+//
+// Triggers on: all PostToolUse events
+// Action: Advisory only — writes JSONL metrics and exits 0
+//
+// Exit codes:
+//   0 = always (non-blocking; cost tracking must not interrupt workflows)
+
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+
+// Inlined utility functions — no external dependencies
+function getClaudeDir() {
+  return path.join(process.env.HOME || process.env.USERPROFILE || os.homedir(), '.claude');
+}
+
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+function toNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function estimateCost(model, inputTokens, outputTokens) {
+  // Approximate per-1M-token blended rates. Conservative defaults.
+  const table = {
+    haiku:  { in: 0.8,  out: 4.0  },
+    sonnet: { in: 3.0,  out: 15.0 },
+    opus:   { in: 15.0, out: 75.0 },
+  };
+
+  const normalized = String(model || '').toLowerCase();
+  let rates = table.sonnet;
+  if (normalized.includes('haiku')) rates = table.haiku;
+  if (normalized.includes('opus'))  rates = table.opus;
+
+  const cost = (inputTokens / 1_000_000) * rates.in + (outputTokens / 1_000_000) * rates.out;
+  return Math.round(cost * 1e6) / 1e6;
+}
+
+const MAX_STDIN = 1024 * 1024;
+let raw = '';
+
+const stdinTimeout = setTimeout(() => process.exit(0), 3000);
+
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', chunk => {
+  if (raw.length < MAX_STDIN) {
+    const remaining = MAX_STDIN - raw.length;
+    raw += chunk.substring(0, remaining);
+  }
+});
+
+process.stdin.on('end', () => {
+  clearTimeout(stdinTimeout);
+  try {
+    const input = raw.trim() ? JSON.parse(raw) : {};
+    const usage = input.usage || input.token_usage || {};
+    const inputTokens  = toNumber(usage.input_tokens  || usage.prompt_tokens     || 0);
+    const outputTokens = toNumber(usage.output_tokens || usage.completion_tokens || 0);
+
+    const model     = String(input.model || input._cursor?.model || process.env.CLAUDE_MODEL || 'unknown');
+    const sessionId = String(process.env.CLAUDE_SESSION_ID || 'default');
+
+    const metricsDir = path.join(getClaudeDir(), 'metrics');
+    ensureDir(metricsDir);
+
+    const row = {
+      timestamp:          new Date().toISOString(),
+      session_id:         sessionId,
+      model,
+      input_tokens:       inputTokens,
+      output_tokens:      outputTokens,
+      estimated_cost_usd: estimateCost(model, inputTokens, outputTokens),
+    };
+
+    fs.appendFileSync(path.join(metricsDir, 'costs.jsonl'), `${JSON.stringify(row)}\n`);
+  } catch {
+    // Keep hook non-blocking — cost tracking must never interrupt tool execution.
+  }
+
+  process.exit(0);
+});
