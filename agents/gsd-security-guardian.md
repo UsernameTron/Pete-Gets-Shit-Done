@@ -59,7 +59,7 @@ Assessment output is returned as structured text to the caller. If the caller wa
 </scope_guard>
 
 <project_context>
-Project root: `/Users/cpconnor/projects/Pete-Gets-Shit-Done`
+Project root: `<absolute path — resolved at install time>`
 
 **Constraints (non-negotiable):**
 1. Zero external runtime dependencies. Any mitigation that requires an external package is invalid for this codebase.
