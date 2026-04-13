@@ -39,6 +39,8 @@ skills/       Command implementations (one file per GSD command)
 
 The **v2.0 Intelligence Layer** (`classify.cjs`, `model-profiles.cjs`, `history.cjs`) adds adaptive task routing — GSD classifies incoming tasks and selects execution strategies based on complexity, history, and available resources.
 
+The **v2.3 Quality Infrastructure** extends the verifier with a 4D scoring rubric (security 35%, performance 25%, correctness 25%, maintainability 15%), adds a three-part necessity gate for subagent creation decisions, and introduces two-mode verification (compliance + schema) in the verify-work workflow. Three new execution hooks provide runtime security: prompt injection detection (18 patterns), config file protection (32 files), and cost tracking (JSONL metrics).
+
 For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 
 ---
@@ -46,7 +48,7 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 ## Tests and Coverage
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
-- **Scale**: ~454 test suites, ~2377 assertions
+- **Scale**: ~472 test suites, ~2474 assertions
 - **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
 - **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
 
