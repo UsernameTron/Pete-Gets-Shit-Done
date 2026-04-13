@@ -17,6 +17,25 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 **Milestones shipped:** 12 (v1.0 through v2.1)
 **Total phases executed:** 38 across all milestones
 
+## Core Value
+
+GSD delivers disciplined, reproducible software delivery inside Claude Code by enforcing a 5-phase lifecycle (discuss → plan → execute → verify → ship) with wave-based parallelization, quality gates, and adaptive task routing. The core value is **predictable, high-quality execution at scale** — turning ambiguous prompts into shipped, tested, documented code without skipped steps.
+
+## Requirements
+
+Active requirements for the current milestone. Historical milestone requirements are captured in the collapsible sections below.
+
+### v2.2 Security Hardening (active)
+
+| ID | Title | Phase | Status |
+|----|-------|-------|--------|
+| SEC2-01 | `@file:` allowlist in path validation | Phase 39 | Shipped |
+| SEC2-02 | `requireSafePath` enforcement for commands | Phase 39 | Shipped |
+| SEC2-03 | `execSync` elimination, `safeExec` everywhere | Phase 40 | Shipped |
+| SEC2-04 | `indexOf` scanner + `escapeRegex` + 1MB guard | Phase 40 | Shipped |
+
+Deferred to v2.3: H-06, H-07 (refactors, not exposure).
+
 ## Current Milestone: v2.2 Security Hardening
 
 **Goal:** Fix 4 high-severity security findings from the full system audit (H-01, H-10, H-09, H-08).
