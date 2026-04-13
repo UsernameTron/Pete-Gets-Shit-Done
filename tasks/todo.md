@@ -1,22 +1,41 @@
 # Todo
 
-## Current Status: v2.2 Shipped — Between Milestones
+## Current Status: v2.2 Shipped — Between Milestones (CREW-ASSESSMENT fully closed)
 
-v2.2 Security Hardening merged and audited (PR #47 merged 2026-04-12; audit PR #48 merged 2026-04-13, verdict: passed). All 4 findings (SEC2-01 through SEC2-04) resolved. Main is clean; no branches in flight.
+v2.2 Security Hardening merged and audited (PR #47 merged 2026-04-12; audit PR #48 merged 2026-04-13, verdict: passed). All 4 findings (SEC2-01 through SEC2-04) resolved. CREW-ASSESSMENT.md findings all closed as of session 12 (2026-04-13). Main is clean; remote branches pruned to just `main`.
 
 - **Tests**: 2408 passing (baseline post-v2.2)
 - **Coverage**: 90.41% overall
-- **Branch**: `main` (clean)
-- **Last commit**: `fc55c96 chore(planning): reconcile todo.md and refresh crew assessment`
+- **Branch**: `main` (clean, synced with origin)
+- **Last commit**: `7add3f1 docs: add full system audit 2026-04-11`
 
 ## Open Items
 
 - [ ] **Stop-hook sentinel for human-review gates** — add `.planning/.review-pending` sentinel (or env flag) to the uncommitted-files Stop hook so prompts containing "do not commit yet" don't force a commit. Source: `tasks/lessons.md` 2026-04-10 [Hook Design].
 - [ ] **Resume `everything-claude-code-clean` scan** — 4 areas pending (hooks first, then commands/agents/skills). Diamond hunt recon was interrupted by /wrap in session 9. Prior recon findings staged in `.extraction-staging/FINDINGS.md` (gitignored).
-- [ ] **`/gsd:new-milestone` for v2.3** — 13 charter candidates staged from diamond hunt recon (session 9). Awaiting Pete's scope definition before kicking off.
-- [ ] **Act on CREW-ASSESSMENT.md findings** (2026-04-13) — **partially done (session 11, 2026-04-13)**: blocker #1 verified already fixed (struck from assessment), blocker #2 resolved (3 project agents upgraded to 10/10 standard), orphan `gsd-stack-analyzer` removed in `e42b9b0` (agent file deleted + copilot-install test updated). **Remaining**: medium overlap `validator-hub` ecosystem-mode vs `ecosystem-auditor` (dispatch boundary undocumented).
+- [ ] **`/gsd:new-milestone` for v2.3** — 13 charter candidates staged from diamond hunt recon (session 9). v2.3 prompt-chain analysis in `stash@{0}` (`v2.3-prompt-chain — pending Pete's v2.3 milestone kickoff`); pop it when ready to kick off.
+- [x] **Act on CREW-ASSESSMENT.md findings** (closed session 12, 2026-04-13) — all 4 findings resolved: blocker #1 (ui-checker model field) struck as stale read, 3 project agents upgraded to 10/10 (session 11), orphan `gsd-stack-analyzer` removed in `e42b9b0`, validator-hub/ecosystem-auditor dispatch boundary documented in `5d80821`.
 
-## Session Handoff (2026-04-13 — session 11)
+## Session Handoff (2026-04-13 — session 12)
+
+**Branch**: `main` (clean, synced with origin). `docs/crew-assessment-reassessment` merged and deleted.
+
+**Session actions:**
+1. Investigated commit `e42b9b0` provenance gap — confirmed legitimate (Pete + Claude co-author, 2026-04-13 13:43 CDT); session 11's handoff/todo had not logged it. Reconciled `tasks/todo.md`.
+2. Closed all remaining CREW-ASSESSMENT.md findings — updated 3 project-agent scores 7/10 → 10/10 with commit citations (`dedad83`, `ac6e342`, `b7acc84`), marked orphan cleanup resolved (`e42b9b0`), documented `validator-hub` ecosystem-mode ↔ `ecosystem-auditor` dispatch boundary inline. Summary counters reconciled (active 20, archived 8, orphans 0, medium overlaps 0, gold-standard 7, open findings 0). Commit `5d80821`.
+3. Fast-forwarded `docs/crew-assessment-reassessment` to main, pushed to origin, deleted local branch.
+4. Remote branch cleanup — pruned stale gone-branch reference, then deleted 5 origin branches in 2 waves:
+   - Wave 1 (safe, 0 unique commits): `chore/health-warnings-repair`, `chore/planning-reconcile-2026-04-13`, `feat/defense-in-depth-builders-a` (PR #43 squash-merged).
+   - Wave 2 (had orphan content, no PR): cherry-picked `docs/full-audit-2026-04-11` audit doc onto main as `7add3f1`, pushed, then deleted both `docs/full-audit-2026-04-11` and `claude/ctg-technical-plan-htRqx` (CTG engagement scaffold — separate client work, not GSD repo material).
+5. Stash cleanup — dropped 8 stale stashes in reverse-index order (agent-health.log hook artifacts, WIP todos, Phase 34 scratch). Reduced 11 → 3 retained: `v2.3-prompt-chain`, `extraction-staging`, `phase-34-scratch-preserve`.
+
+**Next session:**
+1. Either kick off v2.3 via `/gsd:new-milestone` (pop `stash@{0}` for charter analysis) or continue `everything-claude-code-clean` scan.
+2. Stop-hook sentinel remains open (lesson 2026-04-10 [Hook Design]) — would have prevented this session's `v2.3-prompt-chain.md` push friction.
+
+---
+
+## Prior Handoff (2026-04-13 — session 11)
 
 **Branch**: `docs/crew-assessment-reassessment` — 4 commits ahead of main, not yet pushed.
 
