@@ -1,8 +1,8 @@
 # Todo
 
-## Current Status: v2.3 Phase 44 — Milestone Audit + Docs Sync
+## Current Status: v2.3 Complete — Awaiting Pete's Review Before Ship
 
-Phases 41-43 complete. All 8 requirements (HOOK-01/02/03, SEC3-01/02, QUAL-01/02/03) implemented and verified. Phase 44 is the validation phase before closing v2.3.
+All 4 phases (41-44) complete. All 8 requirements satisfied and audited. Living docs updated. Stopped before /gsd:ship per Pete's instruction.
 
 - **Tests**: 2474 passing, 0 failures
 - **Coverage**: 90.41% overall, no module below 80%, security 100%
@@ -11,7 +11,8 @@ Phases 41-43 complete. All 8 requirements (HOOK-01/02/03, SEC3-01/02, QUAL-01/02
 
 ## Open Items
 
-- [ ] **Phase 44: Milestone Audit + Docs Sync** — validation phase: audit all 8 REQs, update living docs, confirm coverage/tests
+- [x] **Phase 44: Milestone Audit + Docs Sync** — 8/8 REQs audited, CLAUDE.md/README.md/DEVOPS-HANDOFF.md updated
+- [ ] **Ship v2.3** — Pete reviews diff, then `/gsd:ship` to create PR
 - [ ] **Stop-hook sentinel for human-review gates** — add `.planning/.review-pending` sentinel to uncommitted-files Stop hook. Source: `tasks/lessons.md` 2026-04-10 [Hook Design].
 - [ ] **Resume `everything-claude-code-clean` scan** — 4 areas pending (hooks, commands, agents, skills). Prior recon in `.extraction-staging/FINDINGS.md` (gitignored).
 
@@ -24,18 +25,23 @@ Phases 41-43 complete. All 8 requirements (HOOK-01/02/03, SEC3-01/02, QUAL-01/02
 - [x] v2.3 milestone setup — PROJECT.md, MILESTONES.md, REQUIREMENTS.md, ROADMAP.md, STATE.md
 - [x] lesson-capture-gate.cjs wired into settings.json Stop hooks
 
-## Session Handoff (2026-04-13 — session 14)
+## Session Handoff (2026-04-14 — session 15)
 
 **Branch**: `feat/v2.3-phase-41-hook-ports` (clean)
 
 **Session actions:**
-1. `/gsd:resume-work` — confirmed orientation (2474 tests, 90.41% coverage, Phases 41-43 complete)
-2. Generated missing Phase 43 artifacts (43-VERIFICATION.md, 43-01-SUMMARY.md) — commit `5d60336`
-3. Refreshed todo.md — marked Phases 41/42/43 complete, Phase 44 is sole open phase item
+1. Cross-project dependency audit of all 15 dirs under `/Users/cpconnor/projects/`
+2. Produced `/Users/cpconnor/projects/_audit/dependency-map.md` (28 edges, 22 hard, 10 stale targets)
+3. Produced `/Users/cpconnor/projects/_audit/dependency-graph.json` (machine-readable graph)
+4. Decoupled `~/.claude/settings.json:198` from GSD repo — copied `lesson-capture-gate.cjs` to `~/.claude/hooks/`, updated path (verified: exit 0, diff clean)
+5. Added drift-prevention rule to `~/.claude/CLAUDE.md`
+6. Documented `local-plugin-marketplace` symlink — created README.md explaining source-of-truth relationship
 
 **Next:**
-1. Phase 44 — discuss → plan → execute → verify
-2. Stop before /gsd:ship — Pete wants to review diff and docs before shipping v2.3
+1. Pete reviews diff: `git diff main...HEAD` — v2.3 PR still pending
+2. `/gsd:ship` to create PR for v2.3
+3. After merge: `/gsd:complete-milestone` for v2.3 archival
+4. Remaining audit items (future session): Risk #1 (pete-content-factory archived MindMeld1.2 deps), Risk #3 (connor-innovate-platform marketplace.json absolute paths), Risk #5 (dead launcher scripts), 2 stale permission rules in `~/.claude/settings.local.json`
 
 ---
 
