@@ -210,7 +210,7 @@ None. No blocking defects found.
 | ID | Dimension | Finding |
 |----|-----------|---------|
 | L-01 | 1 | GSD-Framework-Analysis.md orphaned analysis artifact (35KB) |
-| L-02 | 1 | PROJECT-AGENT-AUDIT-20260410.md dated audit clutter |
+| L-02 | 1 | PROJECT-AGENT-AUDIT-20260410.md dated audit clutter — relocated to .planning/research/agent-audits/2026-04-10-project-scoped-agents.md |
 | L-03 | 1 | state/ directory naming generic (could confuse with app state) |
 | L-04 | 1 | context/ not documented in project CLAUDE.md structure section |
 | L-05 | 2 | 4 agents with Bash+Edit ambiguity (mitigated by scope guards) |

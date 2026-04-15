@@ -16,6 +16,21 @@ All 4 phases (41-44) complete. All 8 requirements satisfied and audited. Living 
 - [ ] **Stop-hook sentinel for human-review gates** — add `.planning/.review-pending` sentinel to uncommitted-files Stop hook. Source: `tasks/lessons.md` 2026-04-10 [Hook Design].
 - [ ] **Resume `everything-claude-code-clean` scan** — 4 areas pending (hooks, commands, agents, skills). Prior recon in `.extraction-staging/FINDINGS.md` (gitignored).
 
+## v2.4 Backlog (inherited)
+
+Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findings. None of these are v2.3 ship blockers; each is a discrete, actionable cleanup.
+
+- [ ] docs-sync: add `Bash` tool OR rewrite workflow steps 2-3 to use Glob/Grep equivalents. Recommendation: add Bash (commands are read-only and low-risk). Source: agent audit P1 #2.
+- [ ] test-runner: update description to reflect current suite count (currently says 295+, actual is 2474). Use "2400+" or specific. Source: agent audit P1 #3.
+- [ ] all three project agents: add `permissionMode: default` to frontmatter. Source: agent audit P1 #4.
+- [ ] all three project agents: replace hardcoded absolute path to project root with relative path or `$CLAUDE_PROJECT_DIR`. Source: agent audit P2 #5.
+- [ ] worktree-safe agents: add `isolation: worktree` to agents that may run concurrently with editing agents. Tradeoff: ~2s overhead per invocation. Source: agent audit P2 #6.
+- [ ] plugin-developer: add partial-failure guidance — "If hook build fails after source edit, revert the edit and report. Do not leave source in an inconsistent state." Source: agent audit P2 #7.
+- [ ] docs-sync: add CLAUDE.md governance preservation constraint. Source: agent audit P2 #8.
+- [ ] all three project agents: add self-referential protection — "Do not modify files in .claude/agents/." Source: agent audit P2 #9.
+- [ ] Add `// gsd-hook-version: X` headers to all 7 hook source files. Closes security-review finding #1 (deferred). Source: `.planning/research/security-reviews/2026-04-13-v2.3-closure-delta.md`.
+- [ ] Clean up .claude/agents/test-runner.md line 74 parenthetical to distinguish c8 `--lines 70` CLI flag from the project's 80/90/95 agent-level threshold. Cosmetic doc drift only — the thresholds themselves at lines 76-79 and completion criteria at line 112 are already correct. Source: Gate 1 misread resolution 2026-04-15.
+
 ## Completed (v2.3)
 
 - [x] **Phase 41: Hook Ports** (HOOK-01/02/03) — prompt-injection-guard (18 patterns), config-protection, cost-tracker. 3 hooks, all registered in installer, all tested.
