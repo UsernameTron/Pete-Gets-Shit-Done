@@ -20,6 +20,7 @@ All 4 phases (41-44) complete. All 8 requirements satisfied and audited. Living 
 
 Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findings. None of these are v2.3 ship blockers; each is a discrete, actionable cleanup.
 
+- [ ] **Stop auto-committing `.planning/agent-health.log` across sessions.** Hook writes to a tracked path — either add the file to `.gitignore` or redirect the hook to a non-tracked location. Observed surfacing in stashes @{0}/@{1} and `chore/session-16-wrap` auto-creation during v2.3 ship/archival on 2026-04-15.
 - [ ] docs-sync: add `Bash` tool OR rewrite workflow steps 2-3 to use Glob/Grep equivalents. Recommendation: add Bash (commands are read-only and low-risk). Source: agent audit P1 #2.
 - [ ] test-runner: update description to reflect current suite count (currently says 295+, actual is 2474). Use "2400+" or specific. Source: agent audit P1 #3.
 - [ ] all three project agents: add `permissionMode: default` to frontmatter. Source: agent audit P1 #4.

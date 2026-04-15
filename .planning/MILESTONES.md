@@ -1,5 +1,23 @@
 # Milestones
 
+## v2.3 Hook Ecosystem + Security Guardian + Agent Quality (Shipped: 2026-04-15)
+
+**Phases completed:** 4 phases (41-44), 5 plans, 8/8 requirements satisfied
+
+**Key accomplishments:**
+
+- HOOK-01: Prompt injection PreToolUse hook enhanced to 18 regex patterns with fail-closed blocking (Phase 41-01)
+- HOOK-02: Config protection PreToolUse hook ported with 32-entry PROTECTED_FILES set and `Write|Edit` matcher (Phase 41-01)
+- HOOK-03: Cost tracker PostToolUse hook writing zero-dep JSONL metrics; all 3 new hooks wired through `build-hooks.js` and `bin/install.js` (Phase 41-02)
+- SEC3-01/02: `gsd-security-guardian` design-time review agent at 10/10 standard + shared `agent-threat-model.md` reference covering 6 threat categories (Phase 42-01)
+- QUAL-01: 4D weighted scoring rubric (security 35%, perf 25%, correctness 25%, maint 15%) baked into `gsd-verifier` (Phase 43-01)
+- QUAL-02: Three-part agent necessity gate (context pollution / parallelizability / specialization) with PASS/FAIL/AMBIGUOUS outcomes (Phase 43-01)
+- QUAL-03: Two-mode verification (`--mode=compliance`, `--mode=schema`, default both) in `/gsd:verify-work` (Phase 43-01)
+
+**Shipped via:** PR #49 (feat/v2.3-phase-41-hook-ports) merged 2026-04-15 at 75b29cd. CI allowlist patch 34b865b applied to unblock merge. Phase 44 covered milestone audit + docs sync (CLAUDE.md, README.md, DEVOPS-HANDOFF.md updated for 16 hooks / 16 agents / new rubric).
+
+---
+
 ## v2.2 Security Hardening (Shipped: 2026-04-13)
 
 **Phases completed:** 2 phases (39-40), 4 requirements
