@@ -30,6 +30,8 @@ Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findi
 - [ ] all three project agents: add self-referential protection — "Do not modify files in .claude/agents/." Source: agent audit P2 #9.
 - [ ] Add `// gsd-hook-version: X` headers to all 7 hook source files. Closes security-review finding #1 (deferred). Source: `.planning/research/security-reviews/2026-04-13-v2.3-closure-delta.md`.
 - [ ] Clean up .claude/agents/test-runner.md line 74 parenthetical to distinguish c8 `--lines 70` CLI flag from the project's 80/90/95 agent-level threshold. Cosmetic doc drift only — the thresholds themselves at lines 76-79 and completion criteria at line 112 are already correct. Source: Gate 1 misread resolution 2026-04-15.
+- [ ] prompt-injection-scan.sh:81 allowlist entry update (SECURITY_HOOKS_REVIEW → 2026-04-07-hooks-review.md). CI-only, not exercised by npm test. Source: Gate 4 deferred 2026-04-15.
+- [ ] Backfill cross-refs to relocated docs in docs/health-reports/full-audit-2026-04-11.md and .planning/codebase/STRUCTURE.md once those files next touch the relocated artifacts. Source: Gate 4 no-op substitution 2026-04-15.
 
 ## Completed (v2.3)
 
