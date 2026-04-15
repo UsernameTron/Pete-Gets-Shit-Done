@@ -177,7 +177,7 @@ None. No blocking defects found.
 | ID | Dimension | Finding | File |
 |----|-----------|---------|------|
 | M-01 | 1 | bin/ documentation misleading (thin wrapper vs actual location) | CLAUDE.md:29 |
-| M-02 | 1 | README-gsd.md orphaned (41KB stale alternate README) | README-gsd.md |
+| M-02 | 1 | README-gsd.md orphaned (41KB stale alternate README) — relocated to docs/README-technical.md | docs/README-technical.md |
 | M-03 | 2 | gsd-assumptions-analyzer model tier (haiku may be suboptimal for inference) | agents/gsd-assumptions-analyzer.md |
 | M-04 | 3 | gsd-agent-health-check.sh has zero test coverage | scripts/gsd-agent-health-check.sh |
 | M-05 | 3 | {{GSD_VERSION}} placeholders unresolved in hook source files | hooks/gsd-*.js |
@@ -209,7 +209,7 @@ None. No blocking defects found.
 
 | ID | Dimension | Finding |
 |----|-----------|---------|
-| L-01 | 1 | GSD-Framework-Analysis.md orphaned analysis artifact (35KB) |
+| L-01 | 1 | GSD-Framework-Analysis.md orphaned analysis artifact (35KB) — relocated to docs/archive/v1.30.0-framework-analysis.md |
 | L-02 | 1 | PROJECT-AGENT-AUDIT-20260410.md dated audit clutter — relocated to .planning/research/agent-audits/2026-04-10-project-scoped-agents.md |
 | L-03 | 1 | state/ directory naming generic (could confuse with app state) |
 | L-04 | 1 | context/ not documented in project CLAUDE.md structure section |

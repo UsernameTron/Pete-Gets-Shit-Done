@@ -6,6 +6,8 @@ The complete AI coding system: execution engine + governance framework + extensi
 
 Meta-prompting, context engineering, spec-driven development, safety hooks, and session management — for Claude Code, OpenCode, Gemini CLI, Codex, Copilot, and Antigravity.
 
+Technical deep-dive: see [docs/README-technical.md](docs/README-technical.md).
+
 ```
 npx get-shit-done-cc@latest
 ```
