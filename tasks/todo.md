@@ -18,6 +18,8 @@ All 4 phases (41-44) complete. All 8 requirements satisfied and audited. Living 
 
 ## v2.4 Backlog (inherited)
 
+- [ ] Investigate duplicate v1.0/v1.1 tag pointers on origin — both point at `62470189` (the "Initial commit"). Local ffee68d variants were deleted and aligned to origin on 2026-04-15. Either one of the tags belongs on a different ship commit, or the repo was re-created at some point and both tags got stamped on the initial commit by the rebuild. Low priority — repo archaeology.
+
 Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findings. None of these are v2.3 ship blockers; each is a discrete, actionable cleanup.
 
 - [ ] **Stop auto-committing `.planning/agent-health.log` across sessions.** Hook writes to a tracked path — either add the file to `.gitignore` or redirect the hook to a non-tracked location. Observed surfacing in stashes @{0}/@{1} and `chore/session-16-wrap` auto-creation during v2.3 ship/archival on 2026-04-15.
