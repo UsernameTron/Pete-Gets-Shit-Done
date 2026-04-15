@@ -12,7 +12,7 @@ All 4 phases (41-44) complete. All 8 requirements satisfied and audited. Living 
 ## Open Items
 
 - [x] **Phase 44: Milestone Audit + Docs Sync** — 8/8 REQs audited, CLAUDE.md/README.md/DEVOPS-HANDOFF.md updated
-- [ ] **Ship v2.3** — Pete reviews diff, then `/gsd:ship` to create PR
+- [x] **Ship v2.3** — shipped 2026-04-15 via PR #49, tagged v2.3 at 75b29cd
 - [ ] **Stop-hook sentinel for human-review gates** — add `.planning/.review-pending` sentinel to uncommitted-files Stop hook. Source: `tasks/lessons.md` 2026-04-10 [Hook Design].
 - [ ] **Resume `everything-claude-code-clean` scan** — 4 areas pending (hooks, commands, agents, skills). Prior recon in `.extraction-staging/FINDINGS.md` (gitignored).
 
