@@ -1,6 +1,6 @@
 # DevOps Handoff — get-shit-done-cc
 
-> Last verified: 2026-04-09 | Version: 1.30.0
+> Last verified: 2026-04-13 | Version: 1.30.0 | Milestone: v2.3
 
 ---
 
@@ -44,8 +44,8 @@ The installer (`bin/install.js`) copies the following into the user's Claude Cod
 | Component | Destination | Contents |
 |-----------|-------------|----------|
 | Commands | `~/.claude/get-shit-done/commands/` | 61 GSD slash commands |
-| Agents | `~/.claude/get-shit-done/agents/` | 15 specialized agent definitions |
-| Hooks | `~/.claude/get-shit-done/hooks/` | 5 execution hooks (bundled JS) |
+| Agents | `~/.claude/get-shit-done/agents/` | 16 specialized agent definitions |
+| Hooks | `~/.claude/get-shit-done/hooks/` | 7 execution hooks (bundled JS) |
 | Workflows | `~/.claude/get-shit-done/workflows/` | Orchestration templates |
 | Governance | `~/.claude/get-shit-done/governance/` | CLAUDE.md template, 10 governance hooks |
 | Plugins | Respective plugin directories | 45 skills, 10 subagents, 6 reference docs |
@@ -262,12 +262,27 @@ This is a **CLI plugin**, not a deployed service. There is no server to monitor,
 
 ---
 
+## v2.3 Hook Ecosystem + Security Guardian + Agent Quality
+
+Added in milestone v2.3 (2026-04-13):
+
+| Component | What was added |
+|-----------|---------------|
+| Execution hooks (+3) | `gsd-prompt-guard.js` (18 injection patterns, PreToolUse), `gsd-config-protection.js` (32 protected files, PreToolUse), `gsd-cost-tracker.js` (JSONL metrics, PostToolUse) |
+| Security agent | `gsd-security-guardian` — design-time security reviewer, 6 threat categories, read-only plan mode, worktree isolation |
+| Threat model reference | `references/agent-threat-model.md` — 6 categories with attack vectors, detection patterns, mitigation strategies |
+| 4D scoring rubric | `gsd-verifier` extended with security (35%), performance (25%), correctness (25%), maintainability (15%) rubric |
+| Necessity gate | `references/agent-necessity-gate.md` — three-part gate (context pollution, parallelizability, specialization) for subagent creation |
+| Two-mode verify | `workflows/verify-work.md` supports `--mode=compliance`, `--mode=schema`, or both (default) |
+
+---
+
 ## Known Tech Debt
 
 | Item | Status | Details |
 |------|--------|---------|
 | CLAUDE.md Phase 3 quality gates | Resolved (v2.0) | Updated to reference `gsd-verifier` with scope parameters |
-| Stale agent references | Resolved (v1.9 Phase 28) | All 13 active files updated to use current agent names |
+| Stale agent references | Resolved (v1.9 Phase 28) | All agent files updated to use current names; 16 active agents as of v2.3 |
 | CI/CD pipeline | Deferred | No automated test/publish pipeline; appropriate for current project stage |
 
 For full tech debt tracking, see `.planning/PROJECT.md`.

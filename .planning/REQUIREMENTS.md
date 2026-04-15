@@ -89,6 +89,9 @@ v2.3 charter: `.planning/v2.3-prompt-chain.md`. Derived from ECC diamond hunt (h
 - Passing threshold defined (default: >= 70 overall, no dimension below 50)
 - Tests cover rubric application on at least one fixture per dimension
 
+**Validation artifacts:**
+- `.planning/research/agent-audits/2026-04-10-project-scoped-agents.md` — evidence the QUAL-01 rubric produces actionable, repeatable output on real agents (composite score 3.70/5 across plugin-developer, test-runner, docs-sync).
+
 ### QUAL-02: Three-Part Agent Necessity Gate
 
 **Priority:** High
@@ -120,14 +123,14 @@ v2.3 charter: `.planning/v2.3-prompt-chain.md`. Derived from ECC diamond hunt (h
 
 | REQ | Phase | Status |
 |-----|-------|--------|
-| HOOK-01 | 41 | Pending |
-| HOOK-02 | 41 | Pending |
-| HOOK-03 | 41 | Pending |
-| SEC3-01 | 42 | Pending |
-| SEC3-02 | 42 | Pending |
-| QUAL-01 | 43 | Pending |
-| QUAL-02 | 43 | Pending |
-| QUAL-03 | 43 | Pending |
+| HOOK-01 | 41 | Complete |
+| HOOK-02 | 41 | Complete |
+| HOOK-03 | 41 | Complete |
+| SEC3-01 | 42 | Complete |
+| SEC3-02 | 42 | Complete |
+| QUAL-01 | 43 | Complete |
+| QUAL-02 | 43 | Complete |
+| QUAL-03 | 43 | Complete |
 
 ## Deferred to v2.4+
 

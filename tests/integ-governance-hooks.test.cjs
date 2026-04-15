@@ -160,12 +160,14 @@ describe('prompt injection guard multi-pattern enforcement', () => {
       },
     });
 
-    assert.equal(result.exitCode, 0);
+    // Prompt guard is fail-closed: exits 2 with permissionDecision: "deny"
+    assert.equal(result.exitCode, 2);
     const output = JSON.parse(result.stdout);
     assert.ok(
       output.hookSpecificOutput?.additionalContext.includes('PROMPT INJECTION WARNING'),
       'classic injection should trigger warning'
     );
+    assert.equal(output.hookSpecificOutput.permissionDecision, 'deny', 'should deny the tool call');
     // Pattern count should be >= 1
     const match = output.hookSpecificOutput.additionalContext.match(
       /triggered (\d+) injection detection pattern/
@@ -184,12 +186,14 @@ describe('prompt injection guard multi-pattern enforcement', () => {
       },
     });
 
-    assert.equal(result.exitCode, 0);
+    // Prompt guard is fail-closed: exits 2 with permissionDecision: "deny"
+    assert.equal(result.exitCode, 2);
     const output = JSON.parse(result.stdout);
     assert.ok(
       output.hookSpecificOutput?.additionalContext.includes('PROMPT INJECTION WARNING'),
       'XML tag injection should be detected'
     );
+    assert.equal(output.hookSpecificOutput.permissionDecision, 'deny', 'should deny the tool call');
   });
 
   it('detects invisible Unicode characters', () => {
@@ -202,12 +206,14 @@ describe('prompt injection guard multi-pattern enforcement', () => {
       },
     });
 
-    assert.equal(result.exitCode, 0);
+    // Prompt guard is fail-closed: exits 2 with permissionDecision: "deny"
+    assert.equal(result.exitCode, 2);
     const output = JSON.parse(result.stdout);
     assert.ok(
       output.hookSpecificOutput?.additionalContext.includes('PROMPT INJECTION WARNING'),
       'invisible Unicode should trigger warning'
     );
+    assert.equal(output.hookSpecificOutput.permissionDecision, 'deny', 'should deny the tool call');
     assert.ok(
       output.hookSpecificOutput.additionalContext.includes('invisible-unicode-characters'),
       'should name the invisible-unicode-characters pattern'

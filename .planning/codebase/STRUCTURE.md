@@ -71,7 +71,7 @@ Pete-Gets-Shit-Done/
 ├── package.json             # npm manifest (v1.30.0)
 ├── CLAUDE.md                # Project-level AI instructions
 ├── README.md                # Public documentation
-├── README-gsd.md            # GSD framework documentation
+├── docs/README-technical.md # GSD technical deep-dive (architecture, security, troubleshooting)
 └── CHANGELOG.md             # Release history
 ```
 

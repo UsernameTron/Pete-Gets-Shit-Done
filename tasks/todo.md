@@ -1,67 +1,75 @@
 # Todo
 
-## Current Status: v2.3 Milestone Initialized — Ready for Phase Execution
+## Current Status: v2.3 Complete — Awaiting Pete's Review Before Ship
 
-v2.3 Hook Ecosystem + Security Guardian + Agent Quality fully set up. REQUIREMENTS.md (8 REQs), ROADMAP.md (4 phases 41-44), PROJECT.md, MILESTONES.md, STATE.md all committed on main. lesson-capture-gate.cjs wired into settings.json Stop hooks (was inert since PR #34).
+All 4 phases (41-44) complete. All 8 requirements satisfied and audited. Living docs updated. Stopped before /gsd:ship per Pete's instruction.
 
-- **Tests**: 2377 passing (baseline maintained through v2.2)
-- **Coverage**: 90.41% overall
-- **Branch**: `main` (clean, 6 commits ahead of origin)
-- **Last commit**: `f785191 fix(hooks): wire lesson-capture-gate into settings.json Stop hooks`
+- **Tests**: 2474 passing, 0 failures
+- **Coverage**: 90.41% overall, no module below 80%, security 100%
+- **Branch**: `feat/v2.3-phase-41-hook-ports` (clean)
+- **Last commit**: `5d60336 docs(43): add missing VERIFICATION.md and SUMMARY.md`
 
 ## Open Items
 
-- [ ] **Push main to origin** — 6 commits ahead (v2.3 setup + hook fix). Do before starting phase work.
-- [ ] **Phase 41: Hook Ports** (HOOK-01/02/03) — port prompt-injection-guard, config-protection, cost-tracker from ECC diamond hunt
-- [ ] **Phase 42: Security Guardian** (SEC3-01/02) — new gsd-security-guardian agent + threat model reference doc
-- [ ] **Phase 43: Agent Quality Infrastructure** (QUAL-01/02/03) — 4D scoring rubric, necessity gate, two-mode verify
-- [ ] **Phase 44: Milestone Audit + Docs Sync** — validation phase, no REQs
+- [x] **Phase 44: Milestone Audit + Docs Sync** — 8/8 REQs audited, CLAUDE.md/README.md/DEVOPS-HANDOFF.md updated
+- [ ] **Ship v2.3** — Pete reviews diff, then `/gsd:ship` to create PR
 - [ ] **Stop-hook sentinel for human-review gates** — add `.planning/.review-pending` sentinel to uncommitted-files Stop hook. Source: `tasks/lessons.md` 2026-04-10 [Hook Design].
 - [ ] **Resume `everything-claude-code-clean` scan** — 4 areas pending (hooks, commands, agents, skills). Prior recon in `.extraction-staging/FINDINGS.md` (gitignored).
 
-## Session Handoff (2026-04-13 — session 13)
+## v2.4 Backlog (inherited)
 
-**Branch**: `main` (clean, 6 commits ahead of origin)
+Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findings. None of these are v2.3 ship blockers; each is a discrete, actionable cleanup.
+
+- [ ] docs-sync: add `Bash` tool OR rewrite workflow steps 2-3 to use Glob/Grep equivalents. Recommendation: add Bash (commands are read-only and low-risk). Source: agent audit P1 #2.
+- [ ] test-runner: update description to reflect current suite count (currently says 295+, actual is 2474). Use "2400+" or specific. Source: agent audit P1 #3.
+- [ ] all three project agents: add `permissionMode: default` to frontmatter. Source: agent audit P1 #4.
+- [ ] all three project agents: replace hardcoded absolute path to project root with relative path or `$CLAUDE_PROJECT_DIR`. Source: agent audit P2 #5.
+- [ ] worktree-safe agents: add `isolation: worktree` to agents that may run concurrently with editing agents. Tradeoff: ~2s overhead per invocation. Source: agent audit P2 #6.
+- [ ] plugin-developer: add partial-failure guidance — "If hook build fails after source edit, revert the edit and report. Do not leave source in an inconsistent state." Source: agent audit P2 #7.
+- [ ] docs-sync: add CLAUDE.md governance preservation constraint. Source: agent audit P2 #8.
+- [ ] all three project agents: add self-referential protection — "Do not modify files in .claude/agents/." Source: agent audit P2 #9.
+- [ ] Add `// gsd-hook-version: X` headers to all 7 hook source files. Closes security-review finding #1 (deferred). Source: `.planning/research/security-reviews/2026-04-13-v2.3-closure-delta.md`.
+- [ ] Clean up .claude/agents/test-runner.md line 74 parenthetical to distinguish c8 `--lines 70` CLI flag from the project's 80/90/95 agent-level threshold. Cosmetic doc drift only — the thresholds themselves at lines 76-79 and completion criteria at line 112 are already correct. Source: Gate 1 misread resolution 2026-04-15.
+- [x] prompt-injection-scan.sh allowlist updated for relocated hooks-review + REQUIREMENTS.md + agent-threat-model.md. Closed by v2.3 ship CI fix 2026-04-15.
+- [ ] Backfill cross-refs to relocated docs in docs/health-reports/full-audit-2026-04-11.md and .planning/codebase/STRUCTURE.md once those files next touch the relocated artifacts. Source: Gate 4 no-op substitution 2026-04-15.
+
+## Completed (v2.3)
+
+- [x] **Phase 41: Hook Ports** (HOOK-01/02/03) — prompt-injection-guard (18 patterns), config-protection, cost-tracker. 3 hooks, all registered in installer, all tested.
+- [x] **Phase 42: Security Guardian** (SEC3-01/02) — gsd-security-guardian agent (10/10 DiD, 6 threat categories) + agent-threat-model reference doc. 2451 tests after.
+- [x] **Phase 43: Agent Quality Infrastructure** (QUAL-01/02/03) — 4D scoring rubric (14 criteria, 4 weighted dimensions), three-part necessity gate, two-mode verify (compliance + schema). 2474 tests after.
+- [x] Phase 43 artifact gap fixed — 43-VERIFICATION.md and 43-01-SUMMARY.md generated from on-disk deliverables.
+- [x] v2.3 milestone setup — PROJECT.md, MILESTONES.md, REQUIREMENTS.md, ROADMAP.md, STATE.md
+- [x] lesson-capture-gate.cjs wired into settings.json Stop hooks
+
+## Session Handoff (2026-04-14 — session 15)
+
+**Branch**: `feat/v2.3-phase-41-hook-ports` (clean)
 
 **Session actions:**
-1. `/prime` boot — 11 lessons, 3 specialists, resumed v2.3 setup at HANDOFF.json task 9
-2. Wrote `.planning/REQUIREMENTS.md` — 8 REQs (HOOK-01/02/03, SEC3-01/02, QUAL-01/02/03) with full acceptance criteria, traceability, deferred backlog. Committed `e61633c`.
-3. Wrote `.planning/ROADMAP.md` — 4 phases (41-44) with goals, requirements, success criteria. Updated STATE.md. Committed `7ad7b0c`.
-4. Merged `chore/v2.3-milestone-setup` → main (fast-forward, 5 commits). Branch deleted.
-5. Pete directed: back up settings.json, wire `lesson-capture-gate.cjs` into Stop hooks, add Integration lesson. Done — path initially wrong (`~/.claude/hooks/`), Pete caught MODULE_NOT_FOUND, corrected to project path.
-6. Committed hook fix + lesson on `fix/wire-lesson-capture-gate` as `f785191`. Merged to main, branch deleted.
+1. Cross-project dependency audit of all 15 dirs under `/Users/cpconnor/projects/`
+2. Produced `/Users/cpconnor/projects/_audit/dependency-map.md` (28 edges, 22 hard, 10 stale targets)
+3. Produced `/Users/cpconnor/projects/_audit/dependency-graph.json` (machine-readable graph)
+4. Decoupled `~/.claude/settings.json:198` from GSD repo — copied `lesson-capture-gate.cjs` to `~/.claude/hooks/`, updated path (verified: exit 0, diff clean)
+5. Added drift-prevention rule to `~/.claude/CLAUDE.md`
+6. Documented `local-plugin-marketplace` symlink — created README.md explaining source-of-truth relationship
 
-**Next session:**
-1. Push main to origin (6 commits ahead)
-2. `/gsd:autonomous` for phases 41-44 (discuss → plan → execute per phase)
-3. Source files needed: see `.continue-here.md` for full paths
+**Next:**
+1. Pete reviews diff: `git diff main...HEAD` — v2.3 PR still pending
+2. `/gsd:ship` to create PR for v2.3
+3. After merge: `/gsd:complete-milestone` for v2.3 archival
+4. Remaining audit items (future session): Risk #1 (pete-content-factory archived MindMeld1.2 deps), Risk #3 (connor-innovate-platform marketplace.json absolute paths), Risk #5 (dead launcher scripts), 2 stale permission rules in `~/.claude/settings.local.json`
 
 ---
 
-## Prior Handoff (2026-04-13 — session 12)
+## Completed (prior milestones — reference)
 
-**Branch**: `main` (clean, synced with origin). `docs/crew-assessment-reassessment` merged and deleted.
-
-**Session actions:**
-1. Closed all remaining CREW-ASSESSMENT.md findings (commit `5d80821`)
-2. Remote branch cleanup (6→0 stale branches)
-3. Stash cleanup (11→3 retained)
-
-## Completed (reference)
-
-- [x] v2.3 milestone setup — PROJECT.md, MILESTONES.md, REQUIREMENTS.md, ROADMAP.md, STATE.md
-- [x] lesson-capture-gate.cjs wired into settings.json Stop hooks (was inert since PR #34)
-- [x] v2.2 milestone setup — REQUIREMENTS.md, ROADMAP.md, STATE.md, PROJECT.md
-- [x] Phase 39: Path Validation (SEC2-01 @file: allowlist, SEC2-02 requireSafePath for commands)
-- [x] Phase 40: Exec & Parser Hardening (SEC2-03 execSync elimination + indexOf scanner, SEC2-04 escapeRegex + 1MB guard)
-- [x] v2.2 PR #47 merged (2026-04-12)
-- [x] v2.2 milestone audit PR #48 merged (2026-04-13) — passed verdict
-- [x] `feat/defense-in-depth-executor` → PR #45 merged (2026-04-10)
-- [x] `feat/gsd-stack-analyzer` → PR #46 merged (2026-04-10)
-- [x] Lesson-capture enforcement (Layer 2) → PR #34 merged (2026-04-10)
-- [x] CREW-ASSESSMENT fully closed (session 12, 2026-04-13)
+- [x] v2.2 Security Hardening — PR #47 (code) + PR #48 (audit), shipped 2026-04-13
+- [x] v2.1 System Audit & Debt Closure — 5 phases, shipped 2026-04-10
+- [x] v2.0 Intelligence Layer — 4 phases, shipped 2026-04-05
+- [x] v1.0-v1.9 — 13 milestones shipped across 40 phases
 
 ## Notes
 
-- `.planning/v2.2-MILESTONE-AUDIT.md` notes that v2.2 bypassed standard discuss → plan → execute (no PLAN.md/VERIFICATION.md). Audit verified against REQUIREMENTS.md directly. Deemed acceptable given narrow scope.
-- HANDOFF.json is stale (from prior session pause) — `.continue-here.md` is authoritative for session 13 handoff.
+- `.planning/v2.2-MILESTONE-AUDIT.md` notes that v2.2 bypassed standard discuss → plan → execute (no PLAN.md/VERIFICATION.md). Audit verified against REQUIREMENTS.md directly.
+- HANDOFF.json is stale (from session 13 pause) — todo.md is authoritative for session 14.

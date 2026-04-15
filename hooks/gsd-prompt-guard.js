@@ -5,17 +5,17 @@
 // Defense-in-depth: catches injected instructions before they enter agent context.
 //
 // Triggers on: Write and Edit tool calls targeting .planning/ files
-// Action: Advisory warning (does not block) — logs detection for awareness
+// Action: Fail-closed blocking — blocks tool calls matching injection patterns
 //
-// Why advisory-only: Blocking would prevent legitimate workflow operations.
-// The goal is to surface suspicious content so the orchestrator can inspect it,
-// not to create false-positive deadlocks.
+// Exit codes:
+//   0 = allow (no injection detected, non-.planning/ path, or non-Write/Edit tool)
+//   2 = block (injection pattern matched — permissionDecision: "deny")
 
-const fs = require('fs');
 const path = require('path');
 
-// Prompt injection patterns (subset of security.cjs patterns, inlined for hook independence)
+// Prompt injection patterns (18 total — inlined for hook zero-dependency independence)
 const INJECTION_PATTERNS = [
+  // Existing 13 patterns
   /ignore\s+(all\s+)?previous\s+instructions/i,
   /ignore\s+(all\s+)?above\s+instructions/i,
   /disregard\s+(all\s+)?previous/i,
@@ -29,6 +29,12 @@ const INJECTION_PATTERNS = [
   /\[SYSTEM\]/i,
   /\[INST\]/i,
   /<<\s*SYS\s*>>/i,
+  // 5 new patterns (patterns 14-18)
+  /(?:aWdub3Jl|ZG8gbm90|b3ZlcnJpZGU)/,                                                                                          // base64 fragments for "ignore", "do not", "override"
+  /={3,}\s*(?:BEGIN|START|NEW)\s+(?:INSTRUCTION|SYSTEM|PROMPT)/i,                                                                // instruction delimiter injection
+  /^#+\s*(?:SYSTEM|ASSISTANT|HUMAN)\s*$/im,                                                                                      // markdown role headings
+  /(?:ignorar|ignorer|ignorieren)\s+(?:todas?|toutes?|alle)\s+(?:las?|les?|die)\s+(?:instrucciones|instructions|Anweisungen)/i, // multilingual override
+  /(?:write|save|output|dump)\s+(?:your\s+)?(?:system\s+)?(?:prompt|instructions|rules)\s+(?:to|into|in)\s+/i,                 // prompt leaking via tool
 ];
 
 let input = '';
@@ -76,21 +82,23 @@ process.stdin.on('end', () => {
       process.exit(0);
     }
 
-    // Advisory warning — does not block the operation
+    // Fail-closed blocking — deny the tool call
     const output = {
       hookSpecificOutput: {
         hookEventName: 'PreToolUse',
-        additionalContext: `\u26a0\ufe0f PROMPT INJECTION WARNING: Content being written to ${path.basename(filePath)} ` +
+        permissionDecision: 'deny',
+        additionalContext: `PROMPT INJECTION WARNING: Content being written to ${path.basename(filePath)} ` +
           `triggered ${findings.length} injection detection pattern(s): ${findings.join(', ')}. ` +
-          'This content will become part of agent context. Review the text for embedded ' +
-          'instructions that could manipulate agent behavior. If the content is legitimate ' +
-          '(e.g., documentation about prompt injection), proceed normally.',
+          'This content appears to contain embedded instructions that could manipulate agent behavior. ' +
+          'Tool call blocked. If the content is legitimate (e.g., documentation about prompt injection), ' +
+          'disable the prompt-guard hook temporarily.',
       },
     };
 
     process.stdout.write(JSON.stringify(output));
+    process.exit(2);
   } catch {
-    // Silent fail — never block tool execution
+    // Silent fail — never block tool execution on error
     process.exit(0);
   }
 });

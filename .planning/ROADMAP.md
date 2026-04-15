@@ -17,8 +17,11 @@
   - Zero external dependencies (Node.js built-ins only)
   - `npm test` green with new tests included
   - One commit per hook
-- **Status:** not started
-- **Complete:** false
+- **Plans:** 2/2 plans complete
+  - [x] 41-01-PLAN.md -- Enhance prompt guard (18 patterns, fail-closed) + port config protection
+  - [x] 41-02-PLAN.md -- Port cost tracker + wire all hooks into build/installer
+- **Status:** complete
+- **Complete:** true
 
 ### Phase 42: Security Guardian
 - **Goal:** Fill the security Guardian gap flagged by the diamond hunt. Ship a design-time security review agent plus a shared threat model reference doc that any GSD agent can cite.
@@ -30,12 +33,18 @@
   - Agent registered in installer and referenced from README/CLAUDE.md agent inventory
   - Model: `sonnet` (pattern matching)
   - Agent scope is design-time review (not runtime — that is HOOK-01)
-- **Status:** not started
-- **Complete:** false
+- **Plans:** 1/1 plans complete
+  - [x] 42-01-PLAN.md -- Threat model reference doc + security guardian agent + doc inventory updates
+- **Status:** complete
+- **Complete:** true
 
 ### Phase 43: Agent Quality Infrastructure
 - **Goal:** Extend GSD's quality tooling with (a) a 4D scoring rubric baked into the verifier, (b) a three-part necessity gate in the subagent creation workflow, and (c) two-mode verification (compliance + schema) in `/gsd:verify-work`.
 - **Requirements:** QUAL-01, QUAL-02, QUAL-03
+- **Plans:** 1/1 plans complete
+  - [x] 43-01-PLAN.md -- 4D rubric + necessity gate + two-mode verify
+- **Status:** complete
+- **Complete:** true
 - **Success criteria:**
   - `gsd-verifier.md` scores 4 dimensions (security 35%, perf 25%, correctness 25%, maint 15%) using 14 design pattern criteria
   - Verifier emits per-dimension and total score in VERIFICATION.md; threshold defined (default >= 70 overall, no dimension < 50)

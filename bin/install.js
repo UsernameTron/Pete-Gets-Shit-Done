@@ -3449,7 +3449,7 @@ function uninstall(isGlobal, runtime = 'claude') {
   // 4. Remove GSD hooks
   const hooksDir = path.join(targetDir, 'hooks');
   if (fs.existsSync(hooksDir)) {
-    const gsdHooks = ['gsd-statusline.js', 'gsd-check-update.js', 'gsd-check-update.sh', 'gsd-context-monitor.js', 'gsd-prompt-guard.js'];
+    const gsdHooks = ['gsd-statusline.js', 'gsd-check-update.js', 'gsd-check-update.sh', 'gsd-context-monitor.js', 'gsd-cost-tracker.js', 'gsd-config-protection.js', 'gsd-prompt-guard.js'];
     let hookCount = 0;
     for (const hook of gsdHooks) {
       const hookPath = path.join(hooksDir, hook);
@@ -4767,6 +4767,12 @@ function install(isGlobal, runtime = 'claude') {
   const promptGuardCommand = isGlobal
     ? buildHookCommand(targetDir, 'gsd-prompt-guard.js')
     : 'node ' + dirName + '/hooks/gsd-prompt-guard.js';
+  const configProtectionCommand = isGlobal
+    ? buildHookCommand(targetDir, 'gsd-config-protection.js')
+    : 'node ' + dirName + '/hooks/gsd-config-protection.js';
+  const costTrackerCommand = isGlobal
+    ? buildHookCommand(targetDir, 'gsd-cost-tracker.js')
+    : 'node ' + dirName + '/hooks/gsd-cost-tracker.js';
 
   // Enable experimental agents for Gemini CLI (required for custom sub-agents)
   if (isGemini) {
@@ -4847,6 +4853,24 @@ function install(isGlobal, runtime = 'claude') {
       }
     }
 
+    // Configure PostToolUse hook for cost tracking
+    const hasCostTrackerHook = settings.hooks[postToolEvent].some(entry =>
+      entry.hooks && entry.hooks.some(h => h.command && h.command.includes('gsd-cost-tracker'))
+    );
+
+    if (!hasCostTrackerHook) {
+      settings.hooks[postToolEvent].push({
+        hooks: [
+          {
+            type: 'command',
+            command: costTrackerCommand,
+            timeout: 10
+          }
+        ]
+      });
+      console.log(`  ${green}✓${reset} Configured cost tracker hook`);
+    }
+
     // Configure PreToolUse hook for prompt injection detection
     // Gemini and Antigravity use BeforeTool instead of PreToolUse for pre-tool hooks
     const preToolEvent = (runtime === 'gemini' || runtime === 'antigravity') ? 'BeforeTool' : 'PreToolUse';
@@ -4870,6 +4894,25 @@ function install(isGlobal, runtime = 'claude') {
         ]
       });
       console.log(`  ${green}✓${reset} Configured prompt injection guard hook`);
+    }
+
+    // Configure PreToolUse hook for config file protection
+    const hasConfigProtectionHook = settings.hooks[preToolEvent].some(entry =>
+      entry.hooks && entry.hooks.some(h => h.command && h.command.includes('gsd-config-protection'))
+    );
+
+    if (!hasConfigProtectionHook) {
+      settings.hooks[preToolEvent].push({
+        matcher: 'Write|Edit',
+        hooks: [
+          {
+            type: 'command',
+            command: configProtectionCommand,
+            timeout: 5
+          }
+        ]
+      });
+      console.log(`  ${green}✓${reset} Configured config protection hook`);
     }
   }
 

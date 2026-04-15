@@ -6,6 +6,8 @@ The complete AI coding system: execution engine + governance framework + extensi
 
 Meta-prompting, context engineering, spec-driven development, safety hooks, and session management — for Claude Code, OpenCode, Gemini CLI, Codex, Copilot, and Antigravity.
 
+Technical deep-dive: see [docs/README-technical.md](docs/README-technical.md).
+
 ```
 npx get-shit-done-cc@latest
 ```
@@ -54,8 +56,8 @@ GSD is two layers in one install:
 
 | Layer | What it does | Components |
 |-------|-------------|------------|
-| Execution Engine | discuss → plan → execute → verify → ship | 61 commands, 15 agents, 5 hooks, wave-based parallel execution |
-| Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (45 skills, 10 subagents), 6 reference docs |
+| Execution Engine | discuss → plan → execute → verify → ship | 61 commands, 16 agents, 7 hooks, wave-based parallel execution |
+| Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (45 skills, 10 subagents), 7 reference docs |
 | Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | classify.cjs, model-profiles.cjs, history.cjs — all opt-in, off by default |
 
 The execution engine handles *how* your code gets built. The governance framework handles *what rules it follows* while building it. The intelligence layer makes the engine *smarter over time* — routing tasks to the right model tier and adapting workflow gates based on complexity and history.
@@ -65,14 +67,14 @@ The full inventory:
 | Metric | Count |
 |--------|-------|
 | GSD commands | 61 |
-| Specialized agents | 15 |
-| Runtime hooks | 15 (5 execution + 10 governance) |
+| Specialized agents | 16 |
+| Runtime hooks | 16 (7 execution + 10 governance, 1 shared) |
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
-| Test suites | 454 |
-| Test assertions | 2,377 |
-| Reference docs | 6 (CLI, skills, hooks, MCP, settings, subagents) |
+| Test suites | 472 |
+| Test assertions | 2,474 |
+| Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
 

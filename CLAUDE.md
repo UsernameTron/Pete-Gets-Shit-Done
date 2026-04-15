@@ -12,7 +12,7 @@ You are working with Pete Connor — AI transformation leader, MS in AI, CCXP/CC
 
 Key capabilities:
 - **61 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
-- **15 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, and others) handling quality, planning, and execution roles
+- **16 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-security-guardian, and others) handling quality, planning, and execution roles
 - **47+ Claude Code skills** covering command implementations, utilities, and governance workflows
 - **Wave-based parallel execution** — independent tasks run concurrently in waves; dependent tasks respect ordering automatically
 - **5-phase delivery lifecycle**: discuss → plan → execute → verify → ship, with explicit phase gates that cannot be skipped
@@ -39,6 +39,8 @@ skills/       Command implementations (one file per GSD command)
 
 The **v2.0 Intelligence Layer** (`classify.cjs`, `model-profiles.cjs`, `history.cjs`) adds adaptive task routing — GSD classifies incoming tasks and selects execution strategies based on complexity, history, and available resources.
 
+The **v2.3 Quality Infrastructure** extends the verifier with a 4D scoring rubric (security 35%, performance 25%, correctness 25%, maintainability 15%), adds a three-part necessity gate for subagent creation decisions, and introduces two-mode verification (compliance + schema) in the verify-work workflow. Three new execution hooks provide runtime security: prompt injection detection (18 patterns), config file protection (32 files), and cost tracking (JSONL metrics).
+
 For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 
 ---
@@ -46,7 +48,7 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 ## Tests and Coverage
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
-- **Scale**: ~454 test suites, ~2377 assertions
+- **Scale**: ~472 test suites, ~2474 assertions
 - **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
 - **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
 
@@ -71,9 +73,9 @@ Three project-scoped specialists live in `.claude/agents/`:
 | test-runner | `test-runner.md` | Runs test suites, diagnoses failures, writes coverage |
 | docs-sync | `docs-sync.md` | Keeps CLAUDE.md, README.md, and DEVOPS-HANDOFF.md current |
 
-GSD also ships 15 built-in agents activated by the execution engine:
+GSD also ships 16 built-in agents activated by the execution engine:
 
-`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
+`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-security-guardian`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
 
 ---
 

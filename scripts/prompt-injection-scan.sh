@@ -78,7 +78,9 @@ ALLOWLIST=(
   'tests/verify.test.cjs'
   'tests/integ-governance-hooks.test.cjs'
   'SECURITY.md'
-  'SECURITY_HOOKS_REVIEW.md'
+  '.planning/research/security-reviews/2026-04-07-hooks-review.md'
+  '.planning/REQUIREMENTS.md'
+  'get-shit-done/references/agent-threat-model.md'
   '.planning/milestones/archived-phases/'
 )
 
