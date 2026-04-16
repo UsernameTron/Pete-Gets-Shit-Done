@@ -40,7 +40,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 45. Critical Fixes | 1/3 | In Progress|  |
+| 45. Critical Fixes | 2/3 | In Progress|  |
 | 46. Housekeeping | 0/? | Not started | - |
 
 ---
