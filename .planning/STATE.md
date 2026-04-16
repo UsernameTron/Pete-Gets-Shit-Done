@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v2.4
 milestone_name: Foundation Hardening
-status: defining_requirements
+status: ready_to_plan
 last_updated: "2026-04-16T17:00:00.000Z"
 last_activity: 2026-04-16
 progress:
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 45 (Critical Fixes) — not yet planned
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-16 — Milestone v2.4 started
+Status: Ready to plan
+Last activity: 2026-04-16 — Milestone v2.4 initialized, roadmap created
 
 ## Milestone History
 
@@ -51,7 +51,7 @@ Last activity: 2026-04-16 — Milestone v2.4 started
 ## Session Handoff
 
 **Branch**: `main` @ bb234f6 (audit merged)
-**Last action (2026-04-16)**: Milestone v2.4 started — PROJECT.md and STATE.md updated.
+**Last action (2026-04-16)**: Milestone v2.4 initialized — PROJECT.md, STATE.md, REQUIREMENTS.md, ROADMAP.md all written.
 **Coverage**: 90.41% overall
 **Tests**: 2474 passing, 0 failures
-**Next**: Define requirements, create roadmap, then `/gsd:plan-phase 45`.
+**Next**: `/gsd:plan-phase 45` to plan the Critical Fixes phase.
