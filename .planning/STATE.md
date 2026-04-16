@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 Phase: 45 (critical-fixes) — COMPLETE
 Plan: 3 of 3 (all done)
-Status: Phase 45 executed, pending verify + ship
-Last activity: 2026-04-16 -- Phase 45 all 3 plans complete
+Status: Phase 45 shipped — PR #50
+Last activity: 2026-04-16 -- Phase 45 shipped to PR #50
 
 ## Milestone History
 
@@ -57,4 +57,4 @@ Last activity: 2026-04-16 -- Phase 45 all 3 plans complete
 - Plan 01: Registered factory plugin in marketplace.json (PLUG-01)
 - Plan 02: Canonical injection-patterns.json (23 patterns), security.cjs + hook consume shared source (SECPAT-01)
 - Plan 03: Version template substitution in build-hooks.js, all 7 dist hooks stamped with 1.30.0 (HOOK-04)
-**Next**: `/gsd:verify-work 45` then `/gsd:ship` to create PR for merge to main.
+**Next**: Merge PR #50, then `/gsd:plan-phase 46` for foundation sweep.
