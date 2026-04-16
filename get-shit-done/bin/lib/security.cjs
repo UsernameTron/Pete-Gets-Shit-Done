@@ -114,39 +114,11 @@ function requireSafePath(filePath, baseDir, label, opts = {}) {
  * Note: This is defense-in-depth — not a complete solution. The primary defense
  * is proper input/output boundaries in agent prompts.
  */
-const INJECTION_PATTERNS = [
-  // Direct instruction override attempts
-  /ignore\s+(all\s+)?previous\s+instructions/i,
-  /ignore\s+(all\s+)?above\s+instructions/i,
-  /disregard\s+(all\s+)?previous/i,
-  /forget\s+(all\s+)?(your\s+)?instructions/i,
-  /override\s+(system|previous)\s+(prompt|instructions)/i,
-
-  // Role/identity manipulation
-  /you\s+are\s+now\s+(?:a|an|the)\s+/i,
-  /act\s+as\s+(?:a|an|the)\s+(?!plan|phase|wave)/i,  // allow "act as a plan"
-  /pretend\s+(?:you(?:'re| are)\s+|to\s+be\s+)/i,
-  /from\s+now\s+on,?\s+you\s+(?:are|will|should|must)/i,
-
-  // System prompt extraction
-  /(?:print|output|reveal|show|display|repeat)\s+(?:your\s+)?(?:system\s+)?(?:prompt|instructions)/i,
-  /what\s+(?:are|is)\s+your\s+(?:system\s+)?(?:prompt|instructions)/i,
-
-  // Hidden instruction markers (XML/HTML tags that mimic system messages)
-  // Note: <instructions> is excluded — GSD uses it as legitimate prompt structure
-  // Requires > to close the tag (not just whitespace) to avoid matching generic types like Promise<User | null>
-  /<\/?(?:system|assistant|human)>/i,
-  /\[SYSTEM\]/i,
-  /\[INST\]/i,
-  /<<\s*SYS\s*>>/i,
-
-  // Exfiltration attempts
-  /(?:send|post|fetch|curl|wget)\s+(?:to|from)\s+https?:\/\//i,
-  /(?:base64|btoa|encode)\s+(?:and\s+)?(?:send|exfiltrate|output)/i,
-
-  // Tool manipulation
-  /(?:run|execute|call|invoke)\s+(?:the\s+)?(?:bash|shell|exec|spawn)\s+(?:tool|command)/i,
-];
+// Loaded from canonical shared source (lib/injection-patterns.json).
+// Edit patterns there, not here — this file consumes the shared source at require time.
+const INJECTION_PATTERNS = require(
+  path.join(__dirname, '..', '..', '..', 'lib', 'injection-patterns.json')
+).map(p => new RegExp(p.source, p.flags));
 
 /**
  * Scan text for potential prompt injection patterns.
