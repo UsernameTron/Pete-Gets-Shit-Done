@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.4
 milestone_name: Foundation Hardening
 status: executing
-last_updated: "2026-04-16T22:23:47.763Z"
-last_activity: 2026-04-16 -- Phase 45 execution started
+last_updated: "2026-04-16T23:30:00.000Z"
+last_activity: 2026-04-16 -- Phase 45 execution complete (3/3 plans)
 progress:
   total_phases: 2
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 3
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -23,10 +23,10 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 45 (critical-fixes) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 45
-Last activity: 2026-04-16 -- Phase 45 execution started
+Phase: 45 (critical-fixes) — COMPLETE
+Plan: 3 of 3 (all done)
+Status: Phase 45 executed, pending verify + ship
+Last activity: 2026-04-16 -- Phase 45 all 3 plans complete
 
 ## Milestone History
 
@@ -49,8 +49,12 @@ Last activity: 2026-04-16 -- Phase 45 execution started
 
 ## Session Handoff
 
-**Branch**: `main` @ bb234f6 (audit merged)
-**Last action (2026-04-16)**: Milestone v2.4 initialized — PROJECT.md, STATE.md, REQUIREMENTS.md, ROADMAP.md all written.
+**Branch**: `feat/phase-45-critical-fixes` @ 3c6cf78
+**Last action (2026-04-16)**: Phase 45 execution complete — all 3 plans across 3 waves finished.
 **Coverage**: 90.41% overall
-**Tests**: 2474 passing, 0 failures
-**Next**: `/gsd:plan-phase 45` to plan the Critical Fixes phase.
+**Tests**: 2485 passing, 0 failures
+**What was built**:
+- Plan 01: Registered factory plugin in marketplace.json (PLUG-01)
+- Plan 02: Canonical injection-patterns.json (23 patterns), security.cjs + hook consume shared source (SECPAT-01)
+- Plan 03: Version template substitution in build-hooks.js, all 7 dist hooks stamped with 1.30.0 (HOOK-04)
+**Next**: `/gsd:verify-work 45` then `/gsd:ship` to create PR for merge to main.
