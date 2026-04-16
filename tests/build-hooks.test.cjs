@@ -128,4 +128,43 @@ describe('build-hooks script', () => {
       );
     }
   });
+
+  // ── Version substitution ──────────────────────────────────
+
+  it('dist hooks have real version, not template placeholder', () => {
+    const distDir = path.join(HOOKS_DIR, 'dist');
+    const pkg = require(path.join(__dirname, '..', 'package.json'));
+    const distFiles = fs.readdirSync(distDir).filter(f => f.startsWith('gsd-') && f.endsWith('.js'));
+
+    for (const f of distFiles) {
+      const content = fs.readFileSync(path.join(distDir, f), 'utf8');
+      assert.ok(
+        !content.includes('{{GSD_VERSION}}'),
+        `dist/${f} should not contain unsubstituted template placeholder`
+      );
+      assert.ok(
+        content.includes(`gsd-hook-version: ${pkg.version}`),
+        `dist/${f} should contain real version ${pkg.version}`
+      );
+    }
+  });
+
+  it('source hooks retain template marker', () => {
+    const sourceFiles = fs.readdirSync(HOOKS_DIR).filter(f => f.startsWith('gsd-') && f.endsWith('.js'));
+
+    for (const f of sourceFiles) {
+      const content = fs.readFileSync(path.join(HOOKS_DIR, f), 'utf8');
+      assert.ok(
+        content.includes('{{GSD_VERSION}}'),
+        `source hooks/${f} should retain {{GSD_VERSION}} template marker`
+      );
+    }
+  });
+
+  it('package version does not contain template delimiters', () => {
+    const pkg = require(path.join(__dirname, '..', 'package.json'));
+    assert.ok(!pkg.version.includes('{{'), 'package version should not contain {{ delimiters');
+    assert.ok(!pkg.version.includes('}}'), 'package version should not contain }} delimiters');
+    assert.match(pkg.version, /^\d+\.\d+\.\d+/, 'package version should be semver');
+  });
 });
