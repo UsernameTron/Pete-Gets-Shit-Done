@@ -9,7 +9,7 @@
 
 ## Phases
 
-- [ ] **Phase 45: Critical Fixes** — Resolve the 3 highest-risk structural issues: orphaned plugin cache, diverged injection patterns, dead version tracking
+- [x] **Phase 45: Critical Fixes** — Resolve the 3 highest-risk structural issues: orphaned plugin cache, diverged injection patterns, dead version tracking (completed 2026-04-16)
 - [ ] **Phase 46: Housekeeping** — Close the 4 remaining WARN items: documentation counts, branch coverage gaps, command/workflow convention drift, hardcoded portability issue
 
 ## Phase Details
@@ -40,7 +40,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 45. Critical Fixes | 2/3 | In Progress|  |
+| 45. Critical Fixes | 3/3 | Complete   | 2026-04-16 |
 | 46. Housekeeping | 0/? | Not started | - |
 
 ---
