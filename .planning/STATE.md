@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-last_updated: "2026-04-15T15:50:00.000Z"
-last_activity: 2026-04-15
+milestone: v2.4
+milestone_name: Foundation Hardening
+status: ready_to_plan
+last_updated: "2026-04-16T17:00:00.000Z"
+last_activity: 2026-04-16
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,16 +17,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-13)
+See: .planning/PROJECT.md (updated 2026-04-16)
 
-**Current:** _None — awaiting next milestone. Pete decides when and what v2.4 is._
+**Current:** v2.4 Foundation Hardening — Fix top 3 structural risks from foundation audit, then sweep remaining 4 WARN items.
 **Previous:** v2.3 Hook Ecosystem + Security Guardian + Agent Quality (shipped 2026-04-15, PR #49, archived to `.planning/milestones/v2.3-ROADMAP.md`)
 
 ## Current Position
 
-_No active milestone. Run `/gsd:new-milestone` to start the next milestone cycle._
-
-Last activity: 2026-04-15 (v2.3 archival)
+Phase: 45 (Critical Fixes) — not yet planned
+Plan: —
+Status: Ready to plan
+Last activity: 2026-04-16 — Milestone v2.4 initialized, roadmap created
 
 ## Milestone History
 
@@ -49,8 +50,8 @@ Last activity: 2026-04-15 (v2.3 archival)
 
 ## Session Handoff
 
-**Branch**: `main` @ 75b29cd (v2.3 merged)
-**Last action (2026-04-15)**: v2.3 milestone archived — ROADMAP.md collapsed, REQUIREMENTS.md archived + deleted, MILESTONES.md updated, STATE.md reset.
+**Branch**: `main` @ bb234f6 (audit merged)
+**Last action (2026-04-16)**: Milestone v2.4 initialized — PROJECT.md, STATE.md, REQUIREMENTS.md, ROADMAP.md all written.
 **Coverage**: 90.41% overall
 **Tests**: 2474 passing, 0 failures
-**Next**: Pete decides v2.4 scope. Run `/gsd:new-milestone` when ready.
+**Next**: `/gsd:plan-phase 45` to plan the Critical Fixes phase.

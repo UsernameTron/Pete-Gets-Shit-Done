@@ -25,26 +25,39 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 Active requirements for the current milestone. Historical milestone requirements are captured in the collapsible sections below.
 
-### v2.3 Hook Ecosystem + Security Guardian + Agent Quality (active)
+### v2.4 Foundation Hardening (active)
 
 | ID | Title | Phase | Status |
 |----|-------|-------|--------|
-| HOOK-01 | Prompt injection detection hook (PreToolUse, 18 regex patterns) | Phase 41 | Pending |
-| HOOK-02 | Config-protection hook (blocks linter/formatter config edits) | Phase 41 | Pending |
-| HOOK-03 | Cost-tracker hook (JSONL token usage + USD to ~/.claude/metrics) | Phase 41 | Pending |
-| SEC3-01 | `gsd-security-guardian` agent (6-category threat model, 10/10 DiD) | Phase 42 | Pending |
-| SEC3-02 | Threat model reference doc at `references/agent-threat-model.md` | Phase 42 | Pending |
-| QUAL-01 | Extend `gsd-verifier` with 4D scoring rubric (sec/perf/corr/maint) | Phase 43 | Pending |
-| QUAL-02 | Three-part necessity gate in subagent creation workflow | Phase 43 | Pending |
-| QUAL-03 | Two-mode verify in `/gsd:verify-work` (compliance + schema) | Phase 43 | Pending |
+| PLUG-01 | Register claude-code-factory in marketplace.json and load from live source | Phase 45 | Pending |
+| SECPAT-01 | Create shared injection pattern file consumed by both gsd-prompt-guard.js and security.cjs | Phase 45 | Pending |
+| HOOK-04 | Implement {{GSD_VERSION}} substitution in build-hooks.js or remove placeholder from all 7 hooks | Phase 45 | Pending |
+| DOC-01 | Update README.md and CLAUDE.md agent/command counts (16→18 agents, 61→63 commands) | Phase 46 | Pending |
+| COV-01 | Raise branch coverage for workstream.cjs and build-hooks.js above 80% | Phase 46 | Pending |
+| LINK-01 | Resolve command/workflow linkage drift (11 unlinked commands, 5 orphaned workflows) | Phase 46 | Pending |
+| REF-01 | Fix crew.md hardcoded project path for portability | Phase 46 | Pending |
 
-## Current Milestone: v2.3 Hook Ecosystem + Security Guardian + Agent Quality
+## Current Milestone: v2.4 Foundation Hardening
 
-**Goal:** Port high-value hooks from the ECC diamond hunt, fill the security Guardian gap with a new agent, and extend agent quality infrastructure with a scoring rubric, necessity gate, and two-mode verification.
-**Phases:** 4 (41 Hook Ports, 42 Security Guardian, 43 Agent Quality Infrastructure, 44 Milestone Audit + Docs)
-**Requirements:** 8 (HOOK-01/02/03, SEC3-01/02, QUAL-01/02/03)
-**Decisions:** REQ prefix `SEC3-xx` to avoid collision with v1.3 `SEC-xx` and v2.2 `SEC2-xx`. Continue phase numbering from 41 (no reset). Skip research phase — charter specifies exact source files and adaptation patterns.
-**Source material:** `gsd-prompt-guard.js` (connor-innovate-platform), `config-protection.js` + `cost-tracker.js` (everything-claude-code-clean), `security-threat-modeler` + `agent-architecture-review` skills (Inside Claude Code).
+**Goal:** Fix the 3 highest-risk structural findings from the 8-dimension foundation audit (D5 orphaned factory cache, D6c injection pattern divergence, D6a dead version tracking), then sweep the remaining 4 WARN items in a housekeeping pass.
+**Phases:** 2 (45 Critical Fixes, 46 Housekeeping)
+**Requirements:** 7 (PLUG-01, SECPAT-01, HOOK-04, DOC-01, COV-01, LINK-01, REF-01)
+**Decisions:** Continue phase numbering from 45 (v2.3 ended at 44). Skip research — all findings sourced from FOUNDATION-AUDIT-20260416.md. REQ prefixes: PLUG for plugin, SECPAT for security patterns, HOOK for hooks (continuing from v2.3), DOC for documentation, COV for coverage, LINK for linkage, REF for references.
+**Source material:** `.planning/milestones/FOUNDATION-AUDIT-20260416.md` (8-dimension audit, bb234f6).
+
+<details>
+<summary><strong>v2.3 Hook Ecosystem + Security Guardian + Agent Quality (8/8 requirements shipped)</strong></summary>
+
+**Goal:** Port high-value hooks from the ECC diamond hunt, fill the security Guardian gap, and extend agent quality infrastructure.
+
+**Key deliverables:**
+- HOOK-01/02/03: Prompt injection, config protection, and cost tracker hooks (Phase 41)
+- SEC3-01/02: gsd-security-guardian agent + threat model reference (Phase 42)
+- QUAL-01/02/03: 4D scoring rubric, necessity gate, two-mode verification (Phase 43)
+
+**Shipped via:** PR #49 merged 2026-04-15 at 75b29cd.
+
+</details>
 
 <details>
 <summary><strong>v2.2 Security Hardening (4/4 requirements shipped)</strong></summary>
@@ -266,6 +279,8 @@ All 6 requirements verified complete:
 - v1.3 added config migration system — configs auto-gain config_version on first load
 - v2.0 adds 2 new modules: classify.cjs (task classification), history.cjs (execution history)
 - v2.0 extends model-profiles.cjs with dynamicSelect(), core.cjs with optional taskContext
+- v2.3 added 3 execution hooks (prompt guard, config protection, cost tracker), security guardian agent, and 4D verifier rubric
+- 18 active agents, 63 commands (corrected in v2.4)
 
 ## Tech Debt
 
@@ -289,4 +304,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 -- v2.1 System Audit & Debt Closure started*
+*Last updated: 2026-04-16 -- v2.4 Foundation Hardening started*
