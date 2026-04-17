@@ -49,19 +49,19 @@ Last activity: 2026-04-17 -- Phase 47 all 6 plans complete
 
 ## Session Handoff
 
-**Branch**: `feat/phase-47-agent-roster-assessment` (outer), `feat/phase-47-audit-remediation` (inner)
-**Phase 47**: Agent Roster Assessment — ALL 6 PLANS COMPLETE
-**Tests**: 2490 pass, 0 fail (inner repo)
+**Branch**: `feat/phase-47-audit-remediation`
+**Phase 47**: Agent Roster Assessment — UAT IN PROGRESS (2/9 tested, 2 issues found+fixed, 7 remaining)
+**Tests**: 2513 pass, 0 fail
 **Coverage**: 94.08% overall, security 100%, all modules >= 80%
 
-**All Plans Complete**:
-  - Plan 01: Dead code removal, orphan cleanup, naming fixes
-  - Plan 02: Coverage verification (phase.cjs 73.26%, profile-output.cjs 83.11%)
-  - Plan 03: Security fixes (prompt-guard sync, path validation, hook dedup)
-  - Plan 04: Agent infrastructure (17 model profiles, 17 CODEX entries, crew archive)
-  - Plan 05: Plugin skill parity (38 factory skills version-controlled)
-  - Plan 06: getPhaseFileStats test, workflow confirmation, final validation
+**UAT Progress (47-UAT.md)**:
+  - Test 1: Dead Code Removal — ISSUE (fixed: deleted 3 orphaned files, moved guardian to _archived, fixed 7 cascading refs)
+  - Test 2: Path Traversal Prevention — ISSUE (fixed: added requireSafePath to milestone.cjs + 2 tests)
+  - Test 3-9: PENDING (prompt-guard sync, stop hook dedup, model profiles, CODEX sandbox, skill parity, coverage, full suite)
 
-**Next**: `/gsd:ship` to create PR for Phase 47, or `/gsd:new-milestone` for v2.5
-**Inner repo**: clean on `feat/phase-47-audit-remediation`, commit 7043fc0
-**Outer repo**: on `feat/phase-47-agent-roster-assessment`
+**Commits this session**:
+  - `46f1b35` fix(47): complete dead code removal and archive security guardian
+  - `09d86be` fix(47): add requireSafePath validation to milestone.cjs
+
+**Next**: Resume `/gsd:verify-work 47` — continue from Test 3 (Prompt Guard Sync). UAT file at `.planning/phases/47-agent-roster-assessment/47-UAT.md` (gitignored, on disk only).
+**After UAT**: `/gsd:ship` to create PR for Phase 47
