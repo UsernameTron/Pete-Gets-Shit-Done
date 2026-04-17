@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Executing Phase 47
-last_updated: "2026-04-17T14:21:11.869Z"
-last_activity: 2026-04-17 -- Phase 47 execution started
+last_updated: "2026-04-17T17:00:00.000Z"
+last_activity: 2026-04-17 -- Plan 01 complete, Plans 02-06 pending
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 17
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -50,10 +50,21 @@ Last activity: 2026-04-17 -- Phase 47 execution started
 
 ## Session Handoff
 
-**Branch**: `feat/phase-46-housekeeping` @ 02d1b91
-**Milestone v2.4**: COMPLETE — archived, tagged v2.4, pushed.
-**PR #51**: Phase 46 housekeeping (pending merge to main)
-**Coverage**: 90%+ overall, workstream.cjs 87.14%, build-hooks.js 93.75% branch
-**Tests**: 2528 passing, 0 failures
-**Milestone history**: v2.4 added to table (15th milestone)
-**Next**: Merge PR #51 → `/gsd:new-milestone` for v2.5
+**Branch**: `feat/phase-47-agent-roster-assessment` (outer), `feat/phase-47-audit-remediation` (inner)
+**Phase 47**: Agent Roster Assessment — 6 plans, Plan 01 COMPLETE
+**Plan 01 commits**: 1d2fc59, a53194a (inner), 4e80f45 (outer), 92a660c (inner — test cleanup)
+**Tests**: 2466 pass, 0 fail (inner repo)
+**47-01-SUMMARY.md**: Written
+**Remaining Plans**:
+  - Plan 02: Branch coverage (phase.cjs 69%→70%, profile-output.cjs 62%→70%)
+  - Plan 03: Security fixes (prompt-guard sync, milestone path validation, lesson-capture dedup)
+  - Plan 04: Model profiles (6 missing) + CODEX sandbox (2 missing) + crew.md archive doc
+  - Plan 05: Plugin skill parity (37 missing factory skills from cache→repo)
+  - Plan 06: getPhaseFileStats test + final validation
+**Next**: Execute Plan 02 interactively (no subagents)
+
+### Plan 02 Prep (from prior session)
+Uncovered branches already identified — write tests targeting:
+- **phase.cjs**: line 543 (regex table row removal), lines 656-661 (UAT file scanning: pending/blocked/partial/diagnosed), lines 664-667 (VERIFICATION file scanning: human_needed/gaps_found), lines 787-791 (roadmap fallback next-phase detection)
+- **profile-output.cjs**: lines 713-714 (JSON parse error), lines 717-718 (missing dimensions object error), line 775 (global CLAUDE.md path), lines 779-780 (default CLAUDE.md path)
+Inner repo working directory is clean. All changes in inner repo on branch `feat/phase-47-audit-remediation`.
