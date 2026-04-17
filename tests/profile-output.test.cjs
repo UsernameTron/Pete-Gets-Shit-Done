@@ -483,3 +483,300 @@ describe('generate-claude-md extended', () => {
     assert.ok(fs.existsSync(path.join(tmpDir, 'subdir', 'CLAUDE.md')), 'file should exist at resolved path');
   });
 });
+
+// ─── generate-dev-preferences branch coverage ───────────────────────────────
+
+describe('generate-dev-preferences branch coverage', () => {
+  let tmpDir;
+
+  const makeAnalysis = (overrides = {}) => ({
+    profile_version: '1.0',
+    data_source: 'session_analysis',
+    dimensions: {
+      communication_style: { rating: 'terse-direct', confidence: 'HIGH', claude_instruction: 'Be concise.' },
+      decision_speed: { rating: 'fast-intuitive', confidence: 'MEDIUM', claude_instruction: 'Recommend quickly.' },
+    },
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('questionnaire data_source uses questionnaire stack block', () => {
+    const analysis = makeAnalysis({ data_source: 'questionnaire' });
+    const analysisPath = path.join(tmpDir, 'analysis.json');
+    fs.writeFileSync(analysisPath, JSON.stringify(analysis));
+    const outputPath = path.join(tmpDir, 'dev-prefs.md');
+
+    const result = runGsdTools(
+      ['generate-dev-preferences', '--analysis', analysisPath, '--output', outputPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const content = fs.readFileSync(outputPath, 'utf-8');
+    assert.ok(
+      content.includes('Stack preferences not available (questionnaire-only profile)'),
+      'should use questionnaire stack block'
+    );
+  });
+
+  test('session_analysis without --stack uses default stack block', () => {
+    const analysis = makeAnalysis({ data_source: 'session_analysis' });
+    const analysisPath = path.join(tmpDir, 'analysis.json');
+    fs.writeFileSync(analysisPath, JSON.stringify(analysis));
+    const outputPath = path.join(tmpDir, 'dev-prefs.md');
+
+    const result = runGsdTools(
+      ['generate-dev-preferences', '--analysis', analysisPath, '--output', outputPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const content = fs.readFileSync(outputPath, 'utf-8');
+    assert.ok(
+      content.includes('Stack preferences will be populated from session analysis'),
+      'should use default stack block when no --stack provided'
+    );
+  });
+
+  test('--stack flag provides custom stack block', () => {
+    const analysis = makeAnalysis({ data_source: 'session_analysis' });
+    const analysisPath = path.join(tmpDir, 'analysis.json');
+    fs.writeFileSync(analysisPath, JSON.stringify(analysis));
+    const outputPath = path.join(tmpDir, 'dev-prefs.md');
+
+    const result = runGsdTools(
+      ['generate-dev-preferences', '--analysis', analysisPath, '--output', outputPath, '--stack', 'Python,Node.js,React', '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const content = fs.readFileSync(outputPath, 'utf-8');
+    assert.ok(
+      content.includes('Python,Node.js,React'),
+      'should include custom stack from --stack flag'
+    );
+  });
+
+  test('relative --output path resolves from cwd', () => {
+    const analysis = makeAnalysis();
+    const analysisPath = path.join(tmpDir, 'analysis.json');
+    fs.writeFileSync(analysisPath, JSON.stringify(analysis));
+
+    const result = runGsdTools(
+      ['generate-dev-preferences', '--analysis', analysisPath, '--output', 'subdir/dev-prefs.md', '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const out = JSON.parse(result.output);
+    assert.ok(
+      out.command_path.includes(path.join('subdir', 'dev-prefs.md')),
+      'should resolve relative output path from cwd'
+    );
+    assert.ok(fs.existsSync(path.join(tmpDir, 'subdir', 'dev-prefs.md')), 'file should exist at resolved path');
+  });
+
+  test('errors on invalid JSON in analysis file', () => {
+    const analysisPath = path.join(tmpDir, 'bad.json');
+    fs.writeFileSync(analysisPath, '{{{ not json');
+
+    const result = runGsdTools(
+      ['generate-dev-preferences', '--analysis', analysisPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(!result.success, 'should fail on invalid JSON');
+    assert.ok(result.error.includes('Failed to parse analysis JSON'), 'should mention parse error');
+  });
+
+  test('errors when analysis lacks dimensions object', () => {
+    const analysisPath = path.join(tmpDir, 'no-dims.json');
+    fs.writeFileSync(analysisPath, JSON.stringify({ profile_version: '1.0' }));
+
+    const result = runGsdTools(
+      ['generate-dev-preferences', '--analysis', analysisPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(!result.success, 'should fail without dimensions');
+    assert.ok(result.error.includes('dimensions'), 'should mention missing dimensions');
+  });
+
+  test('uses fallback instruction when rating has no CLAUDE_INSTRUCTIONS entry', () => {
+    // Use a rating value that does not exist in CLAUDE_INSTRUCTIONS lookup
+    const analysis = makeAnalysis({
+      dimensions: {
+        communication_style: { rating: 'nonexistent-rating-value', confidence: 'HIGH' },
+      },
+    });
+    const analysisPath = path.join(tmpDir, 'analysis.json');
+    fs.writeFileSync(analysisPath, JSON.stringify(analysis));
+    const outputPath = path.join(tmpDir, 'dev-prefs.md');
+
+    const result = runGsdTools(
+      ['generate-dev-preferences', '--analysis', analysisPath, '--output', outputPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const content = fs.readFileSync(outputPath, 'utf-8');
+    assert.ok(
+      content.includes('Adapt to this developer\'s communication style preference'),
+      'should use fallback instruction text'
+    );
+  });
+});
+
+// ─── generate-claude-profile error branches ─────────────────────────────────
+
+describe('generate-claude-profile error branches', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('errors on invalid JSON in analysis file', () => {
+    const analysisPath = path.join(tmpDir, 'bad.json');
+    fs.writeFileSync(analysisPath, 'NOT VALID JSON {{{');
+
+    const result = runGsdTools(
+      ['generate-claude-profile', '--analysis', analysisPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(!result.success, 'should fail on invalid JSON');
+    assert.ok(result.error.includes('Failed to parse analysis JSON'), 'should mention parse error');
+  });
+
+  test('errors when analysis lacks dimensions object', () => {
+    const analysisPath = path.join(tmpDir, 'no-dims.json');
+    fs.writeFileSync(analysisPath, JSON.stringify({ profile_version: '1.0' }));
+
+    const result = runGsdTools(
+      ['generate-claude-profile', '--analysis', analysisPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(!result.success, 'should fail without dimensions');
+    assert.ok(result.error.includes('dimensions'), 'should mention missing dimensions');
+  });
+
+  test('--global flag targets ~/.claude/CLAUDE.md', () => {
+    const analysis = {
+      profile_version: '1.0',
+      data_source: 'session_analysis',
+      dimensions: {
+        communication_style: { rating: 'terse-direct', confidence: 'HIGH', claude_instruction: 'Be concise.' },
+      },
+    };
+    const analysisPath = path.join(tmpDir, 'analysis.json');
+    fs.writeFileSync(analysisPath, JSON.stringify(analysis));
+
+    // Sandbox HOME so --global writes to tmpDir/.claude/CLAUDE.md
+    const result = runGsdTools(
+      ['generate-claude-profile', '--analysis', analysisPath, '--global', '--raw'],
+      tmpDir,
+      { HOME: tmpDir }
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const globalPath = path.join(tmpDir, '.claude', 'CLAUDE.md');
+    assert.ok(fs.existsSync(globalPath), 'should create file at ~/.claude/CLAUDE.md');
+    const content = fs.readFileSync(globalPath, 'utf-8');
+    assert.ok(content.includes('<!-- GSD:profile-start -->'), 'should have profile markers');
+  });
+
+  test('defaults output to cwd/CLAUDE.md when no --output or --global', () => {
+    const analysis = {
+      profile_version: '1.0',
+      data_source: 'session_analysis',
+      dimensions: {
+        communication_style: { rating: 'terse-direct', confidence: 'HIGH', claude_instruction: 'Be concise.' },
+      },
+    };
+    const analysisPath = path.join(tmpDir, 'analysis.json');
+    fs.writeFileSync(analysisPath, JSON.stringify(analysis));
+
+    const result = runGsdTools(
+      ['generate-claude-profile', '--analysis', analysisPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const defaultPath = path.join(tmpDir, 'CLAUDE.md');
+    assert.ok(fs.existsSync(defaultPath), 'should create CLAUDE.md in cwd by default');
+    const content = fs.readFileSync(defaultPath, 'utf-8');
+    assert.ok(content.includes('<!-- GSD:profile-start -->'), 'should have profile markers');
+  });
+});
+
+// ─── generate-claude-md branch coverage ─────────────────────────────────────
+
+describe('generate-claude-md branch coverage', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempGitProject();
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'PROJECT.md'),
+      '# Test Project\n\nA test project.\n\n## What This Is\n\nA unit-test fixture.\n\n## Tech Stack\n\n- Node.js\n- TypeScript\n'
+    );
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('defaults output to cwd/CLAUDE.md when no --output', () => {
+    const result = runGsdTools(
+      ['generate-claude-md', '--auto', '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const out = JSON.parse(result.output);
+    const defaultPath = path.join(tmpDir, 'CLAUDE.md');
+    assert.ok(fs.existsSync(defaultPath), 'should create CLAUDE.md in cwd by default');
+    assert.ok(out.claude_md_path.endsWith('CLAUDE.md'), 'output path should end with CLAUDE.md');
+  });
+
+  test('non-auto mode appends profile placeholder on update', () => {
+    // First create file without profile markers
+    const outputPath = path.join(tmpDir, 'CLAUDE.md');
+    fs.writeFileSync(outputPath, '# Existing CLAUDE.md\n\nSome content.\n');
+
+    // Run without --auto to trigger the profile placeholder insertion (line 904-906)
+    const result = runGsdTools(
+      ['generate-claude-md', '--output', outputPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const content = fs.readFileSync(outputPath, 'utf-8');
+    assert.ok(
+      content.includes('<!-- GSD:profile-start'),
+      'should insert profile placeholder in non-auto mode when markers missing'
+    );
+  });
+
+  test('non-auto mode does not duplicate profile placeholder', () => {
+    // Create file that already has profile markers
+    const outputPath = path.join(tmpDir, 'CLAUDE.md');
+    fs.writeFileSync(outputPath, [
+      '# Existing CLAUDE.md',
+      '',
+      '<!-- GSD:profile-start -->',
+      '## Developer Profile',
+      '<!-- GSD:profile-end -->',
+      '',
+    ].join('\n'));
+
+    const result = runGsdTools(
+      ['generate-claude-md', '--output', outputPath, '--raw'],
+      tmpDir
+    );
+    assert.ok(result.success, `Failed: ${result.error}`);
+    const content = fs.readFileSync(outputPath, 'utf-8');
+    const markerCount = (content.match(/<!-- GSD:profile-start/g) || []).length;
+    assert.strictEqual(markerCount, 1, 'should not duplicate profile placeholder');
+  });
+});
