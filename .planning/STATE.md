@@ -56,4 +56,12 @@ Last activity: 2026-04-17 -- Phase 47 shipped — PR #1
 **UAT**: 9/9 pass (5 blockers found and fixed during UAT)
 **PR**: https://github.com/UsernameTron/Pete-Gets-Shit-Done/pull/1
 
-**Next**: Merge PR #1 when ready, then `/gsd:new-milestone` to start v2.5.
+**CI fixes applied this session**:
+- Replaced non-existent action SHA pins with correct v4 SHAs (checkout, setup-node)
+- Added `moveSync` EXDEV fallback to workstream.cjs and milestone.cjs for cross-device rename in CI
+- Moved phase-coverage.test.cjs from tests/coverage/ to tests/ (test runner glob fix)
+- Pushed `main` branch to remote (was missing — only feature branches existed on GitHub)
+
+**CI status**: Pending — EXDEV fix for workstream/milestone pushed, awaiting green. If lesson-capture-gate.test.cjs still fails, the error is not from renameSync (no such calls exist in that file or its hook). Check actual CI logs for root cause.
+
+**Next**: Wait for CI green on PR #1, merge, then `/gsd:new-milestone` to start v2.5.
