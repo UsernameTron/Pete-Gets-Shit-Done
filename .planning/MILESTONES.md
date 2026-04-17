@@ -1,5 +1,22 @@
 # Milestones
 
+## v2.5 Final Documentation Sync (Shipped: 2026-04-17)
+
+**Phases completed:** 2 phases (47-48), 9 plans, 11 tasks
+
+**Key accomplishments:**
+
+- Agent roster assessment: explicit frontmatter (model, permissionMode, maxTurns, isolation) added to 10 agents following validator-hub gold standard
+- `gsd-dependency-auditor` agent and `/gsd:audit-deps` command added for package security auditing
+- Agent count corrected from 18 to 17 (gsd-security-guardian archived, gsd-dependency-auditor and gsd-ecosystem-auditor added to inventories)
+- CI/CD pipeline established: GitHub Actions for Node 20+22 on Ubuntu and macOS with SHA-pinned actions
+- All documentation aligned to verified counts: 63 commands, 17 agents, 45 skills, 6 hooks, 479 test suites, 2,490 assertions, 90.79% coverage
+- CHANGELOG.md v2.5 section created; project enters maintenance mode
+
+**Shipped via:** PR #1 (v2.4 phases 45-47) + PR #2 (v2.5 phase 48 + UAT fixes). 4 stale count references found and fixed during UAT.
+
+---
+
 ## v2.4 Foundation Hardening (Shipped: 2026-04-17)
 
 **Phases completed:** 2 phases, 6 plans, 8 tasks

@@ -1,5 +1,41 @@
 # Retrospective
 
+## v2.5 Final Documentation Sync (2026-04-17)
+
+### What Was Built
+
+- **Agent hygiene**: 10 agents upgraded with explicit frontmatter (model, permissionMode, maxTurns, isolation) following validator-hub gold standard pattern.
+- **New capability**: `gsd-dependency-auditor` agent and `/gsd:audit-deps` command for package security auditing across 6 ecosystems.
+- **CI/CD pipeline**: GitHub Actions workflow for Node 20+22 on Ubuntu and macOS, with 5 rounds of CI fixes (SHA pins, EXDEV fallbacks, matrix trimming).
+- **Documentation alignment**: All 5 living documents (README, CLAUDE.md, DEVOPS-HANDOFF, PROJECT.md, CHANGELOG) aligned to verified counts. Project enters maintenance mode.
+
+### What Worked Well
+
+- **UAT caught real issues**: 4 of 6 tests found stale counts that automated verification missed. The conversational UAT format made it easy to spot-check documents against reality.
+- **Inline fix during UAT**: Fixing issues as they were found (rather than batching into gap closure plans) was efficient for docs-only work.
+
+### What Was Inefficient
+
+- **Phase 48-01 executor checked wrong README**: The executor verified the inner repo's README (Petes-Get-Shit-Done-Coding-Automation/) but missed the outer repo's README.md which had stale counts. Root cause: two-repo structure created ambiguity about which files to check.
+- **CHANGELOG.md assumed new file**: Plan 48-03 assumed CHANGELOG.md needed creation, but it already existed with extensive history. Executor adapted correctly but the plan was inaccurate.
+
+### Patterns Established
+
+- **Inner repo archival**: Petes-Get-Shit-Done-Coding-Automation is archived and being removed. Future work should reference only the outer Pete-Gets-Shit-Done repo.
+- **Maintenance mode closure**: When all requirements are satisfied, replace active requirements with a maintenance mode notice rather than leaving an empty section.
+
+### Key Metrics
+
+| Metric | Before v2.5 | After v2.5 |
+|--------|-------------|------------|
+| Agents | 18 (incorrect) | 17 (verified) |
+| Test suites | 479 | 479 (no regression) |
+| Coverage | 90.79% | 90.79% (maintained) |
+| Milestones shipped | 14 | 15 |
+| Total phases | 47 | 48 |
+
+---
+
 ## v2.1 System Audit & Debt Closure (2026-04-10)
 
 ### What Was Built

@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 48 shipped — PR #2
-last_updated: "2026-04-17T22:00:00.000Z"
-last_activity: 2026-04-17 -- Phase 48 shipped (PR #2)
+status: v2.5 complete — maintenance mode
+last_updated: "2026-04-17T23:00:00.000Z"
+last_activity: 2026-04-17 -- v2.5 milestone complete, project in maintenance mode
 progress:
   total_phases: 7
   completed_phases: 6
@@ -23,10 +23,10 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 48 (final-documentation-sync) — SHIPPED, PR #2
-PR #1 merged (v2.4). PR #2 created (v2.5). UAT complete, 4 issues fixed inline.
-Next: Merge PR #2, then `/gsd:complete-milestone`.
-Last activity: 2026-04-17 -- Phase 48 shipped (PR #2)
+Milestone v2.5 complete. Project in maintenance mode.
+PR #1 merged (v2.4). PR #2 merged (v2.5). All 48 phases shipped across 15 milestones.
+Next: `/gsd:new-milestone` if new work is needed.
+Last activity: 2026-04-17 -- v2.5 milestone complete
 
 ## Milestone History
 
