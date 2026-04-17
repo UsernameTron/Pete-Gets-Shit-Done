@@ -250,22 +250,14 @@ if (missingHooks.length === 0) {
   record('Hooks installed', 'fail', `missing: ${missingHooks.join(', ')}`);
 }
 
-// V-3: Plugin registered in settings.json
-let pluginRegistered = false;
-try {
-  const raw = fs.readFileSync(CLAUDE_SETTINGS, 'utf8');
-  const settings = JSON.parse(raw);
-  const enabledPlugins = settings.enabledPlugins || {};
-  // Partial match on key name — any key containing 'get-shit-done'
-  pluginRegistered = Object.keys(enabledPlugins).some(k => k.includes('get-shit-done'));
-} catch (_) {
-  // settings.json may not exist or may be malformed
-}
+// V-3: GSD plugin installed (directory exists at ~/.claude/get-shit-done/)
+const GSD_PLUGIN_DIR = path.join(CLAUDE_DIR, 'get-shit-done');
+const pluginInstalled = fileExists(GSD_PLUGIN_DIR) && fs.statSync(GSD_PLUGIN_DIR).isDirectory();
 
-if (pluginRegistered) {
-  record('Plugin registered', 'pass', `get-shit-done found in ${CLAUDE_SETTINGS}`);
+if (pluginInstalled) {
+  record('Plugin installed', 'pass', `get-shit-done directory present at ${GSD_PLUGIN_DIR}`);
 } else {
-  record('Plugin registered', 'fail', `get-shit-done not found in enabledPlugins at ${CLAUDE_SETTINGS}`);
+  record('Plugin installed', 'fail', `get-shit-done directory not found at ${GSD_PLUGIN_DIR}`);
 }
 
 // V-4: injection-patterns.json at installed location
