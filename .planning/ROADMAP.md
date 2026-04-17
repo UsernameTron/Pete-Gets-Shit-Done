@@ -27,11 +27,7 @@
   3. After the script runs, built hooks are present in ~/.claude/hooks/ and the plugin is registered in Claude Code config
   4. The script's final output clearly states pass or fail with specifics on what was verified
   5. lib/injection-patterns.json is present at every location that consumes it after install
-**Plans:** 2 plans
-
-Plans:
-- [ ] 49-01-PLAN.md -- Setup script and package.json entry (INST-01 through INST-06)
-- [ ] 49-02-PLAN.md -- Tests and full suite validation (INST-07)
+**Plans**: TBD
 
 ### Phase 50: CI Watch
 **Goal**: Users can monitor GitHub Actions results for the current branch without leaving the Claude Code session
@@ -63,7 +59,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 49. One-Command Install | 0/2 | Planned | - |
+| 49. One-Command Install | 0/? | Not started | - |
 | 50. CI Watch | 0/? | Not started | - |
 | 51. Sync Docs | 0/? | Not started | - |
 
