@@ -6,12 +6,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v2.5] - 2026-04-17
+
+v2.5 Final Documentation Sync — maintenance mode closure.
+
+**Verified counts:** 63 commands, 17 agents, 45 skills, 6 hooks, 479 test suites, 2,490 assertions, 90.79% statement / 83.11% branch / 97.43% function coverage.
+
 ### Added
 - **`gsd-dependency-auditor` agent** — Audits package dependencies for CVEs, staleness, and license compatibility. Supports npm/pnpm/yarn, pip/poetry/uv, cargo, go mod, bundler, composer. Returns BLOCK/FLAG/PASS verdicts and writes `.planning/dependencies/DEPENDENCIES-REPORT.md`. Follows validator-hub defense-in-depth pattern (haiku / acceptEdits / isolation: worktree / maxTurns: 20). Minor-version upsells explicitly prohibited to preserve scope discipline.
 - **`/gsd:audit-deps` command** — Slash command wrapper that spawns `gsd-dependency-auditor`, verifies report output, and commits to a `chore/dependency-audit-<ts>` branch. Flags: `--no-commit`, `--quiet`. Respects GSD pre-commit hook (no direct main commits).
+- **CI/CD pipeline** — GitHub Actions workflow for Node 20+22 on Ubuntu and macOS. SHA-pinned actions, EXDEV cross-device fallbacks, test runner glob alignment.
 
 ### Changed
 - **Agent hygiene rollout (P0)** — Added explicit `model:`, `permissionMode:`, `disallowedTools:`, `maxTurns:`, and `isolation:` declarations to 10 agents previously running on implicit defaults. Pattern follows the validator-hub gold standard surfaced by the agent-architecture-review audit (composite 3.4/5.0). Affected agents: `gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-executor`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-ui-checker`, `gsd-user-profiler`, `gsd-verifier`. Tier rationale: haiku for pattern-matching/validation, sonnet for judgment/synthesis, opus for deep-reasoning verifier.
+- **Agent roster corrected to 17** — Removed `gsd-security-guardian` (not present in agents/ directory). Added `gsd-dependency-auditor` and `gsd-ecosystem-auditor` to all doc inventories.
+- **Documentation sync across all files** — README.md, CLAUDE.md, DEVOPS-HANDOFF.md, PROJECT.md, and CHANGELOG.md aligned to verified counts. All stale references to 16/18 agents, 61 commands, 472 suites, 2,474 assertions eliminated.
+
+### Fixed
+- **`lib/injection-patterns.json` missing from install** — `bin/install.js` now copies the shared pattern file to the installed location, fixing runtime failures in `gsd-prompt-guard.js`.
+- **CI matrix failures** — Dropped Node 24 (not LTS) and Windows (not target platform). Fixed `lesson-capture-gate.test.cjs` path resolution. Fixed EXDEV test stubs using EACCES instead of EXDEV.
 
 ## [1.30.0] - 2026-04-04
 
