@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.6
 milestone_name: milestone
-status: Ready to execute
-last_updated: "2026-04-17T21:48:40.824Z"
-last_activity: 2026-04-17
+status: Phase 49 executed — awaiting verification
+last_updated: "2026-04-17T22:30:00.000Z"
+last_activity: 2026-04-17 -- Phase 49 planned and executed (2 plans, 2 waves)
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -53,16 +53,15 @@ Last activity: 2026-04-17
 
 ## Session Handoff
 
-**Branch**: `main` (clean)
-**Session**: v2.6 milestone initialization
-**Commits this session**: 95f7d3b, c7095c0, 3edf1a7 (milestone start, requirements, roadmap)
+**Branch**: `feat/49-one-command-install` (clean)
+**Session**: Phase 49 plan + execute
+**Commits this session**: 07999a4 (plans), b3a70df, 7f7a932 (Plan 01 — script + package.json), e5b9462 (bug fix), ffa6219 (Plan 02 — tests), 15053e5 (state)
 
 **What was done**:
+- Planned Phase 49: 2 plans, 2 waves, all 7 INST requirements covered
+- Executed Plan 01 (Wave 1): Created `bin/setup-from-clone.js` orchestrator + `package.json` setup entry
+- Fixed bug: V-3 plugin check was looking in `enabledPlugins` instead of `~/.claude/get-shit-done/` directory
+- Executed Plan 02 (Wave 2): Created `tests/setup-from-clone.test.cjs` — 11 tests, 4 suites, all passing
+- Setup script verified end-to-end: 7 passed, 1 skipped, 0 failed
 
-- Initialized milestone v2.6 Developer Experience
-- Defined 18 requirements across 3 categories (Install, CI Watch, Sync Docs)
-- Created roadmap with 3 phases (49-51), all requirements mapped
-- Phase 49 directory created at `.planning/phases/49-one-command-install/`
-- Started `/gsd:plan-phase 49` but user chose "Run discuss-phase first"
-
-**Next**: `/gsd:discuss-phase 49` then `/gsd:plan-phase 49`
+**Next**: `/gsd:verify-work 49` then `/gsd:ship`
