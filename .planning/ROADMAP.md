@@ -10,7 +10,7 @@
 ## Phases
 
 - [ ] **Phase 49: One-Command Install** - A single script takes a fresh git clone to a fully working, health-verified GSD install
-- [ ] **Phase 50: CI Watch** - /gsd:ci-watch polls GitHub Actions in real time, surfaces results, fetches logs on failure, and suggests fixes
+- [x] **Phase 50: CI Watch** - /gsd:ci-watch polls GitHub Actions in real time, surfaces results, fetches logs on failure, and suggests fixes (completed 2026-04-17)
 - [ ] **Phase 51: Sync Docs** - /gsd:sync-docs audits and rewrites all project documentation from live codebase state, then reports what changed
 
 ---
@@ -60,7 +60,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 49. One-Command Install | 0/? | Not started | - |
-| 50. CI Watch | 0/? | Not started | - |
+| 50. CI Watch | 2/2 | Complete    | 2026-04-17 |
 | 51. Sync Docs | 0/? | Not started | - |
 
 ---
