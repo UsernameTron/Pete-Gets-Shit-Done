@@ -801,11 +801,19 @@ describe('cmdWorkstreamComplete archive failure rollback', () => {
     fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** Complete\n');
 
     const origRename = fs.renameSync;
+    const origCpSync = fs.cpSync;
+    // Stub both renameSync (EXDEV) and cpSync (fallback) so moveSync cannot succeed
     fs.renameSync = (src, dest) => {
       if (src.includes('STATE.md') || src.includes('phases')) {
         throw new Error('EXDEV: cross-device link not permitted');
       }
       return origRename(src, dest);
+    };
+    fs.cpSync = (src, dest, opts) => {
+      if (src.includes('STATE.md') || src.includes('phases')) {
+        throw new Error('EXDEV: cross-device link not permitted');
+      }
+      return origCpSync(src, dest, opts);
     };
 
     try {
@@ -814,6 +822,7 @@ describe('cmdWorkstreamComplete archive failure rollback', () => {
       // cmdWorkstreamComplete catches internally
     } finally {
       fs.renameSync = origRename;
+      fs.cpSync = origCpSync;
     }
 
     assert.ok(fs.existsSync(wsDir), 'workstream dir should still exist after failed archive');
@@ -1256,24 +1265,33 @@ describe('cmdWorkstreamComplete rollback with inner catch', () => {
 
   test('handles rollback renameSync failure gracefully (lines 314-315)', () => {
     const origRename = fs.renameSync;
+    const origCpSync = fs.cpSync;
     let forwardCount = 0;
 
+    // Stub renameSync: allow first archive move, fail on second with EXDEV
     fs.renameSync = function (src, dest) {
-      // Archive direction: wsDir → archivePath
       if (src.includes('workstreams') && dest.includes('milestones')) {
         forwardCount++;
         if (forwardCount >= 2) {
-          // Fail on second file during archive
           throw new Error('EXDEV: cross-device link');
         }
         return origRename(src, dest);
       }
-      // Rollback direction: archivePath → wsDir — make the inner rollback also fail
-      // This triggers the inner catch on line 314
       if (src.includes('milestones') && dest.includes('workstreams')) {
         throw new Error('EPERM: rollback failed');
       }
       return origRename(src, dest);
+    };
+
+    // Also stub cpSync so the moveSync EXDEV fallback cannot succeed either
+    fs.cpSync = function (src, dest, opts) {
+      if (src.includes('workstreams') && dest.includes('milestones')) {
+        throw new Error('EXDEV: cross-device link');
+      }
+      if (src.includes('milestones') && dest.includes('workstreams')) {
+        throw new Error('EPERM: rollback failed');
+      }
+      return origCpSync(src, dest, opts);
     };
 
     // output() uses fs.writeSync(1, data) — capture fd 1 writes
@@ -1292,6 +1310,7 @@ describe('cmdWorkstreamComplete rollback with inner catch', () => {
       assert.strictEqual(data.error, 'archive_failed');
     } finally {
       fs.renameSync = origRename;
+      fs.cpSync = origCpSync;
       fs.writeSync = origWriteSync;
     }
   });
