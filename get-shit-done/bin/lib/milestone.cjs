@@ -7,6 +7,7 @@ const path = require('path');
 const { escapeRegex, getMilestonePhaseFilter, extractOneLinerFromBody, normalizeMd, planningPaths, output, error } = require('./core.cjs');
 const { extractFrontmatter } = require('./frontmatter.cjs');
 const { writeStateMd, stateReplaceFieldWithFallback } = require('./state.cjs');
+const { requireSafePath } = require('./security.cjs');
 
 function cmdRequirementsMarkComplete(cwd, reqIdsRaw, raw) {
   if (!reqIdsRaw || reqIdsRaw.length === 0) {
@@ -96,6 +97,9 @@ function cmdMilestoneComplete(cwd, version, options, raw) {
   const milestonesPath = path.join(cwd, '.planning', 'MILESTONES.md');
   const archiveDir = path.join(cwd, '.planning', 'milestones');
   const phasesDir = planningPaths(cwd).phases;
+
+  // Validate version as safe path component — prevents traversal via version parameter
+  requireSafePath(`${version}-ROADMAP.md`, archiveDir, 'milestone version');
   const today = new Date().toISOString().split('T')[0];
   const milestoneName = options.name || version;
 
