@@ -6,8 +6,8 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.5 Final Documentation Sync (started 2026-04-17)
-**Previous:** v2.4 Foundation Hardening (shipped 2026-04-17, PR #1 merged)
+**Current milestone:** v2.6 Developer Experience (started 2026-04-17)
+**Previous:** v2.5 Final Documentation Sync (shipped 2026-04-17, PR #2 merged)
 **Package:** `get-shit-done-cc` v1.30.0
 **Tests:** 2,490 total, all passing
 **Coverage:** 90.79% statements, 83.11% branches, 97.43% functions
@@ -23,14 +23,28 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ## Requirements
 
-No active code requirements. Project is in maintenance mode as of v2.5.
+### Active
 
-## Current Milestone: v2.5 Final Documentation Sync
+- [ ] Install-from-clone script — one command from fresh git clone to working GSD install
+- [ ] /gsd:ci-watch command — auto-poll CI after push, surface pass/fail inline
+- [ ] /gsd:sync-docs command — scan codebase and update all docs to match current state
 
-**Goal:** Update every existing document to match codebase reality and close the project for maintenance mode.
-**Phases:** 1 (Phase 48)
-**Requirements:** Documentation accuracy across README, CLAUDE.md, PROJECT.md, DEVOPS-HANDOFF.md, reference docs, and CHANGELOG.md creation.
-**Status:** In progress
+### Out of Scope
+
+- GUI installer — CLI-only project, no graphical installer needed
+- CI provider abstraction — GitHub Actions only, no Jenkins/GitLab/Circle support this milestone
+
+## Current Milestone: v2.6 Developer Experience
+
+**Goal:** Three high-impact DX improvements that make GSD portable, CI-aware, and self-documenting.
+
+**Target features:**
+- Install-from-clone script (npm install, symlink commands, install hooks, register plugins, copy injection-patterns.json)
+- /gsd:ci-watch command (auto-poll gh run list, wait for completion, surface results inline)
+- /gsd:sync-docs command (scan codebase, update README, CLAUDE.md, PROJECT.md, DEVOPS-HANDOFF, CHANGELOG, references)
+
+**Phases:** 3 (Phases 49-51), sequential execution
+**Status:** Defining requirements
 
 <details>
 <summary><strong>v2.4 Foundation Hardening (7/7 requirements shipped)</strong></summary>
@@ -319,4 +333,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 -- v2.5 Final Documentation Sync*
+*Last updated: 2026-04-17 -- v2.6 Developer Experience milestone started*

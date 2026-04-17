@@ -1,32 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
+milestone: v2.6
 milestone_name: milestone
-status: v2.5 complete — maintenance mode
-last_updated: "2026-04-17T23:00:00.000Z"
-last_activity: 2026-04-17 -- v2.5 milestone complete, project in maintenance mode
+status: Phase 49 shipped — PR #3
+last_updated: "2026-04-17T22:30:00.000Z"
+last_activity: 2026-04-17 -- Phase 49 planned and executed (2 plans, 2 waves)
 progress:
-  total_phases: 7
-  completed_phases: 6
-  total_plans: 17
-  completed_plans: 17
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 2
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-16)
+See: .planning/PROJECT.md (updated 2026-04-17)
 
-**Current:** v2.5 Final Documentation Sync — IN PROGRESS
-**Previous:** v2.4 Foundation Hardening (shipped 2026-04-17, PR #1 merged)
+**Current:** v2.6 Developer Experience — ROADMAP CREATED, Phase 49 ready to plan
+**Previous:** v2.5 Final Documentation Sync (shipped 2026-04-17, PR #2 merged)
 
 ## Current Position
 
-Milestone v2.5 complete. Project in maintenance mode.
-PR #1 merged (v2.4). PR #2 merged (v2.5). All 48 phases shipped across 15 milestones.
-Next: `/gsd:new-milestone` if new work is needed.
-Last activity: 2026-04-17 -- v2.5 milestone complete
+Phase: 49 (one-command-install) — EXECUTING
+Plan: 2 of 2
+Milestone v2.6 roadmap created. 3 phases (49-51), 18 requirements mapped.
+Next: `/gsd:plan-phase 49` to begin One-Command Install.
+Last activity: 2026-04-17
 
 ## Milestone History
 
@@ -46,35 +47,21 @@ Last activity: 2026-04-17 -- v2.5 milestone complete
 | v2.1 | System Audit & Debt Closure | 5 | 8 | 2026-04-10 |
 | v2.2 | Security Hardening | 2 | 0 | 2026-04-13 |
 | v2.3 | Hook Ecosystem + Security Guardian + Agent Quality | 4 | 5 | 2026-04-15 |
+| v2.4 | Foundation Hardening | 2 | 6 | 2026-04-17 |
+| v2.5 | Final Documentation Sync | 2 | 3 | 2026-04-17 |
+| v2.6 | Developer Experience | 3 | 0 | In progress |
 
 ## Session Handoff
 
-**Branch**: `feat/phase-47-agent-roster-assessment`
-**Phase 47**: Agent Roster Assessment — SHIPPED, PR #1
-**Tests**: 2536 pass, 0 fail
-**Coverage**: 94.52% overall, 82.85% branch, security 100%, all modules >= 80%
-**UAT**: 9/9 pass (5 blockers found and fixed during UAT)
-**PR**: https://github.com/UsernameTron/Pete-Gets-Shit-Done/pull/1
+**Branch**: `feat/49-one-command-install` (clean)
+**Session**: Phase 49 plan + execute
+**Commits this session**: 07999a4 (plans), b3a70df, 7f7a932 (Plan 01 — script + package.json), e5b9462 (bug fix), ffa6219 (Plan 02 — tests), 15053e5 (state)
 
-**CI fixes applied across sessions**:
-- Replaced non-existent action SHA pins with correct v4 SHAs (checkout, setup-node)
-- Added `moveSync` EXDEV fallback to workstream.cjs and milestone.cjs for cross-device rename in CI
-- Moved phase-coverage.test.cjs from tests/coverage/ to tests/ (test runner glob fix)
-- Pushed `main` branch to remote (was missing — only feature branches existed on GitHub)
-- Workstream test stubs: EACCES instead of EXDEV (moveSync fallback now handles EXDEV)
-- lesson-capture-gate.test.cjs: resolve hook from repo `.claude/hooks/` not `~/.claude/hooks/`
-- Reverted phase.cjs moveSync — same-directory renames don't need EXDEV fallback
-- Dropped Node 24 and Windows from CI matrix (not LTS / not target platform)
+**What was done**:
+- Planned Phase 49: 2 plans, 2 waves, all 7 INST requirements covered
+- Executed Plan 01 (Wave 1): Created `bin/setup-from-clone.js` orchestrator + `package.json` setup entry
+- Fixed bug: V-3 plugin check was looking in `enabledPlugins` instead of `~/.claude/get-shit-done/` directory
+- Executed Plan 02 (Wave 2): Created `tests/setup-from-clone.test.cjs` — 11 tests, 4 suites, all passing
+- Setup script verified end-to-end: 7 passed, 1 skipped, 0 failed
 
-**CI status**: Awaiting green on 3 remaining jobs (ubuntu Node 20+22, macOS Node 22).
-**Commits on branch**: 647914e → 1b4c9b3 (5 CI fix commits this session)
-
-**Phase 48 execution (this session)**:
-- Planned: 3 plans in 1 wave (all parallel, docs-only)
-- 48-01: README + DEVOPS-HANDOFF verified current, no edits needed
-- 48-02: Both CLAUDE.md files updated with D-05 counts (outer commit 1254418, inner commit a198246)
-- 48-03: PROJECT.md updated with v2.4/v2.5 milestones (commit 79fd91e), CHANGELOG.md created (inner commit 59829e0)
-- All 3 SUMMARYs on disk, phase artifacts committed at 9b145cc
-- gsd-tools.cjs broken (missing injection-patterns.json) — worked around manually
-
-**Next**: `/gsd:verify-work 48` then `/gsd:ship` to create PR for v2.5.
+**Next**: Merge PR #3, then `/gsd:plan-phase 50` for CI Watch

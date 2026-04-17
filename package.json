@@ -45,6 +45,7 @@
     "esbuild": "^0.25.12"
   },
   "scripts": {
+    "setup": "node bin/setup-from-clone.js",
     "build:hooks": "node scripts/build-hooks.js",
     "prepublishOnly": "npm run build:hooks",
     "test": "node scripts/run-tests.cjs",
