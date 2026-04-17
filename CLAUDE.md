@@ -12,8 +12,8 @@ You are working with Pete Connor — AI transformation leader, MS in AI, CCXP/CC
 
 Key capabilities:
 - **63 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
-- **18 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-security-guardian, and others) handling quality, planning, and execution roles
-- **47+ Claude Code skills** covering command implementations, utilities, and governance workflows
+- **17 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-validator-hub, and others) handling quality, planning, and execution roles
+- **45 Claude Code skills** covering command implementations, utilities, and governance workflows
 - **Wave-based parallel execution** — independent tasks run concurrently in waves; dependent tasks respect ordering automatically
 - **5-phase delivery lifecycle**: discuss → plan → execute → verify → ship, with explicit phase gates that cannot be skipped
 
@@ -48,7 +48,7 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 ## Tests and Coverage
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
-- **Scale**: ~472 test suites, ~2474 assertions
+- **Scale**: 479 test suites, 2,490 assertions
 - **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
 - **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
 
@@ -73,9 +73,9 @@ Three project-scoped specialists live in `.claude/agents/`:
 | test-runner | `test-runner.md` | Runs test suites, diagnoses failures, writes coverage |
 | docs-sync | `docs-sync.md` | Keeps CLAUDE.md, README.md, and DEVOPS-HANDOFF.md current |
 
-GSD also ships 18 built-in agents activated by the execution engine:
+GSD also ships 17 built-in agents activated by the execution engine:
 
-`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-dependency-auditor`, `gsd-ecosystem-auditor`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-security-guardian`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
+`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-dependency-auditor`, `gsd-ecosystem-auditor`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
 
 ---
 
@@ -209,7 +209,7 @@ Pete runs multiple MCP servers (Filesystem, Desktop Commander, Obsidian, and cus
 
 ### Skill and Plugin Architecture
 
-Pete maintains 40+ Claude Desktop skills and 47+ Claude Code skills. When building new skills, follow SKILL.md frontmatter conventions: `allowed-tools`, `context fork`, `disable-model-invocation`, `user-invocable`, `$ARGUMENTS`, and `!command` syntax. Skills must have precise trigger descriptions to avoid collisions. Use the skill-forge protocol for production-grade skill engineering.
+Pete maintains 40+ Claude Desktop skills and 45 Claude Code skills. When building new skills, follow SKILL.md frontmatter conventions: `allowed-tools`, `context fork`, `disable-model-invocation`, `user-invocable`, `$ARGUMENTS`, and `!command` syntax. Skills must have precise trigger descriptions to avoid collisions. Use the skill-forge protocol for production-grade skill engineering.
 
 ### Multi-Agent Orchestration
 

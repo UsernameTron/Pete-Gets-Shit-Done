@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 47 Shipped — PR #1
-last_updated: "2026-04-17T18:00:00.000Z"
-last_activity: 2026-04-17 -- Phase 47 shipped — PR #1
+status: Phase 48 shipped — PR #2
+last_updated: "2026-04-17T22:00:00.000Z"
+last_activity: 2026-04-17 -- Phase 48 shipped (PR #2)
 progress:
   total_phases: 7
   completed_phases: 6
@@ -18,15 +18,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-16)
 
-**Current:** v2.4 Foundation Hardening — COMPLETE. Shipped 2026-04-17, tag v2.4, PR #51.
-**Previous:** v2.3 Hook Ecosystem + Security Guardian + Agent Quality (shipped 2026-04-15, PR #49)
+**Current:** v2.5 Final Documentation Sync — IN PROGRESS
+**Previous:** v2.4 Foundation Hardening (shipped 2026-04-17, PR #1 merged)
 
 ## Current Position
 
-Phase: 47 (agent-roster-assessment) — SHIPPED (PR #1)
-Milestone v2.4 complete. Phase 47 shipped.
-Next: Merge PR #1, then `/gsd:new-milestone` to start v2.5.
-Last activity: 2026-04-17 -- Phase 47 shipped — PR #1
+Phase: 48 (final-documentation-sync) — SHIPPED, PR #2
+PR #1 merged (v2.4). PR #2 created (v2.5). UAT complete, 4 issues fixed inline.
+Next: Merge PR #2, then `/gsd:complete-milestone`.
+Last activity: 2026-04-17 -- Phase 48 shipped (PR #2)
 
 ## Milestone History
 
@@ -56,12 +56,25 @@ Last activity: 2026-04-17 -- Phase 47 shipped — PR #1
 **UAT**: 9/9 pass (5 blockers found and fixed during UAT)
 **PR**: https://github.com/UsernameTron/Pete-Gets-Shit-Done/pull/1
 
-**CI fixes applied this session**:
+**CI fixes applied across sessions**:
 - Replaced non-existent action SHA pins with correct v4 SHAs (checkout, setup-node)
 - Added `moveSync` EXDEV fallback to workstream.cjs and milestone.cjs for cross-device rename in CI
 - Moved phase-coverage.test.cjs from tests/coverage/ to tests/ (test runner glob fix)
 - Pushed `main` branch to remote (was missing — only feature branches existed on GitHub)
+- Workstream test stubs: EACCES instead of EXDEV (moveSync fallback now handles EXDEV)
+- lesson-capture-gate.test.cjs: resolve hook from repo `.claude/hooks/` not `~/.claude/hooks/`
+- Reverted phase.cjs moveSync — same-directory renames don't need EXDEV fallback
+- Dropped Node 24 and Windows from CI matrix (not LTS / not target platform)
 
-**CI status**: Pending — EXDEV fix for workstream/milestone pushed, awaiting green. If lesson-capture-gate.test.cjs still fails, the error is not from renameSync (no such calls exist in that file or its hook). Check actual CI logs for root cause.
+**CI status**: Awaiting green on 3 remaining jobs (ubuntu Node 20+22, macOS Node 22).
+**Commits on branch**: 647914e → 1b4c9b3 (5 CI fix commits this session)
 
-**Next**: Wait for CI green on PR #1, merge, then `/gsd:new-milestone` to start v2.5.
+**Phase 48 execution (this session)**:
+- Planned: 3 plans in 1 wave (all parallel, docs-only)
+- 48-01: README + DEVOPS-HANDOFF verified current, no edits needed
+- 48-02: Both CLAUDE.md files updated with D-05 counts (outer commit 1254418, inner commit a198246)
+- 48-03: PROJECT.md updated with v2.4/v2.5 milestones (commit 79fd91e), CHANGELOG.md created (inner commit 59829e0)
+- All 3 SUMMARYs on disk, phase artifacts committed at 9b145cc
+- gsd-tools.cjs broken (missing injection-patterns.json) — worked around manually
+
+**Next**: `/gsd:verify-work 48` then `/gsd:ship` to create PR for v2.5.

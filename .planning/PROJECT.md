@@ -6,16 +6,16 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.3 Hook Ecosystem + Security Guardian + Agent Quality (started 2026-04-13)
-**Previous:** v2.2 Security Hardening (shipped 2026-04-13, PR #47 + #48)
+**Current milestone:** v2.5 Final Documentation Sync (started 2026-04-17)
+**Previous:** v2.4 Foundation Hardening (shipped 2026-04-17, PR #1 merged)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2377+ total, all passing
-**Coverage:** 90.41% overall, all modules >= 80%, security 100%
-**Agents:** 15 active, 7 archived, 3 specialist — all tiered and quality-gated
+**Tests:** 2,490 total, all passing
+**Coverage:** 90.79% statements, 83.11% branches, 97.43% functions
+**Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
-**Milestones shipped:** 13 (v1.0 through v2.2)
-**Total phases executed:** 40 across all milestones
+**Milestones shipped:** 15 (v1.0 through v2.5)
+**Total phases executed:** 48
 
 ## Core Value
 
@@ -23,27 +23,42 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ## Requirements
 
-Active requirements for the current milestone. Historical milestone requirements are captured in the collapsible sections below.
+No active code requirements. Project is in maintenance mode as of v2.5.
 
-### v2.4 Foundation Hardening (active)
+## Current Milestone: v2.5 Final Documentation Sync
+
+**Goal:** Update every existing document to match codebase reality and close the project for maintenance mode.
+**Phases:** 1 (Phase 48)
+**Requirements:** Documentation accuracy across README, CLAUDE.md, PROJECT.md, DEVOPS-HANDOFF.md, reference docs, and CHANGELOG.md creation.
+**Status:** In progress
+
+<details>
+<summary><strong>v2.4 Foundation Hardening (7/7 requirements shipped)</strong></summary>
+
+**Goal:** Fix the 3 highest-risk structural findings from the 8-dimension foundation audit (D5 orphaned factory cache, D6c injection pattern divergence, D6a dead version tracking), then sweep the remaining 4 WARN items in a housekeeping pass.
+
+**Key deliverables:**
+- PLUG-01: claude-code-factory registered in marketplace.json with validated source path resolution and integration test
+- SECPAT-01: Merged diverged hook (18) and library (18) injection patterns into a 23-pattern canonical superset with build-time inlining
+- HOOK-04: build-hooks.js now stamps real package version (1.30.0) into all 7 dist hooks, making staleness detection operative
+- DOC-01: Agent/command counts corrected (17 agents, 63 commands)
+- COV-01: Branch coverage raised for workstream.cjs and build-hooks.js above 80%
+- LINK-01: Command/workflow linkage drift resolved
+- REF-01: crew.md hardcoded project path fixed for portability
+
+**Shipped via:** PR #1, merged 2026-04-17. Phase 47 agent roster assessment included.
 
 | ID | Title | Phase | Status |
 |----|-------|-------|--------|
-| PLUG-01 | Register claude-code-factory in marketplace.json and load from live source | Phase 45 | Pending |
-| SECPAT-01 | Create shared injection pattern file consumed by both gsd-prompt-guard.js and security.cjs | Phase 45 | Pending |
-| HOOK-04 | Implement {{GSD_VERSION}} substitution in build-hooks.js or remove placeholder from all 7 hooks | Phase 45 | Pending |
-| DOC-01 | Update README.md and CLAUDE.md agent/command counts (16→18 agents, 61→63 commands) | Phase 46 | Pending |
-| COV-01 | Raise branch coverage for workstream.cjs and build-hooks.js above 80% | Phase 46 | Pending |
-| LINK-01 | Resolve command/workflow linkage drift (11 unlinked commands, 5 orphaned workflows) | Phase 46 | Pending |
-| REF-01 | Fix crew.md hardcoded project path for portability | Phase 46 | Pending |
+| PLUG-01 | Register claude-code-factory in marketplace.json and load from live source | Phase 45 | Shipped |
+| SECPAT-01 | Create shared injection pattern file consumed by both gsd-prompt-guard.js and security.cjs | Phase 45 | Shipped |
+| HOOK-04 | Implement {{GSD_VERSION}} substitution in build-hooks.js or remove placeholder from all 7 hooks | Phase 45 | Shipped |
+| DOC-01 | Update README.md and CLAUDE.md agent/command counts (16→17 agents, 61→63 commands) | Phase 46 | Shipped |
+| COV-01 | Raise branch coverage for workstream.cjs and build-hooks.js above 80% | Phase 46 | Shipped |
+| LINK-01 | Resolve command/workflow linkage drift (11 unlinked commands, 5 orphaned workflows) | Phase 46 | Shipped |
+| REF-01 | Fix crew.md hardcoded project path for portability | Phase 46 | Shipped |
 
-## Current Milestone: v2.4 Foundation Hardening
-
-**Goal:** Fix the 3 highest-risk structural findings from the 8-dimension foundation audit (D5 orphaned factory cache, D6c injection pattern divergence, D6a dead version tracking), then sweep the remaining 4 WARN items in a housekeeping pass.
-**Phases:** 2 (45 Critical Fixes, 46 Housekeeping)
-**Requirements:** 7 (PLUG-01, SECPAT-01, HOOK-04, DOC-01, COV-01, LINK-01, REF-01)
-**Decisions:** Continue phase numbering from 45 (v2.3 ended at 44). Skip research — all findings sourced from FOUNDATION-AUDIT-20260416.md. REQ prefixes: PLUG for plugin, SECPAT for security patterns, HOOK for hooks (continuing from v2.3), DOC for documentation, COV for coverage, LINK for linkage, REF for references.
-**Source material:** `.planning/milestones/FOUNDATION-AUDIT-20260416.md` (8-dimension audit, bb234f6).
+</details>
 
 <details>
 <summary><strong>v2.3 Hook Ecosystem + Security Guardian + Agent Quality (8/8 requirements shipped)</strong></summary>
@@ -280,7 +295,7 @@ All 6 requirements verified complete:
 - v2.0 adds 2 new modules: classify.cjs (task classification), history.cjs (execution history)
 - v2.0 extends model-profiles.cjs with dynamicSelect(), core.cjs with optional taskContext
 - v2.3 added 3 execution hooks (prompt guard, config protection, cost tracker), security guardian agent, and 4D verifier rubric
-- 18 active agents, 63 commands (corrected in v2.4)
+- 17 active agents, 63 commands
 
 ## Tech Debt
 
@@ -304,4 +319,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 -- v2.4 Foundation Hardening started*
+*Last updated: 2026-04-17 -- v2.5 Final Documentation Sync*
