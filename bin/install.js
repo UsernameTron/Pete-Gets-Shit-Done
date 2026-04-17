@@ -4554,6 +4554,20 @@ function install(isGlobal, runtime = 'claude') {
     }
   }
 
+  // Copy lib/injection-patterns.json (required by security.cjs at runtime)
+  const injectionSrc = path.join(src, 'lib', 'injection-patterns.json');
+  if (fs.existsSync(injectionSrc)) {
+    const libDest = path.join(targetDir, 'lib');
+    fs.mkdirSync(libDest, { recursive: true });
+    const injectionDest = path.join(libDest, 'injection-patterns.json');
+    fs.copyFileSync(injectionSrc, injectionDest);
+    if (verifyFileInstalled(injectionDest, 'lib/injection-patterns.json')) {
+      console.log(`  ${green}✓${reset} Installed lib/injection-patterns.json`);
+    } else {
+      failures.push('lib/injection-patterns.json');
+    }
+  }
+
   // Write VERSION file
   const versionDest = path.join(targetDir, 'get-shit-done', 'VERSION');
   fs.writeFileSync(versionDest, pkg.version);
