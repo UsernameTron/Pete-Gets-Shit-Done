@@ -22,8 +22,7 @@ const HOOKS_TO_COPY = [
   'gsd-context-monitor.js',
   'gsd-cost-tracker.js',
   'gsd-prompt-guard.js',
-  'gsd-statusline.js',
-  'gsd-workflow-guard.js'
+  'gsd-statusline.js'
 ];
 
 /**

@@ -13,6 +13,22 @@ const path = require('path');
 const { output, error, planningPaths, planningRoot, toPosixPath, getMilestoneInfo, generateSlugInternal, setActiveWorkstream, getActiveWorkstream, filterPlanFiles, filterSummaryFiles, readSubdirectories } = require('./core.cjs');
 const { stateExtractField } = require('./state.cjs');
 
+/**
+ * Cross-device-safe move: tries fs.renameSync first, falls back to
+ * recursive copy + delete when source and dest are on different mounts
+ * (EXDEV). This is common in CI where /tmp and the workspace are
+ * separate filesystems.
+ */
+function moveSync(src, dest) {
+  try {
+    fs.renameSync(src, dest);
+  } catch (err) {
+    if (err.code !== 'EXDEV') throw err;
+    fs.cpSync(src, dest, { recursive: true });
+    fs.rmSync(src, { recursive: true, force: true });
+  }
+}
+
 // ─── Migration ──────────────────────────────────────────────────────────────
 
 /**
@@ -48,13 +64,13 @@ function migrateToWorkstreams(cwd, workstreamName) {
       const src = path.join(baseDir, item.name);
       if (fs.existsSync(src)) {
         const dest = path.join(wsDir, item.name);
-        fs.renameSync(src, dest);
+        moveSync(src, dest);
         filesMoved.push(item.name);
       }
     }
   } catch (err) {
     for (const name of filesMoved) {
-      try { fs.renameSync(path.join(wsDir, name), path.join(baseDir, name)); } catch { /* intentional: best-effort rollback of moved file */ }
+      try { moveSync(path.join(wsDir, name), path.join(baseDir, name)); } catch { /* intentional: best-effort rollback of moved file */ }
     }
     try { fs.rmSync(wsDir, { recursive: true }); } catch { /* intentional: best-effort cleanup on migration failure */ }
     try { fs.rmdirSync(path.join(baseDir, 'workstreams')); } catch { /* intentional: best-effort cleanup of empty workstreams dir */ }
@@ -306,12 +322,12 @@ function cmdWorkstreamComplete(cwd, name, options, raw) {
   try {
     const entries = fs.readdirSync(wsDir, { withFileTypes: true });
     for (const entry of entries) {
-      fs.renameSync(path.join(wsDir, entry.name), path.join(archivePath, entry.name));
+      moveSync(path.join(wsDir, entry.name), path.join(archivePath, entry.name));
       filesMoved.push(entry.name);
     }
   } catch (err) {
     for (const fname of filesMoved) {
-      try { fs.renameSync(path.join(archivePath, fname), path.join(wsDir, fname)); } catch { /* intentional: best-effort rollback of archived file */ }
+      try { moveSync(path.join(archivePath, fname), path.join(wsDir, fname)); } catch { /* intentional: best-effort rollback of archived file */ }
     }
     try { fs.rmSync(archivePath, { recursive: true }); } catch { /* intentional: best-effort cleanup on archive failure */ }
     if (active === name) setActiveWorkstream(cwd, name);

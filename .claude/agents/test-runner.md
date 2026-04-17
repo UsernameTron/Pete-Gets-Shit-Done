@@ -64,7 +64,7 @@ If a test failure indicates a production-code bug, STOP at the test boundary. Re
 </scope_guard>
 
 <project_context>
-Project root: `/Users/cpconnor/projects/Pete-Gets-Shit-Done/get-shit-done`
+Project root: use the current working directory
 
 **Test infrastructure:**
 - Runner: Node.js built-in `node:test` — NOT jest, mocha, or vitest

@@ -68,7 +68,7 @@ If a doc update requires a code change to be accurate (e.g., the README claims a
 </scope_guard>
 
 <project_context>
-Project root: `/Users/cpconnor/projects/Pete-Gets-Shit-Done/get-shit-done`
+Project root: use the current working directory
 
 **Sources of truth (consult before writing):**
 - Command count: `ls commands/gsd/*.md | wc -l`

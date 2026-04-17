@@ -1,26 +1,40 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-13T21:09:32.855Z",
-  "phase": "42",
-  "phase_name": "security-guardian",
-  "phase_dir": ".planning/phases/42-security-guardian",
-  "plan": 1,
-  "task": 2,
-  "total_tasks": 2,
-  "status": "paused_at_verification",
+  "timestamp": "2026-04-17T17:28:24Z",
+  "phase": "47",
+  "phase_name": "agent-roster-assessment",
+  "phase_dir": ".planning/phases/47-agent-roster-assessment",
+  "plan": null,
+  "task": null,
+  "total_tasks": 9,
+  "status": "paused",
   "completed_tasks": [
-    {"id": 1, "name": "Threat model reference + security guardian agent", "status": "done", "commit": "2fa9073"},
-    {"id": 2, "name": "Update agent inventory in CLAUDE.md and README.md", "status": "done", "commit": "04bf101"}
+    {"id": 1, "name": "Dead Code Removal", "status": "done", "commit": "46f1b35"},
+    {"id": 2, "name": "Path Traversal Prevention", "status": "done", "commit": "09d86be"},
+    {"id": 3, "name": "Prompt Guard Sync", "status": "done", "commit": "pass-no-fix"},
+    {"id": 4, "name": "Stop Hook Deduplication", "status": "done", "commit": "pass-no-fix"},
+    {"id": 5, "name": "Model Profile Coverage", "status": "done", "commit": "fc6fd1f"},
+    {"id": 6, "name": "CODEX Sandbox Coverage", "status": "done", "commit": "5e56409"},
+    {"id": 7, "name": "Plugin Skill Parity", "status": "done", "commit": "efc20de"},
+    {"id": 8, "name": "Coverage Thresholds", "status": "in_progress", "progress": "profile-output.cjs fixed (61.67% to 71.65%). phase.cjs still at 69.44% — new tests written but not picked up by test runner (tests/coverage/ not in glob). Need to either move test file or update run-tests.cjs glob."}
   ],
-  "remaining_tasks": [],
-  "blockers": [],
+  "remaining_tasks": [
+    {"id": 8, "name": "Coverage Thresholds", "status": "in_progress"},
+    {"id": 9, "name": "Full Test Suite Green", "status": "not_started"}
+  ],
+  "blockers": [
+    {
+      "description": "tests/coverage/phase-coverage.test.cjs not picked up by npm test — scripts/run-tests.cjs glob does not include tests/coverage/ subdirectory",
+      "type": "technical",
+      "workaround": "Either move the file to tests/phase-coverage.test.cjs or update the glob in scripts/run-tests.cjs to include tests/coverage/*.test.cjs"
+    }
+  ],
   "human_actions_pending": [],
   "decisions": [
-    {"decision": "Phase 41 complete — 3 hooks ported (prompt guard, config protection, cost tracker)", "rationale": "All HOOK-01/02/03 requirements satisfied, 2448+ tests passing", "phase": "41"},
-    {"decision": "Phase 42 execution complete — agent + threat model shipped", "rationale": "SEC3-01/SEC3-02 requirements satisfied, 2451 tests passing", "phase": "42"},
-    {"decision": "Verification interrupted by user pause", "rationale": "Phase 42 execution done, verification agent was about to run", "phase": "42"}
+    {"decision": "Model profile tiers follow agent role patterns", "rationale": "advisor-researcher gets opus at quality (makes trade-off decisions), other 5 inspection agents follow codebase-mapper pattern (sonnet/haiku/haiku)", "phase": "47"},
+    {"decision": "Plugin skills copied from Petes-Get-Shit-Done-Coding-Automation reference", "rationale": "37 skills were present in reference copy but never committed to main repo", "phase": "47"}
   ],
-  "uncommitted_files": [".planning/agent-health.log"],
-  "next_action": "Run phase 42 verification (gsd-verifier), then mark phase complete. After that, continue autonomous with phases 43 and 44.",
-  "context_notes": "Running /gsd:autonomous --from 41. Phase 41 fully complete (executed + verified + marked complete). Phase 42 fully executed (plan 42-01, 2 tasks, all committed) but verification was interrupted. Need to: (1) verify phase 42, (2) mark complete, (3) plan+execute phase 43, (4) plan+execute phase 44, (5) run milestone lifecycle. Branch is feat/v2.3-phase-41-hook-ports."
+  "uncommitted_files": ["tests/profile-output.test.cjs", "tests/coverage/phase-coverage.test.cjs", ".planning/phases/47-agent-roster-assessment/47-UAT.md"],
+  "next_action": "Fix phase.cjs branch coverage: move tests/coverage/phase-coverage.test.cjs to tests/phase-coverage.test.cjs (or update run-tests.cjs glob), verify coverage hits 70%+, then commit. After that, run Test 9 (Full Test Suite Green) which should be a quick pass. Then complete UAT, commit, and proceed to /gsd:ship.",
+  "context_notes": "UAT session at 7/9 tests done. 5 issues found and fixed in-session (dead code, path traversal, model profiles, CODEX sandbox, plugin skills). Tests 3-4 passed clean. Test 8 (coverage) partially fixed — profile-output solved, phase.cjs blocked by test runner glob. Test 9 should be trivial once 8 is resolved."
 }

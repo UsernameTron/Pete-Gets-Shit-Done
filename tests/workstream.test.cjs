@@ -803,7 +803,9 @@ describe('cmdWorkstreamComplete archive failure rollback', () => {
     const origRename = fs.renameSync;
     fs.renameSync = (src, dest) => {
       if (src.includes('STATE.md') || src.includes('phases')) {
-        throw new Error('EXDEV: cross-device link not permitted');
+        const err = new Error('EACCES: permission denied');
+        err.code = 'EACCES';
+        throw err;
       }
       return origRename(src, dest);
     };
@@ -1258,18 +1260,18 @@ describe('cmdWorkstreamComplete rollback with inner catch', () => {
     const origRename = fs.renameSync;
     let forwardCount = 0;
 
+    // Stub renameSync: allow first archive move, fail on second with EACCES
     fs.renameSync = function (src, dest) {
-      // Archive direction: wsDir → archivePath
       if (src.includes('workstreams') && dest.includes('milestones')) {
         forwardCount++;
         if (forwardCount >= 2) {
-          // Fail on second file during archive
-          throw new Error('EXDEV: cross-device link');
+          const err = new Error('EACCES: permission denied');
+          err.code = 'EACCES';
+          throw err;
         }
         return origRename(src, dest);
       }
-      // Rollback direction: archivePath → wsDir — make the inner rollback also fail
-      // This triggers the inner catch on line 314
+      // Rollback direction: make the inner rollback also fail
       if (src.includes('milestones') && dest.includes('workstreams')) {
         throw new Error('EPERM: rollback failed');
       }

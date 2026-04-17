@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.4
-milestone_name: Foundation Hardening
-status: complete
-last_updated: "2026-04-17T01:26:12.496Z"
-last_activity: 2026-04-17
+milestone: v1.0
+milestone_name: milestone
+status: Phase 47 Shipped — PR #1
+last_updated: "2026-04-17T18:00:00.000Z"
+last_activity: 2026-04-17 -- Phase 47 shipped — PR #1
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_phases: 7
+  completed_phases: 6
+  total_plans: 17
+  completed_plans: 17
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -23,9 +23,10 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 ## Current Position
 
-Milestone v2.4 complete. No active phase.
-Next: `/gsd:new-milestone` to start v2.5.
-Last activity: 2026-04-17 — Milestone archived, tagged v2.4, pushed.
+Phase: 47 (agent-roster-assessment) — SHIPPED (PR #1)
+Milestone v2.4 complete. Phase 47 shipped.
+Next: Merge PR #1, then `/gsd:new-milestone` to start v2.5.
+Last activity: 2026-04-17 -- Phase 47 shipped — PR #1
 
 ## Milestone History
 
@@ -48,10 +49,19 @@ Last activity: 2026-04-17 — Milestone archived, tagged v2.4, pushed.
 
 ## Session Handoff
 
-**Branch**: `feat/phase-46-housekeeping` @ 02d1b91
-**Milestone v2.4**: COMPLETE — archived, tagged v2.4, pushed.
-**PR #51**: Phase 46 housekeeping (pending merge to main)
-**Coverage**: 90%+ overall, workstream.cjs 87.14%, build-hooks.js 93.75% branch
-**Tests**: 2528 passing, 0 failures
-**Milestone history**: v2.4 added to table (15th milestone)
-**Next**: Merge PR #51 → `/gsd:new-milestone` for v2.5
+**Branch**: `feat/phase-47-agent-roster-assessment`
+**Phase 47**: Agent Roster Assessment — SHIPPED, PR #1
+**Tests**: 2536 pass, 0 fail
+**Coverage**: 94.52% overall, 82.85% branch, security 100%, all modules >= 80%
+**UAT**: 9/9 pass (5 blockers found and fixed during UAT)
+**PR**: https://github.com/UsernameTron/Pete-Gets-Shit-Done/pull/1
+
+**CI fixes applied this session**:
+- Replaced non-existent action SHA pins with correct v4 SHAs (checkout, setup-node)
+- Added `moveSync` EXDEV fallback to workstream.cjs and milestone.cjs for cross-device rename in CI
+- Moved phase-coverage.test.cjs from tests/coverage/ to tests/ (test runner glob fix)
+- Pushed `main` branch to remote (was missing — only feature branches existed on GitHub)
+
+**CI status**: Pending — EXDEV fix for workstream/milestone pushed, awaiting green. If lesson-capture-gate.test.cjs still fails, the error is not from renameSync (no such calls exist in that file or its hook). Check actual CI logs for root cause.
+
+**Next**: Wait for CI green on PR #1, merge, then `/gsd:new-milestone` to start v2.5.

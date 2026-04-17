@@ -512,6 +512,31 @@ describe('milestone complete command', () => {
     assert.strictEqual(output.plans, 0, 'plan count should be 0');
     assert.strictEqual(output.tasks, 0, 'task count should be 0');
   });
+
+  test('rejects path traversal in version parameter', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'),
+      '# State\n\n**Status:** In progress\n'
+    );
+
+    const result = runGsdTools(tmpDir, ['milestone', 'complete', '../../etc/passwd']);
+    assert.ok(!result.success || result.error, 'traversal version should be rejected');
+    const out = result.output || result.error || '';
+    assert.ok(
+      out.includes('validation failed') || out.includes('escapes allowed') || !result.success,
+      `should reject traversal payload, got: ${out}`
+    );
+  });
+
+  test('rejects dot-dot version parameter', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'),
+      '# State\n\n**Status:** In progress\n'
+    );
+
+    const result = runGsdTools(tmpDir, ['milestone', 'complete', '../v1.0']);
+    assert.ok(!result.success || result.error, 'dot-dot version should be rejected');
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

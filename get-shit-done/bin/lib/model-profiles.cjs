@@ -37,6 +37,12 @@ function _initialize() {
     'gsd-ui-researcher': { quality: 'opus', balanced: 'sonnet', budget: 'haiku' },
     'gsd-ui-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
     'gsd-ui-auditor': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-advisor-researcher': { quality: 'opus', balanced: 'sonnet', budget: 'haiku' },
+    'gsd-assumptions-analyzer': { quality: 'sonnet', balanced: 'haiku', budget: 'haiku' },
+    'gsd-user-profiler': { quality: 'sonnet', balanced: 'haiku', budget: 'haiku' },
+    'gsd-dependency-auditor': { quality: 'sonnet', balanced: 'haiku', budget: 'haiku' },
+    'gsd-ecosystem-auditor': { quality: 'sonnet', balanced: 'haiku', budget: 'haiku' },
+    'gsd-validator-hub': { quality: 'sonnet', balanced: 'haiku', budget: 'haiku' },
   };
   _validProfiles = Object.keys(_modelProfiles['gsd-planner']);
 }

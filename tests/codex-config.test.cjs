@@ -229,9 +229,9 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 // ─── CODEX_AGENT_SANDBOX mapping ────────────────────────────────────────────────
 
 describe('CODEX_AGENT_SANDBOX', () => {
-  test('has all 15 agents mapped', () => {
+  test('has all 17 agents mapped', () => {
     const agentNames = Object.keys(CODEX_AGENT_SANDBOX);
-    assert.strictEqual(agentNames.length, 15, 'has 15 agents');
+    assert.strictEqual(agentNames.length, 17, 'has 17 agents');
   });
 
   test('workspace-write agents have write tools', () => {
@@ -239,7 +239,7 @@ describe('CODEX_AGENT_SANDBOX', () => {
       'gsd-executor', 'gsd-planner', 'gsd-research-orchestrator',
       'gsd-research-synthesizer', 'gsd-verifier',
       'gsd-codebase-mapper', 'gsd-roadmapper', 'gsd-debugger',
-      'gsd-ui-auditor', 'gsd-ui-researcher',
+      'gsd-ui-auditor', 'gsd-ui-researcher', 'gsd-dependency-auditor',
     ];
     for (const name of writeAgents) {
       assert.strictEqual(CODEX_AGENT_SANDBOX[name], 'workspace-write', `${name} is workspace-write`);
@@ -250,6 +250,7 @@ describe('CODEX_AGENT_SANDBOX', () => {
     const readOnlyAgents = [
       'gsd-advisor-researcher', 'gsd-assumptions-analyzer',
       'gsd-ui-checker', 'gsd-user-profiler', 'gsd-validator-hub',
+      'gsd-ecosystem-auditor',
     ];
     for (const name of readOnlyAgents) {
       assert.strictEqual(CODEX_AGENT_SANDBOX[name], 'read-only', `${name} is read-only`);
