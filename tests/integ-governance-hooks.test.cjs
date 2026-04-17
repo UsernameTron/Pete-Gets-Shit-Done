@@ -2,9 +2,8 @@
  * Integration tests for governance hook enforcement.
  *
  * Validates:
- * 1. Workflow guard multi-scenario enforcement (cross-scenario sequences)
- * 2. Prompt injection guard multi-pattern enforcement
- * 3. settings-hooks.json template wiring correctness
+ * 1. Prompt injection guard multi-pattern enforcement
+ * 2. settings-hooks.json template wiring correctness
  *
  * Advisory hooks always exit 0 — they warn, never block.
  */
@@ -15,7 +14,6 @@ const fs = require('fs');
 const path = require('path');
 const { runHook, createTempWithConfig, cleanup } = require('./hook-helpers.cjs');
 
-const WORKFLOW_GUARD = path.join(__dirname, '..', 'hooks', 'gsd-workflow-guard.js');
 const PROMPT_GUARD = path.join(__dirname, '..', 'hooks', 'gsd-prompt-guard.js');
 const SETTINGS_HOOKS = path.join(
   __dirname, '..', 'governance', 'templates', 'global', 'settings-hooks.json'
@@ -35,119 +33,7 @@ afterEach(() => {
   tmpDirs = [];
 });
 
-// ─── Describe block 1: workflow guard multi-scenario enforcement ───────────
-
-describe('workflow guard multi-scenario enforcement', () => {
-  it('detects sequential edits to multiple files in same session', () => {
-    const tmpDir = trackTmp(createTempWithConfig({ hooks: { workflow_guard: true } }));
-    const opts = { cwd: tmpDir };
-
-    // First write — outside .planning/
-    const r1 = runHook(WORKFLOW_GUARD, {
-      tool_name: 'Write',
-      tool_input: { file_path: path.join(tmpDir, 'src', 'file-a.js'), content: 'a' },
-      cwd: tmpDir,
-    }, opts);
-    assert.equal(r1.exitCode, 0);
-    const out1 = JSON.parse(r1.stdout);
-    assert.ok(
-      out1.hookSpecificOutput?.additionalContext.includes('WORKFLOW ADVISORY'),
-      'first file should produce advisory'
-    );
-
-    // Second write — different file, also outside .planning/
-    const r2 = runHook(WORKFLOW_GUARD, {
-      tool_name: 'Write',
-      tool_input: { file_path: path.join(tmpDir, 'src', 'file-b.js'), content: 'b' },
-      cwd: tmpDir,
-    }, opts);
-    assert.equal(r2.exitCode, 0);
-    const out2 = JSON.parse(r2.stdout);
-    assert.ok(
-      out2.hookSpecificOutput?.additionalContext.includes('WORKFLOW ADVISORY'),
-      'second file should also produce advisory (stateless hook)'
-    );
-  });
-
-  it('produces advisory only for blocked paths in mixed sequence', () => {
-    const tmpDir = trackTmp(createTempWithConfig({ hooks: { workflow_guard: true } }));
-    const opts = { cwd: tmpDir };
-
-    // Allowed: .planning/STATE.md
-    const r1 = runHook(WORKFLOW_GUARD, {
-      tool_name: 'Write',
-      tool_input: { file_path: path.join(tmpDir, '.planning', 'STATE.md'), content: '# State' },
-      cwd: tmpDir,
-    }, opts);
-    assert.equal(r1.exitCode, 0);
-    assert.equal(r1.stdout.trim(), '', '.planning/ write should be silent');
-
-    // Blocked: src/app.js
-    const r2 = runHook(WORKFLOW_GUARD, {
-      tool_name: 'Write',
-      tool_input: { file_path: path.join(tmpDir, 'src', 'app.js'), content: 'code' },
-      cwd: tmpDir,
-    }, opts);
-    assert.equal(r2.exitCode, 0);
-    assert.notEqual(r2.stdout.trim(), '', 'src/app.js should produce advisory');
-    const out2 = JSON.parse(r2.stdout);
-    assert.ok(out2.hookSpecificOutput?.additionalContext.includes('WORKFLOW ADVISORY'));
-
-    // Allowed: CLAUDE.md
-    const r3 = runHook(WORKFLOW_GUARD, {
-      tool_name: 'Write',
-      tool_input: { file_path: path.join(tmpDir, 'CLAUDE.md'), content: '# CLAUDE.md' },
-      cwd: tmpDir,
-    }, opts);
-    assert.equal(r3.exitCode, 0);
-    assert.equal(r3.stdout.trim(), '', 'CLAUDE.md should be silent');
-  });
-
-  it('advisory output contains file basename', () => {
-    const tmpDir = trackTmp(createTempWithConfig({ hooks: { workflow_guard: true } }));
-    const result = runHook(WORKFLOW_GUARD, {
-      tool_name: 'Write',
-      tool_input: {
-        file_path: path.join(tmpDir, 'src', 'components', 'Dashboard.tsx'),
-        content: 'jsx',
-      },
-      cwd: tmpDir,
-    }, { cwd: tmpDir });
-
-    assert.equal(result.exitCode, 0);
-    const output = JSON.parse(result.stdout);
-    assert.ok(
-      output.hookSpecificOutput?.additionalContext.includes('Dashboard.tsx'),
-      'advisory should contain the file basename'
-    );
-  });
-
-  it('Edit tool triggers same advisory as Write', () => {
-    const tmpDir = trackTmp(createTempWithConfig({ hooks: { workflow_guard: true } }));
-    const result = runHook(WORKFLOW_GUARD, {
-      tool_name: 'Edit',
-      tool_input: {
-        file_path: path.join(tmpDir, 'lib', 'utils.js'),
-        old_string: 'old',
-        new_string: 'new',
-      },
-      cwd: tmpDir,
-    }, { cwd: tmpDir });
-
-    assert.equal(result.exitCode, 0);
-    const output = JSON.parse(result.stdout);
-    assert.ok(
-      output.hookSpecificOutput?.additionalContext.includes('WORKFLOW ADVISORY'),
-      'Edit tool should produce same advisory structure'
-    );
-    assert.ok(
-      output.hookSpecificOutput.additionalContext.includes('utils.js'),
-      'Edit advisory should contain file basename'
-    );
-  });
-});
-
-// ─── Describe block 2: prompt injection guard multi-pattern enforcement ────
+// ─── Describe block 1: prompt injection guard multi-pattern enforcement ────
 
 describe('prompt injection guard multi-pattern enforcement', () => {
   it('detects classic injection in PLAN.md content', () => {

@@ -989,7 +989,6 @@ describe('stale hook filter', () => {
       'gsd-context-monitor.js',
       'gsd-prompt-guard.js',
       'gsd-statusline.js',
-      'gsd-workflow-guard.js',
       'guard-edits-outside-project.js',  // user hook
       'my-custom-hook.js',               // user hook
       'gsd-check-update.js.bak',         // backup file
@@ -1004,7 +1003,6 @@ describe('stale hook filter', () => {
       'gsd-context-monitor.js',
       'gsd-prompt-guard.js',
       'gsd-statusline.js',
-      'gsd-workflow-guard.js',
     ], 'should only include gsd-prefixed .js files');
 
     assert.ok(!filtered.includes('guard-edits-outside-project.js'), 'must not include user hooks');

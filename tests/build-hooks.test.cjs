@@ -64,13 +64,12 @@ describe('build-hooks script', () => {
 
   // ── All hook source files have valid syntax (integration) ──
 
-  it('all 5 hook source files have valid JavaScript syntax', () => {
+  it('all hook source files have valid JavaScript syntax', () => {
     const hookFiles = [
       'gsd-check-update.js',
       'gsd-context-monitor.js',
       'gsd-prompt-guard.js',
       'gsd-statusline.js',
-      'gsd-workflow-guard.js',
     ];
 
     for (const hookFile of hookFiles) {
@@ -118,7 +117,6 @@ describe('build-hooks script', () => {
       'gsd-context-monitor.js',
       'gsd-prompt-guard.js',
       'gsd-statusline.js',
-      'gsd-workflow-guard.js',
     ];
 
     for (const f of expectedFiles) {

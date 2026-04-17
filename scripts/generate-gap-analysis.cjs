@@ -27,7 +27,7 @@ const OPERATIONAL_PATTERNS = [
   'verify.cjs',
   'gsd-tools.cjs',
   'install.js',
-  'gsd-workflow-guard'
+  'gsd-cost-tracker'
 ];
 
 // Shell script inventory (hardcoded mapping per 02-RESEARCH.md Pattern 2)
