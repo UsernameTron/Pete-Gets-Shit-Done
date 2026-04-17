@@ -69,7 +69,7 @@ If a plugin-surface change requires a companion test change or doc update, repor
 </scope_guard>
 
 <project_context>
-Project root: `/Users/cpconnor/projects/Pete-Gets-Shit-Done/get-shit-done`
+Project root: use the current working directory
 
 Before editing, discover context:
 
