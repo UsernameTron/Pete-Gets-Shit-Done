@@ -1,32 +1,32 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: v2.5 complete — maintenance mode
-last_updated: "2026-04-17T23:00:00.000Z"
-last_activity: 2026-04-17 -- v2.5 milestone complete, project in maintenance mode
+milestone: v2.6
+milestone_name: Developer Experience
+status: defining requirements
+last_updated: "2026-04-17T00:00:00.000Z"
+last_activity: 2026-04-17 -- v2.6 Developer Experience milestone started
 progress:
-  total_phases: 7
-  completed_phases: 6
-  total_plans: 17
-  completed_plans: 17
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-16)
+See: .planning/PROJECT.md (updated 2026-04-17)
 
-**Current:** v2.5 Final Documentation Sync — IN PROGRESS
-**Previous:** v2.4 Foundation Hardening (shipped 2026-04-17, PR #1 merged)
+**Current:** v2.6 Developer Experience — DEFINING REQUIREMENTS
+**Previous:** v2.5 Final Documentation Sync (shipped 2026-04-17, PR #2 merged)
 
 ## Current Position
 
-Milestone v2.5 complete. Project in maintenance mode.
-PR #1 merged (v2.4). PR #2 merged (v2.5). All 48 phases shipped across 15 milestones.
-Next: `/gsd:new-milestone` if new work is needed.
-Last activity: 2026-04-17 -- v2.5 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-17 — Milestone v2.6 started
 
 ## Milestone History
 
