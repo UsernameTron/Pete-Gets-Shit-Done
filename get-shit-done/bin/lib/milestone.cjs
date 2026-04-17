@@ -9,6 +9,17 @@ const { extractFrontmatter } = require('./frontmatter.cjs');
 const { writeStateMd, stateReplaceFieldWithFallback } = require('./state.cjs');
 const { requireSafePath } = require('./security.cjs');
 
+/** Cross-device-safe move (falls back to copy+delete on EXDEV). */
+function moveSync(src, dest) {
+  try {
+    fs.renameSync(src, dest);
+  } catch (err) {
+    if (err.code !== 'EXDEV') throw err;
+    fs.cpSync(src, dest, { recursive: true });
+    fs.rmSync(src, { recursive: true, force: true });
+  }
+}
+
 function cmdRequirementsMarkComplete(cwd, reqIdsRaw, raw) {
   if (!reqIdsRaw || reqIdsRaw.length === 0) {
     error('requirement IDs required. Usage: requirements mark-complete REQ-01,REQ-02 or REQ-01 REQ-02');
@@ -170,7 +181,7 @@ function cmdMilestoneComplete(cwd, version, options, raw) {
   // Archive audit file if exists
   const auditFile = path.join(cwd, '.planning', `${version}-MILESTONE-AUDIT.md`);
   if (fs.existsSync(auditFile)) {
-    fs.renameSync(auditFile, path.join(archiveDir, `${version}-MILESTONE-AUDIT.md`));
+    moveSync(auditFile, path.join(archiveDir, `${version}-MILESTONE-AUDIT.md`));
   }
 
   // Create/append MILESTONES.md entry
@@ -222,7 +233,7 @@ function cmdMilestoneComplete(cwd, version, options, raw) {
       let archivedCount = 0;
       for (const dir of phaseDirNames) {
         if (!isDirInMilestone(dir)) continue;
-        fs.renameSync(path.join(phasesDir, dir), path.join(phaseArchiveDir, dir));
+        moveSync(path.join(phasesDir, dir), path.join(phaseArchiveDir, dir));
         archivedCount++;
       }
       phasesArchived = archivedCount > 0;
