@@ -1,0 +1,117 @@
+[
+  {
+    "source": "ignore\\s+(all\\s+)?previous\\s+instructions",
+    "flags": "i",
+    "category": "override"
+  },
+  {
+    "source": "ignore\\s+(all\\s+)?above\\s+instructions",
+    "flags": "i",
+    "category": "override"
+  },
+  {
+    "source": "disregard\\s+(all\\s+)?previous",
+    "flags": "i",
+    "category": "override"
+  },
+  {
+    "source": "forget\\s+(all\\s+)?(your\\s+)?instructions",
+    "flags": "i",
+    "category": "override"
+  },
+  {
+    "source": "override\\s+(system|previous)\\s+(prompt|instructions)",
+    "flags": "i",
+    "category": "override"
+  },
+  {
+    "source": "you\\s+are\\s+now\\s+(?:a|an|the)\\s+",
+    "flags": "i",
+    "category": "impersonation"
+  },
+  {
+    "source": "act\\s+as\\s+(?:a|an|the)\\s+(?!plan|phase|wave)",
+    "flags": "i",
+    "category": "impersonation"
+  },
+  {
+    "source": "pretend\\s+(?:you(?:'re| are)\\s+|to\\s+be\\s+)",
+    "flags": "i",
+    "category": "impersonation"
+  },
+  {
+    "source": "from\\s+now\\s+on,?\\s+you\\s+(?:are|will|should|must)",
+    "flags": "i",
+    "category": "impersonation"
+  },
+  {
+    "source": "(?:print|output|reveal|show|display|repeat)\\s+(?:your\\s+)?(?:system\\s+)?(?:prompt|instructions)",
+    "flags": "i",
+    "category": "extraction"
+  },
+  {
+    "source": "what\\s+(?:are|is)\\s+your\\s+(?:system\\s+)?(?:prompt|instructions)",
+    "flags": "i",
+    "category": "extraction"
+  },
+  {
+    "source": "(?:write|save|output|dump)\\s+(?:your\\s+)?(?:system\\s+)?(?:prompt|instructions|rules)\\s+(?:to|into|in)\\s+",
+    "flags": "i",
+    "category": "extraction"
+  },
+  {
+    "source": "<\\/?(?:system|assistant|human)>",
+    "flags": "i",
+    "category": "delimiter"
+  },
+  {
+    "source": "\\[SYSTEM\\]",
+    "flags": "i",
+    "category": "delimiter"
+  },
+  {
+    "source": "\\[INST\\]",
+    "flags": "i",
+    "category": "delimiter"
+  },
+  {
+    "source": "<<\\s*SYS\\s*>>",
+    "flags": "i",
+    "category": "delimiter"
+  },
+  {
+    "source": "(?:aWdub3Jl|ZG8gbm90|b3ZlcnJpZGU)",
+    "flags": "",
+    "category": "encoded"
+  },
+  {
+    "source": "={3,}\\s*(?:BEGIN|START|NEW)\\s+(?:INSTRUCTION|SYSTEM|PROMPT)",
+    "flags": "i",
+    "category": "instruction_delimiter"
+  },
+  {
+    "source": "^#+\\s*(?:SYSTEM|ASSISTANT|HUMAN)\\s*$",
+    "flags": "im",
+    "category": "markdown_role"
+  },
+  {
+    "source": "(?:ignorar|ignorer|ignorieren)\\s+(?:todas?|toutes?|alle)\\s+(?:las?|les?|die)\\s+(?:instrucciones|instructions|Anweisungen)",
+    "flags": "i",
+    "category": "multilingual"
+  },
+  {
+    "source": "(?:send|post|fetch|curl|wget)\\s+(?:to|from)\\s+https?:\\/\\/",
+    "flags": "i",
+    "category": "exfiltration"
+  },
+  {
+    "source": "(?:base64|btoa|encode)\\s+(?:and\\s+)?(?:send|exfiltrate|output)",
+    "flags": "i",
+    "category": "exfiltration"
+  },
+  {
+    "source": "(?:run|execute|call|invoke)\\s+(?:the\\s+)?(?:bash|shell|exec|spawn)\\s+(?:tool|command)",
+    "flags": "i",
+    "category": "tool_manipulation"
+  }
+]

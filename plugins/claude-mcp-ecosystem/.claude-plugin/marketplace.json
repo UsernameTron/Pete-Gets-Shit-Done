@@ -8,6 +8,11 @@
       "name": "claude-mcp-ecosystem",
       "source": "./",
       "description": "Project agent ecosystem — /prime, /wrap, agent lifecycle (/agents, /agent-setup, /agent-status, /agent-diagnose, /agent-add, /agent-remove, /agent-reset)"
+    },
+    {
+      "name": "claude-code-factory",
+      "source": "../../claude-code-factory",
+      "description": "Extension generation — skills, hooks, agents, plugins, MCP configs, CI/CD pipelines, dev team recipes"
     }
   ]
 }

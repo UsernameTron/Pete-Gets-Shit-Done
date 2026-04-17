@@ -51,7 +51,8 @@ const SCAN_EXTS = new Set(['.md', '.cjs', '.js', '.json']);
 const ALLOWLIST = new Set([
   'get-shit-done/bin/lib/security.cjs',        // The security module itself
   'hooks/gsd-prompt-guard.js',                  // The prompt guard hook
-  'tests/security.test.cjs',                    // Security tests
+  'lib/injection-patterns.json',               // Canonical pattern source
+  'tests/security.test.cjs',                   // Security tests
   'tests/prompt-injection-scan.test.cjs',       // This file
 ]);
 
@@ -319,5 +320,72 @@ Build a JWT-based authentication system with login, logout, and session manageme
 `;
     const result = scanForInjection(clean);
     assert.ok(result.clean, `False positive on clean technical content: ${result.findings.join(', ')}`);
+  });
+});
+
+// ─── Canonical Injection Patterns Validation ────────────────────────────────
+
+describe('canonical injection patterns', () => {
+  const canonicalPath = path.join(PROJECT_ROOT, 'lib', 'injection-patterns.json');
+
+  test('injection-patterns.json exists and contains 23 patterns', () => {
+    assert.ok(fs.existsSync(canonicalPath), 'lib/injection-patterns.json should exist');
+    const patterns = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+    assert.ok(Array.isArray(patterns), 'should be an array');
+    assert.equal(patterns.length, 23, 'should contain 23 patterns');
+  });
+
+  test('all patterns compile to valid RegExp', () => {
+    const patterns = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+    for (const p of patterns) {
+      assert.doesNotThrow(() => new RegExp(p.source, p.flags), `Pattern should compile: ${p.source}`);
+    }
+  });
+
+  test('every pattern has required fields', () => {
+    const patterns = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+    for (const p of patterns) {
+      assert.ok(typeof p.source === 'string' && p.source.length > 0, `source required: ${JSON.stringify(p)}`);
+      assert.ok(typeof p.flags === 'string', `flags required: ${JSON.stringify(p)}`);
+      assert.ok(typeof p.category === 'string' && p.category.length > 0, `category required: ${JSON.stringify(p)}`);
+    }
+  });
+
+  test('security.cjs INJECTION_PATTERNS count matches canonical count', () => {
+    const patterns = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+    assert.equal(INJECTION_PATTERNS.length, patterns.length,
+      'security.cjs should load same count as canonical source');
+  });
+
+  test('canonical set includes all expected categories', () => {
+    const patterns = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+    const categories = new Set(patterns.map(p => p.category));
+    const expected = ['override', 'impersonation', 'extraction', 'delimiter', 'encoded',
+      'instruction_delimiter', 'markdown_role', 'multilingual', 'exfiltration', 'tool_manipulation'];
+    for (const cat of expected) {
+      assert.ok(categories.has(cat), `should include category: ${cat}`);
+    }
+  });
+
+  test('canonical set includes hook-only patterns', () => {
+    const patterns = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+    const sources = patterns.map(p => p.source);
+    assert.ok(sources.some(s => s.includes('aWdub3Jl')), 'should include base64 encoded pattern');
+    assert.ok(sources.some(s => s.includes('BEGIN|START|NEW')), 'should include instruction delimiter pattern');
+    assert.ok(sources.some(s => s.includes('SYSTEM|ASSISTANT|HUMAN')), 'should include markdown role pattern');
+    assert.ok(sources.some(s => s.includes('ignorar|ignorer')), 'should include multilingual pattern');
+  });
+
+  test('canonical set includes lib-only patterns', () => {
+    const patterns = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+    const sources = patterns.map(p => p.source);
+    assert.ok(sources.some(s => s.includes('act\\s+as') && s.includes('plan|phase|wave')),
+      'should include act-as pattern with negative lookahead');
+    assert.ok(sources.some(s => s.includes('what\\s+(?:are|is)\\s+your')),
+      'should include what-are-your extraction pattern');
+    assert.ok(sources.some(s => s.includes('send|post|fetch|curl')),
+      'should include exfiltration pattern');
+    assert.ok(sources.some(s => s.includes('run|execute|call|invoke')),
+      'should include tool manipulation pattern');
   });
 });

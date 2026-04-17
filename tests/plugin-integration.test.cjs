@@ -77,6 +77,35 @@ describe('plugin structure', () => {
     );
   });
 
+  test('marketplace.json registers all local plugins', () => {
+    const marketplacePath = path.join(
+      PLUGINS_DIR,
+      'claude-mcp-ecosystem',
+      '.claude-plugin',
+      'marketplace.json'
+    );
+    assert.ok(fs.existsSync(marketplacePath), 'marketplace.json should exist');
+    const content = fs.readFileSync(marketplacePath, 'utf8');
+    const marketplace = JSON.parse(content);
+    assert.ok(Array.isArray(marketplace.plugins), 'plugins should be an array');
+
+    const pluginNames = marketplace.plugins.map(p => p.name);
+    assert.ok(pluginNames.includes('claude-mcp-ecosystem'), 'marketplace should register claude-mcp-ecosystem');
+    assert.ok(pluginNames.includes('claude-code-factory'), 'marketplace should register claude-code-factory');
+
+    // Validate source paths resolve to existing directories
+    for (const plugin of marketplace.plugins) {
+      const resolvedSource = path.resolve(
+        path.dirname(marketplacePath),
+        plugin.source
+      );
+      assert.ok(
+        fs.existsSync(resolvedSource),
+        `Plugin "${plugin.name}" source path should resolve to existing directory: ${resolvedSource}`
+      );
+    }
+  });
+
   test('no plan.md, build.md, or status.md in claude-mcp-ecosystem commands/', () => {
     const commandsDir = path.join(PLUGINS_DIR, 'claude-mcp-ecosystem', 'commands');
     assert.ok(fs.existsSync(commandsDir), 'commands/ directory should exist');

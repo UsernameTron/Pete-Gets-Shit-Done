@@ -9,6 +9,8 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const canonicalPatterns = require('../lib/injection-patterns.json');
+const pkg = require('../package.json');
 
 const HOOKS_DIR = path.join(__dirname, '..', 'hooks');
 const DIST_DIR = path.join(HOOKS_DIR, 'dist');
@@ -70,7 +72,35 @@ function build() {
     }
 
     console.log(`\x1b[32m✓\x1b[0m Copying ${hook}...`);
-    fs.copyFileSync(src, dest);
+    // Read-transform-write: substitute {{GSD_VERSION}} with real package version
+    let hookContent = fs.readFileSync(src, 'utf8');
+    hookContent = hookContent.replace(/\{\{GSD_VERSION\}\}/g, pkg.version);
+    fs.writeFileSync(dest, hookContent, 'utf8');
+
+    // Inline canonical injection patterns into gsd-prompt-guard.js
+    if (hook === 'gsd-prompt-guard.js') {
+      let content = fs.readFileSync(dest, 'utf8');
+      const beginMarker = '// --- BEGIN_INJECTION_PATTERNS ---';
+      const endMarker = '// --- END_INJECTION_PATTERNS ---';
+      const beginIdx = content.indexOf(beginMarker);
+      const endIdx = content.indexOf(endMarker);
+      if (beginIdx !== -1 && endIdx !== -1) {
+        const lines = canonicalPatterns.map(p => {
+          const flags = p.flags || '';
+          return `  /${p.source}/${flags},`;
+        });
+        const replacement = [
+          beginMarker,
+          'const INJECTION_PATTERNS = [',
+          ...lines,
+          '];',
+          endMarker,
+        ].join('\n');
+        content = content.substring(0, beginIdx) + replacement + content.substring(endIdx + endMarker.length);
+        fs.writeFileSync(dest, content, 'utf8');
+        console.log(`  -> Inlined ${canonicalPatterns.length} canonical patterns into ${hook}`);
+      }
+    }
   }
 
   if (hasErrors) {
@@ -78,6 +108,7 @@ function build() {
     process.exit(1);
   }
 
+  console.log('  -> Stamped version ' + pkg.version + ' into all hooks');
   console.log('\nBuild complete.');
 }
 
