@@ -1,6 +1,6 @@
 # DevOps Handoff — get-shit-done-cc
 
-> Last verified: 2026-04-13 | Version: 1.30.0 | Milestone: v2.3
+> Last verified: 2026-04-17 | Version: 1.30.0 | Milestone: v2.5
 
 ---
 
@@ -43,8 +43,8 @@ The installer (`bin/install.js`) copies the following into the user's Claude Cod
 
 | Component | Destination | Contents |
 |-----------|-------------|----------|
-| Commands | `~/.claude/get-shit-done/commands/` | 61 GSD slash commands |
-| Agents | `~/.claude/get-shit-done/agents/` | 16 specialized agent definitions |
+| Commands | `~/.claude/get-shit-done/commands/` | 63 GSD slash commands |
+| Agents | `~/.claude/get-shit-done/agents/` | 17 specialized agent definitions |
 | Hooks | `~/.claude/get-shit-done/hooks/` | 7 execution hooks (bundled JS) |
 | Workflows | `~/.claude/get-shit-done/workflows/` | Orchestration templates |
 | Governance | `~/.claude/get-shit-done/governance/` | CLAUDE.md template, 10 governance hooks |
@@ -282,7 +282,7 @@ Added in milestone v2.3 (2026-04-13):
 | Item | Status | Details |
 |------|--------|---------|
 | CLAUDE.md Phase 3 quality gates | Resolved (v2.0) | Updated to reference `gsd-verifier` with scope parameters |
-| Stale agent references | Resolved (v1.9 Phase 28) | All agent files updated to use current names; 16 active agents as of v2.3 |
+| Stale agent references | Resolved (v1.9 Phase 28) | All agent files updated to use current names; 17 active agents as of v2.5 |
 | CI/CD pipeline | Deferred | No automated test/publish pipeline; appropriate for current project stage |
 
 For full tech debt tracking, see `.planning/PROJECT.md`.
