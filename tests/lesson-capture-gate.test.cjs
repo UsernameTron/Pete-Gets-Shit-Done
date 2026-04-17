@@ -7,7 +7,7 @@ const path = require('path');
 const os = require('os');
 const { spawnSync } = require('child_process');
 
-const HOOK_PATH = path.resolve(os.homedir(), '.claude', 'hooks', 'lesson-capture-gate.cjs');
+const HOOK_PATH = path.resolve(__dirname, '..', '.claude', 'hooks', 'lesson-capture-gate.cjs');
 const {
   stripCode,
   countSignals,

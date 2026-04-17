@@ -8,17 +8,6 @@ const { escapeRegex, loadConfig, normalizePhaseName, matchesPhaseDir, comparePha
 const { extractFrontmatter } = require('./frontmatter.cjs');
 const { writeStateMd, stateExtractField, stateReplaceField, stateReplaceFieldWithFallback } = require('./state.cjs');
 
-/** Cross-device-safe move (falls back to copy+delete on EXDEV). */
-function moveSync(src, dest) {
-  try {
-    fs.renameSync(src, dest);
-  } catch (err) {
-    if (err.code !== 'EXDEV') throw err;
-    fs.cpSync(src, dest, { recursive: true });
-    fs.rmSync(src, { recursive: true, force: true });
-  }
-}
-
 function cmdPhasesList(cwd, options, raw) {
   const phasesDir = path.join(planningDir(cwd), 'phases');
   const { type, phase, includeArchived } = options;
@@ -490,12 +479,12 @@ function renameDecimalPhases(phasesDir, baseInt, removedDecimal) {
     const oldPhaseId = `${baseInt}.${item.oldDecimal}`;
     const newPhaseId = `${baseInt}.${newDecimal}`;
     const newDirName = `${baseInt}.${newDecimal}-${item.slug}`;
-    moveSync(path.join(phasesDir, item.dir), path.join(phasesDir, newDirName));
+    fs.renameSync(path.join(phasesDir, item.dir), path.join(phasesDir, newDirName));
     renamedDirs.push({ from: item.dir, to: newDirName });
     for (const f of fs.readdirSync(path.join(phasesDir, newDirName))) {
       if (f.includes(oldPhaseId)) {
         const newFileName = f.replace(oldPhaseId, newPhaseId);
-        moveSync(path.join(phasesDir, newDirName, f), path.join(phasesDir, newDirName, newFileName));
+        fs.renameSync(path.join(phasesDir, newDirName, f), path.join(phasesDir, newDirName, newFileName));
         renamedFiles.push({ from: f, to: newFileName });
       }
     }
@@ -530,12 +519,12 @@ function renameIntegerPhases(phasesDir, removedInt) {
     const oldPrefix = `${oldPadded}${letterSuffix}${decimalSuffix}`;
     const newPrefix = `${newPadded}${letterSuffix}${decimalSuffix}`;
     const newDirName = `${newPrefix}-${item.slug}`;
-    moveSync(path.join(phasesDir, item.dir), path.join(phasesDir, newDirName));
+    fs.renameSync(path.join(phasesDir, item.dir), path.join(phasesDir, newDirName));
     renamedDirs.push({ from: item.dir, to: newDirName });
     for (const f of fs.readdirSync(path.join(phasesDir, newDirName))) {
       if (f.startsWith(oldPrefix)) {
         const newFileName = newPrefix + f.slice(oldPrefix.length);
-        moveSync(path.join(phasesDir, newDirName, f), path.join(phasesDir, newDirName, newFileName));
+        fs.renameSync(path.join(phasesDir, newDirName, f), path.join(phasesDir, newDirName, newFileName));
         renamedFiles.push({ from: f, to: newFileName });
       }
     }
