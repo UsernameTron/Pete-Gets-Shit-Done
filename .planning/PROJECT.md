@@ -41,7 +41,7 @@ No active code requirements. Project is in maintenance mode as of v2.5.
 - PLUG-01: claude-code-factory registered in marketplace.json with validated source path resolution and integration test
 - SECPAT-01: Merged diverged hook (18) and library (18) injection patterns into a 23-pattern canonical superset with build-time inlining
 - HOOK-04: build-hooks.js now stamps real package version (1.30.0) into all 7 dist hooks, making staleness detection operative
-- DOC-01: Agent/command counts corrected (18 agents, 63 commands)
+- DOC-01: Agent/command counts corrected (17 agents, 63 commands)
 - COV-01: Branch coverage raised for workstream.cjs and build-hooks.js above 80%
 - LINK-01: Command/workflow linkage drift resolved
 - REF-01: crew.md hardcoded project path fixed for portability
@@ -53,7 +53,7 @@ No active code requirements. Project is in maintenance mode as of v2.5.
 | PLUG-01 | Register claude-code-factory in marketplace.json and load from live source | Phase 45 | Shipped |
 | SECPAT-01 | Create shared injection pattern file consumed by both gsd-prompt-guard.js and security.cjs | Phase 45 | Shipped |
 | HOOK-04 | Implement {{GSD_VERSION}} substitution in build-hooks.js or remove placeholder from all 7 hooks | Phase 45 | Shipped |
-| DOC-01 | Update README.md and CLAUDE.md agent/command counts (16→18 agents, 61→63 commands) | Phase 46 | Shipped |
+| DOC-01 | Update README.md and CLAUDE.md agent/command counts (16→17 agents, 61→63 commands) | Phase 46 | Shipped |
 | COV-01 | Raise branch coverage for workstream.cjs and build-hooks.js above 80% | Phase 46 | Shipped |
 | LINK-01 | Resolve command/workflow linkage drift (11 unlinked commands, 5 orphaned workflows) | Phase 46 | Shipped |
 | REF-01 | Fix crew.md hardcoded project path for portability | Phase 46 | Shipped |
