@@ -1,3 +1,4 @@
+<!-- orphan-workflow: not referenced by any command or workflow as of v2.4. Retained for potential future use. If still orphaned at v2.5, consider removal. -->
 <purpose>
 Execute discovery at the appropriate depth level.
 Produces DISCOVERY.md (for Level 2-3) that informs PLAN.md creation.

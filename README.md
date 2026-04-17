@@ -56,7 +56,7 @@ GSD is two layers in one install:
 
 | Layer | What it does | Components |
 |-------|-------------|------------|
-| Execution Engine | discuss → plan → execute → verify → ship | 61 commands, 16 agents, 7 hooks, wave-based parallel execution |
+| Execution Engine | discuss → plan → execute → verify → ship | 63 commands, 18 agents, 7 hooks, wave-based parallel execution |
 | Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (45 skills, 10 subagents), 7 reference docs |
 | Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | classify.cjs, model-profiles.cjs, history.cjs — all opt-in, off by default |
 
@@ -66,8 +66,8 @@ The full inventory:
 
 | Metric | Count |
 |--------|-------|
-| GSD commands | 61 |
-| Specialized agents | 16 |
+| GSD commands | 63 |
+| Specialized agents | 18 |
 | Runtime hooks | 16 (7 execution + 10 governance, 1 shared) |
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
@@ -215,7 +215,7 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 
 ## Command Syntax
 
-Before we get into the 61 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
+Before we get into the 63 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
 
 | Runtime | Pattern | Example |
 |---------|---------|---------|
@@ -1190,7 +1190,7 @@ The governance template (`governance/templates/global/CLAUDE.md`) defines:
 
 All slash commands available across the three plugin systems.
 
-### GSD Commands (61)
+### GSD Commands (63)
 
 | Command | Description |
 |---------|-------------|
@@ -1198,6 +1198,8 @@ All slash commands available across the three plugin systems.
 | `/gsd:add-phase` | Add phase to end of current milestone in roadmap |
 | `/gsd:add-tests` | Generate tests for a completed phase based on UAT criteria and implementation |
 | `/gsd:add-todo` | Capture idea or task as todo from current conversation context |
+| `/gsd:audit-agents` | Audit the GSD agent ecosystem for frontmatter integrity, tool/permission mismatches, and hygiene gaps |
+| `/gsd:audit-deps` | Audit package dependencies for CVEs, staleness, and license issues |
 | `/gsd:audit-milestone` | Audit milestone completion against original intent before archiving |
 | `/gsd:audit-uat` | Cross-phase audit of all outstanding UAT and verification items |
 | `/gsd:autonomous` | Run all remaining phases autonomously — discuss, plan, execute per phase |

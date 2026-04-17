@@ -1,6 +1,7 @@
 ---
 description: Manage parallel workstreams — list, create, switch, status, progress, complete, and resume
 ---
+<!-- workflow-exemption: inline — workstream CRUD delegates to lib/workstream.cjs, no workflow needed -->
 
 # /gsd:workstreams
 

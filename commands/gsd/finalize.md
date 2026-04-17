@@ -11,6 +11,7 @@ allowed-tools:
   - Write
   - Task
 ---
+<!-- workflow-exemption: inline — orchestrates existing commands (complete-milestone, cleanup, stats, session-report) inline -->
 
 <objective>
 Close out a completed project or milestone in a single pass. Runs the full verification → archive → report → push → confirm loop so nothing is left dangling.

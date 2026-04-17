@@ -1,3 +1,4 @@
+<!-- orphan-workflow: referenced only by templates (phase-prompt.md, roadmap.md), not by any command or runtime workflow as of v2.4. Retained for template compatibility. -->
 <purpose>
 Verify phase goal achievement through goal-backward analysis. Check that the codebase delivers what the phase promised, not just that tasks completed.
 

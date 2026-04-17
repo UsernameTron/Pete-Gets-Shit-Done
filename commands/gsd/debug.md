@@ -8,6 +8,7 @@ allowed-tools:
   - Task
   - AskUserQuestion
 ---
+<!-- workflow-exemption: inline — persistent debug state managed entirely within command -->
 
 <objective>
 Debug issues using scientific method with subagent isolation.

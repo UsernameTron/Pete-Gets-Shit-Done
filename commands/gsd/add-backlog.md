@@ -7,6 +7,7 @@ allowed-tools:
   - Write
   - Bash
 ---
+<!-- workflow-exemption: inline — simple file append, no orchestration needed -->
 
 <objective>
 Add a backlog item to the roadmap using 999.x numbering. Backlog items are

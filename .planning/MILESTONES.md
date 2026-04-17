@@ -1,5 +1,17 @@
 # Milestones
 
+## v2.4 Foundation Hardening (Shipped: 2026-04-17)
+
+**Phases completed:** 2 phases, 6 plans, 8 tasks
+
+**Key accomplishments:**
+
+- Registered claude-code-factory in marketplace.json with validated source path resolution and integration test
+- Merged diverged hook (18) and library (18) injection patterns into a 23-pattern canonical superset with build-time inlining
+- build-hooks.js now stamps real package version (1.30.0) into all 7 dist hooks, making staleness detection operative
+
+---
+
 ## v2.3 Hook Ecosystem + Security Guardian + Agent Quality (Shipped: 2026-04-15)
 
 **Phases completed:** 4 phases (41-44), 5 plans, 8/8 requirements satisfied

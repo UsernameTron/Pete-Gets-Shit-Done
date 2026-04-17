@@ -6,6 +6,7 @@ allowed-tools:
   - Write
   - Bash
 ---
+<!-- workflow-exemption: inline — backlog review and promotion is self-contained -->
 
 <objective>
 Review all 999.x backlog items and optionally promote them into the active

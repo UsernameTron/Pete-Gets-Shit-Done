@@ -10,6 +10,7 @@ allowed-tools:
   - Write
   - Task
 ---
+<!-- workflow-exemption: inline — agent scanning and display logic is self-contained -->
 
 <objective>
 Show the full GSD agent roster with capabilities, command mappings, and spawning relationships. Optionally assess the team for gaps, overlaps, and quality issues.
@@ -30,7 +31,7 @@ Arguments: $ARGUMENTS (optional)
 - `--assess` → Self-assessment mode (diagnostic only)
 - `--recommend "description"` → Task-to-agent recommendation
 
-**Agent directory:** Read all .md files in the project's `agents/` directory. Fall back to `~/.claude/agents/` or `~/projects/Pete-Gets-Shit-Done/agents/` if no local agents/ exists.
+**Agent directory:** Read all .md files in the project's `agents/` directory. Fall back to `~/.claude/agents/` if no local agents/ exists. For GSD plugin agents, resolve via the get-shit-done plugin install path (the directory containing this skill file).
 
 **Workflow directory:** Cross-reference `~/.claude/get-shit-done/workflows/*.md` to find which workflows spawn which agents.
 </context>

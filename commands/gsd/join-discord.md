@@ -2,6 +2,7 @@
 name: gsd:join-discord
 description: Join the GSD Discord community
 ---
+<!-- workflow-exemption: inline — single URL display, no logic -->
 
 <objective>
 Display the Discord invite link for the GSD community server.

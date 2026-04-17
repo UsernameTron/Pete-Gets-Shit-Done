@@ -10,6 +10,7 @@ allowed-tools:
   - Write
   - Task
 ---
+<!-- workflow-exemption: inline — session context injection is self-contained -->
 
 <objective>
 Single-command session boot that loads project state AND injects the relevant Claude Code design patterns from KB v2.1. Replaces running `/prime` then manually pasting a KB prompt.

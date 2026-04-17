@@ -9,6 +9,7 @@ allowed-tools:
   - Grep
   - Write
 ---
+<!-- workflow-exemption: inline — cross-project scanning is self-contained -->
 
 <objective>
 Scan all projects in a directory, read their GSD state, check git health, and present a ranked dashboard showing which projects need attention. Replaces manually cd-ing into each project to check status.

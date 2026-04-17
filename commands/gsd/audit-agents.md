@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Task
 ---
+<!-- workflow-exemption: inline — orchestration is simple enough to live inline (spawns gsd-ecosystem-auditor agent directly) -->
 <objective>
 Run a full ecosystem audit across every GSD agent in `./agents/` (frontmatter schema, tool/permission consistency, P0 hygiene compliance, description quality, naming collisions, install drift between repo and `~/.claude/agents/`). Produces a BLOCK/FLAG/PASS verdict with a committable report at `.planning/ecosystem/ECOSYSTEM-REPORT.md`.
 

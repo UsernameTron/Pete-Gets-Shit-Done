@@ -7,6 +7,7 @@ allowed-tools:
   - Write
   - Bash
 ---
+<!-- workflow-exemption: inline — thread CRUD is self-contained -->
 
 <objective>
 Create, list, or resume persistent context threads. Threads are lightweight

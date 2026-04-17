@@ -511,3 +511,815 @@ describe('path traversal rejection', () => {
     }
   });
 });
+
+// ─── migrateToWorkstreams direct coverage ────────────────────────────────────
+
+describe('migrateToWorkstreams validation', () => {
+  const { migrateToWorkstreams } = require('../get-shit-done/bin/lib/workstream.cjs');
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), '# Roadmap\n');
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '# State\n');
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('rejects empty workstream name', () => {
+    assert.throws(() => migrateToWorkstreams(tmpDir, ''), /Invalid workstream name/);
+  });
+
+  test('rejects workstream name with forward slash', () => {
+    assert.throws(() => migrateToWorkstreams(tmpDir, 'a/b'), /Invalid workstream name/);
+  });
+
+  test('rejects workstream name with backslash', () => {
+    assert.throws(() => migrateToWorkstreams(tmpDir, 'a\\b'), /Invalid workstream name/);
+  });
+
+  test('rejects dot as workstream name', () => {
+    assert.throws(() => migrateToWorkstreams(tmpDir, '.'), /Invalid workstream name/);
+  });
+
+  test('rejects double-dot as workstream name', () => {
+    assert.throws(() => migrateToWorkstreams(tmpDir, '..'), /Invalid workstream name/);
+  });
+
+  test('throws when already in workstream mode', () => {
+    const wsRoot = path.join(tmpDir, '.planning', 'workstreams');
+    fs.mkdirSync(wsRoot, { recursive: true });
+    try {
+      assert.throws(() => migrateToWorkstreams(tmpDir, 'new-ws'), /Already in workstream mode/);
+    } finally {
+      fs.rmdirSync(wsRoot);
+    }
+  });
+
+  test('migrates flat layout to named workstream', () => {
+    const result = migrateToWorkstreams(tmpDir, 'main-work');
+    assert.equal(result.migrated, true);
+    assert.equal(result.workstream, 'main-work');
+    assert.ok(result.files_moved.includes('ROADMAP.md'), 'should move ROADMAP.md');
+    assert.ok(result.files_moved.includes('STATE.md'), 'should move STATE.md');
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'main-work');
+    assert.ok(fs.existsSync(path.join(wsDir, 'ROADMAP.md')));
+    assert.ok(fs.existsSync(path.join(wsDir, 'STATE.md')));
+  });
+});
+
+// ─── migrateToWorkstreams rollback on rename failure ─────────────────────────
+
+describe('migrateToWorkstreams rollback on rename failure', () => {
+  const { migrateToWorkstreams } = require('../get-shit-done/bin/lib/workstream.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), '# Roadmap\n');
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '# State\n');
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases', '01-setup'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'phases', '01-setup', 'PLAN.md'), '# Plan\n');
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('rolls back moved files on rename failure (lines 55-61)', () => {
+    const origRename = fs.renameSync;
+    let forwardCallCount = 0;
+    fs.renameSync = function (src, dest) {
+      // Only count forward migration renames (baseDir → wsDir)
+      const isForwardMigration = src.includes('.planning' + path.sep) &&
+        dest.includes('workstreams' + path.sep + 'rollback-ws');
+      if (isForwardMigration) {
+        forwardCallCount++;
+        // Let first two forward renames succeed, fail on third (phases/)
+        if (forwardCallCount >= 3) {
+          throw new Error('EXDEV: cross-device link not permitted');
+        }
+      }
+      return origRename(src, dest);
+    };
+
+    try {
+      assert.throws(
+        () => migrateToWorkstreams(tmpDir, 'rollback-ws'),
+        /EXDEV/
+      );
+      assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'ROADMAP.md')),
+        'ROADMAP.md should be restored after rollback');
+      assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'STATE.md')),
+        'STATE.md should be restored after rollback');
+      assert.ok(!fs.existsSync(path.join(tmpDir, '.planning', 'workstreams')),
+        'workstreams/ dir should be removed after rollback');
+    } finally {
+      fs.renameSync = origRename;
+    }
+  });
+});
+
+// ─── getOtherActiveWorkstreams direct coverage ───────────────────────────────
+
+describe('getOtherActiveWorkstreams edge cases', () => {
+  const { getOtherActiveWorkstreams } = require('../get-shit-done/bin/lib/workstream.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('returns empty array when workstreams directory does not exist', () => {
+    const result = getOtherActiveWorkstreams(tmpDir, 'any');
+    assert.deepEqual(result, []);
+  });
+
+  test('returns empty array when workstreams directory is empty', () => {
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'workstreams'), { recursive: true });
+    const result = getOtherActiveWorkstreams(tmpDir, 'any');
+    assert.deepEqual(result, []);
+  });
+
+  test('excludes the named workstream from results', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'alpha');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** executing\n');
+    const result = getOtherActiveWorkstreams(tmpDir, 'alpha');
+    assert.deepEqual(result, []);
+  });
+
+  test('returns other active workstreams excluding the specified one', () => {
+    for (const ws of ['alpha', 'beta']) {
+      const wsDir = path.join(tmpDir, '.planning', 'workstreams', ws);
+      fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+      fs.writeFileSync(path.join(wsDir, 'STATE.md'), `# State\n**Status:** executing\n**Current Phase:** 1\n`);
+    }
+    const result = getOtherActiveWorkstreams(tmpDir, 'alpha');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].name, 'beta');
+    assert.equal(result[0].status, 'executing');
+  });
+
+  test('excludes workstreams with "Milestone Complete" status', () => {
+    const ws1Dir = path.join(tmpDir, '.planning', 'workstreams', 'done');
+    const ws2Dir = path.join(tmpDir, '.planning', 'workstreams', 'active');
+    fs.mkdirSync(path.join(ws1Dir, 'phases'), { recursive: true });
+    fs.mkdirSync(path.join(ws2Dir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(ws1Dir, 'STATE.md'), '# State\n**Status:** Milestone Complete\n');
+    fs.writeFileSync(path.join(ws2Dir, 'STATE.md'), '# State\n**Status:** executing\n');
+    const result = getOtherActiveWorkstreams(tmpDir, 'other');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].name, 'active');
+  });
+
+  test('excludes workstreams with "archived" status', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'old-work');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** archived\n');
+    const result = getOtherActiveWorkstreams(tmpDir, 'other');
+    assert.deepEqual(result, []);
+  });
+
+  test('includes workstreams with unknown status (no STATE.md)', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'mystery');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    const result = getOtherActiveWorkstreams(tmpDir, 'other');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].name, 'mystery');
+    assert.equal(result[0].status, 'unknown');
+  });
+
+  test('includes workstreams with unrecognized status', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'in-limbo');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** planning\n');
+    const result = getOtherActiveWorkstreams(tmpDir, 'other');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].name, 'in-limbo');
+    assert.equal(result[0].status, 'planning');
+  });
+
+  test('counts completed phases within active workstream', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'tracker');
+    const phase1Dir = path.join(wsDir, 'phases', '01-setup');
+    const phase2Dir = path.join(wsDir, 'phases', '02-build');
+    fs.mkdirSync(phase1Dir, { recursive: true });
+    fs.mkdirSync(phase2Dir, { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** executing\n**Current Phase:** 2\n');
+    fs.writeFileSync(path.join(phase1Dir, '01-01-PLAN.md'), '# Plan\n');
+    fs.writeFileSync(path.join(phase1Dir, '01-01-SUMMARY.md'), '# Summary\n');
+    fs.writeFileSync(path.join(phase2Dir, '02-01-PLAN.md'), '# Plan\n');
+    const result = getOtherActiveWorkstreams(tmpDir, 'other');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].phases, '1/2', 'should show 1 of 2 phases complete');
+  });
+
+  test('non-directory entries in workstreams/ are ignored', () => {
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'workstreams'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'workstreams', 'README.md'), '# Workstreams\n');
+    const result = getOtherActiveWorkstreams(tmpDir, 'other');
+    assert.deepEqual(result, []);
+  });
+});
+
+// ─── cmdWorkstreamComplete error coverage ────────────────────────────────────
+
+describe('cmdWorkstreamComplete not_found path', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'workstreams'), { recursive: true });
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('returns not_found for non-existent workstream', () => {
+    const result = runGsdTools(['workstream', 'complete', 'does-not-exist', '--raw'], tmpDir);
+    assert.ok(result.success);
+    const data = JSON.parse(result.output);
+    assert.equal(data.completed, false);
+    assert.equal(data.error, 'not_found');
+  });
+});
+
+describe('cmdWorkstreamComplete archive suffix collision', () => {
+  let tmpDir;
+  const today = new Date().toISOString().split('T')[0];
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('uses suffix when archive path already exists', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'target');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** Complete\n');
+    const milestonesDir = path.join(tmpDir, '.planning', 'milestones');
+    fs.mkdirSync(milestonesDir, { recursive: true });
+    fs.mkdirSync(path.join(milestonesDir, `ws-target-${today}`), { recursive: true });
+    const result = runGsdTools(['workstream', 'complete', 'target', '--raw'], tmpDir);
+    assert.ok(result.success, `complete failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.equal(data.completed, true);
+    assert.ok(data.archived_to.includes(`ws-target-${today}-1`),
+      `should use suffix-1 path, got: ${data.archived_to}`);
+  });
+
+  test('increments suffix when multiple collisions exist', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'multi');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** Complete\n');
+    const milestonesDir = path.join(tmpDir, '.planning', 'milestones');
+    fs.mkdirSync(path.join(milestonesDir, `ws-multi-${today}`), { recursive: true });
+    fs.mkdirSync(path.join(milestonesDir, `ws-multi-${today}-1`), { recursive: true });
+    const result = runGsdTools(['workstream', 'complete', 'multi', '--raw'], tmpDir);
+    assert.ok(result.success, `complete with double collision failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.equal(data.completed, true);
+    assert.ok(data.archived_to.includes(`ws-multi-${today}-2`),
+      `should use suffix-2 path, got: ${data.archived_to}`);
+  });
+});
+
+describe('cmdWorkstreamComplete archive failure rollback', () => {
+  const { cmdWorkstreamComplete } = require('../get-shit-done/bin/lib/workstream.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('returns archive_failed when rename fails', () => {
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'fail-ws');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** Complete\n');
+
+    const origRename = fs.renameSync;
+    fs.renameSync = (src, dest) => {
+      if (src.includes('STATE.md') || src.includes('phases')) {
+        throw new Error('EXDEV: cross-device link not permitted');
+      }
+      return origRename(src, dest);
+    };
+
+    try {
+      cmdWorkstreamComplete(tmpDir, 'fail-ws', {}, true);
+    } catch {
+      // cmdWorkstreamComplete catches internally
+    } finally {
+      fs.renameSync = origRename;
+    }
+
+    assert.ok(fs.existsSync(wsDir), 'workstream dir should still exist after failed archive');
+  });
+});
+
+// ─── cmdWorkstreamCreate branch coverage ──────────────────────────────────
+
+describe('cmdWorkstreamCreate auto-migration without migrateName', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'PROJECT.md'), '# Project\n');
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '# State\n**Status:** In progress\n');
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('auto-migrates existing work using getMilestoneInfo fallback name', () => {
+    const result = runGsdTools(['workstream', 'create', 'new-feature', '--raw'], tmpDir);
+    assert.ok(result.success, `create failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.created, true);
+    assert.ok(data.migration, 'should include migration info');
+    // getMilestoneInfo returns { name: 'milestone' } when no ROADMAP.md exists
+    assert.strictEqual(data.migration.workstream, 'milestone');
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'workstreams', 'milestone', 'STATE.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'workstreams', 'new-feature', 'STATE.md')));
+  });
+});
+
+describe('cmdWorkstreamCreate flat mode no existing work', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'PROJECT.md'), '# Project\n');
+    fs.rmdirSync(path.join(tmpDir, '.planning', 'phases'));
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('creates wsRoot without migration when no existing work', () => {
+    const result = runGsdTools(['workstream', 'create', 'fresh-start', '--raw'], tmpDir);
+    assert.ok(result.success, `create failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.created, true);
+    assert.strictEqual(data.migration, null);
+    assert.ok(fs.existsSync(path.join(tmpDir, '.planning', 'workstreams', 'fresh-start', 'STATE.md')));
+  });
+});
+
+// ─── cmdWorkstreamList phase counting ───────────────────────────────────────
+
+describe('cmdWorkstreamList with phase plan/summary counting', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'counted');
+    const phase1 = path.join(wsDir, 'phases', '01-setup');
+    const phase2 = path.join(wsDir, 'phases', '02-build');
+    fs.mkdirSync(phase1, { recursive: true });
+    fs.mkdirSync(phase2, { recursive: true });
+    fs.writeFileSync(path.join(phase1, '01-01-PLAN.md'), '# Plan\n');
+    fs.writeFileSync(path.join(phase1, '01-01-SUMMARY.md'), '# Summary\n');
+    fs.writeFileSync(path.join(phase2, '02-01-PLAN.md'), '# Plan\n');
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** executing\n**Current Phase:** 2\n');
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('counts completed phases correctly in list output', () => {
+    const result = runGsdTools(['workstream', 'list', '--raw'], tmpDir);
+    assert.ok(result.success, `list failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.mode, 'workstream');
+    assert.strictEqual(data.count, 1);
+    const ws = data.workstreams[0];
+    assert.strictEqual(ws.name, 'counted');
+    assert.strictEqual(ws.phase_count, 2);
+    assert.strictEqual(ws.completed_phases, 1);
+  });
+});
+
+// ─── cmdWorkstreamCreate validation branches ─────────────────────────────────
+
+describe('cmdWorkstreamCreate validation', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'PROJECT.md'), '# Project\n');
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('errors when no name provided', () => {
+    // Line 70-72: !name branch
+    const result = runGsdTools(['workstream', 'create', '--raw'], tmpDir);
+    assert.ok(!result.success, 'should fail without name');
+  });
+
+  test('errors when name produces empty slug', () => {
+    // Line 75-77: !slug branch — name with only special chars
+    const result = runGsdTools(['workstream', 'create', '!!!', '--raw'], tmpDir);
+    assert.ok(!result.success, 'should fail with invalid name');
+  });
+});
+
+describe('cmdWorkstreamCreate without .planning directory', () => {
+  const { createTempDir } = require('./helpers.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempDir();
+    // No .planning/ directory — triggers line 80-82
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('errors when .planning/ does not exist', () => {
+    const result = runGsdTools(['workstream', 'create', 'test-ws', '--raw'], tmpDir);
+    assert.ok(!result.success, 'should fail without .planning/');
+  });
+});
+
+// ─── cmdWorkstreamStatus validation branches ─────────────────────────────────
+
+describe('cmdWorkstreamStatus validation', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('errors when no name provided', () => {
+    // Line 223: !name branch
+    const result = runGsdTools(['workstream', 'status', '--raw'], tmpDir);
+    assert.ok(!result.success, 'should fail without name');
+  });
+
+  test('errors with traversal name', () => {
+    // Line 224: invalid name branch
+    const result = runGsdTools(['workstream', 'status', '../evil', '--raw'], tmpDir);
+    assert.ok(!result.success, 'should fail with traversal name');
+  });
+});
+
+// ─── cmdWorkstreamComplete validation branches ───────────────────────────────
+
+describe('cmdWorkstreamComplete validation', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('errors when no name provided', () => {
+    // Line 280: !name branch
+    const result = runGsdTools(['workstream', 'complete', '--raw'], tmpDir);
+    assert.ok(!result.success, 'should fail without name');
+  });
+
+  test('errors with traversal name', () => {
+    // Line 281: invalid name branch
+    const result = runGsdTools(['workstream', 'complete', '../evil', '--raw'], tmpDir);
+    assert.ok(!result.success, 'should fail with traversal name');
+  });
+});
+
+// ─── cmdWorkstreamList non-directory entry branch ────────────────────────────
+
+describe('cmdWorkstreamList ignores non-directory entries', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'workstreams'), { recursive: true });
+    // Put a file (not directory) in the workstreams dir — line 183 branch
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'workstreams', 'README.md'), '# Info\n');
+    // Also a real workstream so the loop runs
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'real');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** active\n');
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('skips file entries and lists only directory entries', () => {
+    const result = runGsdTools(['workstream', 'list', '--raw'], tmpDir);
+    assert.ok(result.success, `list failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.count, 1);
+    assert.strictEqual(data.workstreams[0].name, 'real');
+  });
+});
+
+// ─── cmdWorkstreamList workstream without STATE.md ───────────────────────────
+
+describe('cmdWorkstreamList workstream without STATE.md', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'no-state');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    // No STATE.md — triggers catch on lines 203-205
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('shows unknown status for workstream without STATE.md', () => {
+    const result = runGsdTools(['workstream', 'list', '--raw'], tmpDir);
+    assert.ok(result.success, `list failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.count, 1);
+    assert.strictEqual(data.workstreams[0].status, 'unknown');
+    assert.strictEqual(data.workstreams[0].current_phase, null);
+  });
+});
+
+// ─── cmdWorkstreamStatus with phase detail edge cases ────────────────────────
+
+describe('cmdWorkstreamStatus phase detail edge cases', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'detailed');
+    const phase1 = path.join(wsDir, 'phases', '01-setup');
+    const phase2 = path.join(wsDir, 'phases', '02-build');
+    const phase3 = path.join(wsDir, 'phases', '03-test');
+    fs.mkdirSync(phase1, { recursive: true });
+    fs.mkdirSync(phase2, { recursive: true });
+    fs.mkdirSync(phase3, { recursive: true });
+    // Phase 1: complete (plan + summary)
+    fs.writeFileSync(path.join(phase1, '01-01-PLAN.md'), '# Plan\n');
+    fs.writeFileSync(path.join(phase1, '01-01-SUMMARY.md'), '# Summary\n');
+    // Phase 2: in progress (plan only)
+    fs.writeFileSync(path.join(phase2, '02-01-PLAN.md'), '# Plan\n');
+    // Phase 3: pending (no plan, no summary)
+    fs.writeFileSync(path.join(wsDir, 'ROADMAP.md'), '## Roadmap\n');
+    // No STATE.md — triggers catch on line 265
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('returns phase details with correct status per phase', () => {
+    const result = runGsdTools(['workstream', 'status', 'detailed', '--raw'], tmpDir);
+    assert.ok(result.success, `status failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.found, true);
+    assert.strictEqual(data.phase_count, 3);
+    assert.strictEqual(data.completed_phases, 1);
+    // Phase statuses
+    const phase1 = data.phases.find(p => p.directory === '01-setup');
+    const phase2 = data.phases.find(p => p.directory === '02-build');
+    const phase3 = data.phases.find(p => p.directory === '03-test');
+    assert.strictEqual(phase1.status, 'complete');
+    assert.strictEqual(phase2.status, 'in_progress');
+    assert.strictEqual(phase3.status, 'pending');
+    // No STATE.md → stateInfo defaults
+    assert.strictEqual(data.status, undefined);
+  });
+});
+
+// ─── cmdWorkstreamComplete last workstream cleanup ───────────────────────────
+
+describe('cmdWorkstreamComplete reverts to flat when last workstream completed', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'only-one');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** Complete\n');
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('removes workstreams/ dir when no workstreams remain', () => {
+    const result = runGsdTools(['workstream', 'complete', 'only-one', '--raw'], tmpDir);
+    assert.ok(result.success, `complete failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.completed, true);
+    assert.strictEqual(data.reverted_to_flat, true);
+    assert.strictEqual(data.remaining_workstreams, 0);
+    // workstreams/ dir should be gone — line 327
+    assert.ok(!fs.existsSync(path.join(tmpDir, '.planning', 'workstreams')));
+  });
+});
+
+// ─── cmdWorkstreamProgress non-directory entries ─────────────────────────────
+
+describe('cmdWorkstreamProgress skips non-directory entries', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'workstreams'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'workstreams', '.gitkeep'), '');
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'active-ws');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** executing\n**Current Phase:** 1\n');
+    fs.writeFileSync(path.join(wsDir, 'ROADMAP.md'), '## Roadmap\n### Phase 1: Setup\n');
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'active-workstream'), 'active-ws\n');
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('ignores files and reports only directories', () => {
+    const result = runGsdTools(['workstream', 'progress', '--raw'], tmpDir);
+    assert.ok(result.success, `progress failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.count, 1);
+    assert.strictEqual(data.workstreams[0].name, 'active-ws');
+  });
+});
+
+// ─── cmdWorkstreamProgress workstream without ROADMAP.md ─────────────────────
+
+describe('cmdWorkstreamProgress without ROADMAP.md', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'no-roadmap');
+    fs.mkdirSync(path.join(wsDir, 'phases', '01-setup'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'phases', '01-setup', '01-01-PLAN.md'), '# Plan\n');
+    fs.writeFileSync(path.join(wsDir, 'phases', '01-setup', '01-01-SUMMARY.md'), '# Summary\n');
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** executing\n**Current Phase:** 1\n');
+    // No ROADMAP.md — triggers catch on lines 407
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('falls back to phase dir count when no ROADMAP.md', () => {
+    const result = runGsdTools(['workstream', 'progress', '--raw'], tmpDir);
+    assert.ok(result.success, `progress failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.count, 1);
+    const ws = data.workstreams[0];
+    assert.strictEqual(ws.phases, '1/1');
+    assert.strictEqual(ws.progress_percent, 100);
+  });
+});
+
+// ─── cmdWorkstreamProgress workstream without STATE.md ───────────────────────
+
+describe('cmdWorkstreamProgress without STATE.md', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'no-state-ws');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'ROADMAP.md'), '## Roadmap\n### Phase 1: Setup\n');
+    // No STATE.md — triggers catch on lines 412-414
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('shows unknown status when no STATE.md', () => {
+    const result = runGsdTools(['workstream', 'progress', '--raw'], tmpDir);
+    assert.ok(result.success, `progress failed: ${result.error}`);
+    const data = JSON.parse(result.output);
+    assert.strictEqual(data.count, 1);
+    assert.strictEqual(data.workstreams[0].status, 'unknown');
+    assert.strictEqual(data.workstreams[0].current_phase, null);
+  });
+});
+
+// ─── cmdWorkstreamGet mode detection ─────────────────────────────────────────
+
+// ─── cmdWorkstreamCreate migration_failed branch (lines 116-118) ────────────
+
+describe('cmdWorkstreamCreate migration failure via fs stub', () => {
+  const workstreamMod = require('../get-shit-done/bin/lib/workstream.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'PROJECT.md'), '# Project\n');
+    // Existing flat-mode work that triggers migration
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), '# Roadmap\n');
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), '# State\n');
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('returns migration_failed when migrateToWorkstreams throws during create', () => {
+    // Stub renameSync to always fail — this makes migrateToWorkstreams throw
+    // which triggers the catch on lines 116-118 inside cmdWorkstreamCreate
+    const origRename = fs.renameSync;
+    fs.renameSync = () => { throw new Error('EPERM: operation not permitted'); };
+
+    // output() uses fs.writeSync(1, data) — capture fd 1 writes
+    let capturedOutput = null;
+    const origWriteSync = fs.writeSync;
+    fs.writeSync = function (fd, data) {
+      if (fd === 1) { capturedOutput = data; return data.length; }
+      return origWriteSync.apply(fs, arguments);
+    };
+
+    try {
+      workstreamMod.cmdWorkstreamCreate(tmpDir, 'new-ws', { migrateName: 'existing' }, false);
+      assert.ok(capturedOutput, 'should have captured output');
+      const data = JSON.parse(capturedOutput);
+      assert.strictEqual(data.created, false);
+      assert.strictEqual(data.error, 'migration_failed');
+      assert.ok(data.message.includes('EPERM'));
+    } finally {
+      fs.renameSync = origRename;
+      fs.writeSync = origWriteSync;
+    }
+  });
+});
+
+// ─── cmdWorkstreamComplete archive rollback inner catch (lines 314-315) ─────
+
+describe('cmdWorkstreamComplete rollback with inner catch', () => {
+  const workstreamMod = require('../get-shit-done/bin/lib/workstream.cjs');
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    const wsDir = path.join(tmpDir, '.planning', 'workstreams', 'rollback-ws');
+    fs.mkdirSync(path.join(wsDir, 'phases'), { recursive: true });
+    fs.writeFileSync(path.join(wsDir, 'STATE.md'), '# State\n**Status:** Complete\n');
+    fs.writeFileSync(path.join(wsDir, 'extra.md'), '# Extra file\n');
+  });
+
+  afterEach(() => cleanup(tmpDir));
+
+  test('handles rollback renameSync failure gracefully (lines 314-315)', () => {
+    const origRename = fs.renameSync;
+    let forwardCount = 0;
+
+    fs.renameSync = function (src, dest) {
+      // Archive direction: wsDir → archivePath
+      if (src.includes('workstreams') && dest.includes('milestones')) {
+        forwardCount++;
+        if (forwardCount >= 2) {
+          // Fail on second file during archive
+          throw new Error('EXDEV: cross-device link');
+        }
+        return origRename(src, dest);
+      }
+      // Rollback direction: archivePath → wsDir — make the inner rollback also fail
+      // This triggers the inner catch on line 314
+      if (src.includes('milestones') && dest.includes('workstreams')) {
+        throw new Error('EPERM: rollback failed');
+      }
+      return origRename(src, dest);
+    };
+
+    // output() uses fs.writeSync(1, data) — capture fd 1 writes
+    let capturedOutput = null;
+    const origWriteSync = fs.writeSync;
+    fs.writeSync = function (fd, data) {
+      if (fd === 1) { capturedOutput = data; return data.length; }
+      return origWriteSync.apply(fs, arguments);
+    };
+
+    try {
+      workstreamMod.cmdWorkstreamComplete(tmpDir, 'rollback-ws', {}, false);
+      assert.ok(capturedOutput, 'should have captured output');
+      const data = JSON.parse(capturedOutput);
+      assert.strictEqual(data.completed, false);
+      assert.strictEqual(data.error, 'archive_failed');
+    } finally {
+      fs.renameSync = origRename;
+      fs.writeSync = origWriteSync;
+    }
+  });
+});
+
+// ─── cmdWorkstreamGet mode detection ─────────────────────────────────────────
+
+describe('cmdWorkstreamGet reports flat mode', () => {
+  let tmpDir;
+
+  before(() => {
+    tmpDir = createTempProject();
+    // No workstreams/ dir — line 366 flat mode branch
+  });
+
+  after(() => cleanup(tmpDir));
+
+  test('reports flat mode when no workstreams dir exists', () => {
+    // --raw returns plain string (active workstream name or "none")
+    const rawResult = runGsdTools(['workstream', 'get', '--raw'], tmpDir);
+    assert.ok(rawResult.success, `get --raw failed: ${rawResult.error}`);
+    assert.strictEqual(rawResult.output, 'none');
+
+    // Without --raw returns JSON with mode
+    const jsonResult = runGsdTools(['workstream', 'get'], tmpDir);
+    assert.ok(jsonResult.success, `get failed: ${jsonResult.error}`);
+    const data = JSON.parse(jsonResult.output);
+    assert.strictEqual(data.mode, 'flat');
+    assert.strictEqual(data.active, null);
+  });
+});

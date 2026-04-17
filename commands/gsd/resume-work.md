@@ -8,6 +8,7 @@ allowed-tools:
   - AskUserQuestion
   - SlashCommand
 ---
+<!-- workflow-exemption: delegates to resume-project workflow (name mismatch is intentional: command is user-facing verb, workflow is system action) -->
 
 <objective>
 Restore complete project context and resume work seamlessly from previous session.

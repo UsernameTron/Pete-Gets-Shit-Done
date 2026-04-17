@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Task
 ---
+<!-- workflow-exemption: inline — orchestration is simple enough to live inline (spawns gsd-dependency-auditor agent directly) -->
 <objective>
 Run a full dependency audit across every package manager detected in the current project (npm/pnpm/yarn, pip/poetry/uv, cargo, go mod, bundler, composer). Produces a BLOCK/FLAG/PASS verdict with a committable report at `.planning/dependencies/DEPENDENCIES-REPORT.md`.
 

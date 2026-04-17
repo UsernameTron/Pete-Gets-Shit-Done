@@ -11,8 +11,8 @@ You are working with Pete Connor — AI transformation leader, MS in AI, CCXP/CC
 **get-shit-done** (GSD) is an execution engine and governance framework plugin for Claude Code. It wraps the full software delivery lifecycle — from ideation to merged PR — in a structured, repeatable pipeline with quality gates enforced at every phase.
 
 Key capabilities:
-- **61 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
-- **16 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-security-guardian, and others) handling quality, planning, and execution roles
+- **63 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
+- **18 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-security-guardian, and others) handling quality, planning, and execution roles
 - **47+ Claude Code skills** covering command implementations, utilities, and governance workflows
 - **Wave-based parallel execution** — independent tasks run concurrently in waves; dependent tasks respect ordering automatically
 - **5-phase delivery lifecycle**: discuss → plan → execute → verify → ship, with explicit phase gates that cannot be skipped
@@ -73,9 +73,9 @@ Three project-scoped specialists live in `.claude/agents/`:
 | test-runner | `test-runner.md` | Runs test suites, diagnoses failures, writes coverage |
 | docs-sync | `docs-sync.md` | Keeps CLAUDE.md, README.md, and DEVOPS-HANDOFF.md current |
 
-GSD also ships 16 built-in agents activated by the execution engine:
+GSD also ships 18 built-in agents activated by the execution engine:
 
-`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-security-guardian`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
+`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-dependency-auditor`, `gsd-ecosystem-auditor`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-security-guardian`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
 
 ---
 

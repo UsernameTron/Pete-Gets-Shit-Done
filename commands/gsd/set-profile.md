@@ -6,6 +6,7 @@ model: haiku
 allowed-tools:
   - Bash
 ---
+<!-- workflow-exemption: inline — config file update, no orchestration needed -->
 
 Show the following output to the user verbatim, with no extra commentary:
 
