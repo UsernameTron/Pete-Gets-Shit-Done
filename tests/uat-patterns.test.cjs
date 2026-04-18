@@ -154,8 +154,15 @@ describe('uat-patterns: edge cases', () => {
   });
 
   test('Test 11: all generated commands are read-only (no write operators)', () => {
-    const WRITE_OPERATORS = /(?<![>\/])(>>?)[^>\/]|(?<![>\/])(>>?)$|\btee\b|\brm\b|\bmv\b|\bcp\b|\btruncate\b/;
-    const SAFE_DEVNULL = /> \/dev\/null/g;
+    // Check for dangerous write commands only — not shell redirect operators.
+    // Rationale: 2>&1, > /dev/null, and > /dev/null 2>&1 are all safe read-only
+    // patterns commonly used in shell commands for output control. The key unsafe
+    // operations are write-destructive commands like tee, rm, mv, cp, truncate,
+    // or redirects to actual user-writable files.
+    const WRITE_OPERATORS = /\btee\b|\brm\b|\bmv\b|\bcp\b|\btruncate\b/;
+    // Detect > or >> redirecting to a real file path (not /dev/null, not &N fd)
+    // Pattern: a > or >> followed by a space+filename that is not /dev/null and not &
+    const FILE_REDIRECT = /(?:^|\s)(>>?)\s+(?!\/dev\/null)(?!&)([^\s|&>])/;
 
     const inputs = [
       'some-file.cjs exists',
@@ -171,11 +178,14 @@ describe('uat-patterns: edge cases', () => {
     for (const input of inputs) {
       const result = matchPattern(input);
       if (result.assertion && result.assertion.command) {
-        // Strip > /dev/null (safe output discard) before checking
-        const safeCmd = result.assertion.command.replace(SAFE_DEVNULL, '');
+        const cmd = result.assertion.command;
         assert.ok(
-          !WRITE_OPERATORS.test(safeCmd),
-          `Command for "${input}" contains write operator: ${result.assertion.command}`
+          !WRITE_OPERATORS.test(cmd),
+          `Command for "${input}" contains write operator: ${cmd}`
+        );
+        assert.ok(
+          !FILE_REDIRECT.test(cmd),
+          `Command for "${input}" contains file redirect: ${cmd}`
         );
       }
     }
