@@ -178,7 +178,7 @@ Six execution hooks are bundled from source via esbuild:
 
 | Hook | Purpose |
 |------|---------|
-| `gsd-prompt-guard.js` | Prompt injection scanning on tool inputs (18 patterns) |
+| `gsd-prompt-guard.js` | Prompt injection scanning on tool inputs (23 patterns) |
 | `gsd-config-protection.js` | Config file protection (32 protected files) |
 | `gsd-cost-tracker.js` | JSONL cost metrics per session |
 | `gsd-context-monitor.js` | Context window usage monitoring |
@@ -273,7 +273,7 @@ Added in milestone v2.3 (2026-04-13):
 
 | Component | What was added |
 |-----------|---------------|
-| Execution hooks (+3) | `gsd-prompt-guard.js` (18 injection patterns, PreToolUse), `gsd-config-protection.js` (32 protected files, PreToolUse), `gsd-cost-tracker.js` (JSONL metrics, PostToolUse) |
+| Execution hooks (+3) | `gsd-prompt-guard.js` (23 injection patterns, PreToolUse), `gsd-config-protection.js` (32 protected files, PreToolUse), `gsd-cost-tracker.js` (JSONL metrics, PostToolUse) |
 | Security agent | `gsd-security-guardian` — design-time security reviewer, 6 threat categories, read-only plan mode, worktree isolation |
 | Threat model reference | `references/agent-threat-model.md` — 6 categories with attack vectors, detection patterns, mitigation strategies |
 | 4D scoring rubric | `gsd-verifier` extended with security (35%), performance (25%), correctness (25%), maintainability (15%) rubric |

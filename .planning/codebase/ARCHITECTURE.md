@@ -224,7 +224,7 @@ User Input (/gsd:command)
 - Responsibilities:
   - `gsd-check-update.js` — version check
   - `gsd-context-monitor.js` — token tracking
-  - `gsd-prompt-guard.js` — input validation (18 injection patterns)
+  - `gsd-prompt-guard.js` — input validation (23 injection patterns)
   - `gsd-statusline.js` — status display
   - `gsd-config-protection.js` — config file protection (32 protected files, added v2.3)
   - `gsd-cost-tracker.js` — JSONL cost metrics (added v2.3)
