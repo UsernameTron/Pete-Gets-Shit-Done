@@ -1,13 +1,14 @@
 # Todo
 
-## Current Status: v2.3 Complete — Awaiting Pete's Review Before Ship
+## Current Status: v2.7 Complete — All milestones through Session Continuity shipped
 
-All 4 phases (41-44) complete. All 8 requirements satisfied and audited. Living docs updated. Stopped before /gsd:ship per Pete's instruction.
+17 milestones shipped (v1.0 through v2.7). 54 phases executed. PR #9 (docs sync) was the final merge.
 
-- **Tests**: 2474 passing, 0 failures
-- **Coverage**: 90.41% overall, no module below 80%, security 100%
-- **Branch**: `feat/v2.3-phase-41-hook-ports` (clean)
-- **Last commit**: `5d60336 docs(43): add missing VERIFICATION.md and SUMMARY.md`
+- **Tests**: 2,621 passing, 0 failures (529 suites)
+- **Coverage**: 91.51% overall, 83.24% branches, 98.01% functions
+- **Branch**: `main` (clean)
+- **Last commit**: `87a87f4 docs: sync all documentation to post-v2.7 live codebase state (#9)`
+- **Tag**: v2.7 (2026-04-18)
 
 ## Open Items
 
@@ -22,16 +23,16 @@ All 4 phases (41-44) complete. All 8 requirements satisfied and audited. Living 
 
 Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findings. None of these are v2.3 ship blockers; each is a discrete, actionable cleanup.
 
-- [ ] **Stop auto-committing `.planning/agent-health.log` across sessions.** Hook writes to a tracked path — either add the file to `.gitignore` or redirect the hook to a non-tracked location. Observed surfacing in stashes @{0}/@{1} and `chore/session-16-wrap` auto-creation during v2.3 ship/archival on 2026-04-15.
-- [ ] docs-sync: add `Bash` tool OR rewrite workflow steps 2-3 to use Glob/Grep equivalents. Recommendation: add Bash (commands are read-only and low-risk). Source: agent audit P1 #2.
-- [ ] test-runner: update description to reflect current suite count (currently says 295+, actual is 2474). Use "2400+" or specific. Source: agent audit P1 #3.
-- [ ] all three project agents: add `permissionMode: default` to frontmatter. Source: agent audit P1 #4.
-- [ ] all three project agents: replace hardcoded absolute path to project root with relative path or `$CLAUDE_PROJECT_DIR`. Source: agent audit P2 #5.
-- [ ] worktree-safe agents: add `isolation: worktree` to agents that may run concurrently with editing agents. Tradeoff: ~2s overhead per invocation. Source: agent audit P2 #6.
+- [x] **Stop auto-committing `.planning/agent-health.log` across sessions.** Added to .gitignore. Resolved by v2.4 Phase 47.
+- [x] docs-sync: add `Bash` tool. Already present in frontmatter. Resolved by v2.4 Phase 47.
+- [x] test-runner: update description to reflect current suite count. Updated to "2,600+" in finalization hygiene pass (2026-04-18).
+- [x] all three project agents: add `permissionMode: default` to frontmatter. All three have it. Resolved by v2.4 Phase 47.
+- [x] all three project agents: replace hardcoded absolute path to project root with relative path or `$CLAUDE_PROJECT_DIR`. All three use portable references. Resolved by v2.4 Phase 47.
+- [x] worktree-safe agents: add `isolation: worktree` to agents that may run concurrently with editing agents. All three have it. Resolved by v2.4 Phase 47.
 - [ ] plugin-developer: add partial-failure guidance — "If hook build fails after source edit, revert the edit and report. Do not leave source in an inconsistent state." Source: agent audit P2 #7.
 - [ ] docs-sync: add CLAUDE.md governance preservation constraint. Source: agent audit P2 #8.
 - [ ] all three project agents: add self-referential protection — "Do not modify files in .claude/agents/." Source: agent audit P2 #9.
-- [ ] Add `// gsd-hook-version: X` headers to all 7 hook source files. Closes security-review finding #1 (deferred). Source: `.planning/research/security-reviews/2026-04-13-v2.3-closure-delta.md`.
+- [x] Add `// gsd-hook-version: X` headers to all hook source files. All 6 current hooks have headers. Resolved by v2.4 Phase 47.
 - [ ] Clean up .claude/agents/test-runner.md line 74 parenthetical to distinguish c8 `--lines 70` CLI flag from the project's 80/90/95 agent-level threshold. Cosmetic doc drift only — the thresholds themselves at lines 76-79 and completion criteria at line 112 are already correct. Source: Gate 1 misread resolution 2026-04-15.
 - [x] prompt-injection-scan.sh allowlist updated for relocated hooks-review + REQUIREMENTS.md + agent-threat-model.md. Closed by v2.3 ship CI fix 2026-04-15.
 - [ ] Backfill cross-refs to relocated docs in docs/health-reports/full-audit-2026-04-11.md and .planning/codebase/STRUCTURE.md once those files next touch the relocated artifacts. Source: Gate 4 no-op substitution 2026-04-15.
