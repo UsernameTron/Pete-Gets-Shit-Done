@@ -14,12 +14,12 @@
 
 - [x] **Phase 44: Milestone Audit + Docs Sync** — 8/8 REQs audited, CLAUDE.md/README.md/DEVOPS-HANDOFF.md updated
 - [x] **Ship v2.3** — shipped 2026-04-15 via PR #49, tagged v2.3 at 75b29cd
-- [ ] **Stop-hook sentinel for human-review gates** — add `.planning/.review-pending` sentinel to uncommitted-files Stop hook. Source: `tasks/lessons.md` 2026-04-10 [Hook Design].
-- [ ] **Resume `everything-claude-code-clean` scan** — 4 areas pending (hooks, commands, agents, skills). Prior recon in `.extraction-staging/FINDINGS.md` (gitignored).
+- [ ] ~~**Stop-hook sentinel for human-review gates**~~ — deferred to v2.8+, not a finalization blocker. Source: `tasks/lessons.md` 2026-04-10 [Hook Design].
+- [ ] ~~**Resume `everything-claude-code-clean` scan**~~ — deferred to v2.8+, not a finalization blocker. Prior recon in `.extraction-staging/FINDINGS.md` (gitignored).
 
 ## v2.4 Backlog (inherited)
 
-- [ ] Investigate duplicate v1.0/v1.1 tag pointers on origin — both point at `62470189` (the "Initial commit"). Local ffee68d variants were deleted and aligned to origin on 2026-04-15. Either one of the tags belongs on a different ship commit, or the repo was re-created at some point and both tags got stamped on the initial commit by the rebuild. Low priority — repo archaeology.
+- [ ] ~~Investigate duplicate v1.0/v1.1 tag pointers on origin~~ — deferred to v2.8+, not a finalization blocker. Repo archaeology, low priority.
 
 Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findings. None of these are v2.3 ship blockers; each is a discrete, actionable cleanup.
 
@@ -29,13 +29,13 @@ Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findi
 - [x] all three project agents: add `permissionMode: default` to frontmatter. All three have it. Resolved by v2.4 Phase 47.
 - [x] all three project agents: replace hardcoded absolute path to project root with relative path or `$CLAUDE_PROJECT_DIR`. All three use portable references. Resolved by v2.4 Phase 47.
 - [x] worktree-safe agents: add `isolation: worktree` to agents that may run concurrently with editing agents. All three have it. Resolved by v2.4 Phase 47.
-- [ ] plugin-developer: add partial-failure guidance — "If hook build fails after source edit, revert the edit and report. Do not leave source in an inconsistent state." Source: agent audit P2 #7.
-- [ ] docs-sync: add CLAUDE.md governance preservation constraint. Source: agent audit P2 #8.
-- [ ] all three project agents: add self-referential protection — "Do not modify files in .claude/agents/." Source: agent audit P2 #9.
+- [x] plugin-developer: add partial-failure guidance — "If hook build fails after source edit, revert the edit and report. Do not leave source in an inconsistent state." Resolved by finalization Phase 2A (2026-04-18).
+- [x] docs-sync: add CLAUDE.md governance preservation constraint. Resolved by finalization Phase 2A (2026-04-18).
+- [x] all three project agents: add self-referential protection — "Do not modify files in .claude/agents/." Resolved by finalization Phase 2A (2026-04-18).
 - [x] Add `// gsd-hook-version: X` headers to all hook source files. All 6 current hooks have headers. Resolved by v2.4 Phase 47.
-- [ ] Clean up .claude/agents/test-runner.md line 74 parenthetical to distinguish c8 `--lines 70` CLI flag from the project's 80/90/95 agent-level threshold. Cosmetic doc drift only — the thresholds themselves at lines 76-79 and completion criteria at line 112 are already correct. Source: Gate 1 misread resolution 2026-04-15.
+- [x] Clean up .claude/agents/test-runner.md line 74 parenthetical to distinguish c8 `--lines 70` CLI flag from the project's 80/90/95 agent-level threshold. Resolved by finalization Phase 2A (2026-04-18).
 - [x] prompt-injection-scan.sh allowlist updated for relocated hooks-review + REQUIREMENTS.md + agent-threat-model.md. Closed by v2.3 ship CI fix 2026-04-15.
-- [ ] Backfill cross-refs to relocated docs in docs/health-reports/full-audit-2026-04-11.md and .planning/codebase/STRUCTURE.md once those files next touch the relocated artifacts. Source: Gate 4 no-op substitution 2026-04-15.
+- [ ] ~~Backfill cross-refs to relocated docs~~ — deferred to v2.8+, not a finalization blocker. Applies to docs/health-reports/full-audit-2026-04-11.md and .planning/codebase/STRUCTURE.md when they next touch relocated artifacts.
 
 ## Completed (v2.3)
 
