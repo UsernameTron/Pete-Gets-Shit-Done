@@ -66,14 +66,14 @@ The full inventory:
 
 | Metric | Count |
 |--------|-------|
-| GSD commands | 63 |
+| GSD commands | 65 |
 | Specialized agents | 17 |
 | Runtime hooks | 16 (7 execution + 10 governance, 1 shared) |
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
-| Test suites | 479 |
-| Test assertions | 2,490 |
+| Test suites | 529 |
+| Test assertions | 2,621 |
 | Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
