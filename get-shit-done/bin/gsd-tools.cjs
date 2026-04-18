@@ -743,8 +743,30 @@ async function runCommand(command, args, cwd, raw) {
       if (subcommand === 'render-checkpoint') {
         const options = parseNamedArgs(args, ['file']);
         uat.cmdRenderCheckpoint(cwd, options, raw);
+      } else if (subcommand === 'run-automated') {
+        const runner = require('./lib/uat-runner.cjs');
+        const options = parseNamedArgs(args, ['phase']);
+        const phaseArg = options.phase;
+        if (!phaseArg) { error('--phase required for uat run-automated'); }
+        const phasesDir = path.join(core.planningDir(cwd), 'phases');
+        const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
+        const phaseDir = entries
+          .filter(e => e.isDirectory())
+          .map(e => e.name)
+          .find(d => d.startsWith(phaseArg + '-') || d === phaseArg);
+        if (!phaseDir) { error('Phase not found: ' + phaseArg); }
+        const fullPhaseDir = path.join(phasesDir, phaseDir);
+        const planFiles = fs.readdirSync(fullPhaseDir)
+          .filter(f => f.endsWith('-PLAN.md'))
+          .map(f => path.join(fullPhaseDir, f));
+        const results = runner.runAutomatedUAT(planFiles);
+        if (raw) {
+          core.output(results, raw);
+        } else {
+          core.output(null, false, runner.formatUATResults(results));
+        }
       } else {
-        error('Unknown uat subcommand. Available: render-checkpoint');
+        error('Unknown uat subcommand. Available: render-checkpoint, run-automated');
       }
       break;
     }
