@@ -1,32 +1,14 @@
 # Todo
 
-## Current Status: v2.7 Finalized — Ready for v2.8
+## Current Status: v2.7 Complete — All milestones through Session Continuity shipped
 
-17 milestones shipped (v1.0 through v2.7). 54 phases executed. Finalization complete.
+17 milestones shipped (v1.0 through v2.7). 54 phases executed. PR #9 (docs sync) was the final merge.
 
 - **Tests**: 2,621 passing, 0 failures (529 suites)
 - **Coverage**: 91.51% overall, 83.24% branches, 98.01% functions
-- **Branch**: `chore/finalization-phase-2a-agent-fixes` → PR pending against main
+- **Branch**: `main` (clean)
+- **Last commit**: `87a87f4 docs: sync all documentation to post-v2.7 live codebase state (#9)`
 - **Tag**: v2.7 (2026-04-18)
-
-## Session Handoff (2026-04-18 — Finalization Phases 7-9: Final Gate + Ship + Close)
-
-**Branch**: `chore/finalization-phase-2a-agent-fixes`
-**Action**: PR created, pending merge
-
-**Completed this session:**
-- [x] /gsd:prime-patterns — 5 KB v2.1 patterns loaded
-- [x] /gsd:finalize Gate 2 — 2,621/2,621 tests pass, 91.51% coverage, all modules above thresholds
-- [x] /gsd:finalize Gate 3 — v2.7 milestone archived (REQUIREMENTS.md, ROADMAP.md, MILESTONES.md fixed)
-- [x] /gsd:finalize Gate 5 — todo.md updated
-- [x] /gsd:ship — PR created
-- [x] /gsd:cleanup --dry-run — stale artifacts inventoried
-- [x] /wrap — session closed
-
-**Next actions (v2.8):**
-1. Merge finalization PR to main
-2. `/gsd:new-milestone` for v2.8
-3. Optional: evaluate esbuild 0.25→0.28 upgrade
 
 ## Open Items
 
