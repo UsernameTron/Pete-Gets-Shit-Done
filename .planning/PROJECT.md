@@ -6,7 +6,7 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** Planning next milestone (v2.6 shipped 2026-04-18)
+**Current milestone:** v2.7 Session Continuity
 **Previous:** v2.6 Developer Experience (shipped 2026-04-18, PR #3 + PR #4 merged)
 **Package:** `get-shit-done-cc` v1.30.0
 **Tests:** 2,561 total, all passing
@@ -25,7 +25,29 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ### Active
 
-(None — planning next milestone)
+- **CP-01**: writeCheckpoint() produces valid JSON consumable by readCheckpoint()
+- **CP-02**: /gsd:resume-work reads CHECKPOINT.json and skips completed plans
+- **CP-03**: /prime surfaces checkpoint data in initialization summary
+- **CP-04**: Stale checkpoint (>24h) generates warning but still loads
+- **CP-05**: Missing checkpoint is graceful no-op
+- **CP-06**: 15+ checkpoint tests with >80% branch coverage
+- **CP-07**: Full test suite green after checkpoint integration
+- **DAILY-01**: /gsd:daily produces dashboard in under 2 seconds
+- **DAILY-02**: Reads CHECKPOINT.json first, falls back to STATE.md
+- **DAILY-03**: Shows correct next-action for every GSD state
+- **DAILY-04**: Handles missing files gracefully
+- **DAILY-05**: Dirty tree and stale checkpoint produce warnings
+- **DAILY-06**: 10+ daily tests with >80% branch coverage
+- **UAT-01**: Parses must_haves from plan YAML frontmatter
+- **UAT-02**: Matches at least 8 pattern types from registry
+- **UAT-03**: Executes commands in read-only mode (no writes)
+- **UAT-04**: Returns structured pass/fail/manual results
+- **UAT-05**: Failed checks include expected, actual, and command
+- **UAT-06**: Unrecognized must_haves fall through to manual UAT
+- **UAT-07**: verify-work.md presents auto results before conversational UAT
+- **UAT-08**: 20+ tests across patterns and runner
+- **UAT-09**: Command timeout (30s) prevents hanging
+- **UAT-10**: Full test suite green after integration
 
 ### Validated
 
@@ -37,6 +59,17 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 - GUI installer — CLI-only project, no graphical installer needed
 - CI provider abstraction — GitHub Actions only, no Jenkins/GitLab/Circle support
+
+## Current Milestone: v2.7 Session Continuity
+
+**Goal:** Eliminate the three biggest operational friction points — context loss on /clear, slow session starts, and manual UAT checks.
+
+**Target features:**
+- Checkpoint Engine — lib/checkpoint.cjs writes .planning/CHECKPOINT.json before every context reset; resume-work and /prime consume it to skip completed work
+- /gsd:daily — one-command morning dashboard showing milestone, phase, plan, branch, tests, next action
+- Automated UAT Runner — lib/uat-runner.cjs with pattern registry parses plan must_haves into shell assertions, presents pass/fail table before conversational UAT
+
+**Reference:** `.planning/v27-session-continuity-milestone-plan.md` — full code sketches, schemas, test cases, acceptance criteria.
 
 ## Most Recent: v2.6 Developer Experience (shipped 2026-04-18)
 
@@ -334,4 +367,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after v2.6 milestone*
+*Last updated: 2026-04-18 after v2.7 milestone start*

@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.6
-milestone_name: Developer Experience
-status: "v2.6 complete — milestone archived"
+milestone: v2.7
+milestone_name: Session Continuity
+status: "defining requirements"
 last_updated: "2026-04-18"
 last_activity: 2026-04-18
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -19,14 +19,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** Planning next milestone
+**Current focus:** v2.7 Session Continuity — Checkpoint Engine, Daily Dashboard, Automated UAT
 
 ## Current Position
 
-Phase: All complete — milestone v2.6 archived
-Milestone: v2.6 Developer Experience — SHIPPED 2026-04-18
-Next: `/gsd:new-milestone` to start v2.7 (ref doc at `.planning/v27-session-continuity-milestone-plan.md`)
-Last activity: 2026-04-18
+Phase: Not started (defining requirements)
+Milestone: v2.7 Session Continuity
+Next: Define requirements, then roadmap
+Last activity: 2026-04-18 — Milestone v2.7 started
 
 ## Milestone History
 
