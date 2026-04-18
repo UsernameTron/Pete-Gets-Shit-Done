@@ -3,6 +3,7 @@
 ## Milestones
 
 - v2.6 Developer Experience — Phases 49-51 (shipped 2026-04-18) — [archive](milestones/v2.6-ROADMAP.md)
+- v2.7 Session Continuity — Phases 52-54 (in progress)
 
 ## Phases
 
@@ -15,10 +16,60 @@
 
 </details>
 
+### v2.7 Session Continuity (In Progress)
+
+**Milestone Goal:** Eliminate the three primary session friction points — context-reset amnesia, manual verification overhead, and slow session-start orientation.
+
+- [ ] **Phase 52: Checkpoint Engine** - Deterministic session state written before every context reset, consumed by /prime and resume-work to skip completed work
+- [ ] **Phase 53: Daily Dashboard** - One-command morning briefing showing milestone, phase, plan progress, branch state, and exact next action
+- [ ] **Phase 54: Automated UAT Runner** - Pattern-based must_have assertions executed automatically before conversational UAT, with pass/fail/manual triage
+
+## Phase Details
+
+### Phase 52: Checkpoint Engine
+**Goal**: Session state is captured deterministically before context resets so resumed sessions skip work that is already done
+**Depends on**: Nothing (Phase 51 shipped)
+**Requirements**: CP-01, CP-02, CP-03, CP-04, CP-05, CP-06, CP-07
+**Success Criteria** (what must be TRUE):
+  1. Running `/gsd:checkpoint` produces a valid `.planning/CHECKPOINT.json` that can be read back by `readCheckpoint()` with no data loss
+  2. `/gsd:resume-work` reads the checkpoint and skips any plan IDs already listed in `plans.completed` — the user sees a "skipping N completed plans" message, not a re-execution prompt
+  3. `/prime` includes checkpoint data in its initialization summary when a checkpoint file is present
+  4. A checkpoint older than 24 hours triggers a visible staleness warning but does not crash or block startup
+  5. Running `/prime` or `/gsd:resume-work` in a project with no checkpoint file completes silently with no error
+**Plans**: TBD
+
+### Phase 53: Daily Dashboard
+**Goal**: Developers can run one command at session start and immediately know their exact state and next action
+**Depends on**: Phase 52 (consumes `readCheckpoint()` from checkpoint.cjs)
+**Requirements**: DAILY-01, DAILY-02, DAILY-03, DAILY-04, DAILY-05, DAILY-06
+**Success Criteria** (what must be TRUE):
+  1. `/gsd:daily` completes and prints a formatted dashboard in under 2 seconds
+  2. When a checkpoint is present, the dashboard reflects checkpoint data; when absent, it falls back to STATE.md without error
+  3. The dashboard shows the correct next GSD command for every project state: active phase with in-progress plan, active phase with pending plans, between milestones, and maintenance mode
+  4. A dirty git working tree and a stale checkpoint each produce their own visible warning in the dashboard output
+**Plans**: TBD
+
+### Phase 54: Automated UAT Runner
+**Goal**: must_have assertions from plan frontmatter are executed automatically as shell commands before any conversational verification is requested
+**Depends on**: Nothing (independent of Phases 52-53, though benefits from checkpoint data)
+**Requirements**: UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, UAT-06, UAT-07, UAT-08, UAT-09, UAT-10
+**Success Criteria** (what must be TRUE):
+  1. `verify-work` automatically parses must_haves from all phase PLAN.md files and executes shell assertions before prompting the user for anything
+  2. The runner matches at least 8 distinct must_have pattern types (file exists, file not exists, test suite green, coverage threshold, file contains, file not contains, files identical, module export count)
+  3. Failed assertions display the must_have text, the expected value, the actual value, and the exact command that was run
+  4. must_haves that match no pattern are routed to manual conversational UAT — the user is only asked to verify what cannot be automated
+  5. All runner commands are read-only; no file writes occur during automated verification
+**Plans**: TBD
+
 ## Progress
+
+**Execution Order:** Phase 52 -> Phase 53 -> Phase 54 (52 must complete before 53; 54 is independent but runs last)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 49. One-Command Install | v2.6 | 1/1 | Complete | 2026-04-17 |
 | 50. CI Watch | v2.6 | 2/2 | Complete | 2026-04-17 |
 | 51. Sync Docs | v2.6 | 1/1 | Complete | 2026-04-18 |
+| 52. Checkpoint Engine | v2.7 | 0/TBD | Not started | - |
+| 53. Daily Dashboard | v2.7 | 0/TBD | Not started | - |
+| 54. Automated UAT Runner | v2.7 | 0/TBD | Not started | - |
