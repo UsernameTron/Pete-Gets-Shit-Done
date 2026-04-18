@@ -9,12 +9,12 @@ Requirements for v2.7 Session Continuity. Each maps to roadmap phases.
 
 ### Checkpoint Engine
 
-- [ ] **CP-01**: writeCheckpoint() produces valid JSON consumable by readCheckpoint()
+- [x] **CP-01**: writeCheckpoint() produces valid JSON consumable by readCheckpoint()
 - [ ] **CP-02**: /gsd:resume-work reads CHECKPOINT.json and skips completed plans
 - [ ] **CP-03**: /prime surfaces checkpoint data in initialization summary
-- [ ] **CP-04**: Stale checkpoint (>24h) generates warning but still loads
-- [ ] **CP-05**: Missing checkpoint is graceful no-op (no error, no stack trace)
-- [ ] **CP-06**: 15+ checkpoint tests passing with >80% branch coverage
+- [x] **CP-04**: Stale checkpoint (>24h) generates warning but still loads
+- [x] **CP-05**: Missing checkpoint is graceful no-op (no error, no stack trace)
+- [x] **CP-06**: 15+ checkpoint tests passing with >80% branch coverage
 - [ ] **CP-07**: Full test suite green after checkpoint integration
 
 ### Daily Dashboard
@@ -60,12 +60,12 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CP-01 | Phase 52 | Pending |
+| CP-01 | Phase 52 | Complete |
 | CP-02 | Phase 52 | Pending |
 | CP-03 | Phase 52 | Pending |
-| CP-04 | Phase 52 | Pending |
-| CP-05 | Phase 52 | Pending |
-| CP-06 | Phase 52 | Pending |
+| CP-04 | Phase 52 | Complete |
+| CP-05 | Phase 52 | Complete |
+| CP-06 | Phase 52 | Complete |
 | CP-07 | Phase 52 | Pending |
 | DAILY-01 | Phase 53 | Pending |
 | DAILY-02 | Phase 53 | Pending |
