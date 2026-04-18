@@ -1,0 +1,44 @@
+[
+  {
+    "source": "EXDEV.*cross.device",
+    "flags": "i",
+    "category": "cross-device",
+    "description": "Cross-device rename failed (EXDEV) — typically moveSync across filesystem boundaries",
+    "fix": "Use copySync + removeSync fallback instead of moveSync/renameSync. See lib/phase.cjs for the established pattern."
+  },
+  {
+    "source": "Cannot find module|MODULE_NOT_FOUND",
+    "flags": "i",
+    "category": "missing-module",
+    "description": "Required module not found — likely missing dependency or wrong path",
+    "fix": "Run npm install. If the module is a local file, check the require path is correct relative to the executing file."
+  },
+  {
+    "source": "Unable to resolve action.*uses.*@",
+    "flags": "i",
+    "category": "sha-pin",
+    "description": "GitHub Actions step references an invalid or outdated commit SHA",
+    "fix": "Update the SHA pin in the workflow YAML. Use the tag page on GitHub to find the correct full SHA for the version you want (e.g., actions/checkout v4)."
+  },
+  {
+    "source": "SyntaxError.*Unexpected token|node:|--experimental-|engine.*\"node\".*incompatible",
+    "flags": "i",
+    "category": "node-version",
+    "description": "Code uses syntax or APIs not available in the running Node.js version",
+    "fix": "Check the engines field in package.json and the CI matrix. Ensure the CI matrix only includes supported Node.js versions (currently 20 and 22)."
+  },
+  {
+    "source": "not ok \\d|FAIL |AssertionError|expected.*to.*equal",
+    "flags": "i",
+    "category": "test-failure",
+    "description": "One or more test assertions failed",
+    "fix": "Read the specific test name and assertion message. Compare expected vs actual values. Check if the test or the implementation needs updating."
+  },
+  {
+    "source": "exit code \\d+|Process exited with code|exited with \\d+",
+    "flags": "i",
+    "category": "exit-code",
+    "description": "A process exited with a non-zero exit code",
+    "fix": "Check the command that failed in the log output above this line. The exit code indicates the type of failure."
+  }
+]
