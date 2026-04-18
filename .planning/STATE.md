@@ -7,9 +7,9 @@ last_updated: "2026-04-18T01:46:59.219Z"
 last_activity: 2026-04-18
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,15 +18,16 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-17)
 
-**Current:** v2.6 Developer Experience — Phase 50 shipped, Phase 51 (Sync Docs) pending
+**Current:** v2.6 Developer Experience — all 3 phases complete, PR #4 open, awaiting CI green + merge
 **Previous:** v2.5 Final Documentation Sync (shipped 2026-04-17, PR #2 merged)
 
 ## Current Position
 
-Phase: 51
-Plan: Not started
-Phase 50 (CI Watch) executed and verified (5/5 criteria). Phase 51 needs discuss → plan → execute.
-Next: Decide whether to build Phase 51 or close v2.6 and start v2.7
+Phase: All phases complete (49, 50, 51)
+Milestone: v2.6 shipped — PR #4 awaiting merge
+UAT: 9/9 passed, 2,561 unit tests green
+CI fix: absolute path in ci-watch workflow example (commit 9beadec) — awaiting re-run
+Next: Merge PR #4, then `/gsd:complete-milestone` to close v2.6 and start v2.7
 Last activity: 2026-04-18
 
 ## Milestone History
@@ -49,24 +50,23 @@ Last activity: 2026-04-18
 | v2.3 | Hook Ecosystem + Security Guardian + Agent Quality | 4 | 5 | 2026-04-15 |
 | v2.4 | Foundation Hardening | 2 | 6 | 2026-04-17 |
 | v2.5 | Final Documentation Sync | 2 | 3 | 2026-04-17 |
-| v2.6 | Developer Experience | 3 | 2 | In progress |
+| v2.6 | Developer Experience | 3 | 5 | Awaiting merge (PR #4) |
 
 ## Session Handoff
 
 **Branch**: `chore/session-wrap-phase50-plan` (clean)
-**Session**: Phase 50 execution + v2.7 reference doc
-**Commits this session**: 090f830, 8f459fb (Plan 01), 190771d, f18b293 (Plan 02), 44da40b (verification), 3993426 (phase complete), c8186d5 (PROJECT.md), ca5e97f (v2.7 ref doc)
+**Session**: Phase 51 execution + v2.6 UAT + ship + CI fix
+**Commits this session**: f2174a7 (sync-docs command), 3928ef0 (verification), c2e1000 (PROJECT.md), f1a21a5 (STATE.md), 9beadec (CI fix)
 
 **What was done**:
+- Executed Phase 51 (Sync Docs) — 1 plan, 2 tasks, single wave
+  - Created `commands/gsd/sync-docs.md` (421-line inline workflow)
+  - Verified 5/5 must-haves, all 6 SDOCS requirements satisfied
+- Ran v2.6 combined UAT across phases 49, 50, 51 — 9/9 tests passed
+- Shipped PR #4 with full auto-generated body
+- Fixed CI failure: absolute path in ci-watch workflow example (path-replacement test)
+- Pushed fix (9beadec), awaiting CI re-run
 
-- Executed Phase 50 (CI Watch) — 2 plans, 2 waves, all tasks complete
-  - Plan 01: lib/ci-patterns.json (6 failure patterns) + workflows/ci-watch.md (402-line polling workflow)
-  - Plan 02: commands/gsd/ci-watch.md (slash command) + tests/ci-patterns.test.cjs (14 tests)
-- Verified 5/5 success criteria, full test suite green (2,561 tests)
-- Marked phase complete, updated ROADMAP.md, STATE.md, PROJECT.md
-- Added v2.7 Session Continuity milestone reference plan to .planning/
-
-**Decision pending**: Phase 51 (Sync Docs) — build it to close v2.6, or skip and start v2.7?
-**v2.7 reference**: `.planning/v27-session-continuity-milestone-plan.md` — full implementation spec for checkpoint engine, daily dashboard, automated UAT
+**Next**: Merge PR #4 when CI green, then `/gsd:complete-milestone` to close v2.6. v2.7 ref doc at `.planning/v27-session-continuity-milestone-plan.md`.
 
 **Next**: Pete to decide Phase 51 vs v2.7. Then either `/gsd:discuss-phase 51` or `/gsd:new-milestone` with v2.7 ref doc.
