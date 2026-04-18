@@ -60,7 +60,8 @@ function runAutomatedUAT(planPaths) {
     const content = safeReadFile(planPath);
     if (!content) continue;
 
-    const truths = parseMustHavesBlock(content, 'truths');
+    const rawTruths = parseMustHavesBlock(content, 'truths');
+    const truths = rawTruths.filter(t => typeof t === 'string' && t.length > 0);
 
     for (const truth of truths) {
       results.total++;
