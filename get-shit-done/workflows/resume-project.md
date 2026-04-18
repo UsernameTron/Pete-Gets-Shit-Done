@@ -16,6 +16,60 @@ Instantly restore full project context so "Where were we?" has an immediate, com
 
 <process>
 
+<step name="check_checkpoint">
+Before loading STATE.md, check whether a fresh checkpoint exists from the previous session.
+
+Read `.planning/CHECKPOINT.json` if it exists:
+
+```bash
+CHECKPOINT_DATA=$(cat .planning/CHECKPOINT.json 2>/dev/null || echo "null")
+```
+
+**If the file exists and is valid JSON with `version: 1`:**
+
+Calculate age in hours:
+```
+age_hours = (Date.now() - new Date(timestamp).getTime()) / 3600000
+stale = age_hours > 24
+```
+
+**If fresh (`stale === false`):**
+
+Report to user:
+```
+Checkpoint found from {timestamp} ({age_hours}h ago).
+Phase {phase} — {phase_name}
+Plans: {plans.completed.length}/{plans.total} completed
+```
+
+If `plans.active` is not null:
+```
+Plan {plans.active} was in progress.
+```
+
+Set `completed_plans = checkpoint.plans.completed` (array of plan IDs).
+
+When executing phase, SKIP any plan whose ID is in `completed_plans`.
+
+Use `checkpoint.next_action` as the recommended next command.
+
+Continue to `load_state` for full context, but `completed_plans` is authoritative — STATE.md does not override it.
+
+**If stale (`stale === true`):**
+
+Report:
+```
+Stale checkpoint ({age_hours}h old). Loading from STATE.md instead.
+Run /gsd:checkpoint to refresh.
+```
+
+Fall through to existing `load_state` logic unchanged.
+
+**If no checkpoint (file missing or invalid JSON or wrong version):**
+
+Fall through to existing `load_state` logic unchanged (current behavior preserved).
+</step>
+
 <step name="initialize">
 Load all context in one call:
 

@@ -68,6 +68,22 @@ Parse JSON for: `researcher_model`, `synthesizer_model`, `roadmapper_model`, `co
 
 **If `project_exists` is true:** Error — project already initialized. Use `/gsd:progress`.
 
+**Checkpoint awareness (session initialization):**
+
+After state loading, check if `.planning/CHECKPOINT.json` exists. If it does, include checkpoint data in the initialization summary:
+
+```bash
+CHECKPOINT_DATA=$(cat .planning/CHECKPOINT.json 2>/dev/null || echo "null")
+```
+
+If the file exists and is valid JSON with `version: 1`:
+- Calculate age: `age_hours = (Date.now() - new Date(timestamp).getTime()) / 3600000`
+- Include in summary: `Checkpoint: Phase {phase} ({phase_name}), {plans.completed.length}/{plans.total} plans done`
+- If age > 24: append `(stale — {age_hours}h old)`
+- Include: `Next: {next_action}`
+
+If the file does not exist: silent no-op — add nothing to the summary.
+
 **If `has_git` is false:** Initialize git:
 
 ```bash
