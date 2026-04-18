@@ -1,40 +1,31 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-17T17:28:24Z",
-  "phase": "47",
-  "phase_name": "agent-roster-assessment",
-  "phase_dir": ".planning/phases/47-agent-roster-assessment",
-  "plan": null,
-  "task": null,
-  "total_tasks": 9,
+  "timestamp": "2026-04-18T00:03:27.108Z",
+  "phase": "51",
+  "phase_name": "Sync Docs",
+  "phase_dir": ".planning/phases/51-sync-docs",
+  "plan": 0,
+  "task": 0,
+  "total_tasks": 0,
   "status": "paused",
   "completed_tasks": [
-    {"id": 1, "name": "Dead Code Removal", "status": "done", "commit": "46f1b35"},
-    {"id": 2, "name": "Path Traversal Prevention", "status": "done", "commit": "09d86be"},
-    {"id": 3, "name": "Prompt Guard Sync", "status": "done", "commit": "pass-no-fix"},
-    {"id": 4, "name": "Stop Hook Deduplication", "status": "done", "commit": "pass-no-fix"},
-    {"id": 5, "name": "Model Profile Coverage", "status": "done", "commit": "fc6fd1f"},
-    {"id": 6, "name": "CODEX Sandbox Coverage", "status": "done", "commit": "5e56409"},
-    {"id": 7, "name": "Plugin Skill Parity", "status": "done", "commit": "efc20de"},
-    {"id": 8, "name": "Coverage Thresholds", "status": "in_progress", "progress": "profile-output.cjs fixed (61.67% to 71.65%). phase.cjs still at 69.44% — new tests written but not picked up by test runner (tests/coverage/ not in glob). Need to either move test file or update run-tests.cjs glob."}
+    {"id": 1, "name": "Context gathering (discuss-phase)", "status": "done", "commit": "70616a5"}
   ],
   "remaining_tasks": [
-    {"id": 8, "name": "Coverage Thresholds", "status": "in_progress"},
-    {"id": 9, "name": "Full Test Suite Green", "status": "not_started"}
+    {"id": 2, "name": "Plan phase 51", "status": "not_started"},
+    {"id": 3, "name": "Execute phase 51", "status": "not_started"},
+    {"id": 4, "name": "Verify work", "status": "not_started"},
+    {"id": 5, "name": "Ship", "status": "not_started"}
   ],
-  "blockers": [
-    {
-      "description": "tests/coverage/phase-coverage.test.cjs not picked up by npm test — scripts/run-tests.cjs glob does not include tests/coverage/ subdirectory",
-      "type": "technical",
-      "workaround": "Either move the file to tests/phase-coverage.test.cjs or update the glob in scripts/run-tests.cjs to include tests/coverage/*.test.cjs"
-    }
-  ],
+  "blockers": [],
   "human_actions_pending": [],
   "decisions": [
-    {"decision": "Model profile tiers follow agent role patterns", "rationale": "advisor-researcher gets opus at quality (makes trade-off decisions), other 5 inspection agents follow codebase-mapper pattern (sonnet/haiku/haiku)", "phase": "47"},
-    {"decision": "Plugin skills copied from Petes-Get-Shit-Done-Coding-Automation reference", "rationale": "37 skills were present in reference copy but never committed to main repo", "phase": "47"}
+    {"decision": "Live counts every time, no caching", "rationale": "Stale cache is the problem being solved; 30s acceptable", "phase": "51"},
+    {"decision": "Conventional commit prefixes since last git tag for CHANGELOG", "rationale": "feat:->Added, fix:->Fixed, docs:/chore:->Changed; Keep a Changelog format", "phase": "51"},
+    {"decision": "Inline terminal table for diff reporting", "rationale": "file|section|old->new; no artifact files", "phase": "51"},
+    {"decision": "Standalone workflow, no agent delegation", "rationale": "Find-and-replace with live inputs; simpler and testable", "phase": "51"}
   ],
-  "uncommitted_files": ["tests/profile-output.test.cjs", "tests/coverage/phase-coverage.test.cjs", ".planning/phases/47-agent-roster-assessment/47-UAT.md"],
-  "next_action": "Fix phase.cjs branch coverage: move tests/coverage/phase-coverage.test.cjs to tests/phase-coverage.test.cjs (or update run-tests.cjs glob), verify coverage hits 70%+, then commit. After that, run Test 9 (Full Test Suite Green) which should be a quick pass. Then complete UAT, commit, and proceed to /gsd:ship.",
-  "context_notes": "UAT session at 7/9 tests done. 5 issues found and fixed in-session (dead code, path traversal, model profiles, CODEX sandbox, plugin skills). Tests 3-4 passed clean. Test 8 (coverage) partially fixed — profile-output solved, phase.cjs blocked by test runner glob. Test 9 should be trivial once 8 is resolved."
+  "uncommitted_files": [],
+  "next_action": "Run /gsd:plan-phase 51 to create execution plans for the sync-docs command",
+  "context_notes": "Phase 51 context fully captured. All 4 gray areas decided by Pete. Phase 50 (CI Watch) is complete. This is the final phase of v2.6 Developer Experience milestone. After Phase 51 ships, decision pending: close v2.6 or start v2.7 (Session Continuity). v2.7 reference plan exists at .planning/v27-session-continuity-milestone-plan.md."
 }
