@@ -2,12 +2,12 @@
 
 ## Current Status: v2.7 Complete — All milestones through Session Continuity shipped
 
-17 milestones shipped (v1.0 through v2.7). 54 phases executed. PR #9 (docs sync) was the final merge.
+17 milestones shipped (v1.0 through v2.7). 54 phases executed. PR #10 merged, PR #10 review fixes applied.
 
 - **Tests**: 2,621 passing, 0 failures (529 suites)
 - **Coverage**: 91.51% overall, 83.24% branches, 98.01% functions
 - **Branch**: `main` (clean)
-- **Last commit**: `87a87f4 docs: sync all documentation to post-v2.7 live codebase state (#9)`
+- **Last commit**: `d811511 fix(docs): correct injection pattern counts and milestone terminology per PR #10 review`
 - **Tag**: v2.7 (2026-04-18)
 
 ## Open Items
@@ -45,6 +45,22 @@ Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findi
 - [x] Phase 43 artifact gap fixed — 43-VERIFICATION.md and 43-01-SUMMARY.md generated from on-disk deliverables.
 - [x] v2.3 milestone setup — PROJECT.md, MILESTONES.md, REQUIREMENTS.md, ROADMAP.md, STATE.md
 - [x] lesson-capture-gate.cjs wired into settings.json Stop hooks
+
+## Session Handoff (2026-04-18 — PR #10 review verification)
+
+**Branch**: `main` (clean, at `d811511`)
+
+**Session actions:**
+1. Verified 7 Gemini code review claims from PR #10 against on-disk reality
+2. Applied 4 doc fixes: injection pattern count 18→23 (DEVOPS-HANDOFF, ARCHITECTURE.md), v2.3→v2.4 evolution note (CLAUDE.md), "post-v2.7"→"v2.7" milestone tags (repo-map.txt, 10 occurrences)
+3. Full test suite green (2,621/0), committed and pushed to main
+
+**Next:**
+1. `/gsd:new-milestone` for v2.8
+2. Optional: execute cleanup to archive 12 shipped phase dirs
+3. Optional: evaluate esbuild 0.25→0.28 upgrade
+
+---
 
 ## Session Handoff (2026-04-14 — session 15)
 
