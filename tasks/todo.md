@@ -1,29 +1,30 @@
 # Todo
 
-## Current Status: v2.7 Complete — All milestones through Session Continuity shipped
+## Current Status: v2.7 Finalized — Ready for v2.8
 
-17 milestones shipped (v1.0 through v2.7). 54 phases executed. PR #9 (docs sync) was the final merge.
+17 milestones shipped (v1.0 through v2.7). 54 phases executed. Finalization complete.
 
 - **Tests**: 2,621 passing, 0 failures (529 suites)
 - **Coverage**: 91.51% overall, 83.24% branches, 98.01% functions
-- **Branch**: `main` (clean)
-- **Last commit**: `87a87f4 docs: sync all documentation to post-v2.7 live codebase state (#9)`
+- **Branch**: `chore/finalization-phase-2a-agent-fixes` → PR pending against main
 - **Tag**: v2.7 (2026-04-18)
 
-## Session Handoff (2026-04-18 — Finalization Phase 4+5: Verify & Docs Sync)
+## Session Handoff (2026-04-18 — Finalization Phases 7-9: Final Gate + Ship + Close)
 
-**Branch**: `chore/finalization-phase-2a-agent-fixes` (4 commits ahead of main)
-**Commits on branch**: (1) agent quality fixes, (2) backlog triage, (3) ARCHITECTURE.md + repo-map.txt resync, (4) living docs sync
+**Branch**: `chore/finalization-phase-2a-agent-fixes`
+**Action**: PR created, pending merge
 
 **Completed this session:**
-- [x] Phase 4: Full test suite — 2,621/2,621 pass, 0 fail, 529 suites
-- [x] Phase 4: Coverage — 91.51% overall, all modules above thresholds, security.cjs at 100%
-- [x] Phase 4: Code review of full branch diff — 0 findings at any severity
-- [x] Phase 5: Docs sync — README.md (command count fix), DEVOPS-HANDOFF.md (CI/CD section, hook table), PROJECT.md (footer), CHANGELOG.md (finalization entries)
-- [x] Phase 5: Verification — all 7 metrics confirmed matching across all docs
+- [x] /gsd:prime-patterns — 5 KB v2.1 patterns loaded
+- [x] /gsd:finalize Gate 2 — 2,621/2,621 tests pass, 91.51% coverage, all modules above thresholds
+- [x] /gsd:finalize Gate 3 — v2.7 milestone archived (REQUIREMENTS.md, ROADMAP.md, MILESTONES.md fixed)
+- [x] /gsd:finalize Gate 5 — todo.md updated
+- [x] /gsd:ship — PR created
+- [x] /gsd:cleanup --dry-run — stale artifacts inventoried
+- [x] /wrap — session closed
 
-**Immediate next actions (before v2.8):**
-1. Merge `chore/finalization-phase-2a-agent-fixes` to main
+**Next actions (v2.8):**
+1. Merge finalization PR to main
 2. `/gsd:new-milestone` for v2.8
 3. Optional: evaluate esbuild 0.25→0.28 upgrade
 

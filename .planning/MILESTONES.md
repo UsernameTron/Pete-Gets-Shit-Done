@@ -1,5 +1,19 @@
 # Milestones
 
+## v2.7 Session Continuity (Shipped: 2026-04-18)
+
+**Phases completed:** 3 phases (52-54), 7 plans, 23 requirements satisfied
+
+**Key accomplishments:**
+
+- Checkpoint Engine (`checkpoint.cjs`): deterministic session state JSON written before context resets, consumed by `/gsd:resume-work` and `/prime` to skip completed work — 18 tests, 97% coverage
+- Daily Dashboard (`daily.cjs`): one-command morning briefing showing milestone, phase, plan progress, branch state, and exact next action via `gatherDailyState`/`determineNextAction`/`formatDashboard` — 13 tests
+- Automated UAT Runner (`uat-patterns.cjs` + `uat-runner.cjs`): 8 pattern types (file_exists, file_not_exists, test_suite_green, coverage_threshold, file_contains, file_not_contains, files_identical, module_export_count) executed automatically before conversational UAT — 29 tests
+
+**Shipped via:** PR #6 (Phase 52), PR #7 (Phase 53), PR #8 (Phase 54). 2,621 unit tests green at ship. Full finalization: 5 phases (agent fixes, diagnostics, codebase audit, verify, docs sync).
+
+---
+
 ## v2.6 Developer Experience (Shipped: 2026-04-18)
 
 **Phases completed:** 3 phases (49-51), 5 plans, 7 tasks
