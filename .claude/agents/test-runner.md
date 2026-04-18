@@ -1,8 +1,8 @@
 ---
 name: test-runner
 description: >
-  Runs the 454+ test suites in get-shit-done/, diagnoses failures, and fixes
-  test code. Use when tests fail, when verifying changes, when checking coverage,
+  Runs the 2,600+ test assertions across 529 suites in get-shit-done/, diagnoses
+  failures, and fixes test code. Use when tests fail, when verifying changes, when checking coverage,
   or when writing new test suites. Does NOT modify production code — only test
   files and test helpers.
 tools: Read, Edit, Bash, Glob, Grep
