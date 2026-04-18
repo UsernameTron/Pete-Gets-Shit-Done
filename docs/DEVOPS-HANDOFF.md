@@ -144,17 +144,19 @@ Current coverage exceeds all thresholds.
 
 ## CI/CD Status
 
-**No CI/CD pipeline.** Distribution is npm-only via `npx get-shit-done-cc@latest`. The package is published manually to npm.
+**CI pipeline active.** GitHub Actions runs on every PR and push to main.
 
 | Aspect | Status |
 |--------|--------|
-| Continuous Integration | Not configured |
-| Continuous Deployment | Not configured |
+| Continuous Integration | GitHub Actions (`test.yml` — Node 20+22, Ubuntu + macOS) |
+| Security Scanning | GitHub Actions (`security-scan.yml` — prompt injection, secrets, base64) |
+| Issue Management | GitHub Actions (`auto-label-issues.yml`) |
+| Continuous Deployment | Not configured (manual npm publish) |
 | npm publish | Manual (`npm publish`) |
 | Pre-publish gate | `prepublishOnly` runs `build:hooks` |
-| Test gate | Manual (run `npm test && npm run test:e2e` before publish) |
+| Test gate | CI enforced (`npm test && npm run test:e2e` before merge) |
 
-This is appropriate for the project's current stage: a CLI plugin distributed via npm with no server component, no API surface, and no production deployment.
+Distribution is npm-only via `npx get-shit-done-cc@latest`.
 
 ---
 
@@ -172,12 +174,13 @@ The package has **zero runtime dependencies**. This eliminates supply chain risk
 
 ### Hook Safety
 
-Five execution hooks are bundled from source via esbuild:
+Six execution hooks are bundled from source via esbuild:
 
 | Hook | Purpose |
 |------|---------|
-| `gsd-prompt-guard.js` | Prompt injection scanning on tool inputs |
-| `gsd-workflow-guard.js` | Workflow state validation |
+| `gsd-prompt-guard.js` | Prompt injection scanning on tool inputs (18 patterns) |
+| `gsd-config-protection.js` | Config file protection (32 protected files) |
+| `gsd-cost-tracker.js` | JSONL cost metrics per session |
 | `gsd-context-monitor.js` | Context window usage monitoring |
 | `gsd-check-update.js` | Version update checking |
 | `gsd-statusline.js` | Status line display |

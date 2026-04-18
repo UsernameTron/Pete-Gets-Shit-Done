@@ -10,6 +10,22 @@
 - **Last commit**: `87a87f4 docs: sync all documentation to post-v2.7 live codebase state (#9)`
 - **Tag**: v2.7 (2026-04-18)
 
+## Session Handoff (2026-04-18 — Finalization Phase 2C+3)
+
+**Branch**: `chore/finalization-phase-2a-agent-fixes` (3 commits ahead of main)
+**Commits on branch**: (1) agent quality fixes, (2) backlog triage, (3) ARCHITECTURE.md + repo-map.txt resync
+
+**Completed this session:**
+- [x] Phase 2C: 8 drifted agents resynced to ~/.claude/agents/ — 17/17 verified clean
+- [x] Phase 2C: 11 .bak-* files removed from ~/.claude/agents/
+- [x] Phase 3: Dependency audit — 0 vulnerabilities, 0 unused deps, all MIT
+- [x] Phase 3: Codebase map — repo-map.txt regenerated, ARCHITECTURE.md updated (5 drift dimensions fixed)
+
+**Immediate next actions (before v2.8):**
+1. Merge `chore/finalization-phase-2a-agent-fixes` to main
+2. `/gsd:new-milestone` for v2.8
+3. Optional: evaluate esbuild 0.25→0.28 upgrade
+
 ## Open Items
 
 - [x] **Phase 44: Milestone Audit + Docs Sync** — 8/8 REQs audited, CLAUDE.md/README.md/DEVOPS-HANDOFF.md updated
