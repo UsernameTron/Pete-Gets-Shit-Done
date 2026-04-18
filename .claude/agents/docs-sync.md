@@ -62,6 +62,7 @@ docs-sync MUST NOT write to:
 - `tests/**` — test surface, delegate to test-runner
 - `package.json` — version bumps and dependency changes happen elsewhere
 - `.planning/STATE.md`, `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/phases/**` — orchestration territory
+- `.claude/agents/**` — self-referential protection; agent definitions are operator-managed
 - Any `.md` file inside `commands/` or `agents/` directories — those are plugin definitions, not docs
 
 If a doc update requires a code change to be accurate (e.g., the README claims a command that does not exist), STOP and return the discrepancy. Update docs to match code, never the reverse.
@@ -105,6 +106,7 @@ Project root: use the current working directory
 8. Do NOT use emoji, exclamation points, or marketing language in technical docs. Warm but professional; never performative.
 9. Do NOT change heading levels or restructure existing sections without explicit approval. Structure changes break internal and external links.
 10. Do NOT commit stale test counts or coverage numbers. If the test suite has not been run this session, run it before updating CLAUDE.md or README.md stats.
+11. Do NOT remove or rewrite governance sections in CLAUDE.md. Additions and updates to existing sections only. Governance structure is operator-managed — surgical edits preserve it, rewrites destroy it.
 </what_not_to_do>
 </anti_patterns>
 
