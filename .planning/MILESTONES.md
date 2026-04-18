@@ -1,5 +1,19 @@
 # Milestones
 
+## v2.6 Developer Experience (Shipped: 2026-04-18)
+
+**Phases completed:** 3 phases (49-51), 5 plans, 7 tasks
+
+**Key accomplishments:**
+
+- One-command install (`npm run setup`): takes a fresh git clone to a fully working, health-verified GSD install with idempotent npm install, hook build, plugin registration, and verification table
+- `/gsd:ci-watch` command: polls GitHub Actions in real time, surfaces pass/fail results inline, fetches failure logs, and suggests concrete fixes from a 6-pattern diagnostic library
+- `/gsd:sync-docs` command: audits and rewrites README.md, CLAUDE.md, PROJECT.md, DEVOPS-HANDOFF.md, and CHANGELOG.md from live codebase state, then reports what changed
+
+**Shipped via:** PR #3 (Phase 49) + PR #4 (Phases 50-51). UAT 9/9 passed, 2,561 unit tests green.
+
+---
+
 ## v2.5 Final Documentation Sync (Shipped: 2026-04-17)
 
 **Phases completed:** 2 phases (47-48), 9 plans, 11 tasks

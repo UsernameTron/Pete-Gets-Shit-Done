@@ -6,15 +6,15 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.6 Developer Experience (started 2026-04-17)
-**Previous:** v2.5 Final Documentation Sync (shipped 2026-04-17, PR #2 merged)
+**Current milestone:** Planning next milestone (v2.6 shipped 2026-04-18)
+**Previous:** v2.6 Developer Experience (shipped 2026-04-18, PR #3 + PR #4 merged)
 **Package:** `get-shit-done-cc` v1.30.0
 **Tests:** 2,561 total, all passing
 **Coverage:** 90.79% statements, 83.11% branches, 97.43% functions
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
-**Milestones shipped:** 15 (v1.0 through v2.5)
+**Milestones shipped:** 16 (v1.0 through v2.6)
 **Total phases executed:** 51
 
 ## Core Value
@@ -25,26 +25,27 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ### Active
 
-- [ ] Install-from-clone script — one command from fresh git clone to working GSD install
-- [ ] /gsd:ci-watch command — auto-poll CI after push, surface pass/fail inline
-- [x] /gsd:sync-docs command — scan codebase and update all docs to match current state (Phase 51, 2026-04-18)
+(None — planning next milestone)
+
+### Validated
+
+- Install-from-clone script (`npm run setup`) — v2.6 Phase 49
+- /gsd:ci-watch command — v2.6 Phase 50
+- /gsd:sync-docs command — v2.6 Phase 51
 
 ### Out of Scope
 
 - GUI installer — CLI-only project, no graphical installer needed
-- CI provider abstraction — GitHub Actions only, no Jenkins/GitLab/Circle support this milestone
+- CI provider abstraction — GitHub Actions only, no Jenkins/GitLab/Circle support
 
-## Current Milestone: v2.6 Developer Experience
+## Most Recent: v2.6 Developer Experience (shipped 2026-04-18)
 
-**Goal:** Three high-impact DX improvements that make GSD portable, CI-aware, and self-documenting.
+Three high-impact DX improvements that make GSD portable, CI-aware, and self-documenting:
+- `npm run setup` — one-command install from fresh clone with verification table
+- `/gsd:ci-watch` — real-time GitHub Actions polling with failure diagnosis
+- `/gsd:sync-docs` — automated documentation sync from live codebase state
 
-**Target features:**
-- Install-from-clone script (npm install, symlink commands, install hooks, register plugins, copy injection-patterns.json)
-- /gsd:ci-watch command (auto-poll gh run list, wait for completion, surface results inline)
-- /gsd:sync-docs command (scan codebase, update README, CLAUDE.md, PROJECT.md, DEVOPS-HANDOFF, CHANGELOG, references)
-
-**Phases:** 3 (Phases 49-51), sequential execution
-**Status:** All 3 phases complete — ready to close milestone
+3 phases (49-51), 5 plans, 18/18 requirements complete. PR #3 + PR #4 merged.
 
 <details>
 <summary><strong>v2.4 Foundation Hardening (7/7 requirements shipped)</strong></summary>
@@ -333,4 +334,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 -- Phase 50 (CI Watch) complete, 2/3 phases shipped in v2.6*
+*Last updated: 2026-04-18 after v2.6 milestone*
