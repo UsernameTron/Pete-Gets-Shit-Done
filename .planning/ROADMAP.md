@@ -67,7 +67,7 @@
 Plans:
 - [x] 54-01-PLAN.md -- Pattern registry (TDD)
 - [x] 54-02-PLAN.md -- Runner orchestrator (TDD)
-- [ ] 54-03-PLAN.md -- Integration + full suite green
+- [x] 54-03-PLAN.md -- Integration + full suite green
 
 ## Progress
 
