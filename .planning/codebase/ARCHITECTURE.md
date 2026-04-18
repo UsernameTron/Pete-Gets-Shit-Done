@@ -1,6 +1,6 @@
 # Architecture
 
-**Analysis Date:** 2026-04-06
+**Analysis Date:** 2026-04-18
 
 ## Pattern Overview
 
@@ -35,7 +35,7 @@ User Input (/gsd:command)
                                   | dispatches to
                                   v
                     +---------------------------+
-                    | lib/ Modules (19 files)   |
+                    | lib/ Modules (23 files)   |
                     |---------------------------|
                     | Layer 0: model-profiles,  |
                     |          security          |
@@ -46,7 +46,9 @@ User Input (/gsd:command)
                     |   roadmap, verify, init,   |
                     |   commands, workstream,     |
                     |   history, classify, uat,   |
-                    |   template, profile-*       |
+                    |   uat-patterns, uat-runner, |
+                    |   template, profile-*,      |
+                    |   checkpoint, daily         |
                     +---------------------------+
                               |
                               v
@@ -84,28 +86,45 @@ User Input (/gsd:command)
 
 **Layer 3 -- Application:**
 - Purpose: High-level operations that compose lower layers into workflow-specific logic
-- Location: `get-shit-done/bin/lib/` (13 modules: `phase.cjs`, `milestone.cjs`, `roadmap.cjs`, `verify.cjs`, `init.cjs`, `commands.cjs`, `workstream.cjs`, `history.cjs`, `classify.cjs`, `uat.cjs`, `template.cjs`, `profile-output.cjs`, `profile-pipeline.cjs`)
-- Contains: Phase operations (add/remove/complete), milestone archiving, roadmap parsing, verification suite, compound init commands, task classification, user profiling
+- Location: `get-shit-done/bin/lib/` (17 modules)
+- Modules:
+  - `phase.cjs` — phase add/remove/complete operations
+  - `milestone.cjs` — milestone archiving
+  - `roadmap.cjs` — roadmap parsing
+  - `verify.cjs` — verification suite
+  - `init.cjs` — compound init commands
+  - `commands.cjs` — git and command helpers
+  - `workstream.cjs` — workstream isolation
+  - `history.cjs` — session history
+  - `classify.cjs` — task classification (v2.0 Intelligence Layer)
+  - `uat.cjs` — UAT orchestration
+  - `uat-patterns.cjs` — UAT pattern library (added Phase 54, post-v2.7)
+  - `uat-runner.cjs` — automated UAT runner (added Phase 54, post-v2.7)
+  - `template.cjs` — template scaffolding
+  - `profile-output.cjs` — user profiling output
+  - `profile-pipeline.cjs` — profiling pipeline
+  - `checkpoint.cjs` — checkpoint engine (added Phase 52, post-v2.7)
+  - `daily.cjs` — daily dashboard (added Phase 53, post-v2.7)
 - Depends on: Layers 0-2
 - Used by: `gsd-tools.cjs` CLI router
 
 **Markdown Command Layer:**
 - Purpose: Define slash commands that AI runtimes expose to users
-- Location: `commands/gsd/*.md` (61 files)
+- Location: `commands/gsd/*.md` (65 files)
 - Contains: Frontmatter (name, description, allowed-tools, agent assignment), objective, execution context references, process instructions
 - Depends on: Workflow files via `@` references
 - Used by: AI runtime (Claude Code, Copilot, etc.)
 
 **Workflow Layer:**
 - Purpose: Detailed step-by-step execution instructions for each command
-- Location: `get-shit-done/workflows/*.md` (57 files)
+- Location: `get-shit-done/workflows/*.md` (59 files)
 - Contains: Multi-step processes with `<step>` tags, runtime compatibility notes, agent type references, bash code blocks that invoke `gsd-tools.cjs`
 - Depends on: `gsd-tools.cjs` CLI, agent definitions, reference docs
 - Used by: Command files and agents
 
 **Agent Layer:**
 - Purpose: Define specialized AI subagents with focused expertise
-- Location: `agents/*.md` (15 active agents)
+- Location: `agents/*.md` (17 active agents, 8 archived in `agents/_archived/`)
 - Contains: System prompts, tool restrictions, model assignments, detailed behavioral instructions
 - Depends on: Workflow files, `gsd-tools.cjs`
 - Used by: Workflow orchestrators via `Task(subagent_type="gsd-executor", ...)`
@@ -184,20 +203,31 @@ User Input (/gsd:command)
 - Triggers: `npx get-shit-done-cc@latest`, `npm install -g get-shit-done-cc`
 - Responsibilities: Multi-runtime installer -- copies files, converts formats, scaffolds projects, installs plugins
 
+**`bin/setup-from-clone.js` (dev setup):**
+- Location: `bin/setup-from-clone.js`
+- Triggers: Manual invocation by contributors cloning the repo
+- Responsibilities: Developer environment setup without npm publish cycle
+
 **`get-shit-done/bin/gsd-tools.cjs` (CLI tool):**
 - Location: `get-shit-done/bin/gsd-tools.cjs` (1052 lines)
 - Triggers: Called by workflow markdown files via `node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" <command> [args]`
 - Responsibilities: CLI router that dispatches to lib/ modules. Handles `--raw`, `--pick`, `--cwd`, `--ws` flags. All structured operations go through here.
 
 **`commands/gsd/*.md` (slash commands):**
-- Location: `commands/gsd/` (61 command files)
+- Location: `commands/gsd/` (65 command files)
 - Triggers: User typing `/gsd:command-name` in AI runtime
 - Responsibilities: Define the user-facing command interface, tool permissions, agent delegation, and reference the workflow to execute
 
 **`hooks/dist/*.js` (lifecycle hooks):**
-- Location: `hooks/dist/` (5 compiled hooks)
+- Location: `hooks/dist/` (6 compiled hooks — 1 more than documented pre-v2.7)
 - Triggers: Claude Code hook events (PreToolUse, PostToolUse, SessionStart, etc.)
-- Responsibilities: `gsd-check-update.js` (version check), `gsd-context-monitor.js` (token tracking), `gsd-prompt-guard.js` (input validation), `gsd-statusline.js` (status display), `gsd-workflow-guard.js` (workflow enforcement)
+- Responsibilities:
+  - `gsd-check-update.js` — version check
+  - `gsd-context-monitor.js` — token tracking
+  - `gsd-prompt-guard.js` — input validation (18 injection patterns)
+  - `gsd-statusline.js` — status display
+  - `gsd-config-protection.js` — config file protection (32 protected files, added v2.3)
+  - `gsd-cost-tracker.js` — JSONL cost metrics (added v2.3)
 
 ## Error Handling
 
@@ -214,7 +244,7 @@ User Input (/gsd:command)
 
 **Logging:** Debug diagnostics via `debugLog()` to stderr when `GSD_DEBUG` is set. Production output is JSON to stdout via `fs.writeSync(1, ...)`.
 
-**Validation:** `security.cjs` provides `validateShellArg()` for shell injection prevention. Config keys validated against `VALID_CONFIG_KEYS` set with typo suggestions. Frontmatter validated against schemas (plan/summary/verification). Architecture layering enforced by `tests/architecture.test.cjs`.
+**Validation:** `security.cjs` provides `validateShellArg()` for shell injection prevention. Config keys validated against `VALID_CONFIG_KEYS` set with typo suggestions. Frontmatter validated against schemas (plan/summary/verification). Architecture layering enforced by `tests/architecture.test.cjs`. Prompt injection detection uses patterns from `lib/injection-patterns.json`.
 
 **Authentication:** Not applicable -- GSD is a local development tool. No network auth. Optional Brave Search API key for web search feature.
 
@@ -230,7 +260,7 @@ User Input (/gsd:command)
 
 **Plugin: claude-mcp-ecosystem:**
 - Location: `plugins/claude-mcp-ecosystem/`
-- Contains: 9 commands (`prime.md`, `wrap.md`, `agent-*.md`), 7 skill directories, workspace operations, subagent lifecycle management
+- Contains: Commands, skills, workspace-ops, subagent-lifecycle, context docs
 - Purpose: Session initialization, agent CRUD, workspace isolation
 
 **Plugin: claude-code-factory:**
@@ -243,6 +273,12 @@ User Input (/gsd:command)
 - Contains: `scripts/` (health-check, plugin install, project scaffold), `templates/` (project/global config), `tests/` (integration tests for governance)
 - Purpose: Project bootstrapping, health validation, plugin installation
 
+## Static Data
+
+**`lib/` (top-level):**
+- Location: `lib/injection-patterns.json`, `lib/ci-patterns.json`
+- Purpose: Pattern data loaded by hooks and security modules at runtime — not CJS modules, pure JSON
+
 ---
 
-*Architecture analysis: 2026-04-06*
+*Architecture analysis: 2026-04-18*

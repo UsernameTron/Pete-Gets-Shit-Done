@@ -1,0 +1,240 @@
+Pete-Gets-Shit-Done/                        # Project root
+├── .base64scanignore                        # Base64 scan exclusion list
+├── .c8rc.json                               # c8 coverage configuration
+├── .claude/                                 # Claude Code project settings
+│   ├── agent-memory/                        # Persistent agent memory (architect, auditor)
+│   ├── agents/                              # Project-scoped Claude Code agent definitions
+│   │   ├── docs-sync.md
+│   │   ├── plugin-developer.md
+│   │   └── test-runner.md
+│   ├── hooks/
+│   │   └── lesson-capture-gate.cjs          # Hook: enforces lesson.md update on corrections
+│   ├── settings.json
+│   └── settings.local.json
+├── .continue-here.md                        # Session resume pointer
+├── .github/                                 # GitHub configuration
+│   ├── CODEOWNERS
+│   ├── FUNDING.yml
+│   ├── ISSUE_TEMPLATE/
+│   └── workflows/
+│       ├── auto-label-issues.yml
+│       ├── security-scan.yml
+│       └── test.yml
+├── .planning/                               # GSD execution state (committed)
+│   ├── codebase/                            # Codebase mapping documents
+│   │   ├── ARCHITECTURE.md
+│   │   ├── CONCERNS.md
+│   │   ├── CONVENTIONS.md
+│   │   ├── INTEGRATIONS.md
+│   │   ├── STACK.md
+│   │   ├── STRUCTURE.md
+│   │   └── TESTING.md
+│   ├── config.json                          # GSD project config
+│   ├── milestones/                          # Milestone history (v1.0–v2.6)
+│   │   ├── archived-phases/                 # Phases 01–25, archived
+│   │   ├── v1.9-phases/
+│   │   ├── v2.0-phases/
+│   │   ├── v2.1-phases/
+│   │   └── v2.6-phases/
+│   ├── phases/                              # Active and recent phase directories
+│   │   ├── 41-hook-ports/
+│   │   ├── 42-security-guardian/
+│   │   ├── 43-agent-quality-infrastructure/
+│   │   ├── 44-milestone-audit-docs-sync/
+│   │   ├── 45-critical-fixes/
+│   │   ├── 46-housekeeping/
+│   │   ├── 47-agent-roster-assessment/
+│   │   ├── 48-final-documentation-sync/
+│   │   ├── 52-checkpoint-engine/
+│   │   ├── 53-daily-dashboard/
+│   │   └── 54-automated-uat-runner/         # Phase added post-v2.7
+│   ├── quick/                               # Quick-task records
+│   ├── research/                            # Research outputs and codebase maps
+│   ├── PROJECT.md
+│   ├── ROADMAP.md
+│   └── STATE.md
+├── .release-monitor.sh                      # Release monitoring script
+├── .secretscanignore                        # Secret scan exclusion list
+├── agents/                                  # GSD built-in agent definitions (17 active)
+│   ├── _archived/                           # Retired agents (8 files)
+│   ├── gsd-advisor-researcher.md
+│   ├── gsd-assumptions-analyzer.md
+│   ├── gsd-codebase-mapper.md
+│   ├── gsd-debugger.md
+│   ├── gsd-dependency-auditor.md
+│   ├── gsd-ecosystem-auditor.md
+│   ├── gsd-executor.md
+│   ├── gsd-planner.md
+│   ├── gsd-research-orchestrator.md
+│   ├── gsd-research-synthesizer.md
+│   ├── gsd-roadmapper.md
+│   ├── gsd-ui-auditor.md
+│   ├── gsd-ui-checker.md
+│   ├── gsd-ui-researcher.md
+│   ├── gsd-user-profiler.md
+│   ├── gsd-validator-hub.md
+│   └── gsd-verifier.md
+├── assets/                                  # Brand assets (logos, SVGs)
+├── bin/                                     # npm package entry points
+│   ├── install.js                           # npm postinstall installer (~5241 lines)
+│   └── setup-from-clone.js                  # Dev setup from git clone
+├── CHANGELOG.md
+├── CLAUDE.md                                # Project Claude Code instructions
+├── commands/                                # User-facing slash command definitions
+│   └── gsd/                                 # 65 command .md files
+│       ├── add-backlog.md
+│       ├── add-phase.md
+│       ├── audit-agents.md
+│       ├── crew.md
+│       ├── debug.md
+│       ├── discuss-phase.md
+│       ├── execute-phase.md
+│       ├── finalize.md
+│       ├── forensics.md
+│       ├── join-discord.md
+│       ├── map-codebase.md
+│       ├── plan-phase.md
+│       ├── portfolio.md
+│       ├── prime-patterns.md
+│       ├── ship.md
+│       ├── verify-work.md
+│       └── [49 more ...]
+├── CONTRIBUTING.md
+├── docs/                                    # Project documentation
+│   ├── archive/
+│   ├── health-reports/
+│   ├── AGENTS.md
+│   ├── ARCHITECTURE.md
+│   ├── CLI-TOOLS.md
+│   ├── COMMANDS.md
+│   ├── CONFIGURATION.md
+│   ├── DEVOPS-HANDOFF.md
+│   ├── FEATURES.md
+│   ├── README-technical.md
+│   ├── USER-GUIDE.md
+│   └── [several more ...]
+├── get-shit-done/                           # Installed runtime payload (copied to ~/.claude/)
+│   ├── bin/
+│   │   ├── gsd-tools.cjs                    # CLI router (~1052 lines)
+│   │   └── lib/                             # 23 CJS modules (4-layer architecture)
+│   │       ├── checkpoint.cjs               # Layer 3 — checkpoint engine (post-v2.7)
+│   │       ├── classify.cjs                 # Layer 3 — task classification
+│   │       ├── commands.cjs                 # Layer 3 — git/command operations
+│   │       ├── config.cjs                   # Layer 2 — config CRUD
+│   │       ├── core.cjs                     # Layer 1 — shared hub (~1705 lines)
+│   │       ├── daily.cjs                    # Layer 3 — daily dashboard (post-v2.7)
+│   │       ├── frontmatter.cjs              # Layer 2 — frontmatter parsing
+│   │       ├── history.cjs                  # Layer 3 — session history
+│   │       ├── init.cjs                     # Layer 3 — compound init commands
+│   │       ├── milestone.cjs                # Layer 3 — milestone archiving
+│   │       ├── model-profiles.cjs           # Layer 0 — model profile definitions
+│   │       ├── phase.cjs                    # Layer 3 — phase operations
+│   │       ├── profile-output.cjs           # Layer 3 — user profiling output
+│   │       ├── profile-pipeline.cjs         # Layer 3 — profiling pipeline
+│   │       ├── roadmap.cjs                  # Layer 3 — roadmap parsing
+│   │       ├── security.cjs                 # Layer 0 — input validation/sanitization
+│   │       ├── state.cjs                    # Layer 2 — STATE.md operations
+│   │       ├── template.cjs                 # Layer 3 — template operations
+│   │       ├── uat-patterns.cjs             # Layer 3 — UAT pattern library (post-v2.7)
+│   │       ├── uat-runner.cjs               # Layer 3 — automated UAT runner (post-v2.7)
+│   │       ├── uat.cjs                      # Layer 3 — UAT orchestration
+│   │       ├── verify.cjs                   # Layer 3 — verification suite
+│   │       └── workstream.cjs               # Layer 3 — workstream isolation
+│   ├── commands/gsd/                        # Symlink/copy target for runtime commands
+│   ├── references/                          # Reference docs loaded by workflows
+│   │   ├── agent-necessity-gate.md
+│   │   ├── agent-threat-model.md
+│   │   ├── checkpoints.md
+│   │   ├── continuation-format.md
+│   │   ├── decimal-phase-calculation.md
+│   │   ├── git-integration.md
+│   │   ├── git-planning-commit.md
+│   │   ├── model-profile-resolution.md
+│   │   ├── model-profiles.md
+│   │   ├── phase-argument-parsing.md
+│   │   ├── planning-config.md
+│   │   ├── questioning.md
+│   │   ├── tdd.md
+│   │   ├── ui-brand.md
+│   │   ├── user-profiling.md
+│   │   ├── verification-patterns.md
+│   │   └── workstream-flag.md
+│   ├── templates/                           # Scaffold templates for new projects
+│   │   ├── codebase/
+│   │   ├── research-project/
+│   │   └── [22 .md and .json template files]
+│   └── workflows/                           # Step-by-step workflow instructions (59 files)
+│       ├── checkpoint.md                    # Workflow added post-v2.7
+│       ├── daily.md                         # Workflow added post-v2.7
+│       ├── verify-work.md                   # Updated post-v2.7 (UAT runner integration)
+│       └── [56 more ...]
+├── governance/                              # Project bootstrapping and health tooling
+│   ├── scripts/
+│   │   ├── health-check.sh
+│   │   ├── install-plugins.sh
+│   │   └── scaffold-project.sh
+│   ├── templates/
+│   │   ├── context/
+│   │   ├── global/
+│   │   └── project/
+│   └── tests/                               # Shell integration tests for governance
+├── hooks/                                   # Lifecycle hooks (source + compiled)
+│   ├── dist/                                # Compiled hook output (6 files)
+│   │   ├── gsd-check-update.js
+│   │   ├── gsd-config-protection.js         # Config file protection hook (post-v2.3)
+│   │   ├── gsd-context-monitor.js
+│   │   ├── gsd-cost-tracker.js              # Cost tracking hook (post-v2.3)
+│   │   ├── gsd-prompt-guard.js
+│   │   └── gsd-statusline.js
+│   └── [6 source .js files mirroring dist/]
+├── lib/                                     # Top-level static data files
+│   ├── ci-patterns.json                     # CI pattern definitions
+│   └── injection-patterns.json              # Prompt injection detection patterns
+├── LICENSE
+├── package.json
+├── package-lock.json
+├── plugins/                                 # Bundled plugins
+│   ├── claude-code-factory/                 # Extension generation plugin
+│   │   ├── agents/
+│   │   └── skills/
+│   └── claude-mcp-ecosystem/                # Session management plugin
+│       ├── commands/
+│       ├── context/
+│       ├── docs/
+│       ├── skills/
+│       ├── subagent-lifecycle/
+│       └── workspace-ops/
+├── README.md
+├── references/                              # Root-level reference docs (2 files)
+│   ├── agent-design-patterns.md
+│   └── frontmatter-reference.md
+├── scripts/                                 # Build and CI utility scripts (10 files)
+│   ├── build-hooks.js
+│   ├── build-layer1-fixture.cjs
+│   ├── ci-coverage-report.sh
+│   ├── generate-gap-analysis.cjs
+│   ├── gsd-agent-health-check.sh
+│   ├── prompt-injection-scan.sh
+│   ├── run-e2e-tests.cjs
+│   ├── run-tests.cjs
+│   └── secret-scan.sh
+├── SECURITY.md
+├── tasks/                                   # Governance tracking
+│   ├── lessons.md
+│   └── todo.md
+└── tests/                                   # Test suite (~83 test files)
+    ├── e2e/                                 # End-to-end tests (11 files)
+    ├── fixtures/                            # Test fixtures
+    ├── perf/                                # Performance benchmarks (1 file)
+    ├── helpers.cjs
+    ├── hook-helpers.cjs
+    ├── uat-patterns.test.cjs                # Added post-v2.7
+    ├── uat-runner.test.cjs                  # Added post-v2.7
+    └── [78 more *.test.cjs files]
+
+---
+Generated: 2026-04-18
+Branch: chore/finalization-phase-2a-agent-fixes
+Last tag: v2.7
+Post-v2.7 additions: Phase 54 (automated-uat-runner), checkpoint.cjs, daily.cjs,
+  uat-patterns.cjs, uat-runner.cjs, corresponding tests and workflows
