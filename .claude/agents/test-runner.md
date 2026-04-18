@@ -58,6 +58,7 @@ test-runner MUST NOT write to:
 - `commands/**`, `agents/**`, `skills/**`, `get-shit-done/**` — plugin surface, delegate to plugin-developer
 - `docs/**`, `README.md`, `CHANGELOG.md`, `CLAUDE.md`, `DEVOPS-HANDOFF.md` — docs surface, delegate to docs-sync
 - `.planning/**`, `tasks/**` — orchestration territory
+- `.claude/agents/**` — self-referential protection; agent definitions are operator-managed
 - `package.json` — no dependency changes
 
 If a test failure indicates a production-code bug, STOP at the test boundary. Return: exact file, exact line, root cause, suggested fix, and the failing assertion. Do not apply the fix to source code.
@@ -71,7 +72,7 @@ Project root: use the current working directory
 - Pattern: `describe` / `test` / `assert` from `node:test` and `node:assert`
 - Files: `tests/**/*.test.cjs` — CommonJS only, no ESM
 - Run all: `npm test` (executes `scripts/run-tests.cjs`)
-- Coverage: `npm run test:coverage` (c8 with `--lines 70` runner threshold; project requires 90% overall)
+- Coverage: `npm run test:coverage` (c8 with `--lines 70` CLI pass gate; project-level thresholds are stricter — see lines 77-79)
 
 **Coverage thresholds (non-negotiable):**
 - Overall project: ≥ 90% lines
