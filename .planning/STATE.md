@@ -19,13 +19,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** Phase 54 — automated-uat-runner
+**Current focus:** Post-v2.7 finalization — ready for v2.8
 
 ## Current Position
 
-Phase: 54 (Automated UAT Runner) — executed (3/3 plans complete, 2621 tests green)
-Milestone: v2.7 Session Continuity
-Next: `/gsd:verify-work 54` then `/gsd:ship`
+Milestone: v2.7 Session Continuity — shipped, tagged, archived
+Finalization: Phases 2A (agent fixes), 2B (diagnostics), 2C (agent resync), 3 (codebase audit) — all complete
+Branch: `chore/finalization-phase-2a-agent-fixes` (3 commits ahead of main)
+Next: Merge branch to main, then `/gsd:new-milestone` for v2.8
 Last activity: 2026-04-18
 
 ## Milestone History
