@@ -299,7 +299,7 @@ Example (LLM fallback):
 **Error:**
   Error: Cannot find module '../lib/new-feature'
   Require stack:
-    - /home/runner/work/project/tests/unit/new-feature.test.cjs
+    - tests/unit/new-feature.test.cjs
 
 **Diagnosis:** LLM analysis
 **Category:** llm
