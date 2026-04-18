@@ -1,5 +1,43 @@
 # Retrospective
 
+## v2.6 Developer Experience (2026-04-18)
+
+### What Was Built
+
+- **One-command install** (`bin/setup-from-clone.js`, 342 lines): Orchestrates npm install, hook build, Claude installer, injection-patterns copy with mtime-based idempotency and a UAT-style verification table.
+- **CI Watch** (`commands/gsd/ci-watch.md`, 402 lines): Real-time GitHub Actions polling with configurable interval, failure log fetching, and fix suggestions from a 6-pattern diagnostic library (`lib/ci-patterns.json`).
+- **Sync Docs** (`commands/gsd/sync-docs.md`, 421 lines): Automated documentation sync across README.md, CLAUDE.md, PROJECT.md, DEVOPS-HANDOFF.md, and CHANGELOG.md from live codebase state.
+
+### What Worked Well
+
+- **Three-PR shipping model**: Phase 49 shipped independently (PR #3), then Phases 50-51 shipped together (PR #4). This kept PRs reviewable and allowed independent CI validation.
+- **Combined UAT**: Running UAT across all 3 phases at once (9/9 tests) was more efficient than per-phase UAT for this milestone size.
+- **Inline workflow pattern**: ci-watch and sync-docs both use the inline workflow pattern (skill file contains the full workflow) rather than separate lib modules. This kept the codebase simple for DX commands that orchestrate existing tools.
+
+### What Was Inefficient
+
+- **REQUIREMENTS.md checkbox drift (again)**: All 18 requirements remained "Pending" in the traceability table despite all work being complete. This is the third milestone (v1.1, v2.1, v2.6) with the same issue. The execute-phase workflow does not update REQUIREMENTS.md as tasks complete.
+- **Phase 49 roadmap status stale**: ROADMAP.md showed Phase 49 as "Not started" and "0/?" plans even after PR #3 merged. The roadmap analyze tool reported Phase 49 as "partial" because it has 2 plan files but only 1 summary (Plan 02 was folded into Plan 01 during execution).
+
+### Patterns Established
+
+- **Inline workflow for DX commands**: Commands that orchestrate existing tools (gh, git, npm) work well as inline skill workflows rather than requiring new lib modules.
+- **Pattern library for diagnostics**: `lib/ci-patterns.json` provides a declarative, extensible approach to failure diagnosis — add new patterns without changing code.
+
+### Key Metrics
+
+| Metric | Before v2.6 | After v2.6 |
+|--------|-------------|------------|
+| Test suites | 479 | 479 (no regression) |
+| Assertions | 2,490 | 2,561 |
+| Coverage | 90.79% | 90.79% (maintained) |
+| GSD commands | 63 | 65 (+ci-watch, +sync-docs) |
+| Milestones shipped | 15 | 16 |
+| Total phases | 48 | 51 |
+| Requirements shipped (cumulative) | ~130 | 148 (18 new) |
+
+---
+
 ## v2.5 Final Documentation Sync (2026-04-17)
 
 ### What Was Built
@@ -119,4 +157,4 @@
 | Plans executed | 3 (v1.0) | 11 (v1.1) |
 
 ---
-*Last updated: 2026-03-26*
+*Last updated: 2026-04-18*
