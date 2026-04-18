@@ -6,6 +6,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Phase 54: Automated UAT Runner** — `lib/uat-runner.cjs` with pattern registry, `matchPattern()`, `runAutomatedUAT()`, pass/fail table before conversational UAT (4f4234d)
+- **Phase 53: Daily Dashboard** — `lib/daily.cjs` with `gatherDailyState()`, `determineNextAction()`, `formatDashboard()` for one-command morning status (8c39d22)
+- **Phase 52: Checkpoint Engine** — `lib/checkpoint.cjs` for session state persistence and recovery (7fb4137)
+- **Phase 49: One-Command Install** — `npx get-shit-done-cc@latest` interactive installer with runtime multi-select (ae7a385)
+- **`/gsd:daily` command** — Morning dashboard showing milestone, phase, plan, branch, tests, next action
+- **`/gsd:session-report` command** — Generate session summary from state and git history
+
+### Changed
+- **v2.7 Session Continuity milestone** — 3 phases (52-54), 7 plans, all shipped (4f4234d)
+- **v2.6 Developer Experience milestone** — 3 phases (49-51), 5 plans, all shipped (f1bbcae)
+- **Verified counts:** 65 commands, 17 agents, 45 skills, 529 test suites, 2,621 assertions, 91.51% statement / 83.24% branch / 98.01% function coverage
+
 ## [v2.5] - 2026-04-17
 
 v2.5 Final Documentation Sync — maintenance mode closure.

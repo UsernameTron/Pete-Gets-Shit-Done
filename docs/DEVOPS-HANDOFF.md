@@ -1,6 +1,6 @@
 # DevOps Handoff — get-shit-done-cc
 
-> Last verified: 2026-04-17 | Version: 1.30.0 | Milestone: v2.5
+> Last verified: 2026-04-18 | Version: 1.30.0 | Milestone: v2.7
 
 ---
 
@@ -43,7 +43,7 @@ The installer (`bin/install.js`) copies the following into the user's Claude Cod
 
 | Component | Destination | Contents |
 |-----------|-------------|----------|
-| Commands | `~/.claude/get-shit-done/commands/` | 63 GSD slash commands |
+| Commands | `~/.claude/get-shit-done/commands/` | 65 GSD slash commands |
 | Agents | `~/.claude/get-shit-done/agents/` | 17 specialized agent definitions |
 | Hooks | `~/.claude/get-shit-done/hooks/` | 7 execution hooks (bundled JS) |
 | Workflows | `~/.claude/get-shit-done/workflows/` | Orchestration templates |
@@ -192,7 +192,7 @@ The installer only writes to the user's Claude Code configuration directory (`~/
 
 ## Agent Inventory
 
-15 active specialized agents:
+17 active specialized agents:
 
 | Agent | Role |
 |-------|------|
@@ -211,6 +211,8 @@ The installer only writes to the user's Claude Code configuration directory (`~/
 | `gsd-user-profiler` | Developer behavioral profiling |
 | `gsd-validator-hub` | Unified validation (extension or ecosystem) |
 | `gsd-verifier` | Unified verification (scope: general, plan, integration, nyquist) |
+| `gsd-dependency-auditor` | Audits package dependencies for CVEs, staleness, license compatibility |
+| `gsd-ecosystem-auditor` | Audits agent ecosystem for frontmatter integrity and hygiene |
 
 Agent definitions are in `agents/*.md` with YAML frontmatter specifying name, description, tools, model, and skills.
 
@@ -282,7 +284,7 @@ Added in milestone v2.3 (2026-04-13):
 | Item | Status | Details |
 |------|--------|---------|
 | CLAUDE.md Phase 3 quality gates | Resolved (v2.0) | Updated to reference `gsd-verifier` with scope parameters |
-| Stale agent references | Resolved (v1.9 Phase 28) | All agent files updated to use current names; 17 active agents as of v2.5 |
+| Stale agent references | Resolved (v1.9 Phase 28) | All agent files updated to use current names; 17 active agents as of v2.7 |
 | CI/CD pipeline | Deferred | No automated test/publish pipeline; appropriate for current project stage |
 
 For full tech debt tracking, see `.planning/PROJECT.md`.
