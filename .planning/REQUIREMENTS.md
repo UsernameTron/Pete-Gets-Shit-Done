@@ -10,21 +10,21 @@ Requirements for v2.7 Session Continuity. Each maps to roadmap phases.
 ### Checkpoint Engine
 
 - [x] **CP-01**: writeCheckpoint() produces valid JSON consumable by readCheckpoint()
-- [ ] **CP-02**: /gsd:resume-work reads CHECKPOINT.json and skips completed plans
-- [ ] **CP-03**: /prime surfaces checkpoint data in initialization summary
+- [x] **CP-02**: /gsd:resume-work reads CHECKPOINT.json and skips completed plans
+- [x] **CP-03**: /prime surfaces checkpoint data in initialization summary
 - [x] **CP-04**: Stale checkpoint (>24h) generates warning but still loads
 - [x] **CP-05**: Missing checkpoint is graceful no-op (no error, no stack trace)
 - [x] **CP-06**: 15+ checkpoint tests passing with >80% branch coverage
-- [ ] **CP-07**: Full test suite green after checkpoint integration
+- [x] **CP-07**: Full test suite green after checkpoint integration
 
 ### Daily Dashboard
 
-- [ ] **DAILY-01**: /gsd:daily produces dashboard in under 2 seconds
-- [ ] **DAILY-02**: Reads CHECKPOINT.json first, falls back to STATE.md
-- [ ] **DAILY-03**: Shows correct next-action for every GSD state
-- [ ] **DAILY-04**: Handles missing files gracefully (no stack traces)
-- [ ] **DAILY-05**: Dirty tree and stale checkpoint produce warnings
-- [ ] **DAILY-06**: 10+ daily tests passing with >80% branch coverage
+- [x] **DAILY-01**: /gsd:daily produces dashboard in under 2 seconds
+- [x] **DAILY-02**: Reads CHECKPOINT.json first, falls back to STATE.md
+- [x] **DAILY-03**: Shows correct next-action for every GSD state
+- [x] **DAILY-04**: Handles missing files gracefully (no stack traces)
+- [x] **DAILY-05**: Dirty tree and stale checkpoint produce warnings
+- [x] **DAILY-06**: 10+ daily tests passing with >80% branch coverage
 
 ### Automated UAT Runner
 
@@ -61,18 +61,18 @@ Deferred to future release. Tracked but not in current roadmap.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CP-01 | Phase 52 | Complete |
-| CP-02 | Phase 52 | Pending |
-| CP-03 | Phase 52 | Pending |
+| CP-02 | Phase 52 | Complete |
+| CP-03 | Phase 52 | Complete |
 | CP-04 | Phase 52 | Complete |
 | CP-05 | Phase 52 | Complete |
 | CP-06 | Phase 52 | Complete |
-| CP-07 | Phase 52 | Pending |
-| DAILY-01 | Phase 53 | Pending |
-| DAILY-02 | Phase 53 | Pending |
-| DAILY-03 | Phase 53 | Pending |
-| DAILY-04 | Phase 53 | Pending |
-| DAILY-05 | Phase 53 | Pending |
-| DAILY-06 | Phase 53 | Pending |
+| CP-07 | Phase 52 | Complete |
+| DAILY-01 | Phase 53 | Complete |
+| DAILY-02 | Phase 53 | Complete |
+| DAILY-03 | Phase 53 | Complete |
+| DAILY-04 | Phase 53 | Complete |
+| DAILY-05 | Phase 53 | Complete |
+| DAILY-06 | Phase 53 | Complete |
 | UAT-01 | Phase 54 | Pending |
 | UAT-02 | Phase 54 | Pending |
 | UAT-03 | Phase 54 | Pending |
