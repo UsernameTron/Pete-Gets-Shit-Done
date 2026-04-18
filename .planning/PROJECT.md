@@ -6,16 +6,16 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.7 Session Continuity
+**Current milestone:** v2.7 Session Continuity (shipped 2026-04-18)
 **Previous:** v2.6 Developer Experience (shipped 2026-04-18, PR #3 + PR #4 merged)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,592 total, all passing
+**Tests:** 2,621 total, all passing
 **Coverage:** 90.79% statements, 83.11% branches, 97.43% functions
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
-**Milestones shipped:** 16 (v1.0 through v2.6)
-**Total phases executed:** 53
+**Milestones shipped:** 17 (v1.0 through v2.7)
+**Total phases executed:** 54
 
 ## Core Value
 
@@ -49,18 +49,17 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 - GUI installer — CLI-only project, no graphical installer needed
 - CI provider abstraction — GitHub Actions only, no Jenkins/GitLab/Circle support
 
-## Current Milestone: v2.7 Session Continuity
+## Most Recent: v2.7 Session Continuity (shipped 2026-04-18)
 
-**Goal:** Eliminate the three biggest operational friction points — context loss on /clear, slow session starts, and manual UAT checks.
+Three session-experience improvements eliminating context-reset amnesia, slow orientation, and manual verification overhead:
+- Checkpoint Engine (`checkpoint.cjs`): deterministic state capture before context resets
+- Daily Dashboard (`daily.cjs` + `/gsd:daily`): one-command morning briefing
+- Automated UAT Runner (`uat-patterns.cjs` + `uat-runner.cjs`): 8-pattern must_have assertions before conversational UAT
 
-**Target features:**
-- Checkpoint Engine — lib/checkpoint.cjs writes .planning/CHECKPOINT.json before every context reset; resume-work and /prime consume it to skip completed work
-- /gsd:daily — one-command morning dashboard showing milestone, phase, plan, branch, tests, next action
-- Automated UAT Runner — lib/uat-runner.cjs with pattern registry parses plan must_haves into shell assertions, presents pass/fail table before conversational UAT
+3 phases (52-54), 7 plans, 20/20 requirements complete. PR #6 + PR #7 + PR #8.
 
-**Reference:** `.planning/v27-session-continuity-milestone-plan.md` — full code sketches, schemas, test cases, acceptance criteria.
-
-## Most Recent: v2.6 Developer Experience (shipped 2026-04-18)
+<details>
+<summary><strong>v2.6 Developer Experience (shipped 2026-04-18)</strong></summary>
 
 Three high-impact DX improvements that make GSD portable, CI-aware, and self-documenting:
 - `npm run setup` — one-command install from fresh clone with verification table
@@ -68,6 +67,8 @@ Three high-impact DX improvements that make GSD portable, CI-aware, and self-doc
 - `/gsd:sync-docs` — automated documentation sync from live codebase state
 
 3 phases (49-51), 5 plans, 18/18 requirements complete. PR #3 + PR #4 merged.
+
+</details>
 
 <details>
 <summary><strong>v2.4 Foundation Hardening (7/7 requirements shipped)</strong></summary>
@@ -356,4 +357,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after v2.7 milestone start*
+*Last updated: 2026-04-18 after v2.7 milestone complete*

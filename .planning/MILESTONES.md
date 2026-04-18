@@ -1,5 +1,19 @@
 # Milestones
 
+## v2.7 Session Continuity (Shipped: 2026-04-18)
+
+**Phases completed:** 3 phases (52-54), 7 plans, 1,957 LOC (846 source + 1,111 tests)
+
+**Key accomplishments:**
+
+- Checkpoint Engine (`checkpoint.cjs`): deterministic session state capture before context resets, consumed by `/prime` and `/gsd:resume-work` to skip completed work
+- Daily Dashboard (`daily.cjs` + `/gsd:daily`): one-command morning briefing showing milestone, phase, plan progress, branch state, and exact next action
+- Automated UAT Runner (`uat-patterns.cjs` + `uat-runner.cjs`): 8-pattern registry maps natural-language must_haves to read-only shell assertions, runs automatically before conversational UAT via verify-work Step 0
+
+**Shipped via:** PR #6 (Phase 52), PR #7 (Phase 53), PR #8 (Phase 54). UAT 16/16, 11/11, 6/6 passed. 2,621 tests green.
+
+---
+
 ## v2.6 Developer Experience (Shipped: 2026-04-18)
 
 **Phases completed:** 3 phases (49-51), 5 plans, 7 tasks
