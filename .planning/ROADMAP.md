@@ -22,11 +22,11 @@
 
 - [x] **Phase 52: Checkpoint Engine** - Deterministic session state written before every context reset, consumed by /prime and resume-work to skip completed work (completed 2026-04-18)
 - [x] **Phase 53: Daily Dashboard** - One-command morning briefing showing milestone, phase, plan progress, branch state, and exact next action (completed 2026-04-18)
-- [ ] **Phase 54: Automated UAT Runner** - Pattern-based must_have assertions executed automatically before conversational UAT, with pass/fail/manual triage
+- [x] **Phase 54: Automated UAT Runner** - Pattern-based must_have assertions executed automatically before conversational UAT, with pass/fail/manual triage (completed 2026-04-18)
   Plans:
-  - [ ] 54-01-PLAN.md -- Pattern registry (uat-patterns.cjs) with 8+ pattern types via TDD
-  - [ ] 54-02-PLAN.md -- Runner orchestrator (uat-runner.cjs) with frontmatter parsing and command execution via TDD
-  - [ ] 54-03-PLAN.md -- Integration: wire into verify-work.md + CLI subcommand + full suite green
+  - [x] 54-01-PLAN.md -- Pattern registry (uat-patterns.cjs) with 8+ pattern types via TDD
+  - [x] 54-02-PLAN.md -- Runner orchestrator (uat-runner.cjs) with frontmatter parsing and command execution via TDD
+  - [x] 54-03-PLAN.md -- Integration: wire into verify-work.md + CLI subcommand + full suite green
 
 ## Phase Details
 
@@ -65,8 +65,8 @@
   5. All runner commands are read-only; no file writes occur during automated verification
 **Plans**: 3 plans
 Plans:
-- [ ] 54-01-PLAN.md -- Pattern registry (TDD)
-- [ ] 54-02-PLAN.md -- Runner orchestrator (TDD)
+- [x] 54-01-PLAN.md -- Pattern registry (TDD)
+- [x] 54-02-PLAN.md -- Runner orchestrator (TDD)
 - [ ] 54-03-PLAN.md -- Integration + full suite green
 
 ## Progress
@@ -80,4 +80,4 @@ Plans:
 | 51. Sync Docs | v2.6 | 1/1 | Complete | 2026-04-18 |
 | 52. Checkpoint Engine | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
-| 54. Automated UAT Runner | v2.7 | 0/3 | Not started | - |
+| 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
