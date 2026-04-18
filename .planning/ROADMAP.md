@@ -20,8 +20,8 @@
 
 **Milestone Goal:** Eliminate the three primary session friction points — context-reset amnesia, manual verification overhead, and slow session-start orientation.
 
-- [ ] **Phase 52: Checkpoint Engine** - Deterministic session state written before every context reset, consumed by /prime and resume-work to skip completed work
-- [ ] **Phase 53: Daily Dashboard** - One-command morning briefing showing milestone, phase, plan progress, branch state, and exact next action
+- [x] **Phase 52: Checkpoint Engine** - Deterministic session state written before every context reset, consumed by /prime and resume-work to skip completed work (completed 2026-04-18)
+- [x] **Phase 53: Daily Dashboard** - One-command morning briefing showing milestone, phase, plan progress, branch state, and exact next action (completed 2026-04-18)
 - [ ] **Phase 54: Automated UAT Runner** - Pattern-based must_have assertions executed automatically before conversational UAT, with pass/fail/manual triage
 
 ## Phase Details
@@ -70,6 +70,6 @@
 | 49. One-Command Install | v2.6 | 1/1 | Complete | 2026-04-17 |
 | 50. CI Watch | v2.6 | 2/2 | Complete | 2026-04-17 |
 | 51. Sync Docs | v2.6 | 1/1 | Complete | 2026-04-18 |
-| 52. Checkpoint Engine | v2.7 | 0/TBD | Not started | - |
-| 53. Daily Dashboard | v2.7 | 0/TBD | Not started | - |
+| 52. Checkpoint Engine | v2.7 | 2/2 | Complete    | 2026-04-18 |
+| 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 54. Automated UAT Runner | v2.7 | 0/TBD | Not started | - |

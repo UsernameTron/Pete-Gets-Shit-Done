@@ -9,13 +9,13 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 **Current milestone:** v2.7 Session Continuity
 **Previous:** v2.6 Developer Experience (shipped 2026-04-18, PR #3 + PR #4 merged)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,561 total, all passing
+**Tests:** 2,592 total, all passing
 **Coverage:** 90.79% statements, 83.11% branches, 97.43% functions
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
 **Milestones shipped:** 16 (v1.0 through v2.6)
-**Total phases executed:** 51
+**Total phases executed:** 53
 
 ## Core Value
 
@@ -25,19 +25,6 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ### Active
 
-- **CP-01**: writeCheckpoint() produces valid JSON consumable by readCheckpoint()
-- **CP-02**: /gsd:resume-work reads CHECKPOINT.json and skips completed plans
-- **CP-03**: /prime surfaces checkpoint data in initialization summary
-- **CP-04**: Stale checkpoint (>24h) generates warning but still loads
-- **CP-05**: Missing checkpoint is graceful no-op
-- **CP-06**: 15+ checkpoint tests with >80% branch coverage
-- **CP-07**: Full test suite green after checkpoint integration
-- **DAILY-01**: /gsd:daily produces dashboard in under 2 seconds
-- **DAILY-02**: Reads CHECKPOINT.json first, falls back to STATE.md
-- **DAILY-03**: Shows correct next-action for every GSD state
-- **DAILY-04**: Handles missing files gracefully
-- **DAILY-05**: Dirty tree and stale checkpoint produce warnings
-- **DAILY-06**: 10+ daily tests with >80% branch coverage
 - **UAT-01**: Parses must_haves from plan YAML frontmatter
 - **UAT-02**: Matches at least 8 pattern types from registry
 - **UAT-03**: Executes commands in read-only mode (no writes)
@@ -51,6 +38,8 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ### Validated
 
+- Daily Dashboard (DAILY-01 through DAILY-06) — v2.7 Phase 53
+- Checkpoint Engine (CP-01 through CP-07) — v2.7 Phase 52
 - Install-from-clone script (`npm run setup`) — v2.6 Phase 49
 - /gsd:ci-watch command — v2.6 Phase 50
 - /gsd:sync-docs command — v2.6 Phase 51
