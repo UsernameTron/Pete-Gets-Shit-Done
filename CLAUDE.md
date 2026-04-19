@@ -199,6 +199,10 @@ Know which filesystem you are operating on at all times and be explicit about it
 
 ## Advanced Capabilities
 
+### GitHub Repository Security
+
+The GitHub remote enforces security independently of local GSD hooks. Branch protection requires a PR and 4 passing status checks (`test macos-latest/22`, `test ubuntu-latest/20`, `test ubuntu-latest/22`, `governance`) before any merge to `main`. Force pushes are blocked. Dependabot monitors for CVEs with auto-PRs enabled. Secret scanning with push protection blocks commits containing detected secrets. CodeQL scans JavaScript/TypeScript and GitHub Actions on every push and PR. These are remote-level gates — they cannot be bypassed by local configuration or hook changes.
+
 ### Hooks and Lifecycle Events
 
 Pete's projects use Claude Code hooks extensively. Understand the full hook lifecycle: PreToolUse, PostToolUse, SessionStart, SessionEnd, Stop, SubagentStop, SubagentStart, UserPromptSubmit, PermissionRequest, Notification, PreCompact, ConfigChange. When building hooks, use proper matcher patterns, handle exit codes correctly, and leverage hookSpecificOutput for tool-blocking gates and auto-formatting workflows.

@@ -160,6 +160,56 @@ Distribution is npm-only via `npx get-shit-done-cc@latest`.
 
 ---
 
+## GitHub Repository Security
+
+Configured 2026-04-18 on the GitHub remote. These protections are enforced at the repository level, independent of local GSD hooks.
+
+### Branch Protection (main)
+
+| Rule | Setting |
+|------|---------|
+| Require pull request before merging | Enabled |
+| Required status checks | `test (macos-latest, 22)`, `test (ubuntu-latest, 20)`, `test (ubuntu-latest, 22)`, `governance` |
+| Require branches to be up to date | Enabled |
+| Block force pushes | Enabled |
+
+No code reaches `main` without a PR and all 4 CI jobs passing.
+
+### Dependabot
+
+| Feature | Status |
+|---------|--------|
+| Vulnerability alerts | Enabled |
+| Security updates | Enabled (auto-PRs for CVEs) |
+| Version updates | Enabled (weekly npm checks) |
+| Grouped security updates | Enabled |
+| Config file | `.github/dependabot.yml` |
+
+### Secret Scanning
+
+| Feature | Status |
+|---------|--------|
+| Secret scanning | Enabled |
+| Push protection | Active (blocks commits containing detected secrets) |
+
+### CodeQL Analysis
+
+| Setting | Value |
+|---------|-------|
+| Setup | Default |
+| Languages | JavaScript/TypeScript, GitHub Actions |
+| Triggers | Push to `main`, pull requests to `main` |
+
+### Required Status Checks Summary
+
+All 4 CI jobs must pass before any PR can merge to `main`:
+1. `test (macos-latest, 22)` — macOS Node 22
+2. `test (ubuntu-latest, 20)` — Ubuntu Node 20
+3. `test (ubuntu-latest, 22)` — Ubuntu Node 22
+4. `governance` — GSD governance checks
+
+---
+
 ## Security Notes
 
 ### Zero Runtime Dependencies

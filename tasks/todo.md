@@ -12,6 +12,8 @@
 
 ## Open Items
 
+- [x] **GitHub repository security hardened** — branch protection, Dependabot, secret scanning, CodeQL, status checks, grouped updates (2026-04-18)
+
 - [x] **Phase 44: Milestone Audit + Docs Sync** — 8/8 REQs audited, CLAUDE.md/README.md/DEVOPS-HANDOFF.md updated
 - [x] **Ship v2.3** — shipped 2026-04-15 via PR #49, tagged v2.3 at 75b29cd
 - [ ] ~~**Stop-hook sentinel for human-review gates**~~ — deferred to v2.8+, not a finalization blocker. Source: `tasks/lessons.md` 2026-04-10 [Hook Design].
@@ -45,6 +47,31 @@ Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findi
 - [x] Phase 43 artifact gap fixed — 43-VERIFICATION.md and 43-01-SUMMARY.md generated from on-disk deliverables.
 - [x] v2.3 milestone setup — PROJECT.md, MILESTONES.md, REQUIREMENTS.md, ROADMAP.md, STATE.md
 - [x] lesson-capture-gate.cjs wired into settings.json Stop hooks
+
+## Session Handoff (2026-04-18 — Agent Gap Analysis)
+
+**Branch**: `main` (clean, at `80167d2`)
+
+**Session actions:**
+1. /gsd:prime-patterns — 5 KB v2.1 patterns loaded
+2. Agent gap analysis: 3 parallel explorers (tech stack, agent roster, quality gates) + Plan agent synthesis
+3. Verdict: zero new agents needed, 4 CI hardening items identified (npm audit, coverage blocking, CI agent health, doc link validator)
+4. /gsd:review-backlog — clean, no 999.x items
+
+**Next:**
+1. `/gsd:new-milestone` for v2.8
+2. Consider promoting 4 CI hardening items + 3 deferred todo items as v2.8 phase candidates:
+   - `npm audit --audit-level=moderate` step in test.yml (5 lines YAML)
+   - Make coverage blocking in ci-coverage-report.sh:68 (1-line change)
+   - CI-time agent health check with blocking exit (scripts/gsd-agent-health-check.sh + test.yml)
+   - Internal doc link validator script + CI step
+   - Stop-hook sentinel for human-review gates (deferred from v2.4)
+   - `everything-claude-code-clean` scan resume (deferred from v2.4)
+   - Duplicate v1.0/v1.1 tag pointers investigation (deferred from v2.4)
+3. Optional: archive 12 shipped phase dirs
+4. Optional: esbuild 0.25→0.28 upgrade
+
+---
 
 ## Session Handoff (2026-04-18 — PR #10 review verification)
 
