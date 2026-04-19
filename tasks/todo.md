@@ -48,6 +48,24 @@ Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findi
 - [x] v2.3 milestone setup — PROJECT.md, MILESTONES.md, REQUIREMENTS.md, ROADMAP.md, STATE.md
 - [x] lesson-capture-gate.cjs wired into settings.json Stop hooks
 
+## Session Handoff (2026-04-19 — GitHub Security Hardening Docs)
+
+**Branch**: `main` (clean, at `ac86dc4`)
+
+**Session actions:**
+1. /gsd:prime-patterns — 5 KB v2.1 patterns loaded
+2. Documented GitHub repo security config (branch protection, Dependabot, secret scanning, CodeQL, status checks) across DEVOPS-HANDOFF.md, CLAUDE.md, and todo.md
+3. PR #11 created, all 9 CI checks passed, merged via auto-merge (squash)
+4. Pulled main, updated STATE.md and session-log.md
+
+**Next:**
+1. `/gsd:new-milestone` for v2.8
+2. Consider promoting 4 CI hardening items + 3 deferred todo items as v2.8 phase candidates
+3. Optional: archive 12 shipped phase dirs
+4. Optional: esbuild 0.25→0.28 upgrade
+
+---
+
 ## Session Handoff (2026-04-18 — Agent Gap Analysis)
 
 **Branch**: `main` (clean, at `80167d2`)
