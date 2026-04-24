@@ -175,6 +175,8 @@ Configured 2026-04-18 on the GitHub remote. These protections are enforced at th
 
 No code reaches `main` without a PR and all 4 CI jobs passing.
 
+**Audit tool:** `/gsd:harden-repo` audits branch protection against the standard policy and can apply fixes via `--fix`. Uses read-merge-PUT to avoid partial updates.
+
 ### Dependabot
 
 | Feature | Status |

@@ -73,7 +73,7 @@ The full inventory:
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
 | Test suites | 529 |
-| Test assertions | 2,621 |
+| Test assertions | 2,644 |
 | Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
@@ -215,7 +215,7 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 
 ## Command Syntax
 
-Before we get into the 63 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
+Before we get into the 64 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
 
 | Runtime | Pattern | Example |
 |---------|---------|---------|
@@ -1214,6 +1214,7 @@ All slash commands available across the three plugin systems.
 | `/gsd:fast` | Execute a trivial task inline — no subagents, no planning overhead |
 | `/gsd:finalize` | End-to-end project finalization — verify, archive, report, push, confirm clean |
 | `/gsd:forensics` | Post-mortem investigation for failed GSD workflows |
+| `/gsd:harden-repo` | Audit and enforce GitHub branch protection against standard policy |
 | `/gsd:health` | Diagnose planning directory health and optionally repair issues |
 | `/gsd:help` | Show available GSD commands and usage guide |
 | `/gsd:insert-phase` | Insert urgent work as decimal phase (e.g., 72.1) between existing phases |
