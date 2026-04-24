@@ -81,3 +81,14 @@ Plans:
 | 52. Checkpoint Engine | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
+
+## Backlog
+
+### Phase 999.1: Documentation Refresh (BACKLOG)
+
+**Goal:** Update CLAUDE.md and README.md to reflect current state — agent counts, test counts, milestone history, and any architectural changes since last doc pass.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
