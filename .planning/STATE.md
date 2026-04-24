@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v2.7
 milestone_name: Session Continuity
-status: "v2.7 finalized — /gsd:harden-repo shipped (PR #14)"
-last_updated: "2026-04-19T12:00:00.000Z"
+status: archived
+last_updated: "2026-04-24T12:00:00.000Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 3
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** Post-v2.7 finalization — ready for v2.8
+**Current focus:** v2.7 archived — ready for v2.8
 
 ## Current Position
 
-Milestone: v2.7 Session Continuity — finalized
-Post-milestone: `/gsd:harden-repo` command shipped (PR #14, merged 2026-04-24)
-Branch: `main` (clean, at 02ad28b)
+Milestone: v2.7 Session Continuity — archived (2026-04-24)
+Phase directories: archived to .planning/milestones/
+Tests: 2,644 assertions, 533 suites, 0 failures
+Coverage: 91.23% lines, 83.02% branches, 97.41% functions
 Next: `/gsd:new-milestone` for v2.8 or backlog triage
-Last activity: 2026-04-24
 
 ## Milestone History
 
@@ -50,3 +50,4 @@ Last activity: 2026-04-24
 | v2.4 | Foundation Hardening | 2 | 6 | 2026-04-17 |
 | v2.5 | Final Documentation Sync | 2 | 3 | 2026-04-17 |
 | v2.6 | Developer Experience | 3 | 5 | 2026-04-18 |
+| v2.7 | Session Continuity | 3 | 7 | 2026-04-18 |
