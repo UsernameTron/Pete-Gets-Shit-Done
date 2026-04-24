@@ -82,6 +82,11 @@ ALLOWLIST=(
   '.planning/REQUIREMENTS.md'
   'get-shit-done/references/agent-threat-model.md'
   '.planning/milestones/archived-phases/'
+  '.planning/milestones/v2.3-phases/'
+  '.planning/milestones/v2.4-phases/'
+  '.planning/milestones/v2.5-phases/'
+  '.planning/milestones/v2.6-phases/'
+  '.planning/milestones/v2.7-phases/'
 )
 
 is_allowlisted() {
