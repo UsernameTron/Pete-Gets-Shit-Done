@@ -4,7 +4,7 @@
 
 17 milestones shipped (v1.0 through v2.7). 54 phases executed. PR #10 merged, PR #10 review fixes applied.
 
-- **Tests**: 2,621 passing, 0 failures (529 suites)
+- **Tests**: 2,644 passing, 0 failures (533 suites)
 - **Coverage**: 91.51% overall, 83.24% branches, 98.01% functions
 - **Branch**: `main` (clean)
 - **Last commit**: `d811511 fix(docs): correct injection pattern counts and milestone terminology per PR #10 review`
@@ -47,6 +47,26 @@ Items triaged from the relocated 2026-04-10 agent audit plus pre-ship gate findi
 - [x] Phase 43 artifact gap fixed — 43-VERIFICATION.md and 43-01-SUMMARY.md generated from on-disk deliverables.
 - [x] v2.3 milestone setup — PROJECT.md, MILESTONES.md, REQUIREMENTS.md, ROADMAP.md, STATE.md
 - [x] lesson-capture-gate.cjs wired into settings.json Stop hooks
+
+## Session Handoff (2026-04-24 — Dream Memory Consolidation)
+
+**Branch**: `main` (clean, at `e18d401`)
+
+**Session actions:**
+1. `/prime` — session initialized, 12 lessons loaded, 3 specialists, v2.7 finalized
+2. `/dream` — project-level memory consolidation:
+   - Retired `user_identity.md` (100% redundant with CLAUDE.md)
+   - Updated `project_gsd_state.md` test counts (2,621→2,644, 529→533 suites)
+   - Rebuilt MEMORY.md index (12→8 lines)
+   - Kept `feedback_autonomous_execution.md` and `project_agent_consolidation.md` unchanged
+
+**Next:**
+1. `/gsd:new-milestone` for v2.8
+2. Consider promoting 4 CI hardening items + 3 deferred todo items as v2.8 phase candidates
+3. Optional: archive 12 shipped phase dirs
+4. Optional: esbuild 0.25→0.28 upgrade
+
+---
 
 ## Session Handoff (2026-04-19 — GitHub Security Hardening Docs)
 
