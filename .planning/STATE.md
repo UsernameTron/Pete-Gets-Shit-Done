@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.7
 milestone_name: Session Continuity
-status: "v2.7 finalized — GitHub security hardening documented (PR #11)"
+status: "v2.7 finalized — /gsd:harden-repo shipped (PR #14)"
 last_updated: "2026-04-19T12:00:00.000Z"
-last_activity: 2026-04-19
+last_activity: 2026-04-24
 progress:
   total_phases: 3
   completed_phases: 3
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 ## Current Position
 
-Milestone: v2.7 Session Continuity — finalized, GitHub security hardening documented
-Finalization: All 9 phases complete + PR #10 review corrections + PR #11 GitHub security docs
-Branch: `main` (clean, at ac86dc4)
-Next: `/gsd:new-milestone` for v2.8
-Last activity: 2026-04-19
+Milestone: v2.7 Session Continuity — finalized
+Post-milestone: `/gsd:harden-repo` command shipped (PR #14, merged 2026-04-24)
+Branch: `main` (clean, at 02ad28b)
+Next: `/gsd:new-milestone` for v2.8 or backlog triage
+Last activity: 2026-04-24
 
 ## Milestone History
 
