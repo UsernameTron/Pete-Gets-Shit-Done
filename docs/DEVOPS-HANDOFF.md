@@ -1,6 +1,6 @@
 # DevOps Handoff — get-shit-done-cc
 
-> Last verified: 2026-04-18 | Version: 1.30.0 | Milestone: v2.7
+> Last verified: 2026-04-24 | Version: 1.30.0 | Milestone: v2.7 (archived)
 
 ---
 
@@ -69,8 +69,8 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Script | Purpose |
 |--------|---------|
-| `npm test` | Run 2,377 unit tests via `scripts/run-tests.cjs` |
-| `npm run test:e2e` | Run 133 E2E integration tests via `scripts/run-e2e-tests.cjs` |
+| `npm test` | Run 2,644 unit tests via `scripts/run-tests.cjs` |
+| `npm run test:e2e` | Run 143 E2E integration tests via `scripts/run-e2e-tests.cjs` |
 | `npm run test:e2e:smoke` | Run E2E smoke subset (12 tests) |
 | `npm run test:coverage` | Unit tests with text + JSON coverage report |
 | `npm run test:coverage:full` | Unit tests with text + lcov + JSON coverage report |
@@ -83,12 +83,12 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Metric | Count |
 |--------|-------|
-| Unit tests | 2,377 |
-| E2E tests | 133 |
-| **Total tests** | **2,510** |
-| Unit test files | 74 |
-| E2E test files | 11 |
-| **Total test files** | **85** |
+| Unit tests | 2,644 |
+| E2E tests | 143 |
+| **Total tests** | **2,787** |
+| Unit test files | 82 |
+| E2E test files | 12 |
+| **Total test files** | **94** |
 | Test framework | Node.js built-in test runner (`node:test`) |
 | Assertion library | Node.js built-in (`node:assert`) |
 
