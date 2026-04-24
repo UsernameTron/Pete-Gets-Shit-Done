@@ -55,6 +55,10 @@
  *     [--name <name>]
  *     [--archive-phases]               Move phase dirs to milestones/vX.Y-phases/
  *
+ * Governance:
+ *   harden-repo [--fix] [--dry-run]    Audit branch protection against standard policy
+ *     [--branch <name>]                Optionally apply fixes via read-merge-PUT
+ *
  * Validation:
  *   validate consistency               Check phase numbering, disk/roadmap sync
  *   validate health [--repair]         Check .planning/ integrity, optionally repair
@@ -517,6 +521,17 @@ async function runCommand(command, args, cwd, raw) {
 
     case 'generate-slug': {
       commands.cmdGenerateSlug(args[1], raw);
+      break;
+    }
+
+    case 'harden-repo': {
+      const hardenRepo = require('./lib/harden-repo.cjs');
+      const flags = parseNamedArgs(args, ['branch'], ['fix', 'dry-run']);
+      hardenRepo.cmdHardenRepo(cwd, {
+        fix: flags.fix,
+        dryRun: flags['dry-run'],
+        branch: flags.branch || 'main',
+      }, raw);
       break;
     }
 
