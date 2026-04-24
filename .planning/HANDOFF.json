@@ -1,39 +1,18 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-24T17:14:27.039Z",
+  "timestamp": "2026-04-24T18:00:00.000Z",
   "phase": "ad-hoc",
   "phase_name": "harden-repo command",
-  "phase_dir": null,
-  "plan": 1,
-  "task": 5,
-  "total_tasks": 7,
-  "status": "paused",
+  "status": "complete",
   "completed_tasks": [
     {"id": 1, "name": "Create harden-repo.cjs (core CJS module)", "status": "done"},
     {"id": 2, "name": "Create tests/harden-repo.test.cjs (unit tests)", "status": "done"},
     {"id": 3, "name": "Add dispatch case in gsd-tools.cjs", "status": "done"},
     {"id": 4, "name": "Create commands/gsd/harden-repo.md", "status": "done"},
-    {"id": 5, "name": "Create workflows/harden-repo.md", "status": "done"}
+    {"id": 5, "name": "Create workflows/harden-repo.md", "status": "done"},
+    {"id": 6, "name": "Run npm test — 2644/2644 pass", "status": "done"},
+    {"id": 7, "name": "Live test — audit, human-readable, dry-run all verified", "status": "done"}
   ],
-  "remaining_tasks": [
-    {"id": 6, "name": "Run npm test after restrictions/undefined fix", "status": "not_started"},
-    {"id": 7, "name": "Live test against real repo and dry-run verification", "status": "not_started"}
-  ],
-  "blockers": [],
-  "human_actions_pending": [],
-  "decisions": [
-    {"decision": "Separate CJS module (harden-repo.cjs) instead of adding to commands.cjs", "rationale": "Self-contained domain with 5+ internal functions would bloat commands.cjs", "phase": "ad-hoc"},
-    {"decision": "Export buildGapTable and mergePolicy for testability", "rationale": "Pure functions can be tested without mocking gh CLI", "phase": "ad-hoc"},
-    {"decision": "Use execFileSync not execSync for gh calls", "rationale": "Prevents shell injection ��� args passed as array, never interpolated into shell string", "phase": "ad-hoc"},
-    {"decision": "normalizeRestrictions treats empty {users:[],teams:[],apps:[]} as null", "rationale": "GitHub returns empty object for 'no restrictions' but PUT payload uses null", "phase": "ad-hoc"}
-  ],
-  "uncommitted_files": [
-    "get-shit-done/bin/lib/harden-repo.cjs",
-    "get-shit-done/bin/gsd-tools.cjs",
-    "get-shit-done/commands/gsd/harden-repo.md",
-    "get-shit-done/workflows/harden-repo.md",
-    "tests/harden-repo.test.cjs"
-  ],
-  "next_action": "Run `npm test` to verify the two fixes (normalizeRestrictions + undefined-to-null in check()). Then live test: `node get-shit-done/bin/gsd-tools.cjs harden-repo` should now show restrictions as PASS. Then `--fix --dry-run` to verify PUT payload shape.",
-  "context_notes": "All 5 files created and working. Tests passed 2644/2644 before the restrictions fix was applied. The two in-flight fixes are: (1) normalizeRestrictions() helper to treat empty restrictions objects as null, (2) normalize undefined to null in check() so JSON output doesn't drop the actual field. Plan file at /Users/cpconnor/.claude/plans/expressive-jumping-lerdorf.md has full design."
+  "remaining_tasks": [],
+  "next_action": "Ship PR via /gsd:ship or /commit-push-pr"
 }

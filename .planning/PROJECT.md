@@ -9,7 +9,7 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 **Current milestone:** v2.7 Session Continuity
 **Previous:** v2.6 Developer Experience (shipped 2026-04-18, PR #3 + PR #4 merged)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,621 total, all passing
+**Tests:** 2,644 total, all passing
 **Coverage:** 91.51% statements, 83.24% branches, 98.01% functions
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
@@ -332,7 +332,7 @@ All 6 requirements verified complete:
 - v2.0 adds 2 new modules: classify.cjs (task classification), history.cjs (execution history)
 - v2.0 extends model-profiles.cjs with dynamicSelect(), core.cjs with optional taskContext
 - v2.3 added 3 execution hooks (prompt guard, config protection, cost tracker), security guardian agent, and 4D verifier rubric
-- 17 active agents, 63 commands
+- 17 active agents, 64 commands
 
 ## Tech Debt
 
