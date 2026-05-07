@@ -1,16 +1,123 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-24T18:30:00.000Z",
-  "phase": "ad-hoc",
-  "phase_name": "harden-repo command (complete)",
-  "status": "complete",
+  "timestamp": "2026-05-07T22:25:09.731Z",
+  "phase": "56",
+  "phase_name": "Doc Drift Detector",
+  "phase_dir": ".planning/phases/56-doc-drift-detector",
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "paused",
+  "stage": "context_captured_planning_next",
   "completed_tasks": [
-    {"id": 1, "name": "/gsd:harden-repo — full implementation, tests, live verification", "status": "done"},
-    {"id": 2, "name": "PR #14 merged to main", "status": "done"},
-    {"id": 3, "name": "feat/harden-repo branch cleaned up", "status": "done"}
+    {
+      "id": "discuss-56",
+      "name": "Phase 56 discuss-phase (auto-mode)",
+      "status": "done",
+      "commit": "60928cb",
+      "artifacts": [
+        ".planning/phases/56-doc-drift-detector/56-CONTEXT.md",
+        ".planning/phases/56-doc-drift-detector/56-DISCUSSION-LOG.md"
+      ],
+      "notes": "18 decisions locked (D-01..D-18). Auto-mode used because operator instructed 'no clarifying questions'. Sibling Phase 55 (validate-doc-links.cjs) is the canonical template."
+    }
   ],
-  "remaining_tasks": [],
+  "remaining_tasks": [
+    {
+      "id": "plan-56",
+      "name": "Run /gsd:plan-phase 56",
+      "status": "not_started",
+      "expected_output": "Three plan files following Phase 55 wave structure: 56-01-PLAN.md (fixtures + pure functions, TDD), 56-02-PLAN.md (integration + main + c8 wiring), 56-03-PLAN.md (real-repo run + suite green + living-docs updates)."
+    },
+    {
+      "id": "execute-56",
+      "name": "Run /gsd:execute-phase 56",
+      "status": "not_started",
+      "expected_output": "scripts/check-doc-drift.cjs + tests/check-doc-drift.test.cjs + tests/fixtures/doc-drift/{clean,drift,edge}/ + .c8rc.json updated to include the new script + living docs updated."
+    },
+    {
+      "id": "verify-56",
+      "name": "Run /gsd:verify-work for Phase 56",
+      "status": "not_started"
+    },
+    {
+      "id": "phase-57",
+      "name": "Phase 57 — Backfill and CI Integration (depends on 55 + 56)",
+      "status": "not_started",
+      "blocking_dependency": "Phase 56 must ship first (CI step wires both validate-doc-links.cjs and check-doc-drift.cjs)."
+    }
+  ],
   "blockers": [],
   "human_actions_pending": [],
-  "next_action": "/gsd:new-milestone for v2.8 or pick next backlog item"
+  "decisions": [
+    {
+      "decision": "Auto-mode discuss-phase (no AskUserQuestion calls)",
+      "rationale": "Operator explicitly instructed 'work without stopping for clarifying questions' at session start.",
+      "phase": "56"
+    },
+    {
+      "decision": "Mirror Phase 55 architecture verbatim — zero-dep CJS in scripts/, exports + require.main guard, three-wave TDD, --json envelope, padded text-table default output",
+      "rationale": "Sibling phase shipped clean; reuse over reinvention preserves coherence and reduces planner cognitive cost.",
+      "phase": "56"
+    },
+    {
+      "decision": "Coverage measurement reads coverage/coverage-final.json and aggregates inside the script",
+      "rationale": "Already produced by npm run test:coverage. No need to re-run tests or modify package.json scripts. Staleness threshold 3600s, exit 2 if missing/stale.",
+      "phase": "56"
+    },
+    {
+      "decision": "Test-count measurement spawns 'node --test --test-reporter=tap' from inside the detector",
+      "rationale": "Self-contained; no coupling to scripts/run-tests.cjs. ~30s wall time per detector run accepted.",
+      "phase": "56"
+    },
+    {
+      "decision": "Hook count restricted to execution hooks (hooks/dist/*.js) for v1",
+      "rationale": "Living docs use four+ different 'hook' definitions (15/16/10/7) that disagree with each other. One narrow, unambiguous metric in v1; expand once upstream definitions stabilize.",
+      "phase": "56"
+    },
+    {
+      "decision": "Living-docs scope: exactly 3 files (CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md)",
+      "rationale": "DOCDRIFT-03 names these three. PROJECT.md and CHANGELOG.md are touched by /gsd:sync-docs but were intentionally not in the requirement.",
+      "phase": "56"
+    },
+    {
+      "decision": "Three-tier exit codes (0 clean / 1 drift / 2 runtime error)",
+      "rationale": "Phase 57's CI step needs to distinguish 'real drift' from 'couldn't run check'. Single-exit-1 conflates both.",
+      "phase": "56"
+    },
+    {
+      "decision": "Drift records sorted by canonical (file, line) order — not insertion, not alphabetical",
+      "rationale": "Humans scan multi-file reports in document order. Match that habit.",
+      "phase": "56"
+    }
+  ],
+  "uncommitted_files": [],
+  "local_only_files": [
+    ".planning/phases/56-doc-drift-detector/56-CONTEXT.md",
+    ".planning/phases/56-doc-drift-detector/56-DISCUSSION-LOG.md",
+    ".planning/phases/56-doc-drift-detector/.continue-here.md"
+  ],
+  "next_action": "Run /gsd:plan-phase 56 (after /clear for fresh context window). The planner will read 56-CONTEXT.md and produce three plans following the Phase 55 wave template.",
+  "context_notes": "Phase 56 context was gathered in auto-mode because operator opted out of clarifying questions for the session. Every gray area was auto-resolved with the recommended choice and logged in 56-DISCUSSION-LOG.md. The Phase 55 sibling (validate-doc-links.cjs) is the architectural template — same shape, same wave structure, same test harness pattern. The detector is read-only; its job is to catch numeric drift in three living docs and exit non-zero. Phase 57 wires it into CI (out of scope here). Watch for: (1) the README currently claims '65 commands' but live count is 66 — this will surface as drift in Wave 3 and needs to be fixed in the same wave; (2) c8 currently emits coverage-final.json via the existing 'json' reporter, so no .c8rc.json reporter changes needed — only an 'include' addition for the new script.",
+  "session_state": {
+    "branch": "chore/milestone-v2.8-init",
+    "working_tree": "clean",
+    "last_commit": "60928cb",
+    "milestone": "v2.8",
+    "milestone_name": "Documentation Integrity",
+    "milestone_status": "active",
+    "phases_complete_in_milestone": 1,
+    "phases_total_in_milestone": 3
+  },
+  "false_completion_check": {
+    "scanned": true,
+    "files_with_placeholder_text": [
+      ".planning/phases/55-internal-link-validator/55-01-PLAN.md",
+      ".planning/phases/55-internal-link-validator/55-01-SUMMARY.md",
+      ".planning/phases/55-internal-link-validator/55-02-PLAN.md",
+      ".planning/phases/55-internal-link-validator/55-03-PLAN.md",
+      ".planning/phases/55-internal-link-validator/55-03-SUMMARY.md"
+    ],
+    "verdict": "benign — TBD/placeholder hits are standard plan-template scaffolding (e.g., 'TBD plans', sample placeholder snippets in must_have examples). Phase 55 is fully shipped per ROADMAP and STATE; no real false completions detected."
+  }
 }
