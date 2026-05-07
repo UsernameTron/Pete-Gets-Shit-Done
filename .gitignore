@@ -32,6 +32,7 @@ animation/
 .claude/tmp/
 .claude/cache/
 .claude/state/
+.claude/scheduled_tasks.lock
 
 # Internal planning documents (STATE.md is committed; everything else is local)
 .planning/phases/
