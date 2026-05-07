@@ -11,9 +11,9 @@
 
 ### Internal Link Validator
 
-- [ ] **DOCLINK-01**: Validator script identifies broken relative-path refs in tracked `.md` files (e.g., `[text](path/to/file.md)` where target does not exist)
-- [ ] **DOCLINK-02**: Validator script identifies broken anchor refs within and across files (e.g., `#section-name` not present in target document)
-- [ ] **DOCLINK-03**: Validator outputs structured table — file, line, broken-ref, reason
+- [x] **DOCLINK-01**: Validator script identifies broken relative-path refs in tracked `.md` files (e.g., `[text](path/to/file.md)` where target does not exist)
+- [x] **DOCLINK-02**: Validator script identifies broken anchor refs within and across files (e.g., `#section-name` not present in target document)
+- [x] **DOCLINK-03**: Validator outputs structured table — file, line, broken-ref, reason
 - [ ] **DOCLINK-04**: Validator exits non-zero on any broken link, zero on clean run, with `--json` flag for machine-readable output
 
 ### Doc Drift Detector
@@ -56,9 +56,9 @@ Deferred to a later milestone:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCLINK-01 | Phase 55 | Pending |
-| DOCLINK-02 | Phase 55 | Pending |
-| DOCLINK-03 | Phase 55 | Pending |
+| DOCLINK-01 | Phase 55 | Complete |
+| DOCLINK-02 | Phase 55 | Complete |
+| DOCLINK-03 | Phase 55 | Complete |
 | DOCLINK-04 | Phase 55 | Pending |
 | DOCDRIFT-01 | Phase 56 | Pending |
 | DOCDRIFT-02 | Phase 56 | Pending |

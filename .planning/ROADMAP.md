@@ -92,7 +92,7 @@ Plans:
   4. Broken anchor refs (e.g., `#section-name` not present in the target document) are identified and reported separately from broken file-path refs
 **Plans**: 3 plans
 Plans:
-- [ ] 55-01-PLAN.md — TDD core: fixtures + toGfmSlug + extractHeadingSlugs + extractLinks + validateLink + formatTable (Wave 1)
+- [x] 55-01-PLAN.md — TDD core: fixtures + toGfmSlug + extractHeadingSlugs + extractLinks + validateLink + formatTable (Wave 1)
 - [ ] 55-02-PLAN.md — Discovery + main() + integration tests + .c8rc.json coverage tracking (Wave 2)
 - [ ] 55-03-PLAN.md — Real-repo run + suite green + living-docs updates (Wave 3)
 
@@ -130,7 +130,7 @@ Plans:
 | 52. Checkpoint Engine | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
-| 55. Internal Link Validator | v2.8 | 0/3 | Planned | - |
+| 55. Internal Link Validator | v2.8 | 1/3 | In Progress|  |
 | 56. Doc Drift Detector | v2.8 | 0/TBD | Not started | - |
 | 57. Backfill and CI Integration | v2.8 | 0/TBD | Not started | - |
 
@@ -140,7 +140,7 @@ Plans:
 
 **Goal:** Update CLAUDE.md and README.md to reflect current state — agent counts, test counts, milestone history, and any architectural changes since last doc pass.
 **Requirements:** TBD
-**Plans:** 0 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
