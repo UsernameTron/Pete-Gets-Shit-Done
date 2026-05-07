@@ -54,7 +54,22 @@ Deferred to a later milestone:
 
 ## Traceability
 
-(Filled by roadmap phase — see `.planning/ROADMAP.md` after roadmapper runs)
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DOCLINK-01 | Phase 55 | Pending |
+| DOCLINK-02 | Phase 55 | Pending |
+| DOCLINK-03 | Phase 55 | Pending |
+| DOCLINK-04 | Phase 55 | Pending |
+| DOCDRIFT-01 | Phase 56 | Pending |
+| DOCDRIFT-02 | Phase 56 | Pending |
+| DOCDRIFT-03 | Phase 56 | Pending |
+| DOCDRIFT-04 | Phase 56 | Pending |
+| DOCDRIFT-05 | Phase 56 | Pending |
+| DOCREF-01 | Phase 57 | Pending |
+| DOCREF-02 | Phase 57 | Pending |
+| DOCCI-01 | Phase 57 | Pending |
+| DOCCI-02 | Phase 57 | Pending |
+| DOCCI-03 | Phase 57 | Pending |
 
 ## Acceptance Criteria
 

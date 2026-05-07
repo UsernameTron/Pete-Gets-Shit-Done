@@ -4,6 +4,7 @@
 
 - v2.6 Developer Experience — Phases 49-51 (shipped 2026-04-18) — [archive](milestones/v2.6-ROADMAP.md)
 - v2.7 Session Continuity — Phases 52-54 (shipped 2026-04-18) — [archive](milestones/v2.7-ROADMAP.md)
+- v2.8 Documentation Integrity — Phases 55-57 (active)
 
 ## Phases
 
@@ -27,6 +28,14 @@
   - [x] 54-01-PLAN.md -- Pattern registry (uat-patterns.cjs) with 8+ pattern types via TDD
   - [x] 54-02-PLAN.md -- Runner orchestrator (uat-runner.cjs) with frontmatter parsing and command execution via TDD
   - [x] 54-03-PLAN.md -- Integration: wire into verify-work.md + CLI subcommand + full suite green
+
+### v2.8 Documentation Integrity (ACTIVE)
+
+**Milestone Goal:** Turn documentation accuracy from manually-maintained to CI-enforced — broken links, stale counts, and cross-doc inconsistencies must fail CI before merge.
+
+- [ ] **Phase 55: Internal Link Validator** - A validator script scans all tracked `.md` files for broken relative-path and anchor refs, exits non-zero on failures, and is fully unit-tested
+- [ ] **Phase 56: Doc Drift Detector** - A detector script measures live test counts, agent/command/skill/hook inventory, and coverage, then fails on any disagreement with numeric claims in living docs
+- [ ] **Phase 57: Backfill and CI Integration** - Known broken cross-references are repaired and both validator scripts are wired as blocking CI steps in `test.yml`
 
 ## Phase Details
 
@@ -69,9 +78,42 @@ Plans:
 - [x] 54-02-PLAN.md -- Runner orchestrator (TDD)
 - [x] 54-03-PLAN.md -- Integration + full suite green
 
+### Phase 55: Internal Link Validator
+**Goal**: Every broken relative-path and anchor ref in tracked `.md` files is detected, reported in a structured table, and fails CI on a non-zero exit
+**Depends on**: Nothing (independent — no dependency on Phase 56)
+**Requirements**: DOCLINK-01, DOCLINK-02, DOCLINK-03, DOCLINK-04
+**Success Criteria** (what must be TRUE):
+  1. Running `scripts/validate-doc-links.cjs` on the repo produces a table listing every broken ref (file, line number, broken ref text, reason) and exits non-zero when any broken link exists
+  2. Running the validator on a repo with no broken links exits zero and prints a clean-pass message
+  3. Running the validator with `--json` outputs machine-readable JSON suitable for programmatic consumption (array of objects with file, line, ref, reason fields)
+  4. Broken anchor refs (e.g., `#section-name` not present in the target document) are identified and reported separately from broken file-path refs
+**Plans**: TBD
+
+### Phase 56: Doc Drift Detector
+**Goal**: Numeric claims in the three living docs are automatically compared against measured live values, and any disagreement fails the run with a structured drift report
+**Depends on**: Nothing (independent — no dependency on Phase 55)
+**Requirements**: DOCDRIFT-01, DOCDRIFT-02, DOCDRIFT-03, DOCDRIFT-04, DOCDRIFT-05
+**Success Criteria** (what must be TRUE):
+  1. Running `scripts/check-doc-drift.cjs` on a clean repo where all numeric claims match live values exits zero
+  2. Running the detector after manually editing a claimed test count in CLAUDE.md to an incorrect value produces a drift table row identifying the file, line, claimed value, actual value, and metric name, then exits non-zero
+  3. The detector measures at least six metric categories: test count, suite count, line coverage, branch coverage, function coverage, and filesystem-derived counts (agent, command, skill, or hook count)
+  4. Running the detector with `--json` outputs machine-readable JSON suitable for programmatic consumption
+**Plans**: TBD
+
+### Phase 57: Backfill and CI Integration
+**Goal**: Known broken cross-references are repaired and both validator scripts run as blocking CI steps on every PR so documentation drift cannot merge undetected
+**Depends on**: Phase 55, Phase 56 (both scripts must exist before CI wiring)
+**Requirements**: DOCREF-01, DOCREF-02, DOCCI-01, DOCCI-02, DOCCI-03
+**Success Criteria** (what must be TRUE):
+  1. A grep across the entire repo finds zero references to `docs/health-reports/full-audit-2026-04-11.md` or `.planning/codebase/STRUCTURE.md` — all have been repaired or removed
+  2. The `.github/workflows/test.yml` file contains a dedicated step that runs `scripts/validate-doc-links.cjs` and a dedicated step that runs `scripts/check-doc-drift.cjs`, each as distinct named steps
+  3. Opening a PR with a deliberately introduced broken link causes the CI link-validator step to fail and block merge
+  4. Opening a PR with a deliberately introduced doc drift causes the CI drift-detector step to fail and block merge
+**Plans**: TBD
+
 ## Progress
 
-**Execution Order:** Phase 52 -> Phase 53 -> Phase 54 (52 must complete before 53; 54 is independent but runs last)
+**Execution Order (v2.8):** Phases 55 and 56 are independent and can run in parallel or in either order. Phase 57 depends on both Phases 55 and 56.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -81,6 +123,9 @@ Plans:
 | 52. Checkpoint Engine | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
+| 55. Internal Link Validator | v2.8 | 0/TBD | Not started | - |
+| 56. Doc Drift Detector | v2.8 | 0/TBD | Not started | - |
+| 57. Backfill and CI Integration | v2.8 | 0/TBD | Not started | - |
 
 ## Backlog
 
