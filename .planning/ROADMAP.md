@@ -17,7 +17,8 @@
 
 </details>
 
-### v2.7 Session Continuity (SHIPPED 2026-04-18)
+<details>
+<summary>v2.7 Session Continuity (Phases 52-54) — SHIPPED 2026-04-18</summary>
 
 **Milestone Goal:** Eliminate the three primary session friction points — context-reset amnesia, manual verification overhead, and slow session-start orientation.
 
@@ -28,6 +29,8 @@
   - [x] 54-01-PLAN.md -- Pattern registry (uat-patterns.cjs) with 8+ pattern types via TDD
   - [x] 54-02-PLAN.md -- Runner orchestrator (uat-runner.cjs) with frontmatter parsing and command execution via TDD
   - [x] 54-03-PLAN.md -- Integration: wire into verify-work.md + CLI subcommand + full suite green
+
+</details>
 
 ### v2.8 Documentation Integrity (ACTIVE)
 
