@@ -87,7 +87,11 @@ Plans:
   2. Running the validator on a repo with no broken links exits zero and prints a clean-pass message
   3. Running the validator with `--json` outputs machine-readable JSON suitable for programmatic consumption (array of objects with file, line, ref, reason fields)
   4. Broken anchor refs (e.g., `#section-name` not present in the target document) are identified and reported separately from broken file-path refs
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 55-01-PLAN.md — TDD core: fixtures + toGfmSlug + extractHeadingSlugs + extractLinks + validateLink + formatTable (Wave 1)
+- [ ] 55-02-PLAN.md — Discovery + main() + integration tests + .c8rc.json coverage tracking (Wave 2)
+- [ ] 55-03-PLAN.md — Real-repo run + suite green + living-docs updates (Wave 3)
 
 ### Phase 56: Doc Drift Detector
 **Goal**: Numeric claims in the three living docs are automatically compared against measured live values, and any disagreement fails the run with a structured drift report
@@ -123,7 +127,7 @@ Plans:
 | 52. Checkpoint Engine | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
-| 55. Internal Link Validator | v2.8 | 0/TBD | Not started | - |
+| 55. Internal Link Validator | v2.8 | 0/3 | Planned | - |
 | 56. Doc Drift Detector | v2.8 | 0/TBD | Not started | - |
 | 57. Backfill and CI Integration | v2.8 | 0/TBD | Not started | - |
 
