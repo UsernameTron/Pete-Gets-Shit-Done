@@ -859,6 +859,19 @@ function cmdInitMilestoneOp(cwd, raw) {
       .map(e => e.name);
   } catch { /* intentional: archive directory may not exist */ }
 
+  // Read STATE.md frontmatter for milestone state fields.
+  // status drives closeout's already-finalized fast-exit; paused_at drives
+  // ship-vs-freeze mode detection. Sourced from frontmatter so workflow
+  // bodies don't need to re-parse YAML in bash.
+  let stateStatus = null;
+  let pausedAt = null;
+  try {
+    const stateContent = fs.readFileSync(path.join(planningDir(cwd), 'STATE.md'), 'utf-8');
+    const stateFm = extractFrontmatter(stateContent);
+    stateStatus = stateFm.status || null;
+    pausedAt = stateFm.paused_at || null;
+  } catch { /* intentional: STATE.md may not exist; leave fields null */ }
+
   const result = {
     // Config
     commit_docs: config.commit_docs,
@@ -876,6 +889,10 @@ function cmdInitMilestoneOp(cwd, raw) {
     // Archive
     archived_milestones: archivedMilestones,
     archive_count: archivedMilestones.length,
+
+    // Milestone state (sourced from STATE.md frontmatter)
+    state_status: stateStatus,
+    paused_at: pausedAt,
 
     // File existence
     project_exists: pathExistsInternal(cwd, '.planning/PROJECT.md'),

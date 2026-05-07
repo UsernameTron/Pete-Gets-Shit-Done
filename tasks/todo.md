@@ -20,6 +20,7 @@
 - [ ] CI-time agent health check with blocking exit
 - [ ] Internal doc link validator script + CI step
 - [ ] esbuild 0.25 to 0.28 upgrade
+- [ ] Migrate legacy `paused_at` regex extraction in `init.cjs:1274` to use `extractFrontmatter` (currently uses markdown body string-match, fragile)
 
 ## Completed
 

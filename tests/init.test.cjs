@@ -539,6 +539,55 @@ describe('cmdInitMilestoneOp', () => {
     assert.strictEqual(output.archive_count, 0);
     assert.deepStrictEqual(output.archived_milestones, []);
   });
+
+  test('state_status returned from STATE.md frontmatter', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'),
+      '---\nstatus: in_progress\nmilestone: v1.0\n---\n\n# State\n'
+    );
+
+    const result = runGsdTools('init milestone-op', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.state_status, 'in_progress');
+  });
+
+  test('state_status is null when STATE.md is missing', () => {
+    // createTempProject does not create STATE.md by default
+    const result = runGsdTools('init milestone-op', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.state_exists, false);
+    assert.strictEqual(output.state_status, null);
+  });
+
+  test('paused_at returned from STATE.md frontmatter', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'),
+      '---\nstatus: paused\npaused_at: "2026-05-07T10:00:00Z"\n---\n\n# State\n'
+    );
+
+    const result = runGsdTools('init milestone-op', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.paused_at, '2026-05-07T10:00:00Z');
+  });
+
+  test('paused_at is null when not set in STATE.md frontmatter', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'),
+      '---\nstatus: in_progress\nmilestone: v1.0\n---\n\n# State\n'
+    );
+
+    const result = runGsdTools('init milestone-op', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output.paused_at, null);
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
