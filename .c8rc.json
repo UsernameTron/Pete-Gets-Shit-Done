@@ -5,7 +5,8 @@
     "bin/install.js",
     "hooks/*.js",
     "scripts/build-hooks.js",
-    ".claude/hooks/lesson-capture-gate.cjs"
+    ".claude/hooks/lesson-capture-gate.cjs",
+    "scripts/validate-doc-links.cjs"
   ],
   "exclude": [
     "hooks/dist/**",
