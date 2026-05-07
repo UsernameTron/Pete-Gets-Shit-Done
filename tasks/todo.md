@@ -4,8 +4,8 @@
 
 17 milestones shipped (v1.0 through v2.7). 54 phases executed. 12 phase directories archived.
 
-- **Tests**: 2,644 passing, 0 failures (533 suites)
-- **Coverage**: 91.23% lines, 83.02% branches, 97.41% functions
+- **Tests**: 2,667 passing, 0 failures (536 suites)
+- **Coverage**: 91.23% lines, 83.01% branches, 97.41% functions
 - **Branch**: `main`
 - **Tag**: v2.7 (2026-04-18)
 
@@ -24,7 +24,11 @@
 
 ## Completed
 
-- [x] /gsd:closeout meta-orchestrator command shipped (2026-05-07, PR #17)
+- [x] superpowers plugin uninstalled — GSD primacy codified in ~/.claude/CLAUDE.md (2026-05-07)
+- [x] Karpathy attribution + collision-resolution added to ~/projects/CLAUDE.md (2026-05-07)
+- [x] Test counts refreshed across 3 living docs (2,644→2,667, 533→536) — PR #20 (2026-05-07)
+- [x] state_status + paused_at added to gsd-tools.cjs init milestone-op — PR #19 (2026-05-07)
+- [x] /gsd:closeout meta-orchestrator command shipped — PR #17 (2026-05-07)
 - [x] Stash list cleared — 3 obsolete stashes dropped, 1 valid handoff update popped (2026-05-07)
 - [x] Project finalized via /gsd:finalize (2026-04-24)
 - [x] Phase directories archived (12 dirs + 1 file to milestone archives, 2026-04-24)
@@ -39,28 +43,34 @@
 - [x] v2.0 Intelligence Layer shipped (2026-04-05)
 - [x] v1.0-v1.9 — 13 milestones shipped across 40 phases
 
-## Session Handoff (2026-05-07 — Closeout Command Shipped)
+## Session Handoff (2026-05-07 — Closeout shipped, GSD primacy codified, superpowers uninstalled)
 
-**Branch**: `main` (clean after commit)
+**Branch**: `main` (clean) — 4 PRs merged this session
 
-**Session actions:**
-1. Designed `/gsd:closeout` — comprehensive project closeout meta-orchestrator (orient → audit → verify → capture → ship-or-freeze → finalize → polish)
-2. Built thin-shell command + 9-gate workflow + 19 structural tests
-3. Defers to `/gsd:finalize` at Gate 7; finalize unchanged
-4. PR #17 created, all 9 CI checks passed, squash-merged as `a824914`
-5. Stash list reviewed — dropped 3 obsolete stashes (v2.4-era audit, Phase 54 STATE update, redundant v27 plan), popped 1 legitimate todo.md handoff refresh
+**Shipped:**
+- **PR #17 (a824914)** — feat: `/gsd:closeout` meta-orchestrator. 9-gate command (orient → audit → verify → capture → ship-or-freeze → finalize → polish). Defers to `/gsd:finalize` at Gate 7. 3 files / +941 lines / 19 new tests.
+- **PR #18 (b3dbd84)** — docs: refresh todo.md handoff text + capture stash-cleanup notes
+- **PR #19 (bf10008)** — chore: add `state_status` + `paused_at` fields to `gsd-tools.cjs init milestone-op` (sourced from STATE.md frontmatter via `extractFrontmatter`). +12 lib lines, +49 test lines, 4 new assertions. Caught during /gsd:closeout's first integration UAT.
+- **PR #20 (b590634)** — chore: refresh stale test counts (2,644→2,667, 533→536) across CLAUDE.md, README.md, DEVOPS-HANDOFF.md
 
-**Files added (PR #17):**
-- `commands/gsd/closeout.md` — 50-line thin-shell
-- `get-shit-done/workflows/closeout.md` — 645-line orchestration body
-- `tests/closeout.test.cjs` — 244 lines, 19 assertions
+**User-config changes (not git-tracked):**
+- `~/.claude/CLAUDE.md` — added "Workflow Authority" section codifying GSD primacy with 12-row routing table mapping each overlapping superpowers skill to its GSD or skill-forge equivalent
+- `~/projects/CLAUDE.md` — added Karpathy attribution + 3-tension collision-resolution section (surgical edit, content already correct)
+- Plugin: `claude plugin uninstall superpowers@claude-plugins-official` (full uninstall, Path B)
 
-**Tests:** 2,663 passing, 536 suites, 0 failures (added 19 new).
+**Stash list maintenance:** 4 stashes inspected, 3 dropped as obsolete (Phase 54 STATE update, redundant v27 plan, v2.4-era audit), 1 popped as legitimate handoff refresh.
+
+**Tests:** 2,667 passing / 536 suites / 0 failures. Coverage holds at 91.23% line / 83.01% branch / 97.41% function.
+
+**Loaded skills:** ~150 → ~136 (14 superpowers skills removed).
 
 **Next:**
-1. `/gsd:new-milestone` for v2.8
-2. Triage Deferred Items as v2.8 phase candidates (3 natural clusters: CI hardening, doc link integrity, dependency maintenance)
-3. `/gsd:closeout` should get a real integration run once v2.8 has a milestone to close out
+1. `/gsd:new-milestone v2.8` — earlier invocation paused this session waiting for "what to build" answer
+2. Triage 10 Deferred Items as v2.8 phase candidates — 3 natural clusters:
+   - CI hardening (Stop-hook sentinel, npm audit, blocking coverage, agent health check)
+   - Docs integrity (link validator, cross-ref backfill)
+   - Maintenance (esbuild upgrade, ECC scan, tag archaeology, legacy paused_at regex migration)
+3. `/gsd:closeout` should get a full integration run (not just Gate 0 fast-exit) once v2.8 has a real milestone to close out
 
 ---
 
