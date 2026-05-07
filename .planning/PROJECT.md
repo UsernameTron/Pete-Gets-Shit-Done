@@ -6,11 +6,11 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.7 Session Continuity
-**Previous:** v2.6 Developer Experience (shipped 2026-04-18, PR #3 + PR #4 merged)
+**Current milestone:** v2.8 Documentation Integrity
+**Previous:** v2.7 Session Continuity (shipped 2026-04-18, 3 phases, 23 requirements)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,644 total, all passing
-**Coverage:** 91.51% statements, 83.24% branches, 98.01% functions
+**Tests:** 2,667 total, all passing
+**Coverage:** 91.23% statements, 83.01% branches, 97.41% functions
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
@@ -25,19 +25,11 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ### Active
 
-- **UAT-01**: Parses must_haves from plan YAML frontmatter
-- **UAT-02**: Matches at least 8 pattern types from registry
-- **UAT-03**: Executes commands in read-only mode (no writes)
-- **UAT-04**: Returns structured pass/fail/manual results
-- **UAT-05**: Failed checks include expected, actual, and command
-- **UAT-06**: Unrecognized must_haves fall through to manual UAT
-- **UAT-07**: verify-work.md presents auto results before conversational UAT
-- **UAT-08**: 20+ tests across patterns and runner
-- **UAT-09**: Command timeout (30s) prevents hanging
-- **UAT-10**: Full test suite green after integration
+See `.planning/REQUIREMENTS.md` for v2.8 Documentation Integrity scope (REQ-IDs assigned during requirements phase).
 
 ### Validated
 
+- Automated UAT Runner (UAT-01 through UAT-10) — v2.7 Phase 54
 - Daily Dashboard (DAILY-01 through DAILY-06) — v2.7 Phase 53
 - Checkpoint Engine (CP-01 through CP-07) — v2.7 Phase 52
 - Install-from-clone script (`npm run setup`) — v2.6 Phase 49
@@ -49,25 +41,26 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 - GUI installer — CLI-only project, no graphical installer needed
 - CI provider abstraction — GitHub Actions only, no Jenkins/GitLab/Circle support
 
-## Current Milestone: v2.7 Session Continuity
+## Current Milestone: v2.8 Documentation Integrity
 
-**Goal:** Eliminate the three biggest operational friction points — context loss on /clear, slow session starts, and manual UAT checks.
+**Goal:** Turn documentation accuracy from manually-maintained to CI-enforced — broken links, stale counts, and cross-doc inconsistencies must fail CI before merge.
 
 **Target features:**
-- Checkpoint Engine — lib/checkpoint.cjs writes .planning/CHECKPOINT.json before every context reset; resume-work and /prime consume it to skip completed work
-- /gsd:daily — one-command morning dashboard showing milestone, phase, plan, branch, tests, next action
-- Automated UAT Runner — lib/uat-runner.cjs with pattern registry parses plan must_haves into shell assertions, presents pass/fail table before conversational UAT
+- Internal link validator (`scripts/validate-doc-links.cjs`) — scans tracked `.md` files for broken relative paths and anchor refs; CLI + CI step
+- Doc drift detector (`scripts/check-doc-drift.cjs`) — compares living docs (CLAUDE.md, README.md, DEVOPS-HANDOFF.md) against measured truth and fails on disagreement
+- Cross-reference backfill — repair known-broken refs to relocated docs
+- CI integration — both validators wired as blocking checks in `test.yml`
 
-**Reference:** `.planning/v27-session-continuity-milestone-plan.md` — full code sketches, schemas, test cases, acceptance criteria.
+**Motivating evidence:** PR #20 had to ship just to refresh test counts (533→536, 2,644→2,667). `/gsd:sync-docs` provides measurement primitives but no enforcement. 2 of 10 deferred items in todo.md scope into this milestone (link validator + cross-ref backfill).
 
-## Most Recent: v2.6 Developer Experience (shipped 2026-04-18)
+## Most Recent: v2.7 Session Continuity (shipped 2026-04-18)
 
-Three high-impact DX improvements that make GSD portable, CI-aware, and self-documenting:
-- `npm run setup` — one-command install from fresh clone with verification table
-- `/gsd:ci-watch` — real-time GitHub Actions polling with failure diagnosis
-- `/gsd:sync-docs` — automated documentation sync from live codebase state
+Three operational-friction fixes — context loss on /clear, slow session starts, and manual UAT checks:
+- Checkpoint Engine — `lib/checkpoint.cjs` writes `.planning/CHECKPOINT.json` before context resets; `/gsd:resume-work` and `/prime` consume it to skip completed work
+- `/gsd:daily` — one-command morning dashboard showing milestone, phase, plan, branch, tests, next action
+- Automated UAT Runner — `lib/uat-runner.cjs` + 8-pattern registry that parses plan must_haves into shell assertions, presents pass/fail table before conversational UAT
 
-3 phases (49-51), 5 plans, 18/18 requirements complete. PR #3 + PR #4 merged.
+3 phases (52-54), 7 plans, 23 requirements complete. PR #6, PR #7, PR #8 merged.
 
 <details>
 <summary><strong>v2.4 Foundation Hardening (7/7 requirements shipped)</strong></summary>
@@ -356,4 +349,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after v2.7 milestone complete (shipped, tagged)*
+*Last updated: 2026-05-07 — v2.8 Documentation Integrity milestone started*

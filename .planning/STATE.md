@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.7
-milestone_name: Session Continuity
-status: archived
-last_updated: "2026-05-07T19:00:00.000Z"
+milestone: v2.8
+milestone_name: Documentation Integrity
+status: active
+last_updated: "2026-05-07T20:00:00.000Z"
 last_activity: 2026-05-07
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-18)
+See: .planning/PROJECT.md (updated 2026-05-07)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** v2.7 archived — ready for v2.8
+**Current focus:** v2.8 Documentation Integrity — defining requirements
 
 ## Current Position
 
-Milestone: v2.7 Session Continuity — archived (2026-04-24)
-Phase directories: archived to .planning/milestones/
-Tests: 2,667 assertions, 536 suites, 0 failures (+23 tests this session via PRs #17 + #19)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-07 — Milestone v2.8 started
+Tests: 2,667 assertions, 536 suites, 0 failures
 Coverage: 91.23% lines, 83.01% branches, 97.41% functions
-Last session: 2026-05-07 — /gsd:closeout shipped (PR #17), GSD primacy codified, superpowers uninstalled
-Next: `/gsd:new-milestone` for v2.8 or backlog triage
 
 ## Milestone History
 
