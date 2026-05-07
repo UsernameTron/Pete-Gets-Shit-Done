@@ -1,94 +1,71 @@
 # Requirements: get-shit-done
 
-**Defined:** 2026-04-18
+**Defined:** 2026-05-07
 **Core Value:** Predictable, high-quality execution at scale
 
-## v2.7 Requirements
+## v2.8 Documentation Integrity Requirements
 
-Requirements for v2.7 Session Continuity. Each maps to roadmap phases.
+**Goal:** Turn documentation accuracy from manually-maintained to CI-enforced. Broken links, stale counts, and cross-doc inconsistencies must fail CI before merge.
 
-### Checkpoint Engine
+**Motivating evidence:** PR #20 (b590634) shipped just to refresh stale test counts (2,644 → 2,667, 533 → 536) across 3 living docs. `/gsd:sync-docs` provides measurement primitives but no enforcement gate. Cross-references to relocated docs sat broken until manually noticed.
 
-- [x] **CP-01**: writeCheckpoint() produces valid JSON consumable by readCheckpoint()
-- [x] **CP-02**: /gsd:resume-work reads CHECKPOINT.json and skips completed plans
-- [x] **CP-03**: /prime surfaces checkpoint data in initialization summary
-- [x] **CP-04**: Stale checkpoint (>24h) generates warning but still loads
-- [x] **CP-05**: Missing checkpoint is graceful no-op (no error, no stack trace)
-- [x] **CP-06**: 15+ checkpoint tests passing with >80% branch coverage
-- [x] **CP-07**: Full test suite green after checkpoint integration
+### Internal Link Validator
 
-### Daily Dashboard
+- [ ] **DOCLINK-01**: Validator script identifies broken relative-path refs in tracked `.md` files (e.g., `[text](path/to/file.md)` where target does not exist)
+- [ ] **DOCLINK-02**: Validator script identifies broken anchor refs within and across files (e.g., `#section-name` not present in target document)
+- [ ] **DOCLINK-03**: Validator outputs structured table — file, line, broken-ref, reason
+- [ ] **DOCLINK-04**: Validator exits non-zero on any broken link, zero on clean run, with `--json` flag for machine-readable output
 
-- [x] **DAILY-01**: /gsd:daily produces dashboard in under 2 seconds
-- [x] **DAILY-02**: Reads CHECKPOINT.json first, falls back to STATE.md
-- [x] **DAILY-03**: Shows correct next-action for every GSD state
-- [x] **DAILY-04**: Handles missing files gracefully (no stack traces)
-- [x] **DAILY-05**: Dirty tree and stale checkpoint produce warnings
-- [x] **DAILY-06**: 10+ daily tests passing with >80% branch coverage
+### Doc Drift Detector
 
-### Automated UAT Runner
+- [ ] **DOCDRIFT-01**: Detector measures live test count, suite count, line/branch/function coverage from `npm test` and c8 output
+- [ ] **DOCDRIFT-02**: Detector measures live agent count, command count, skill count, hook count from filesystem inventory
+- [ ] **DOCDRIFT-03**: Detector compares measured values against numeric claims in `CLAUDE.md`, `README.md`, `docs/DEVOPS-HANDOFF.md` using regex-anchored extractors
+- [ ] **DOCDRIFT-04**: Detector outputs structured drift table — doc, file:line, claimed value, actual value, metric name
+- [ ] **DOCDRIFT-05**: Detector exits non-zero on any drift, zero on agreement, with `--json` flag for machine-readable output
 
-- [x] **UAT-01**: Parses must_haves from plan YAML frontmatter
-- [x] **UAT-02**: Matches at least 8 pattern types from registry
-- [x] **UAT-03**: Executes commands in read-only mode (no writes)
-- [x] **UAT-04**: Returns structured { passed, failed, manual } results
-- [x] **UAT-05**: Failed checks include expected, actual, and command
-- [x] **UAT-06**: Unrecognized must_haves fall through to manual UAT
-- [x] **UAT-07**: verify-work.md presents auto results before conversational UAT
-- [x] **UAT-08**: 20+ tests across patterns and runner
-- [x] **UAT-09**: Command timeout (30s) prevents hanging
-- [x] **UAT-10**: Full test suite green after integration
+### Cross-Reference Backfill
+
+- [ ] **DOCREF-01**: All references to relocated `docs/health-reports/full-audit-2026-04-11.md` are repaired or removed across the repo
+- [ ] **DOCREF-02**: All references to relocated `.planning/codebase/STRUCTURE.md` are repaired or removed across the repo
+
+### CI Integration
+
+- [ ] **DOCCI-01**: `validate-doc-links.cjs` runs as a dedicated step in `.github/workflows/test.yml` on every PR
+- [ ] **DOCCI-02**: `check-doc-drift.cjs` runs as a dedicated step in `.github/workflows/test.yml` on every PR
+- [ ] **DOCCI-03**: Both checks fail the workflow on non-zero exit, blocking merge via existing branch protection
 
 ## Future Requirements
 
-Deferred to future release. Tracked but not in current roadmap.
+Deferred to a later milestone:
 
-- **CP-08**: Automatic checkpoint on /compact (beyond /clear)
-- **DAILY-07**: /gsd:daily --json for scripting integration
-- **UAT-11**: LLM fallback for unrecognized must_haves (generate shell commands via model)
+- **DOCLIVE-01**: Living-docs cross-doc consistency check (same fact stated differently across CLAUDE.md / README.md / DEVOPS-HANDOFF.md beyond numeric counts handled by DOCDRIFT) — would require structured fact registry, larger scope than v2.8
+- **DOCMAP-01**: Codebase map staleness detection (`.planning/codebase/CODEBASE-MAP-*.md` drift vs. live structure) — separate from living docs, distinct measurement strategy
+- **DOCEXT-01**: External link validator (HTTP refs) — flaky in CI, separate concern from internal integrity
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| GUI checkpoint viewer | CLI-only project |
-| Real-time dashboard (auto-refresh) | Single-shot command is sufficient |
-| UAT pattern hot-reload | Pattern registry is static; restart is fine |
-| Cross-project checkpoint aggregation | Each project manages its own state |
+| Auto-fix mode | Validators are read-only/report-only by design; auto-rewriting docs introduces risk and conflicts with `/gsd:sync-docs` |
+| Markdown style linting | Separate concern; project follows informal conventions, adding linter is bigger than docs integrity |
+| Spell check / grammar | Out of scope for an integrity-focused milestone |
+| Auto-PR for drift fixes | Existing `/gsd:sync-docs` already provides guided fix flow; CI gate is the missing piece, not auto-fix |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| CP-01 | Phase 52 | Complete |
-| CP-02 | Phase 52 | Complete |
-| CP-03 | Phase 52 | Complete |
-| CP-04 | Phase 52 | Complete |
-| CP-05 | Phase 52 | Complete |
-| CP-06 | Phase 52 | Complete |
-| CP-07 | Phase 52 | Complete |
-| DAILY-01 | Phase 53 | Complete |
-| DAILY-02 | Phase 53 | Complete |
-| DAILY-03 | Phase 53 | Complete |
-| DAILY-04 | Phase 53 | Complete |
-| DAILY-05 | Phase 53 | Complete |
-| DAILY-06 | Phase 53 | Complete |
-| UAT-01 | Phase 54 | Complete |
-| UAT-02 | Phase 54 | Complete |
-| UAT-03 | Phase 54 | Complete |
-| UAT-04 | Phase 54 | Complete |
-| UAT-05 | Phase 54 | Complete |
-| UAT-06 | Phase 54 | Complete |
-| UAT-07 | Phase 54 | Complete |
-| UAT-08 | Phase 54 | Complete |
-| UAT-09 | Phase 54 | Complete |
-| UAT-10 | Phase 54 | Complete |
+(Filled by roadmap phase — see `.planning/ROADMAP.md` after roadmapper runs)
 
-**Coverage:**
-- v2.7 requirements: 23 total
-- Mapped to phases: 23
-- Unmapped: 0
+## Acceptance Criteria
+
+This milestone is complete when:
+
+1. Both validator scripts exist, are unit-tested, and pass on a clean repo
+2. Both validators run as blocking CI steps on every PR (visible in GitHub Actions)
+3. Cross-reference backfill is shipped — no broken refs to relocated docs remain
+4. Test suite green; coverage holds at ≥ 91% line / ≥ 83% branch
+5. CLAUDE.md, README.md, DEVOPS-HANDOFF.md updated to reflect new scripts and CI gates
 
 ---
-*Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 — all 23 requirements complete (finalization)*
+*Requirements defined: 2026-05-07 — v2.8 Documentation Integrity*
+*Previous milestone (v2.7) requirements archived: `.planning/milestones/v2.7-REQUIREMENTS.md`*
