@@ -5,13 +5,18 @@
  * validate-doc-links.cjs — Internal Markdown Link Validator
  *
  * Scans tracked .md files for broken relative-path refs and broken anchor refs.
- * Exits 0 on clean, 1 on broken links, with optional --json output.
+ * Exits 0 on clean, 1 on broken links. Use --json for machine-readable output.
+ *
+ * Usage:
+ *   node scripts/validate-doc-links.cjs                # validate the whole repo
+ *   node scripts/validate-doc-links.cjs --json         # JSON output
+ *   node scripts/validate-doc-links.cjs --root <dir>   # validate a specific tree (used by tests)
  *
  * Requirements: DOCLINK-01, DOCLINK-02, DOCLINK-03, DOCLINK-04
  *
  * Known limitations:
  *   - Reference-style links [text][id] are NOT parsed
- *   - Raw HTML anchor definitions are NOT recognized
+ *   - Raw HTML <a id="..."> anchor definitions are NOT recognized
  *   - HTML-block-embedded links are NOT parsed (regex-based extraction only)
  *   - GFM Unicode edge cases: the toGfmSlug algorithm uses [^\w\s-] to strip
  *     non-word characters, which removes accented Unicode chars. GitHub's
@@ -21,13 +26,11 @@
  *     captured, the title is discarded. (Pass 1 review fix.)
  *   - Files saved in encodings other than UTF-8 (e.g., UTF-16) are skipped
  *     with a single line logged to stderr. (Pass 2 Gemini LOW fix.)
- *
- * Plan 55-01: core pure/fs functions (this file's exports)
- * Plan 55-02: discoverTrackedFiles + main() entrypoint
  */
 
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -160,13 +163,19 @@ function extractLinks(filePath) {
  * Validate a single extracted link ref relative to its containing file.
  * Returns a broken-link record, or null if the link resolves correctly.
  *
+ * Pass 1 consensus fix: the optional slugCache lets the main loop avoid
+ * re-reading the same target file more than once per run. The base
+ * validateLink signature stays backward compatible — when no cache is
+ * provided, the function reads the target file directly each time.
+ *
  * @param {string} sourceFile   Absolute path to file containing the link
  * @param {number} lineNum      1-based line number
  * @param {string} ref          The raw ref text (may include #anchor)
  * @param {string} repoRoot     Absolute repo root (for traversal detection)
+ * @param {Map<string, Set<string>>} [slugCache]  Optional shared slug cache
  * @returns {{ file: string, line: number, ref: string, reason: string } | null}
  */
-function validateLink(sourceFile, lineNum, ref, repoRoot) {
+function validateLink(sourceFile, lineNum, ref, repoRoot, slugCache) {
   const repoRel = (abs) => path.relative(repoRoot, abs);
   const fail = (reason) => ({ file: repoRel(sourceFile), line: lineNum, ref, reason });
 
@@ -216,7 +225,15 @@ function validateLink(sourceFile, lineNum, ref, repoRoot) {
     // matches the target's slug set. Already-slugged refs survive unchanged.
     const anchorSlug = toGfmSlug(decodedAnchor);
 
-    const slugs = extractHeadingSlugs(targetFile);
+    // Consult slug cache if provided; populate on first access.
+    let slugs;
+    if (slugCache && slugCache.has(targetFile)) {
+      slugs = slugCache.get(targetFile);
+    } else {
+      slugs = extractHeadingSlugs(targetFile);
+      if (slugCache) slugCache.set(targetFile, slugs);
+    }
+
     if (!slugs.has(anchorSlug)) {
       // Preserve raw (pre-decode) anchor in reason string to mirror source.
       const reason = slugs.size === 0
@@ -270,6 +287,142 @@ function formatTable(records, repoRoot) {
   return [headerLine, underline, ...dataLines].join('\n');
 }
 
+// ─── discoverTrackedFiles ─────────────────────────────────────────────────────
+
+/**
+ * Recursively glob .md files under a directory, skipping node_modules and .git.
+ * Used as a fallback when git ls-files is unavailable (non-git fixture trees).
+ *
+ * @param {string} dir
+ * @param {string[]} [results]
+ * @returns {string[]}
+ */
+function globMdFiles(dir, results = []) {
+  let entries;
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return results;
+  }
+  for (const entry of entries) {
+    if (entry.name === 'node_modules' || entry.name === '.git') continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      globMdFiles(full, results);
+    } else if (entry.name.endsWith('.md')) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
+/**
+ * Discover all tracked Markdown files via git ls-files.
+ * Falls back to a recursive glob if git is unavailable (non-git directory or
+ * fixture directory used in unit tests).
+ *
+ * @param {string} repoRoot  Absolute path to repo root (or fixture root)
+ * @returns {string[]}       Absolute paths to .md files
+ */
+function discoverTrackedFiles(repoRoot) {
+  // Primary path: git ls-files (respects .gitignore, fast on large trees).
+  // Uses execFileSync (NOT execSync) — arguments passed as array, no shell injection.
+  try {
+    const out = execFileSync('git', ['ls-files', '--', '*.md'], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    const files = out
+      .split('\n')
+      .filter(Boolean)
+      .map(f => path.resolve(repoRoot, f));
+    if (files.length > 0) return files;
+    // git ran but returned no .md files — fall through to glob (could be a
+    // fixture tree that happens to be inside a parent git repo).
+  } catch {
+    // git unavailable or repoRoot is not a git working tree — fall through.
+  }
+  return globMdFiles(repoRoot);
+}
+
+// ─── main ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Main entry point. Discovers files, validates all links, emits output, exits.
+ * Guarded by require.main === module so exports remain testable.
+ *
+ * Flags:
+ *   --json           Emit machine-readable JSON instead of a text table
+ *   --root <dir>     Override repo-root discovery (used by unit tests against fixtures)
+ *
+ * Argument validation (Pass 2 Codex MEDIUM fix):
+ *   `--root` without a following directory argument exits 2 with stderr
+ *   "validate-doc-links: --root requires a directory argument".
+ *
+ * Exit codes:
+ *   0  Clean run (zero broken links)
+ *   1  At least one broken link found
+ *   2  Argument validation error (e.g., `--root` with no value)
+ *
+ * @param {string[]} argv  process.argv.slice(2)
+ */
+function main(argv) {
+  const wantJson = argv.includes('--json');
+  let repoRoot = process.cwd();
+  const rootIdx = argv.indexOf('--root');
+  if (rootIdx !== -1) {
+    // Pass 2 Codex MEDIUM fix: validate that `--root` has a following value.
+    // Without this, `--root` followed by `--json` would silently use `--json`
+    // as the directory argument.
+    const next = argv[rootIdx + 1];
+    if (!next || next.startsWith('--')) {
+      process.stderr.write(
+        'validate-doc-links: --root requires a directory argument\n'
+      );
+      process.exit(2);
+    }
+    repoRoot = path.resolve(next);
+  }
+
+  const files = discoverTrackedFiles(repoRoot);
+  const broken = [];
+  let checked = 0;
+  // Pass 1 consensus MEDIUM-HIGH fix: shared slug cache across all
+  // validateLink calls in this run. Each target file is read at most once.
+  const slugCache = new Map();
+
+  for (const file of files) {
+    const links = extractLinks(file);
+    for (const link of links) {
+      checked++;
+      const result = validateLink(file, link.line, link.ref, repoRoot, slugCache);
+      if (result) broken.push(result);
+    }
+  }
+
+  if (wantJson) {
+    const payload = {
+      status: broken.length === 0 ? 'clean' : 'broken',
+      checked,
+      files: files.length,
+      broken,
+    };
+    process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
+  } else if (broken.length === 0) {
+    process.stdout.write(
+      `validate-doc-links: all links valid (${checked} checked across ${files.length} files)\n`
+    );
+  } else {
+    process.stdout.write(
+      `validate-doc-links: ${broken.length} broken link(s) found\n\n`
+    );
+    process.stdout.write(formatTable(broken, repoRoot) + '\n');
+  }
+
+  process.exit(broken.length === 0 ? 0 : 1);
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -278,12 +431,11 @@ module.exports = {
   extractLinks,
   validateLink,
   formatTable,
+  discoverTrackedFiles,
 };
 
 // ─── Main guard ───────────────────────────────────────────────────────────────
 
 if (require.main === module) {
-  // main() lands in plan 55-02; for now, fail loud if invoked directly.
-  process.stderr.write('validate-doc-links: main() not yet implemented (see plan 55-02)\n');
-  process.exit(2);
+  main(process.argv.slice(2));
 }
