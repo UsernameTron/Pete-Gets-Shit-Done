@@ -61,6 +61,8 @@ npm run test:coverage
 
 Do not treat overall coverage as passing if any individual module is below its threshold. Check per-module results. Security-critical modules (`security.cjs`, auth paths, input validation) must be at 95% or above.
 
+- `node scripts/validate-doc-links.cjs` — validate internal Markdown links across tracked `.md` files; exits non-zero on broken refs. Use `--json` for machine-readable output. (Wired into CI in Phase 57.)
+
 ---
 
 ## Deployed Agents

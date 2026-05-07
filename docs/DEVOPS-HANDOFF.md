@@ -76,6 +76,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 | `npm run test:coverage:full` | Unit tests with text + lcov + JSON coverage report |
 | `npm run build:hooks` | Bundle hook source files via esbuild |
 | `npm run prepublishOnly` | Runs `build:hooks` before npm publish |
+| `node scripts/validate-doc-links.cjs` | Internal Markdown link validator — exits 0 on clean, 1 on broken. Use `--json` for machine-readable output. Phase 57 wires this as a blocking step in `.github/workflows/test.yml`. |
 
 ---
 

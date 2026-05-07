@@ -102,6 +102,12 @@ Verify it worked:
 
 > **Note:** Codex installation uses skills (`skills/gsd-*/SKILL.md`) rather than custom prompts.
 
+## Documentation Tools
+
+| Command | Purpose |
+|---------|---------|
+| `node scripts/validate-doc-links.cjs` | Validates internal Markdown links (relative refs + anchor refs) in tracked `.md` files. Exits non-zero on broken links. Use `--json` for machine output. CI integration deferred to Phase 57. |
+
 ## Staying Updated
 
 GSD moves fast. Update when you remember to:
