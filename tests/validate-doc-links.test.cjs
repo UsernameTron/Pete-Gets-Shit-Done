@@ -1,10 +1,10 @@
 /**
  * validate-doc-links.cjs — Unit Tests
  *
- * Tests for: toGfmSlug, extractHeadingSlugs, extractLinks, validateLink, formatTable.
- * discoverTrackedFiles and main() are tested in plan 55-02.
+ * Tests for: toGfmSlug, extractHeadingSlugs, extractLinks, validateLink, formatTable,
+ * discoverTrackedFiles, main() (via spawnSync).
  *
- * Requirements: DOCLINK-01, DOCLINK-02, DOCLINK-03
+ * Requirements: DOCLINK-01, DOCLINK-02, DOCLINK-03, DOCLINK-04
  */
 'use strict';
 
@@ -13,6 +13,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { spawnSync, execFileSync } = require('child_process');
 
 const {
   toGfmSlug,
@@ -20,7 +21,18 @@ const {
   extractLinks,
   validateLink,
   formatTable,
+  discoverTrackedFiles,
 } = require('../scripts/validate-doc-links.cjs');
+
+const SCRIPT = path.join(__dirname, '..', 'scripts', 'validate-doc-links.cjs');
+
+function runScript(args, opts = {}) {
+  return spawnSync(process.execPath, [SCRIPT, ...args], {
+    encoding: 'utf8',
+    timeout: 30_000,
+    ...opts,
+  });
+}
 
 const FIXTURES = path.join(__dirname, 'fixtures', 'doc-links');
 
@@ -401,5 +413,230 @@ describe('formatTable', () => {
     );
     assert.ok(out.includes('sub/a.md'), 'should contain sub/a.md');
     assert.ok(!out.includes('/repo/sub/a.md'), 'should NOT contain /repo/sub/a.md');
+  });
+});
+
+// ─── discoverTrackedFiles ──────────────────────────────────────────────────────
+
+describe('discoverTrackedFiles', () => {
+  let tmpDir;
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-doclinks-disc-'));
+  });
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  test('non-git dir with .md and .txt: returns only 3 .md files (absolute paths)', () => {
+    fs.writeFileSync(path.join(tmpDir, 'a.md'), '# A\n');
+    fs.writeFileSync(path.join(tmpDir, 'b.md'), '# B\n');
+    fs.mkdirSync(path.join(tmpDir, 'sub'));
+    fs.writeFileSync(path.join(tmpDir, 'sub', 'c.md'), '# C\n');
+    fs.writeFileSync(path.join(tmpDir, 'not-md.txt'), 'text\n');
+    const result = discoverTrackedFiles(tmpDir);
+    assert.strictEqual(result.length, 3, 'should find exactly 3 .md files');
+    const expected = new Set([
+      path.join(tmpDir, 'a.md'),
+      path.join(tmpDir, 'b.md'),
+      path.join(tmpDir, 'sub', 'c.md'),
+    ]);
+    const actual = new Set(result);
+    assert.deepStrictEqual(actual, expected, 'should match expected .md file set');
+  });
+
+  test('non-git dir with only .txt files: returns empty array', () => {
+    fs.writeFileSync(path.join(tmpDir, 'readme.txt'), 'hello\n');
+    fs.writeFileSync(path.join(tmpDir, 'notes.txt'), 'notes\n');
+    const result = discoverTrackedFiles(tmpDir);
+    assert.deepStrictEqual(result, [], 'should return empty array when no .md files');
+  });
+
+  test('excludes node_modules directory', () => {
+    fs.mkdirSync(path.join(tmpDir, 'node_modules'));
+    fs.writeFileSync(path.join(tmpDir, 'node_modules', 'foo.md'), '# Foo\n');
+    fs.writeFileSync(path.join(tmpDir, 'regular.md'), '# Regular\n');
+    const result = discoverTrackedFiles(tmpDir);
+    assert.strictEqual(result.length, 1, 'should find only 1 file (regular.md)');
+    assert.ok(result[0].endsWith('regular.md'), 'should be regular.md');
+  });
+
+  test('excludes .git directory', () => {
+    fs.mkdirSync(path.join(tmpDir, '.git'));
+    fs.writeFileSync(path.join(tmpDir, '.git', 'foo.md'), '# Git Internal\n');
+    fs.writeFileSync(path.join(tmpDir, 'regular.md'), '# Regular\n');
+    const result = discoverTrackedFiles(tmpDir);
+    assert.strictEqual(result.length, 1, 'should find only 1 file (regular.md)');
+    assert.ok(result[0].endsWith('regular.md'), 'should be regular.md');
+  });
+
+  test('all returned paths are absolute', () => {
+    fs.writeFileSync(path.join(tmpDir, 'doc.md'), '# Doc\n');
+    fs.mkdirSync(path.join(tmpDir, 'sub'));
+    fs.writeFileSync(path.join(tmpDir, 'sub', 'other.md'), '# Other\n');
+    const result = discoverTrackedFiles(tmpDir);
+    for (const p of result) {
+      assert.ok(path.isAbsolute(p), `expected absolute path, got: ${p}`);
+    }
+  });
+
+  test('git path (isolated temp repo): returns exactly the tracked .md file', (t) => {
+    // Check git availability
+    const gitCheck = spawnSync('git', ['--version'], { encoding: 'utf8' });
+    if (gitCheck.status !== 0) {
+      t.skip('git unavailable');
+      return;
+    }
+    const tempRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-doclinks-git-'));
+    try {
+      execFileSync('git', ['init', '-q'], { cwd: tempRepo });
+      execFileSync('git', ['config', 'user.email', 'test@example.com'], { cwd: tempRepo });
+      execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tempRepo });
+      fs.writeFileSync(path.join(tempRepo, 'fixture.md'), '# Fixture\n');
+      execFileSync('git', ['add', 'fixture.md'], { cwd: tempRepo });
+      execFileSync('git', ['commit', '-q', '-m', 'add fixture'], { cwd: tempRepo });
+      const result = discoverTrackedFiles(tempRepo);
+      assert.deepStrictEqual(result, [path.join(tempRepo, 'fixture.md')],
+        'git path: should return exactly the tracked file');
+    } finally {
+      fs.rmSync(tempRepo, { recursive: true, force: true });
+    }
+  });
+
+  test('slug cache reuse: extractHeadingSlugs called once for repeated links to same target', () => {
+    const targetFile = path.join(tmpDir, 'target.md');
+    fs.writeFileSync(targetFile, '# Heading\n');
+
+    const source1 = path.join(tmpDir, 'src1.md');
+    const source2 = path.join(tmpDir, 'src2.md');
+    const source3 = path.join(tmpDir, 'src3.md');
+    fs.writeFileSync(source1, '');
+    fs.writeFileSync(source2, '');
+    fs.writeFileSync(source3, '');
+
+    // With cache: extractHeadingSlugs should be called once (cached after first call)
+    const cache = new Map();
+    const r1 = validateLink(source1, 1, './target.md#heading', tmpDir, cache);
+    const r2 = validateLink(source2, 1, './target.md#heading', tmpDir, cache);
+    const r3 = validateLink(source3, 1, './target.md#heading', tmpDir, cache);
+    assert.strictEqual(r1, null, 'first call with cache: should resolve correctly');
+    assert.strictEqual(r2, null, 'second call with cache: should resolve correctly');
+    assert.strictEqual(r3, null, 'third call with cache: should resolve correctly');
+    // Cache should have exactly one entry for the target file
+    assert.strictEqual(cache.size, 1, 'cache should have 1 entry after 3 calls to same target');
+    assert.ok(cache.has(targetFile), 'cache should be keyed by target absolute path');
+
+    // Without cache: calls still work correctly (backward compat)
+    const rNoCache1 = validateLink(source1, 1, './target.md#heading', tmpDir);
+    const rNoCache2 = validateLink(source2, 1, './target.md#heading', tmpDir);
+    assert.strictEqual(rNoCache1, null, 'without cache: should still resolve correctly (1)');
+    assert.strictEqual(rNoCache2, null, 'without cache: should still resolve correctly (2)');
+  });
+});
+
+// ─── Exit codes (DOCLINK-04) ──────────────────────────────────────────────────
+
+describe('validate-doc-links: exit codes (DOCLINK-04)', () => {
+  const FIXTURES = path.join(__dirname, 'fixtures', 'doc-links');
+
+  test('clean fixture: exits 0 and stdout contains "all links valid"', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'clean')]);
+    assert.strictEqual(result.status, 0, `expected exit 0, got ${result.status}; stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('all links valid'),
+      `expected "all links valid" in stdout, got: ${result.stdout}`);
+  });
+
+  test('broken fixture: exits 1 and stdout contains "broken link"', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'broken')]);
+    assert.strictEqual(result.status, 1, `expected exit 1, got ${result.status}; stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('broken link'),
+      `expected "broken link" in stdout, got: ${result.stdout}`);
+  });
+
+  test('no --root flag (project root smoke test): completes within 30s with non-empty stdout', () => {
+    // Uses spawnSync directly with cwd to override working directory for project-root smoke test
+    const result = spawnSync(process.execPath, [SCRIPT], {
+      encoding: 'utf8',
+      timeout: 30_000,
+      cwd: process.cwd(),
+    });
+    // Do not assert exit code — the real repo may have intentional broken refs that Phase 57 will repair
+    assert.ok(result.stdout.length > 0 || result.stderr.length > 0,
+      'smoke test: expected non-empty output from running against project root');
+    assert.ok(result.signal === null,
+      `process should not have been killed by signal, got: ${result.signal}`);
+  });
+
+  test('edge fixture with traversal: exits 1 and stdout contains "path escapes repository root"', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'edge')]);
+    assert.strictEqual(result.status, 1, `expected exit 1, got ${result.status}; stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('path escapes repository root'),
+      `expected "path escapes repository root" in stdout, got: ${result.stdout}`);
+  });
+});
+
+// ─── JSON output (DOCLINK-04) ─────────────────────────────────────────────────
+
+describe('validate-doc-links: JSON output (DOCLINK-04)', () => {
+  const FIXTURES = path.join(__dirname, 'fixtures', 'doc-links');
+
+  test('clean --json: status=clean, broken=[], checked and files are numbers', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'clean'), '--json']);
+    let obj;
+    assert.doesNotThrow(() => { obj = JSON.parse(result.stdout); },
+      `stdout should be valid JSON; got: ${result.stdout}`);
+    assert.strictEqual(obj.status, 'clean', `expected status "clean", got "${obj.status}"`);
+    assert.ok(Array.isArray(obj.broken), 'broken should be an array');
+    assert.strictEqual(obj.broken.length, 0, 'broken should be empty for clean fixture');
+    assert.strictEqual(typeof obj.checked, 'number', 'checked should be a number');
+    assert.strictEqual(typeof obj.files, 'number', 'files should be a number');
+  });
+
+  test('broken --json: status=broken, broken.length >= 3', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'broken'), '--json']);
+    let obj;
+    assert.doesNotThrow(() => { obj = JSON.parse(result.stdout); },
+      `stdout should be valid JSON; got: ${result.stdout}`);
+    assert.strictEqual(obj.status, 'broken', `expected status "broken", got "${obj.status}"`);
+    assert.ok(Array.isArray(obj.broken), 'broken should be an array');
+    assert.ok(obj.broken.length >= 3,
+      `expected at least 3 broken records, got ${obj.broken.length}`);
+  });
+
+  test('broken --json: schema check — file/line/ref/reason are correct types', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'broken'), '--json']);
+    const obj = JSON.parse(result.stdout);
+    assert.ok(obj.broken.length > 0, 'should have at least one broken record');
+    const rec = obj.broken[0];
+    assert.strictEqual(typeof rec.file, 'string', 'file should be a string');
+    assert.strictEqual(typeof rec.line, 'number', 'line should be a number');
+    assert.strictEqual(typeof rec.ref, 'string', 'ref should be a string');
+    assert.strictEqual(typeof rec.reason, 'string', 'reason should be a string');
+  });
+
+  test('broken --json: at least one record with reason === "file not found" (DOCLINK-01)', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'broken'), '--json']);
+    const obj = JSON.parse(result.stdout);
+    const hasFileNotFound = obj.broken.some(r => r.reason === 'file not found');
+    assert.ok(hasFileNotFound, 'expected at least one "file not found" reason in broken records');
+  });
+
+  test('broken --json: at least one record with reason starting with "anchor #" (DOCLINK-02)', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'broken'), '--json']);
+    const obj = JSON.parse(result.stdout);
+    const hasAnchorReason = obj.broken.some(r => r.reason.startsWith('anchor #'));
+    assert.ok(hasAnchorReason, 'expected at least one anchor reason in broken records');
+  });
+});
+
+// ─── Argument validation ──────────────────────────────────────────────────────
+
+describe('validate-doc-links: argument validation', () => {
+  test('--root without value: exits non-zero (2) with stderr containing "--root requires a directory argument"', () => {
+    const result = runScript(['--root']);
+    assert.notStrictEqual(result.status, 0, `expected non-zero exit, got ${result.status}`);
+    assert.strictEqual(result.status, 2, `expected exit code 2, got ${result.status}`);
+    const combined = result.stderr + result.stdout;
+    assert.ok(combined.includes('--root requires a directory argument'),
+      `expected "--root requires a directory argument" in output, got stderr: ${result.stderr}, stdout: ${result.stdout}`);
   });
 });
