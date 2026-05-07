@@ -85,7 +85,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Running `scripts/validate-doc-links.cjs` on the repo produces a table listing every broken ref (file, line number, broken ref text, reason) and exits non-zero when any broken link exists
   2. Running the validator on a repo with no broken links exits zero and prints a clean-pass message
-  3. Running the validator with `--json` outputs machine-readable JSON suitable for programmatic consumption (array of objects with file, line, ref, reason fields)
+  3. Running the validator with `--json` outputs a machine-readable JSON object envelope `{ status: "clean"|"broken", checked: <number>, files: <number>, broken: [<{file, line, ref, reason}>] }` suitable for programmatic consumption (resolves cross-AI review pass-1 HIGH finding — envelope chosen over raw array for diagnostic value)
   4. Broken anchor refs (e.g., `#section-name` not present in the target document) are identified and reported separately from broken file-path refs
 **Plans**: 3 plans
 Plans:

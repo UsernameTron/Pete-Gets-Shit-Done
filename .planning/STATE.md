@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-05-07)
 
 Phase: 55 — Internal Link Validator
 Plan: 3 plans (55-01, 55-02, 55-03) — Wave 1, Wave 2, Wave 3
-Status: Planned and verified (research, validation strategy, plans, and verifier all green)
-Last activity: 2026-05-07 — Phase 55 planning complete (RESEARCH.md, VALIDATION.md, 3 PLAN.md files, plan-verifier passed iter 1)
-Tests: 2,667 assertions, 536 suites, 0 failures
+Status: Planned, reviewed (2 cross-AI passes), revised, re-verified — all green
+Last activity: 2026-05-07 — Phase 55 plans revised with --reviews (15 fixes from Gemini + Codex passes 1+2: slug cache, decodeURIComponent on anchors, link-title regex, temp-git-repo isolation, node-e require checks across all plans, Phase 57 boundary scope-lock, mktemp + .exit files, --root validation test, exact-count doc-mention checks). Re-verified PASS.
+Tests: 2,667 assertions, 536 suites, 0 failures (no implementation yet — execute will write tests + script)
 Coverage: 91.23% lines, 83.01% branches, 97.41% functions
 
 **Next action:** `/gsd:execute-phase 55` (after `/clear` to start with a fresh context window)
