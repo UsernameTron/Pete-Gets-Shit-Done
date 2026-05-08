@@ -14,6 +14,9 @@ hooks/dist/
 
 # Coverage artifacts
 coverage/
+# Test fixtures may contain pre-baked coverage JSON — unignore them
+!tests/fixtures/**/coverage/
+!tests/fixtures/**/coverage/**
 
 # Animation assets
 animation/
