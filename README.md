@@ -24,7 +24,7 @@ Works on Mac, Windows, and Linux.
 
 Trusted by engineers at Amazon, Google, Shopify, and Webflow.
 
-[Why I Built This](#why-i-built-this) · [What You Get](#what-you-get) · [How It Works](#how-it-works) · [Commands](#commands) · [Governance Layer](#governance-layer) · [User Guide](#user-guide)
+[Why I Built This](#why-i-built-this) · [What You Get](#what-you-get) · [Getting Started](#getting-started) · [Commands](#commands) · [Governance Layer](#governance-layer) · [User Guide](docs/USER-GUIDE.md)
 
 ---
 
