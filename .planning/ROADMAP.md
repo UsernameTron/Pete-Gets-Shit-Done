@@ -135,7 +135,7 @@ Plans:
 | 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete    | 2026-05-07 |
-| 56. Doc Drift Detector | v2.8 | 3/3 | Complete   | 2026-05-08 |
+| 56. Doc Drift Detector | v2.8 | 3/3 | Complete    | 2026-05-08 |
 | 57. Backfill and CI Integration | v2.8 | 0/TBD | Not started | - |
 
 ## Backlog
