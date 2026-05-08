@@ -171,7 +171,7 @@ Configured 2026-04-18 on the GitHub remote. These protections are enforced at th
 | Rule | Setting |
 |------|---------|
 | Require pull request before merging | Enabled |
-| Required status checks | 5 required: `test (macos-latest, 22)`, `test (ubuntu-latest, 20)`, `test (ubuntu-latest, 22)`, `governance`, `docs-integrity` (added v2.8 Phase 57; operator runs `gh api repos/:owner/:repo/branches/main/protection -X PATCH` at ship time — see Phase 57-03 SUMMARY for the exact command). |
+| Required status checks | 5 required: `test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity` (added v2.8 Phase 57; operator runs `gh api repos/:owner/:repo/branches/main/protection -X PATCH` at ship time — see Phase 57-03 SUMMARY for the exact command). The third matrix value is the `full_suite` flag. |
 | Require branches to be up to date | Enabled |
 | Block force pushes | Enabled |
 
@@ -206,11 +206,14 @@ No code reaches `main` without a PR and all 5 CI jobs passing.
 
 ### Required Status Checks Summary
 
-All 4 CI jobs must pass before any PR can merge to `main`:
-1. `test (macos-latest, 22)` — macOS Node 22
-2. `test (ubuntu-latest, 20)` — Ubuntu Node 20
-3. `test (ubuntu-latest, 22)` — Ubuntu Node 22
+All 5 CI jobs must pass before any PR can merge to `main`:
+1. `test (macos-latest, 22, false)` — macOS Node 22 (smoke suite)
+2. `test (ubuntu-latest, 20, true)` — Ubuntu Node 20 (full suite)
+3. `test (ubuntu-latest, 22, true)` — Ubuntu Node 22 (full suite)
 4. `governance` — GSD governance checks
+5. `docs-integrity` — Internal Markdown link validation (v2.8 Phase 57)
+
+The third element of the `test` matrix is the `full_suite` boolean flag (defined in `.github/workflows/test.yml`).
 
 ---
 
