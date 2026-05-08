@@ -10,7 +10,7 @@
  */
 'use strict';
 
-const { describe, test, beforeEach, afterEach } = require('node:test');
+const { describe, test, before, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
@@ -46,6 +46,21 @@ function runScript(args, opts = {}) {
 }
 
 const FIXTURES = path.join(__dirname, 'fixtures', 'doc-drift');
+
+// Refresh fixture coverage-final.json mtimes so the script's 1h staleness check
+// passes during test runs. The committed fixture files have whatever mtime the
+// most recent git checkout assigned, which drifts past the 1h threshold during
+// any session lasting more than an hour. Touch on test-suite start.
+before(() => {
+  const fixtureRoots = ['clean', 'drift'];
+  const now = new Date();
+  for (const root of fixtureRoots) {
+    const covPath = path.join(FIXTURES, root, 'coverage', 'coverage-final.json');
+    if (fs.existsSync(covPath)) {
+      fs.utimesSync(covPath, now, now);
+    }
+  }
+});
 
 // ─── METRICS registry ─────────────────────────────────────────────────────────
 
@@ -572,7 +587,10 @@ describe('measureCoverageFromJson', () => {
   });
 
   test('reads clean fixture and returns ~90.00% line coverage', () => {
-    const result = measureCoverageFromJson(path.join(FIXTURES, 'clean'), 3600);
+    // staleSecs=0 disables the staleness check — this test exercises parsing,
+    // not staleness behavior, and the committed fixture's mtime drifts over
+    // session time. Staleness behavior is covered by the dedicated test below.
+    const result = measureCoverageFromJson(path.join(FIXTURES, 'clean'), 0);
     assert.ok(typeof result.line === 'number', 'line should be a number');
     assert.ok(typeof result.branch === 'number', 'branch should be a number');
     assert.ok(typeof result.function === 'number', 'function should be a number');
