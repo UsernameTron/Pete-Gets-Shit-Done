@@ -56,7 +56,7 @@ GSD is two layers in one install:
 
 | Layer | What it does | Components |
 |-------|-------------|------------|
-| Execution Engine | discuss → plan → execute → verify → ship | 65 commands, 17 agents, 7 hooks, wave-based parallel execution |
+| Execution Engine | discuss → plan → execute → verify → ship | 66 commands, 17 agents, 6 hooks, wave-based parallel execution |
 | Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (45 skills, 10 subagents), 7 reference docs |
 | Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | classify.cjs, model-profiles.cjs, history.cjs — all opt-in, off by default |
 
@@ -66,14 +66,14 @@ The full inventory:
 
 | Metric | Count |
 |--------|-------|
-| GSD commands | 65 |
+| GSD commands | 66 |
 | Specialized agents | 17 |
-| Runtime hooks | 16 (7 execution + 10 governance, 1 shared) |
+| Runtime hooks | 16 (6 execution + 10 governance, 1 shared) |
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
-| Test suites | 536 |
-| Test assertions | 2,667 |
+| Test suites | 560 |
+| Test assertions | 2,805 |
 | Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
@@ -101,6 +101,13 @@ Verify it worked:
 | Antigravity | `/gsd:help` |
 
 > **Note:** Codex installation uses skills (`skills/gsd-*/SKILL.md`) rather than custom prompts.
+
+## Documentation Tools
+
+| Command | Purpose |
+|---------|---------|
+| `node scripts/validate-doc-links.cjs` | Validates internal Markdown links (relative refs + anchor refs) in tracked `.md` files. Exits non-zero on broken links. Use `--json` for machine output. CI integration deferred to Phase 57. |
+| `node scripts/check-doc-drift.cjs` | Validates numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md against live test counts, coverage percentages, and filesystem inventory. Exits non-zero on drift. Use `--json` for machine output. |
 
 ## Staying Updated
 

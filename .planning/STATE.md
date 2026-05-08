@@ -1,34 +1,53 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.7
-milestone_name: Session Continuity
-status: archived
-last_updated: "2026-05-07T19:00:00.000Z"
-last_activity: 2026-05-07
+milestone: v2.8
+milestone_name: Documentation Integrity
+status: completed
+last_updated: "2026-05-08T14:00:59.218Z"
+last_activity: 2026-05-08
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  total_phases: 7
+  completed_phases: 2
+  total_plans: 6
+  completed_plans: 6
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-18)
+See: .planning/PROJECT.md (updated 2026-05-07)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** v2.7 archived — ready for v2.8
+**Current focus:** Phase 56 — doc-drift-detector
 
 ## Current Position
 
-Milestone: v2.7 Session Continuity — archived (2026-04-24)
-Phase directories: archived to .planning/milestones/
-Tests: 2,667 assertions, 536 suites, 0 failures (+23 tests this session via PRs #17 + #19)
-Coverage: 91.23% lines, 83.01% branches, 97.41% functions
-Last session: 2026-05-07 — /gsd:closeout shipped (PR #17), GSD primacy codified, superpowers uninstalled
-Next: `/gsd:new-milestone` for v2.8 or backlog triage
+Phase: 57
+Plan: Not started
+Status: Phases 55-56 SHIPPED — PR #22 (https://github.com/UsernameTron/Pete-Gets-Shit-Done/pull/22). 38 commits, 44 files changed, 3,579 lines added. Awaiting CI green + merge. Phase 57 (CI integration) is the only remaining v2.8 milestone work.
+Last activity: 2026-05-08
+Tests: 2,805 assertions, 560 suites (Phase 56 added +82 from 2,723 baseline)
+Coverage: 91.58% lines, 83.4% branches, 97.21% functions (overall); scripts/check-doc-drift.cjs at 98.28% line / 90.5% branch / 92.85% function (well above 80% per-module threshold)
+
+Key decisions from 56-03:
+
+- 14 known drift records reduced to 4 after Wave 1+2 doc reconciliation, then reduced to 0 after Wave 3 surgical fixes
+- 5 metric corrections in living docs: command_count 65→66, hook_count_execution 7→6, test_count 2,667→2,805, suite_count 536→560, line_coverage 91.23%→91.58%
+- Detector reference added to all 3 living docs with collision-safe wording per WORDING-COLLISION AVOIDANCE (REVIEWS.md #5)
+- Final detector run from repo root: exit 0, "all 23 numeric claim(s) match live values"
+
+**Next action:** `/gsd:verify-work 56` → conversational UAT against acceptance criteria
+
+## v2.8 Phase Summary
+
+| Phase | Name | Requirements | Depends On | Status |
+|-------|------|--------------|------------|--------|
+| 55 | Internal Link Validator | DOCLINK-01..04 | Nothing | Not started |
+| 56 | Doc Drift Detector | DOCDRIFT-01..05 | Nothing | Not started |
+| 57 | Backfill and CI Integration | DOCREF-01..02, DOCCI-01..03 | 55 + 56 | Not started |
+
+**Phases 55 and 56 are independent — they can be planned and executed in parallel or in either order. Phase 57 cannot start until both are complete.**
 
 ## Milestone History
 

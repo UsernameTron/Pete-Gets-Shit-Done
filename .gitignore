@@ -14,6 +14,9 @@ hooks/dist/
 
 # Coverage artifacts
 coverage/
+# Test fixtures may contain pre-baked coverage JSON — unignore them
+!tests/fixtures/**/coverage/
+!tests/fixtures/**/coverage/**
 
 # Animation assets
 animation/
@@ -32,6 +35,7 @@ animation/
 .claude/tmp/
 .claude/cache/
 .claude/state/
+.claude/scheduled_tasks.lock
 
 # Internal planning documents (STATE.md is committed; everything else is local)
 .planning/phases/
