@@ -48,7 +48,7 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 ## Tests and Coverage
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
-- **Scale**: 560 test suites, 2,805 assertions, 91.58% line coverage
+- **Scale**: 548 test suites, 2,764 assertions, 90.7% line coverage
 - **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
 - **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
 
@@ -61,8 +61,9 @@ npm run test:coverage
 
 Do not treat overall coverage as passing if any individual module is below its threshold. Check per-module results. Security-critical modules (`security.cjs`, auth paths, input validation) must be at 95% or above.
 
-- `node scripts/validate-doc-links.cjs` — validate internal Markdown links across tracked `.md` files; exits non-zero on broken refs. Use `--json` for machine-readable output. (Wired into CI in Phase 57.)
-- `node scripts/check-doc-drift.cjs` — validate that numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md match live measured values; exits non-zero on drift. Use `--json` for machine-readable output. Requires `npm run test:coverage` to have been run within the last hour. (Wired into CI in Phase 57.)
+- `node scripts/validate-doc-links.cjs` — validate internal Markdown links across tracked `.md` files; exits non-zero on broken refs. Use `--json` for machine-readable output. Use `--exclude <glob>` (multi-value, gitignore-style) to suppress intentional fixtures or template examples. Wired into CI as the `docs-integrity` job (blocking gate).
+- `node scripts/check-doc-drift.cjs` — validate that numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md match live measured values; exits non-zero on drift. Use `--json` for machine-readable output. Requires `npm run test:coverage` to have been run within the last hour. Wired into CI as a step inside the `test` job (single-leg, ubuntu/22 only; blocking gate).
+- Branch protection on `main` now requires **5 passing status checks** before merge: `test macos-latest/22`, `test ubuntu-latest/20`, `test ubuntu-latest/22`, `governance`, `docs-integrity` (added in v2.8 Phase 57).
 
 ---
 
@@ -204,7 +205,7 @@ Know which filesystem you are operating on at all times and be explicit about it
 
 ### GitHub Repository Security
 
-The GitHub remote enforces security independently of local GSD hooks. Branch protection requires a PR and 4 passing status checks (`test macos-latest/22`, `test ubuntu-latest/20`, `test ubuntu-latest/22`, `governance`) before any merge to `main`. Force pushes are blocked. Dependabot monitors for CVEs with auto-PRs enabled. Secret scanning with push protection blocks commits containing detected secrets. CodeQL scans JavaScript/TypeScript and GitHub Actions on every push and PR. These are remote-level gates — they cannot be bypassed by local configuration or hook changes.
+The GitHub remote enforces security independently of local GSD hooks. Branch protection requires a PR and 5 passing status checks (`test macos-latest/22`, `test ubuntu-latest/20`, `test ubuntu-latest/22`, `governance`, `docs-integrity`) before any merge to `main`. Force pushes are blocked. Dependabot monitors for CVEs with auto-PRs enabled. Secret scanning with push protection blocks commits containing detected secrets. CodeQL scans JavaScript/TypeScript and GitHub Actions on every push and PR. These are remote-level gates — they cannot be bypassed by local configuration or hook changes.
 
 ### Hooks and Lifecycle Events
 

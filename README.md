@@ -72,8 +72,8 @@ The full inventory:
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
-| Test suites | 560 |
-| Test assertions | 2,805 |
+| Test suites | 548 |
+| Test assertions | 2,764 |
 | Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
@@ -106,8 +106,8 @@ Verify it worked:
 
 | Command | Purpose |
 |---------|---------|
-| `node scripts/validate-doc-links.cjs` | Validates internal Markdown links (relative refs + anchor refs) in tracked `.md` files. Exits non-zero on broken links. Use `--json` for machine output. CI integration deferred to Phase 57. |
-| `node scripts/check-doc-drift.cjs` | Validates numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md against live test counts, coverage percentages, and filesystem inventory. Exits non-zero on drift. Use `--json` for machine output. |
+| `node scripts/validate-doc-links.cjs` | Validates internal Markdown links (relative refs + anchor refs) in tracked `.md` files. Exits non-zero on broken links. Use `--json` for machine output, `--exclude <glob>` to suppress intentional fixtures. Runs in CI as the `docs-integrity` job. |
+| `node scripts/check-doc-drift.cjs` | Validates numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md against live test counts, coverage percentages, and filesystem inventory. Exits non-zero on drift. Use `--json` for machine output. Runs in CI as a step inside the `test` job (ubuntu/22 only). |
 
 ## Staying Updated
 

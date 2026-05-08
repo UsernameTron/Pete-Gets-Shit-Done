@@ -69,15 +69,15 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Script | Purpose |
 |--------|---------|
-| `npm test` | Run 2,805 unit tests via `scripts/run-tests.cjs` |
+| `npm test` | Run 2,764 unit tests via `scripts/run-tests.cjs` |
 | `npm run test:e2e` | Run 143 E2E integration tests via `scripts/run-e2e-tests.cjs` |
 | `npm run test:e2e:smoke` | Run E2E smoke subset (12 tests) |
 | `npm run test:coverage` | Unit tests with text + JSON coverage report |
 | `npm run test:coverage:full` | Unit tests with text + lcov + JSON coverage report |
 | `npm run build:hooks` | Bundle hook source files via esbuild |
 | `npm run prepublishOnly` | Runs `build:hooks` before npm publish |
-| `node scripts/validate-doc-links.cjs` | Internal Markdown link validator — exits 0 on clean, 1 on broken. Use `--json` for machine-readable output. Phase 57 wires this as a blocking step in `.github/workflows/test.yml`. |
-| `node scripts/check-doc-drift.cjs` | Doc drift detector. Compares live test counts, coverage, agent/command/skill/hook inventory against numeric claims in the three living docs. Exit 0 = clean, 1 = drift, 2 = runtime/coverage error. Phase 57 wires this as a blocking step in `.github/workflows/test.yml`. |
+| `node scripts/validate-doc-links.cjs` | Internal Markdown link validator — exits 0 on clean, 1 on broken. Use `--json` for machine-readable output. Use `--exclude <glob>` (multi-value, gitignore-style) to suppress intentional fixtures or template examples. Wired into `.github/workflows/test.yml` as the `docs-integrity` job (blocking gate). |
+| `node scripts/check-doc-drift.cjs` | Doc drift detector. Compares live test counts, coverage, agent/command/skill/hook inventory against numeric claims in the three living docs. Exit 0 = clean, 1 = drift, 2 = runtime/coverage error. Wired into `.github/workflows/test.yml` as a step inside the `test` job (single-leg: ubuntu-latest, Node 22, full suite; blocking gate). |
 
 ---
 
@@ -85,9 +85,9 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Metric | Count |
 |--------|-------|
-| Unit tests | 2,805 |
+| Unit tests | 2,764 |
 | E2E tests | 143 |
-| **Total tests** | **2,810** |
+| **Total tests** | **2,907** |
 | Unit test files | 82 |
 | E2E test files | 12 |
 | **Total test files** | **94** |
@@ -171,11 +171,11 @@ Configured 2026-04-18 on the GitHub remote. These protections are enforced at th
 | Rule | Setting |
 |------|---------|
 | Require pull request before merging | Enabled |
-| Required status checks | `test (macos-latest, 22)`, `test (ubuntu-latest, 20)`, `test (ubuntu-latest, 22)`, `governance` |
+| Required status checks | 5 required: `test (macos-latest, 22)`, `test (ubuntu-latest, 20)`, `test (ubuntu-latest, 22)`, `governance`, `docs-integrity` (added v2.8 Phase 57; operator runs `gh api repos/:owner/:repo/branches/main/protection -X PATCH` at ship time — see Phase 57-03 SUMMARY for the exact command). |
 | Require branches to be up to date | Enabled |
 | Block force pushes | Enabled |
 
-No code reaches `main` without a PR and all 4 CI jobs passing.
+No code reaches `main` without a PR and all 5 CI jobs passing.
 
 **Audit tool:** `/gsd:harden-repo` audits branch protection against the standard policy and can apply fixes via `--fix`. Uses read-merge-PUT to avoid partial updates.
 
