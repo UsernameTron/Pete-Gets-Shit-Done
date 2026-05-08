@@ -7,7 +7,7 @@
  * Reads current protection, compares against a standard policy, and
  * optionally applies fixes via read-merge-PUT (never partial PUT).
  *
- * Exports: cmdHardenRepo, STANDARD_POLICY, buildGapTable, mergePolicy
+ * Exports: cmdHardenRepo, STANDARD_POLICY, buildGapTable, mergePolicy, applyFix, formatGapTable
  */
 
 'use strict';
@@ -457,4 +457,6 @@ module.exports = {
   STANDARD_POLICY,
   buildGapTable,
   mergePolicy,
+  applyFix,
+  formatGapTable,
 };

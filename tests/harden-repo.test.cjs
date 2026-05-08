@@ -11,7 +11,13 @@
 const { test, describe } = require('node:test');
 const assert = require('node:assert');
 const { runGsdTools } = require('./helpers.cjs');
-const { STANDARD_POLICY, buildGapTable, mergePolicy } = require('../get-shit-done/bin/lib/harden-repo.cjs');
+const {
+  STANDARD_POLICY,
+  buildGapTable,
+  mergePolicy,
+  applyFix,
+  formatGapTable,
+} = require('../get-shit-done/bin/lib/harden-repo.cjs');
 
 // ─── Fixtures: GitHub GET response shapes ─────────────────────────────────────
 
@@ -302,6 +308,183 @@ describe('mergePolicy', () => {
     assert.strictEqual(payload.enforce_admins, false);
     assert.strictEqual(payload.allow_force_pushes, false);
     assert.strictEqual(payload.required_linear_history, false);
+  });
+});
+
+// ─── normalizeRestrictions (via buildGapTable) ────────────────────────────────
+
+describe('normalizeRestrictions via buildGapTable', () => {
+  test('non-empty users restrictions returns the restrictions object', () => {
+    const response = makeCompliantResponse();
+    response.restrictions = { users: [{ login: 'admin' }], teams: [], apps: [] };
+    const result = buildGapTable(response, STANDARD_POLICY);
+    const restrictionsGap = result.gaps.find(g => g.setting === 'restrictions');
+    assert.ok(restrictionsGap, 'should have restrictions gap entry');
+    assert.strictEqual(restrictionsGap.pass, false, 'non-null restrictions should fail vs policy null');
+    assert.notStrictEqual(restrictionsGap.actual, null, 'actual should be the populated restrictions object, not null');
+    assert.deepStrictEqual(
+      restrictionsGap.actual,
+      { users: [{ login: 'admin' }], teams: [], apps: [] },
+      'actual should be the original restrictions object',
+    );
+  });
+
+  test('non-empty teams restrictions returns the restrictions object', () => {
+    const response = makeCompliantResponse();
+    response.restrictions = { users: [], teams: [{ slug: 'admins' }], apps: [] };
+    const result = buildGapTable(response, STANDARD_POLICY);
+    const restrictionsGap = result.gaps.find(g => g.setting === 'restrictions');
+    assert.strictEqual(restrictionsGap.pass, false, 'non-empty teams should fail vs policy null');
+    assert.notStrictEqual(restrictionsGap.actual, null);
+  });
+
+  test('non-empty apps restrictions returns the restrictions object', () => {
+    const response = makeCompliantResponse();
+    response.restrictions = { users: [], teams: [], apps: [{ slug: 'github-actions' }] };
+    const result = buildGapTable(response, STANDARD_POLICY);
+    const restrictionsGap = result.gaps.find(g => g.setting === 'restrictions');
+    assert.strictEqual(restrictionsGap.pass, false, 'non-empty apps should fail vs policy null');
+    assert.notStrictEqual(restrictionsGap.actual, null);
+  });
+
+  test('non-object restrictions passes through unchanged', () => {
+    // GitHub responses shouldn't put strings here, but normalize must not crash.
+    const response = makeCompliantResponse();
+    response.restrictions = 'unexpected-string';
+    const result = buildGapTable(response, STANDARD_POLICY);
+    const restrictionsGap = result.gaps.find(g => g.setting === 'restrictions');
+    assert.strictEqual(
+      restrictionsGap.actual,
+      'unexpected-string',
+      'non-object value passed through normalizeRestrictions unchanged',
+    );
+  });
+
+  test('null restrictions normalized to null (matches policy)', () => {
+    const response = makeCompliantResponse();
+    response.restrictions = null;
+    const result = buildGapTable(response, STANDARD_POLICY);
+    const restrictionsGap = result.gaps.find(g => g.setting === 'restrictions');
+    assert.strictEqual(restrictionsGap.pass, true, 'null restrictions matches policy null');
+    assert.strictEqual(restrictionsGap.actual, null);
+  });
+
+  test('empty users/teams/apps normalized to null (matches policy)', () => {
+    const response = makeCompliantResponse();
+    response.restrictions = { users: [], teams: [], apps: [] };
+    const result = buildGapTable(response, STANDARD_POLICY);
+    const restrictionsGap = result.gaps.find(g => g.setting === 'restrictions');
+    assert.strictEqual(restrictionsGap.pass, true, 'all-empty arrays normalized to null, matches policy');
+    assert.strictEqual(restrictionsGap.actual, null);
+  });
+});
+
+// ─── applyFix (dry-run path) ──────────────────────────────────────────────────
+
+describe('applyFix', () => {
+  test('dry-run returns payload without applying', () => {
+    const payload = {
+      required_pull_request_reviews: { required_approving_review_count: 0 },
+      required_status_checks: { strict: true, contexts: ['ci'] },
+      enforce_admins: false,
+      restrictions: null,
+      allow_force_pushes: false,
+      allow_deletions: false,
+      required_linear_history: false,
+    };
+    const result = applyFix('owner', 'repo', 'main', payload, true);
+    assert.strictEqual(result.applied, false, 'dry-run should not apply');
+    assert.deepStrictEqual(result.payload, payload, 'should return the payload unchanged');
+    assert.strictEqual(
+      Object.prototype.hasOwnProperty.call(result, 'success'),
+      false,
+      'success field absent when not applied',
+    );
+    assert.strictEqual(
+      Object.prototype.hasOwnProperty.call(result, 'error'),
+      false,
+      'error field absent when not applied',
+    );
+  });
+
+  test('dry-run preserves payload object identity', () => {
+    const payload = { test: 'value' };
+    const result = applyFix('owner', 'repo', 'main', payload, true);
+    assert.strictEqual(result.payload, payload, 'should return same payload reference, not a copy');
+  });
+
+  test('dry-run shape is consistent across payload variants', () => {
+    const empty = applyFix('o', 'r', 'main', {}, true);
+    assert.strictEqual(empty.applied, false);
+    assert.deepStrictEqual(empty.payload, {});
+
+    const withContexts = applyFix('o', 'r', 'release', { required_status_checks: { contexts: ['a', 'b'] } }, true);
+    assert.strictEqual(withContexts.applied, false);
+    assert.deepStrictEqual(withContexts.payload.required_status_checks.contexts, ['a', 'b']);
+  });
+});
+
+// ─── formatGapTable ───────────────────────────────────────────────────────────
+
+describe('formatGapTable', () => {
+  test('renders header with owner/repo/branch', () => {
+    const gapResult = buildGapTable(makeCompliantResponse(), STANDARD_POLICY);
+    const text = formatGapTable('myorg', 'myrepo', 'main', gapResult);
+    assert.ok(text.includes('myorg/myrepo'), 'header should include owner/repo');
+    assert.ok(text.includes('main'), 'header should include branch');
+    assert.ok(text.includes('Branch Protection Audit'), 'should have title');
+  });
+
+  test('renders header columns', () => {
+    const gapResult = buildGapTable(makeCompliantResponse(), STANDARD_POLICY);
+    const text = formatGapTable('o', 'r', 'main', gapResult);
+    assert.ok(text.includes('Setting'), 'should have Setting header');
+    assert.ok(text.includes('Expected'), 'should have Expected header');
+    assert.ok(text.includes('Actual'), 'should have Actual header');
+    assert.ok(text.includes('Result'), 'should have Result header');
+  });
+
+  test('renders every gap row with PASS for compliant input', () => {
+    const gapResult = buildGapTable(makeCompliantResponse(), STANDARD_POLICY);
+    const text = formatGapTable('o', 'r', 'main', gapResult);
+    for (const gap of gapResult.gaps) {
+      assert.ok(text.includes(gap.setting), `output should include setting: ${gap.setting}`);
+    }
+    assert.ok(text.includes('PASS'), 'compliant table should contain PASS labels');
+  });
+
+  test('renders FAIL labels for non-compliant input', () => {
+    const gapResult = buildGapTable(makeNonCompliantResponse(), STANDARD_POLICY);
+    const text = formatGapTable('o', 'r', 'main', gapResult);
+    assert.ok(text.includes('FAIL'), 'non-compliant table should contain FAIL labels');
+  });
+
+  test('summary line shows passCount/totalCount', () => {
+    const gapResult = buildGapTable(makeCompliantResponse(), STANDARD_POLICY);
+    const text = formatGapTable('o', 'r', 'main', gapResult);
+    assert.ok(
+      text.includes(`${gapResult.passCount}/${gapResult.totalCount} settings compliant`),
+      'should include summary line in "N/M settings compliant" form',
+    );
+  });
+
+  test('returns a string with newline-separated rows', () => {
+    const gapResult = buildGapTable(makeCompliantResponse(), STANDARD_POLICY);
+    const text = formatGapTable('o', 'r', 'main', gapResult);
+    assert.strictEqual(typeof text, 'string', 'returns a string');
+    const lines = text.split('\n');
+    // header + blank + columns + separator + N gaps + blank + summary
+    assert.ok(
+      lines.length >= gapResult.gaps.length + 5,
+      `expected at least gaps+5 lines, got ${lines.length}`,
+    );
+  });
+
+  test('handles null protection (no current protection) without crashing', () => {
+    const gapResult = buildGapTable(null, STANDARD_POLICY);
+    const text = formatGapTable('o', 'r', 'main', gapResult);
+    assert.ok(text.includes('Branch Protection Audit'));
+    assert.ok(text.includes('FAIL'), 'unprotected branch should produce FAIL rows');
   });
 });
 
