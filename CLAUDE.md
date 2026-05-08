@@ -11,7 +11,7 @@ You are working with Pete Connor — AI transformation leader, MS in AI, CCXP/CC
 **get-shit-done** (GSD) is an execution engine and governance framework plugin for Claude Code. It wraps the full software delivery lifecycle — from ideation to merged PR — in a structured, repeatable pipeline with quality gates enforced at every phase.
 
 Key capabilities:
-- **65 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
+- **66 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
 - **17 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-validator-hub, and others) handling quality, planning, and execution roles
 - **45 Claude Code skills** covering command implementations, utilities, and governance workflows
 - **Wave-based parallel execution** — independent tasks run concurrently in waves; dependent tasks respect ordering automatically
@@ -48,7 +48,7 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 ## Tests and Coverage
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
-- **Scale**: 536 test suites, 2,667 assertions, 91.23% line coverage
+- **Scale**: 560 test suites, 2,805 assertions, 91.58% line coverage
 - **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
 - **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
 
@@ -62,6 +62,7 @@ npm run test:coverage
 Do not treat overall coverage as passing if any individual module is below its threshold. Check per-module results. Security-critical modules (`security.cjs`, auth paths, input validation) must be at 95% or above.
 
 - `node scripts/validate-doc-links.cjs` — validate internal Markdown links across tracked `.md` files; exits non-zero on broken refs. Use `--json` for machine-readable output. (Wired into CI in Phase 57.)
+- `node scripts/check-doc-drift.cjs` — validate that numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md match live measured values; exits non-zero on drift. Use `--json` for machine-readable output. Requires `npm run test:coverage` to have been run within the last hour. (Wired into CI in Phase 57.)
 
 ---
 

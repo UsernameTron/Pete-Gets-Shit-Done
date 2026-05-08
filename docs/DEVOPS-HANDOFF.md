@@ -43,9 +43,9 @@ The installer (`bin/install.js`) copies the following into the user's Claude Cod
 
 | Component | Destination | Contents |
 |-----------|-------------|----------|
-| Commands | `~/.claude/get-shit-done/commands/` | 65 GSD slash commands |
+| Commands | `~/.claude/get-shit-done/commands/` | 66 GSD slash commands |
 | Agents | `~/.claude/get-shit-done/agents/` | 17 specialized agent definitions |
-| Hooks | `~/.claude/get-shit-done/hooks/` | 7 execution hooks (bundled JS) |
+| Hooks | `~/.claude/get-shit-done/hooks/` | 6 execution hooks (bundled JS) |
 | Workflows | `~/.claude/get-shit-done/workflows/` | Orchestration templates |
 | Governance | `~/.claude/get-shit-done/governance/` | CLAUDE.md template, 10 governance hooks |
 | Plugins | Respective plugin directories | 45 skills, 10 subagents, 6 reference docs |
@@ -69,7 +69,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Script | Purpose |
 |--------|---------|
-| `npm test` | Run 2,667 unit tests via `scripts/run-tests.cjs` |
+| `npm test` | Run 2,805 unit tests via `scripts/run-tests.cjs` |
 | `npm run test:e2e` | Run 143 E2E integration tests via `scripts/run-e2e-tests.cjs` |
 | `npm run test:e2e:smoke` | Run E2E smoke subset (12 tests) |
 | `npm run test:coverage` | Unit tests with text + JSON coverage report |
@@ -77,6 +77,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 | `npm run build:hooks` | Bundle hook source files via esbuild |
 | `npm run prepublishOnly` | Runs `build:hooks` before npm publish |
 | `node scripts/validate-doc-links.cjs` | Internal Markdown link validator — exits 0 on clean, 1 on broken. Use `--json` for machine-readable output. Phase 57 wires this as a blocking step in `.github/workflows/test.yml`. |
+| `node scripts/check-doc-drift.cjs` | Doc drift detector. Compares live test counts, coverage, agent/command/skill/hook inventory against numeric claims in the three living docs. Exit 0 = clean, 1 = drift, 2 = runtime/coverage error. Phase 57 wires this as a blocking step in `.github/workflows/test.yml`. |
 
 ---
 
@@ -84,7 +85,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Metric | Count |
 |--------|-------|
-| Unit tests | 2,667 |
+| Unit tests | 2,805 |
 | E2E tests | 143 |
 | **Total tests** | **2,810** |
 | Unit test files | 82 |
