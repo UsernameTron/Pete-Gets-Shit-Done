@@ -107,7 +107,7 @@ Plans:
   4. Running the detector with `--json` outputs machine-readable JSON suitable for programmatic consumption
 **Plans**: 3 plans
 Plans:
-- [ ] 56-01-PLAN.md — TDD core: fixtures + METRICS registry + stripCommas/parsePercent/asInt/parseTapSummary/aggregateCoverage/extractClaims/compareClaim/formatDriftTable (Wave 1)
+- [x] 56-01-PLAN.md — TDD core: fixtures + METRICS registry + stripCommas/parsePercent/asInt/parseTapSummary/aggregateCoverage/extractClaims/compareClaim/formatDriftTable (Wave 1)
 - [ ] 56-02-PLAN.md — Measurement + integration: measure* functions, METRICS measure callbacks, main() with --json/--root/--coverage-stale-secs/--help, .c8rc.json coverage tracking (Wave 2)
 - [ ] 56-03-PLAN.md — Real-repo run + drift fixes + living-docs updates (Wave 3)
 
@@ -135,7 +135,7 @@ Plans:
 | 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete    | 2026-05-07 |
-| 56. Doc Drift Detector | v2.8 | 0/3 | Not started | - |
+| 56. Doc Drift Detector | v2.8 | 1/3 | In Progress|  |
 | 57. Backfill and CI Integration | v2.8 | 0/TBD | Not started | - |
 
 ## Backlog
@@ -144,7 +144,7 @@ Plans:
 
 **Goal:** Update CLAUDE.md and README.md to reflect current state — agent counts, test counts, milestone history, and any architectural changes since last doc pass.
 **Requirements:** TBD
-**Plans:** 3/3 plans complete
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
