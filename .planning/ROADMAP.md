@@ -38,7 +38,7 @@
 
 - [x] **Phase 55: Internal Link Validator** - A validator script scans all tracked `.md` files for broken relative-path and anchor refs, exits non-zero on failures, and is fully unit-tested (completed 2026-05-07)
 - [x] **Phase 56: Doc Drift Detector** - A detector script measures live test counts, agent/command/skill/hook inventory, and coverage, then fails on any disagreement with numeric claims in living docs (completed 2026-05-08)
-- [ ] **Phase 57: Backfill and CI Integration** - Known broken cross-references are repaired and both validator scripts are wired as blocking CI steps in `test.yml`
+- [x] **Phase 57: Backfill and CI Integration** - Known broken cross-references are repaired and both validator scripts are wired as blocking CI steps in `test.yml` (completed 2026-05-08)
 
 ## Phase Details
 
@@ -124,7 +124,7 @@ Plans:
 Plans:
 - [x] 57-01-PLAN.md — Backfill: sed-sweep 83 archived-roadmap cross-refs, repair 16 real broken refs, DOCREF-01/02 closure-via-clarification (Wave 1)
 - [x] 57-02-PLAN.md — Validator `--exclude <glob>` flag with TDD: gitignoreGlobToRegex, fixture tree, ≥80% per-module coverage (Wave 2)
-- [ ] 57-03-PLAN.md — CI integration: drift step + docs-integrity job in test.yml, living-docs sync, branch-protection PATCH command, v2.8 milestone close (Wave 3)
+- [x] 57-03-PLAN.md — CI integration: drift step + docs-integrity job in test.yml, living-docs sync, branch-protection PATCH command, v2.8 milestone close (Wave 3)
 
 ## Progress
 
@@ -140,7 +140,7 @@ Plans:
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete    | 2026-05-07 |
 | 56. Doc Drift Detector | v2.8 | 3/3 | Complete    | 2026-05-08 |
-| 57. Backfill and CI Integration | v2.8 | 2/3 | In Progress|  |
+| 57. Backfill and CI Integration | v2.8 | 3/3 | Complete   | 2026-05-08 |
 
 ## Backlog
 
@@ -148,7 +148,7 @@ Plans:
 
 **Goal:** Update CLAUDE.md and README.md to reflect current state — agent counts, test counts, milestone history, and any architectural changes since last doc pass.
 **Requirements:** TBD
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
