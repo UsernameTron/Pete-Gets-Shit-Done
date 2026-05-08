@@ -19,10 +19,10 @@
 ### Doc Drift Detector
 
 - [x] **DOCDRIFT-01**: Detector measures live test count, suite count, line/branch/function coverage from `npm test` and c8 output
-- [ ] **DOCDRIFT-02**: Detector measures live agent count, command count, skill count, hook count from filesystem inventory
+- [x] **DOCDRIFT-02**: Detector measures live agent count, command count, skill count, hook count from filesystem inventory
 - [x] **DOCDRIFT-03**: Detector compares measured values against numeric claims in `CLAUDE.md`, `README.md`, `docs/DEVOPS-HANDOFF.md` using regex-anchored extractors
 - [x] **DOCDRIFT-04**: Detector outputs structured drift table — doc, file:line, claimed value, actual value, metric name
-- [ ] **DOCDRIFT-05**: Detector exits non-zero on any drift, zero on agreement, with `--json` flag for machine-readable output
+- [x] **DOCDRIFT-05**: Detector exits non-zero on any drift, zero on agreement, with `--json` flag for machine-readable output
 
 ### Cross-Reference Backfill
 
@@ -61,10 +61,10 @@ Deferred to a later milestone:
 | DOCLINK-03 | Phase 55 | Complete |
 | DOCLINK-04 | Phase 55 | Complete |
 | DOCDRIFT-01 | Phase 56 | Complete |
-| DOCDRIFT-02 | Phase 56 | Pending |
+| DOCDRIFT-02 | Phase 56 | Complete |
 | DOCDRIFT-03 | Phase 56 | Complete |
 | DOCDRIFT-04 | Phase 56 | Complete |
-| DOCDRIFT-05 | Phase 56 | Pending |
+| DOCDRIFT-05 | Phase 56 | Complete |
 | DOCREF-01 | Phase 57 | Pending |
 | DOCREF-02 | Phase 57 | Pending |
 | DOCCI-01 | Phase 57 | Pending |

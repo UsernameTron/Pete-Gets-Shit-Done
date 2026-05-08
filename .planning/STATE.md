@@ -24,18 +24,20 @@ See: .planning/PROJECT.md (updated 2026-05-07)
 ## Current Position
 
 Phase: 56 (doc-drift-detector) — EXECUTING
-Plan: 56-01 COMPLETE — 56-02 (Wave 2: measure* I/O + main) is next
-Status: Plan 56-01 complete; 58/58 unit tests GREEN; Wave 2 ready to execute
-Last activity: 2026-05-08 — 56-01 executed (3 tasks, 3 commits: 8ccda95, cfb7f76, 29bd5e7)
-Tests: 2,781 assertions (+58), 554 suites (+9) — plan 56-01 adds tests/check-doc-drift.test.cjs
-Coverage: 91.34% lines, 83.22% branches, 97.47% functions (live; doc drift to be reconciled in Wave 3)
+Plan: 56-02 COMPLETE — 56-03 (Wave 3: real-repo run + drift fixes + living-docs updates) is next
+Status: Plans 56-01 and 56-02 complete; 82/82 detector tests GREEN; full suite 2805/2805; coverage 91.58% line / 83.4% branch (script 98.28% line)
+Last activity: 2026-05-08 — 56-02 executed (3 tasks, 3 commits: f2d1230, e0434b8, 93ca7ce)
+Tests: 2,805 assertions (+82 from baseline), 560 suites (+15) — Phase 56 adds 82 detector test cases
+Coverage: 91.58% lines, 83.4% branches, 97.21% functions (overall); scripts/check-doc-drift.cjs at 98.28% line / 90.5% branch / 92.85% function
 
-Key decisions from 56-01:
-- scripts/check-doc-drift.cjs: 8 pure functions + 9-entry METRICS registry; exits 2 when invoked directly (main() in 56-02)
-- branch_coverage and function_coverage have empty claims arrays (V1 allowed-empty per Pitfall 4)
-- .gitignore negation added for tests/fixtures/**/coverage/ to allow pre-baked fixture JSONs
+Key decisions from 56-02:
+- 6 measure* I/O functions wired (coverage, test counts via TAP or test-stats.json shortcut, agent/command/skill/hook counts)
+- main(argv) with 4 CLI flags (--json, --root, --coverage-stale-secs, --help) per D-18
+- isRepoRoot helper derives missingDocPolicy ('fail' at repo root, 'skip' in fixture mode) — Codex LOW hardening (REVIEWS.md #2) without introducing a new flag
+- maxBuffer: 16 * 1024 * 1024 hardening on TAP execFileSync — Codex MEDIUM (REVIEWS.md #1)
+- .c8rc.json includes scripts/check-doc-drift.cjs
 
-**Next action:** `/gsd:execute-phase 56` → executes plan 56-02 (Wave 2)
+**Next action:** `/gsd:execute-phase 56` → executes plan 56-03 (Wave 3)
 
 ## v2.8 Phase Summary
 
