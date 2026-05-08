@@ -56,13 +56,22 @@ const EXTERNAL_RE = /^(https?:|mailto:|ftp:)/i;
  * @returns {string}     Slug usable as #anchor
  */
 function toGfmSlug(text) {
-  return text
+  // Loop HTML-tag stripping until the string stabilizes — single-pass
+  // /<[^>]+>/g leaves <scr<script>ipt> as <script> (incomplete
+  // multi-character sanitization). Loop closes the gap.
+  let stripped = text;
+  let prev;
+  do {
+    prev = stripped;
+    stripped = stripped.replace(/<[^>]+>/g, '');
+  } while (stripped !== prev);
+
+  return stripped
     .replace(/\*\*(.+?)\*\*/g, '$1')         // bold
     .replace(/\*(.+?)\*/g, '$1')              // italic *
     .replace(/_(.+?)_/g, '$1')                // italic _
     .replace(/`(.+?)`/g, '$1')                // inline code
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // links: keep display text
-    .replace(/<[^>]+>/g, '')                  // HTML tags
     .toLowerCase()
     .replace(/[^\w\s-]/g, '')                 // remove non-word, non-space, non-hyphen
     .replace(/\s+/g, '-')                     // spaces to hyphens
