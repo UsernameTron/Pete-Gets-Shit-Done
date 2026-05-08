@@ -37,7 +37,7 @@
 **Milestone Goal:** Turn documentation accuracy from manually-maintained to CI-enforced — broken links, stale counts, and cross-doc inconsistencies must fail CI before merge.
 
 - [x] **Phase 55: Internal Link Validator** - A validator script scans all tracked `.md` files for broken relative-path and anchor refs, exits non-zero on failures, and is fully unit-tested (completed 2026-05-07)
-- [ ] **Phase 56: Doc Drift Detector** - A detector script measures live test counts, agent/command/skill/hook inventory, and coverage, then fails on any disagreement with numeric claims in living docs
+- [x] **Phase 56: Doc Drift Detector** - A detector script measures live test counts, agent/command/skill/hook inventory, and coverage, then fails on any disagreement with numeric claims in living docs (completed 2026-05-08)
 - [ ] **Phase 57: Backfill and CI Integration** - Known broken cross-references are repaired and both validator scripts are wired as blocking CI steps in `test.yml`
 
 ## Phase Details
@@ -109,7 +109,7 @@ Plans:
 Plans:
 - [x] 56-01-PLAN.md — TDD core: fixtures + METRICS registry + stripCommas/parsePercent/asInt/parseTapSummary/aggregateCoverage/extractClaims/compareClaim/formatDriftTable (Wave 1)
 - [x] 56-02-PLAN.md — Measurement + integration: measure* functions, METRICS measure callbacks, main() with --json/--root/--coverage-stale-secs/--help, .c8rc.json coverage tracking (Wave 2)
-- [ ] 56-03-PLAN.md — Real-repo run + drift fixes + living-docs updates (Wave 3)
+- [x] 56-03-PLAN.md — Real-repo run + drift fixes + living-docs updates (Wave 3)
 
 ### Phase 57: Backfill and CI Integration
 **Goal**: Known broken cross-references are repaired and both validator scripts run as blocking CI steps on every PR so documentation drift cannot merge undetected
@@ -135,7 +135,7 @@ Plans:
 | 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete    | 2026-05-07 |
-| 56. Doc Drift Detector | v2.8 | 2/3 | In Progress|  |
+| 56. Doc Drift Detector | v2.8 | 3/3 | Complete   | 2026-05-08 |
 | 57. Backfill and CI Integration | v2.8 | 0/TBD | Not started | - |
 
 ## Backlog
@@ -144,7 +144,7 @@ Plans:
 
 **Goal:** Update CLAUDE.md and README.md to reflect current state — agent counts, test counts, milestone history, and any architectural changes since last doc pass.
 **Requirements:** TBD
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)

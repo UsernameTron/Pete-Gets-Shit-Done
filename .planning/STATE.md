@@ -23,21 +23,20 @@ See: .planning/PROJECT.md (updated 2026-05-07)
 
 ## Current Position
 
-Phase: 56 (doc-drift-detector) — EXECUTING
-Plan: 56-02 COMPLETE — 56-03 (Wave 3: real-repo run + drift fixes + living-docs updates) is next
-Status: Plans 56-01 and 56-02 complete; 82/82 detector tests GREEN; full suite 2805/2805; coverage 91.58% line / 83.4% branch (script 98.28% line)
-Last activity: 2026-05-08 — 56-02 executed (3 tasks, 3 commits: f2d1230, e0434b8, 93ca7ce)
-Tests: 2,805 assertions (+82 from baseline), 560 suites (+15) — Phase 56 adds 82 detector test cases
-Coverage: 91.58% lines, 83.4% branches, 97.21% functions (overall); scripts/check-doc-drift.cjs at 98.28% line / 90.5% branch / 92.85% function
+Phase: 56 (doc-drift-detector) — EXECUTION COMPLETE
+Plan: 56-03 COMPLETE — all 3 plans shipped, ready for /gsd:verify-work
+Status: Phase 56 implementation complete. Detector runs against live repo with exit 0 (all 23 numeric claims match). Full suite 2805/2805 GREEN. Coverage thresholds preserved.
+Last activity: 2026-05-08 — 56-03 executed (commits 10e82e2, bdbb52d). DOCDRIFT-01..05 all marked complete in REQUIREMENTS.md.
+Tests: 2,805 assertions, 560 suites (Phase 56 added +82 from 2,723 baseline)
+Coverage: 91.58% lines, 83.4% branches, 97.21% functions (overall); scripts/check-doc-drift.cjs at 98.28% line / 90.5% branch / 92.85% function (well above 80% per-module threshold)
 
-Key decisions from 56-02:
-- 6 measure* I/O functions wired (coverage, test counts via TAP or test-stats.json shortcut, agent/command/skill/hook counts)
-- main(argv) with 4 CLI flags (--json, --root, --coverage-stale-secs, --help) per D-18
-- isRepoRoot helper derives missingDocPolicy ('fail' at repo root, 'skip' in fixture mode) — Codex LOW hardening (REVIEWS.md #2) without introducing a new flag
-- maxBuffer: 16 * 1024 * 1024 hardening on TAP execFileSync — Codex MEDIUM (REVIEWS.md #1)
-- .c8rc.json includes scripts/check-doc-drift.cjs
+Key decisions from 56-03:
+- 14 known drift records reduced to 4 after Wave 1+2 doc reconciliation, then reduced to 0 after Wave 3 surgical fixes
+- 5 metric corrections in living docs: command_count 65→66, hook_count_execution 7→6, test_count 2,667→2,805, suite_count 536→560, line_coverage 91.23%→91.58%
+- Detector reference added to all 3 living docs with collision-safe wording per WORDING-COLLISION AVOIDANCE (REVIEWS.md #5)
+- Final detector run from repo root: exit 0, "all 23 numeric claim(s) match live values"
 
-**Next action:** `/gsd:execute-phase 56` → executes plan 56-03 (Wave 3)
+**Next action:** `/gsd:verify-work 56` → conversational UAT against acceptance criteria
 
 ## v2.8 Phase Summary
 
