@@ -6,7 +6,8 @@
     "hooks/*.js",
     "scripts/build-hooks.js",
     ".claude/hooks/lesson-capture-gate.cjs",
-    "scripts/validate-doc-links.cjs"
+    "scripts/validate-doc-links.cjs",
+    "scripts/check-doc-drift.cjs"
   ],
   "exclude": [
     "hooks/dist/**",
