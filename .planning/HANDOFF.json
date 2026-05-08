@@ -1,123 +1,63 @@
 {
   "version": "1.0",
-  "timestamp": "2026-05-07T22:25:09.731Z",
+  "timestamp": "2026-05-08T13:14:21.041Z",
   "phase": "56",
-  "phase_name": "Doc Drift Detector",
+  "phase_name": "doc-drift-detector",
   "phase_dir": ".planning/phases/56-doc-drift-detector",
+  "milestone": "v2.8",
+  "milestone_name": "Documentation Integrity",
+  "branch": "chore/milestone-v2.8-init",
   "plan": null,
   "task": null,
-  "total_tasks": null,
-  "status": "paused",
-  "stage": "context_captured_planning_next",
+  "total_tasks": 8,
+  "status": "ready_to_execute",
+  "phase_progress": {
+    "research_complete": true,
+    "validation_complete": true,
+    "context_complete": true,
+    "plans_authored": 3,
+    "plans_total": 3,
+    "plans_executed": 0,
+    "cross_ai_reviewed": true,
+    "review_revisions_applied": true
+  },
   "completed_tasks": [
-    {
-      "id": "discuss-56",
-      "name": "Phase 56 discuss-phase (auto-mode)",
-      "status": "done",
-      "commit": "60928cb",
-      "artifacts": [
-        ".planning/phases/56-doc-drift-detector/56-CONTEXT.md",
-        ".planning/phases/56-doc-drift-detector/56-DISCUSSION-LOG.md"
-      ],
-      "notes": "18 decisions locked (D-01..D-18). Auto-mode used because operator instructed 'no clarifying questions'. Sibling Phase 55 (validate-doc-links.cjs) is the canonical template."
-    }
+    {"id": "session-resume", "name": "Resume from prior pause (Phase 56 context captured)", "status": "done", "commit": "60928cb"},
+    {"id": "research", "name": "Spawn gsd-research-orchestrator → 56-RESEARCH.md (755 lines, 14 known drift records identified, Validation Architecture Dim 8 defined)", "status": "done", "commit": null, "note": "Output in gitignored .planning/phases/"},
+    {"id": "validation", "name": "Write 56-VALIDATION.md (per-task verification map, Wave 0 requirements, Nyquist Dim 8 sign-off)", "status": "done", "commit": null, "note": "Output in gitignored .planning/phases/"},
+    {"id": "plan-initial", "name": "Spawn gsd-planner → 56-01-PLAN.md (1267 lines), 56-02-PLAN.md (1068 lines), 56-03-PLAN.md (495 lines)", "status": "done", "commit": "2df2f51", "note": "Roadmap and STATE.md committed; plans themselves in gitignored .planning/phases/"},
+    {"id": "verify-initial", "name": "Spawn gsd-verifier (plan scope) → VERIFICATION PASSED on first iteration across 10 dimensions", "status": "done", "commit": null},
+    {"id": "review", "name": "Cross-AI review via /gsd:review --phase 56 --all (Gemini LOW / Codex MEDIUM / Claude skipped for independence) → 56-REVIEWS.md with 5-edit Recommended Replanning section", "status": "done", "commit": null, "note": "Output in gitignored .planning/phases/"},
+    {"id": "plan-revised", "name": "Spawn gsd-planner (mode=reviews) → 5 surgical hardening edits applied (maxBuffer, missingDocPolicy via isRepoRoot, line-by-line constraint JSDoc + sanity test, METRICS empty-claims guard, Wave 3 negative regex check). +4 test cases, +101 lines.", "status": "done", "commit": "35df38b", "note": "STATE.md committed; plan edits themselves in gitignored .planning/phases/"},
+    {"id": "verify-revised", "name": "Spawn gsd-verifier (plan scope, revision verification) → VERIFICATION PASSED, all 5 edits confirmed at specific line numbers", "status": "done", "commit": null}
   ],
   "remaining_tasks": [
-    {
-      "id": "plan-56",
-      "name": "Run /gsd:plan-phase 56",
-      "status": "not_started",
-      "expected_output": "Three plan files following Phase 55 wave structure: 56-01-PLAN.md (fixtures + pure functions, TDD), 56-02-PLAN.md (integration + main + c8 wiring), 56-03-PLAN.md (real-repo run + suite green + living-docs updates)."
-    },
-    {
-      "id": "execute-56",
-      "name": "Run /gsd:execute-phase 56",
-      "status": "not_started",
-      "expected_output": "scripts/check-doc-drift.cjs + tests/check-doc-drift.test.cjs + tests/fixtures/doc-drift/{clean,drift,edge}/ + .c8rc.json updated to include the new script + living docs updated."
-    },
-    {
-      "id": "verify-56",
-      "name": "Run /gsd:verify-work for Phase 56",
-      "status": "not_started"
-    },
-    {
-      "id": "phase-57",
-      "name": "Phase 57 — Backfill and CI Integration (depends on 55 + 56)",
-      "status": "not_started",
-      "blocking_dependency": "Phase 56 must ship first (CI step wires both validate-doc-links.cjs and check-doc-drift.cjs)."
-    }
+    {"id": "execute-wave-1", "name": "Execute Plan 56-01 (Wave 1, TDD): fixtures + METRICS registry + 8 pure functions (stripCommas, parsePercent, asInt, parseTapSummary, aggregateCoverage, extractClaims, compareClaim, formatDriftTable)", "status": "not_started", "depends_on": []},
+    {"id": "execute-wave-2", "name": "Execute Plan 56-02 (Wave 2, TDD): measureCoverageFromJson, measureTestCounts (with maxBuffer hardening), filesystem measure*, main(argv) with isRepoRoot/missingDocPolicy, --json/--root/--coverage-stale-secs/--help flags, .c8rc.json coverage tracking", "status": "not_started", "depends_on": ["56-01"]},
+    {"id": "execute-wave-3", "name": "Execute Plan 56-03 (Wave 3): real-repo run surfacing 14 known drift records, surgical drift fixes in 3 living docs, detector reference added with WORDING-COLLISION AVOIDANCE, clean re-run, full suite + coverage green", "status": "not_started", "depends_on": ["56-02"]},
+    {"id": "verify-execution", "name": "/gsd:verify-work — conversational UAT against acceptance criteria", "status": "not_started", "depends_on": ["56-03"]},
+    {"id": "ship", "name": "/gsd:ship — Phase 56 PR + cross-AI review + ship", "status": "not_started", "depends_on": ["verify-execution"]}
   ],
   "blockers": [],
   "human_actions_pending": [],
   "decisions": [
-    {
-      "decision": "Auto-mode discuss-phase (no AskUserQuestion calls)",
-      "rationale": "Operator explicitly instructed 'work without stopping for clarifying questions' at session start.",
-      "phase": "56"
-    },
-    {
-      "decision": "Mirror Phase 55 architecture verbatim — zero-dep CJS in scripts/, exports + require.main guard, three-wave TDD, --json envelope, padded text-table default output",
-      "rationale": "Sibling phase shipped clean; reuse over reinvention preserves coherence and reduces planner cognitive cost.",
-      "phase": "56"
-    },
-    {
-      "decision": "Coverage measurement reads coverage/coverage-final.json and aggregates inside the script",
-      "rationale": "Already produced by npm run test:coverage. No need to re-run tests or modify package.json scripts. Staleness threshold 3600s, exit 2 if missing/stale.",
-      "phase": "56"
-    },
-    {
-      "decision": "Test-count measurement spawns 'node --test --test-reporter=tap' from inside the detector",
-      "rationale": "Self-contained; no coupling to scripts/run-tests.cjs. ~30s wall time per detector run accepted.",
-      "phase": "56"
-    },
-    {
-      "decision": "Hook count restricted to execution hooks (hooks/dist/*.js) for v1",
-      "rationale": "Living docs use four+ different 'hook' definitions (15/16/10/7) that disagree with each other. One narrow, unambiguous metric in v1; expand once upstream definitions stabilize.",
-      "phase": "56"
-    },
-    {
-      "decision": "Living-docs scope: exactly 3 files (CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md)",
-      "rationale": "DOCDRIFT-03 names these three. PROJECT.md and CHANGELOG.md are touched by /gsd:sync-docs but were intentionally not in the requirement.",
-      "phase": "56"
-    },
-    {
-      "decision": "Three-tier exit codes (0 clean / 1 drift / 2 runtime error)",
-      "rationale": "Phase 57's CI step needs to distinguish 'real drift' from 'couldn't run check'. Single-exit-1 conflates both.",
-      "phase": "56"
-    },
-    {
-      "decision": "Drift records sorted by canonical (file, line) order — not insertion, not alphabetical",
-      "rationale": "Humans scan multi-file reports in document order. Match that habit.",
-      "phase": "56"
-    }
+    {"decision": "Apply Path A (5 surgical hardening edits via /gsd:plan-phase 56 --reviews) instead of Path B (execute-as-is + defer)", "rationale": "Codex MEDIUM concerns are operational hardening; ~20min replan cost is far less than re-debugging in CI later. Edits stay surgical — architecture and wave structure preserved.", "phase": "56"},
+    {"decision": "Skip Claude CLI in /gsd:review for cross-AI independence", "rationale": "Running inside Claude Code; reviewing with the same runtime collapses the value of cross-AI peer review. Gemini + Codex provided sufficient independence (different MEDIUM verdicts, different concerns surfaced).", "phase": "56"},
+    {"decision": "Stay line-by-line in extractClaims (vs Codex's whole-file scan suggestion)", "rationale": "Architectural simplicity wins; the multi-line risk is low (current docs all single-line per sanity test added in Edit 3). JSDoc constraint + sanity test provide an early-warning guardrail without re-architecting the regex extractor.", "phase": "56"},
+    {"decision": "Derive missingDocPolicy from --root presence + isRepoRoot helper, NOT a new CLI flag", "rationale": "Honors D-18 (4 CLI flags only). The runtime can infer fixture-mode vs production-mode from path semantics alone (look for package.json + .gitignore co-presence). New flag would add user-facing surface area for a behavior that's deterministic from existing inputs.", "phase": "56"},
+    {"decision": "Use research-first path (default) instead of --skip-research", "rationale": "CONTEXT.md was decisions-locked but the concrete regex shapes for the 9 metrics across 3 living docs were NOT enumerated. Research produced (a) 14-drift-record ground truth Wave 3 needs, (b) Nyquist Dimension 8 Validation Architecture, (c) confirmation that line-by-line approach is safe. Skipping research would have left these as planning gaps.", "phase": "56"},
+    {"decision": "Ran Gemini and Codex reviewers in parallel (vs workflow's sequential default)", "rationale": "Different services, no shared rate limits. Workflow's caveat about rate limits applies to same-vendor sequencing; cross-vendor parallelism saves ~5min and has zero conflict risk.", "phase": "56"}
   ],
   "uncommitted_files": [],
-  "local_only_files": [
-    ".planning/phases/56-doc-drift-detector/56-CONTEXT.md",
-    ".planning/phases/56-doc-drift-detector/56-DISCUSSION-LOG.md",
-    ".planning/phases/56-doc-drift-detector/.continue-here.md"
+  "background_processes": [],
+  "session_artifacts": [
+    {"path": ".planning/phases/56-doc-drift-detector/56-RESEARCH.md", "size_lines": 755, "tracked": false, "purpose": "Concrete regex shapes per metric per file, TAP/coverage measurement validation, Validation Architecture, pitfalls, 3-wave plan recommendations"},
+    {"path": ".planning/phases/56-doc-drift-detector/56-VALIDATION.md", "size_lines": 105, "tracked": false, "purpose": "Per-task verification map, Wave 0 requirements, manual-only verifications, Nyquist Dim 8 sign-off"},
+    {"path": ".planning/phases/56-doc-drift-detector/56-01-PLAN.md", "size_lines": 1291, "tracked": false, "purpose": "Wave 1 TDD: fixtures + METRICS registry + 8 pure functions; +2 hardening test cases (multi-line sanity, METRICS empty-claims guard)"},
+    {"path": ".planning/phases/56-doc-drift-detector/56-02-PLAN.md", "size_lines": 1125, "tracked": false, "purpose": "Wave 2 TDD: measurement + integration + main + .c8rc; +2 hardening test cases (empty-stdout failure path, missing-doc policy)"},
+    {"path": ".planning/phases/56-doc-drift-detector/56-03-PLAN.md", "size_lines": 515, "tracked": false, "purpose": "Wave 3: real-repo run + drift fixes + living-doc updates; +1 hardening must_haves truth + WORDING-COLLISION AVOIDANCE subsection"},
+    {"path": ".planning/phases/56-doc-drift-detector/56-REVIEWS.md", "size_lines": null, "tracked": false, "purpose": "Cross-AI review (Gemini LOW + Codex MEDIUM) with consensus summary and 5-edit Recommended Replanning section"}
   ],
-  "next_action": "Run /gsd:plan-phase 56 (after /clear for fresh context window). The planner will read 56-CONTEXT.md and produce three plans following the Phase 55 wave template.",
-  "context_notes": "Phase 56 context was gathered in auto-mode because operator opted out of clarifying questions for the session. Every gray area was auto-resolved with the recommended choice and logged in 56-DISCUSSION-LOG.md. The Phase 55 sibling (validate-doc-links.cjs) is the architectural template — same shape, same wave structure, same test harness pattern. The detector is read-only; its job is to catch numeric drift in three living docs and exit non-zero. Phase 57 wires it into CI (out of scope here). Watch for: (1) the README currently claims '65 commands' but live count is 66 — this will surface as drift in Wave 3 and needs to be fixed in the same wave; (2) c8 currently emits coverage-final.json via the existing 'json' reporter, so no .c8rc.json reporter changes needed — only an 'include' addition for the new script.",
-  "session_state": {
-    "branch": "chore/milestone-v2.8-init",
-    "working_tree": "clean",
-    "last_commit": "60928cb",
-    "milestone": "v2.8",
-    "milestone_name": "Documentation Integrity",
-    "milestone_status": "active",
-    "phases_complete_in_milestone": 1,
-    "phases_total_in_milestone": 3
-  },
-  "false_completion_check": {
-    "scanned": true,
-    "files_with_placeholder_text": [
-      ".planning/phases/55-internal-link-validator/55-01-PLAN.md",
-      ".planning/phases/55-internal-link-validator/55-01-SUMMARY.md",
-      ".planning/phases/55-internal-link-validator/55-02-PLAN.md",
-      ".planning/phases/55-internal-link-validator/55-03-PLAN.md",
-      ".planning/phases/55-internal-link-validator/55-03-SUMMARY.md"
-    ],
-    "verdict": "benign — TBD/placeholder hits are standard plan-template scaffolding (e.g., 'TBD plans', sample placeholder snippets in must_have examples). Phase 55 is fully shipped per ROADMAP and STATE; no real false completions detected."
-  }
+  "next_action": "/clear, then /gsd:execute-phase 56 to begin Wave 1 (Plan 56-01). The execution engine will run waves sequentially and gate Wave 2/3 on dependencies automatically.",
+  "context_notes": "Phase 56 is fully planned, hardened, and execution-ready. The 14 known drift records identified during research will surface as expected output during Wave 3 — they're not bugs, they're the proof the detector works against the live repo. The expected initial drift includes command_count 65→66 (docs lag the actual count) and hook_count_execution 7→6 (similar). After Wave 3 surgically updates the living docs, re-running the detector should exit 0 (clean). Mental model: Phases 55+56 are independent; Phase 57 (CI integration) gates on both being shipped. Phase 55 already shipped, so Phase 56 is the last gating dependency for Phase 57."
 }
