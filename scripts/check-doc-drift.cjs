@@ -544,10 +544,17 @@ function extractClaims(filePath, claimsForFile) {
  *   - Integer (normalize = stripCommas or asInt): comma-tolerant string equality.
  *   - Percentage (normalize = parsePercent): |parsedClaimed - actual| <= epsilon.
  *
+ * Default epsilon for percentage claims is 0.1 (one tenth of one percent).
+ * This tolerates legitimate cross-platform coverage variance (c8 instrumentation
+ * on macOS vs ubuntu produces deltas of ~0.06% over ~23k statements due to OS
+ * filesystem semantics) while still catching real drift (a typo from 91.6% to
+ * 81.6% would still be flagged). Pre-existing per-test epsilon overrides
+ * (`epsilon: 0.01`) remain in effect where the test exercises tighter bounds.
+ *
  * @param {{claimed: string, actual: number|string, normalize: Function, epsilon?: number}} args
  * @returns {{claimed: string, actual: string} | null}
  */
-function compareClaim({ claimed, actual, normalize, epsilon = 0.01 }) {
+function compareClaim({ claimed, actual, normalize, epsilon = 0.1 }) {
   if (normalize === parsePercent) {
     const parsedClaimed = parsePercent(claimed);
     const parsedActual = typeof actual === 'number' ? actual : parsePercent(actual);
