@@ -116,7 +116,7 @@ Plans:
 **Depends on**: Phase 55, Phase 56 (both scripts must exist before CI wiring)
 **Requirements**: DOCREF-01, DOCREF-02, DOCCI-01, DOCCI-02, DOCCI-03
 **Success Criteria** (what must be TRUE):
-  1. A grep across the entire repo finds zero references to `docs/health-reports/full-audit-2026-04-11.md` or `.planning/codebase/STRUCTURE.md` — all have been repaired or removed
+  1. The validator (`scripts/validate-doc-links.cjs`) reports zero broken link refs to `docs/health-reports/full-audit-2026-04-11.md` or `.planning/codebase/STRUCTURE.md`, AND every textual mention of these paths in the repo is an intentional description of the requirement (e.g., REQUIREMENTS.md DOCREF-01/02 description) rather than a broken hyperlink.
   2. The `.github/workflows/test.yml` file contains a dedicated step that runs `scripts/validate-doc-links.cjs` and a dedicated step that runs `scripts/check-doc-drift.cjs`, each as distinct named steps
   3. Opening a PR with a deliberately introduced broken link causes the CI link-validator step to fail and block merge
   4. Opening a PR with a deliberately introduced doc drift causes the CI drift-detector step to fail and block merge
