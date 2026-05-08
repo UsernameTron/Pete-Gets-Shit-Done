@@ -19,25 +19,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-07)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** Phase 56 — doc-drift-detector
+**Current focus:** Phase 57 — Backfill + CI Integration (the last v2.8 phase)
 
 ## Current Position
 
 Phase: 57
 Plan: Not started
-Status: Phases 55-56 SHIPPED — PR #22 (https://github.com/UsernameTron/Pete-Gets-Shit-Done/pull/22). 38 commits, 44 files changed, 3,579 lines added. Awaiting CI green + merge. Phase 57 (CI integration) is the only remaining v2.8 milestone work.
+Status: Phases 55-56 MERGED to main — PR #22 squash-merged at commit c1063a2 on 2026-05-08T14:17:47Z. 9/9 CI checks green. Working branch deleted. Local now on main. One CodeQL HIGH severity vuln found and fixed in-flight (toGfmSlug incomplete multi-character sanitization). Phase 57 (CI integration) is the only remaining v2.8 milestone work.
 Last activity: 2026-05-08
-Tests: 2,805 assertions, 560 suites (Phase 56 added +82 from 2,723 baseline)
-Coverage: 91.58% lines, 83.4% branches, 97.21% functions (overall); scripts/check-doc-drift.cjs at 98.28% line / 90.5% branch / 92.85% function (well above 80% per-module threshold)
+Tests: 2,805 assertions, 560 suites
+Coverage: 91.58% lines, 83.4% branches, 97.21% functions (overall); scripts/check-doc-drift.cjs at 98.28% line; scripts/validate-doc-links.cjs at 96.59% line
 
-Key decisions from 56-03:
+Key decisions from ship/merge:
 
-- 14 known drift records reduced to 4 after Wave 1+2 doc reconciliation, then reduced to 0 after Wave 3 surgical fixes
-- 5 metric corrections in living docs: command_count 65→66, hook_count_execution 7→6, test_count 2,667→2,805, suite_count 536→560, line_coverage 91.23%→91.58%
-- Detector reference added to all 3 living docs with collision-safe wording per WORDING-COLLISION AVOIDANCE (REVIEWS.md #5)
-- Final detector run from repo root: exit 0, "all 23 numeric claim(s) match live values"
+- PR #22 shipped both Phase 55 (DOCLINK-01..04) and Phase 56 (DOCDRIFT-01..05) together (milestone-level branch)
+- Cross-AI review (Gemini + Codex) caught 5 hardening edits before execution; CodeQL caught 1 security vuln during CI; security fix landed in-flight before merge
+- Squash-merged via `gh pr merge --squash --delete-branch` — clean main history with one merge commit (c1063a2) representing v2.8 phases 55+56
 
-**Next action:** `/gsd:verify-work 56` → conversational UAT against acceptance criteria
+**Next action:** `/gsd:discuss-phase 57` (or `/gsd:plan-phase 57 --auto` if context is sufficient) — wire both validators as blocking CI steps in `.github/workflows/test.yml`
 
 ## v2.8 Phase Summary
 
