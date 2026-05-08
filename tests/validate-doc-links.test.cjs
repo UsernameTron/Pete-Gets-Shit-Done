@@ -838,7 +838,7 @@ describe('validate-doc-links: --exclude flag', () => {
     ]);
     assert.strictEqual(result.status, 1,
       `expected exit 1 (another-broken.md still present); stdout: ${result.stdout}`);
-    assert.ok(!result.stdout.includes('does-not-exist.md'),
+    assert.ok(!result.stdout.includes('missing-target.md'),
       `broken.md was excluded so its broken ref should not appear; stdout: ${result.stdout}`);
   });
 

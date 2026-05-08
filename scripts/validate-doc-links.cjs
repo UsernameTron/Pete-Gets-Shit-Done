@@ -8,9 +8,12 @@
  * Exits 0 on clean, 1 on broken links. Use --json for machine-readable output.
  *
  * Usage:
- *   node scripts/validate-doc-links.cjs                # validate the whole repo
- *   node scripts/validate-doc-links.cjs --json         # JSON output
- *   node scripts/validate-doc-links.cjs --root <dir>   # validate a specific tree (used by tests)
+ *   node scripts/validate-doc-links.cjs                      # validate the whole repo
+ *   node scripts/validate-doc-links.cjs --json               # JSON output
+ *   node scripts/validate-doc-links.cjs --root <dir>         # validate a specific tree
+ *   node scripts/validate-doc-links.cjs --exclude <glob>     # exempt paths from validation
+ *                                                              (multi-value, gitignore-style globs;
+ *                                                               see gitignoreGlobToRegex for semantics)
  *
  * Requirements: DOCLINK-01, DOCLINK-02, DOCLINK-03, DOCLINK-04
  *
@@ -26,6 +29,16 @@
  *     captured, the title is discarded. (Pass 1 review fix.)
  *   - Files saved in encodings other than UTF-8 (e.g., UTF-16) are skipped
  *     with a single line logged to stderr. (Pass 2 Gemini LOW fix.)
+ *
+ * --exclude unsupported gitignore features (v1):
+ *   - Leading `!` negation patterns (`!path/**`) — NOT supported. Add if
+ *     call-site needs surface (CONTEXT D-07).
+ *   - Brace expansion `{a,b}` — treated as literal characters.
+ *   - Single-char `?` wildcard — treated as literal (gitignore semantics).
+ *   - POSIX character classes — NOT supported.
+ *   The supported subset (`**/`, `/**`, bare `**`, `*`, exact paths) covers
+ *   the v2.8 CI call-site exempt list and is intentionally minimal per
+ *   CONTEXT D-09 (validator stays generic; policy lives at call site).
  */
 
 const fs = require('fs');
@@ -39,6 +52,78 @@ const { execFileSync } = require('child_process');
 // or `)`, then optionally consumes the quoted title without including it.
 const LINK_RE = /!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 const EXTERNAL_RE = /^(https?:|mailto:|ftp:)/i;
+
+// ─── gitignoreGlobToRegex ─────────────────────────────────────────────────────
+
+/**
+ * Convert a gitignore-style glob to a RegExp anchored at start and end.
+ *
+ * Supported semantics (subset sufficient for v2.8 CI call-site exempt list):
+ *   - Leading "**"+"/" matches zero or more directories (incl. zero -- root files match)
+ *   - Trailing "/""**" matches '' or '/anything' (the directory itself plus everything below)
+ *   - Bare "**" matches any chars including '/'
+ *   - "*" matches a single segment (zero or more chars EXCEPT '/')
+ *   - All other regex meta-chars are escaped: . ( ) [ ] { } + $ ^ | backslash ?
+ *   - Pattern is anchored: the full repo-relative path must match
+ *   - Empty-string glob returns a never-match regex (graceful no-op)
+ *
+ * NOT SUPPORTED in v1 (planner choice; can be added if call-site needs surface):
+ *   - Leading "!" negation (CONTEXT D-07)
+ *   - Brace expansion "{a,b}"
+ *   - "?" single-char wildcard (treated as literal)
+ *   - POSIX character classes
+ *
+ * Order matters: lift the special-case "**"/"-leading and "/**"-trailing tokens
+ * to placeholders BEFORE escaping, so the regex meta-char escape step does not
+ * see them; then escape; then resolve "*" and remaining "**"; then resolve
+ * placeholders to their final regex meanings.
+ *
+ * Exported as a public API surface for direct unit testing (see REVIEW MEDIUM
+ * disposition in this plan's review_disposition section).
+ *
+ * @param {string} glob  Gitignore-style glob pattern
+ * @returns {RegExp}     Regex matching repo-relative paths, anchored ^...$
+ */
+function gitignoreGlobToRegex(glob) {
+  // Empty-string glob is a graceful no-op: never matches any path.
+  // Friendlier than throwing for call sites that may accumulate args programmatically.
+  if (glob === '') {
+    return /(?!)/;
+  }
+
+  // Step 1: lift the special-case leading-`**/` and trailing-`/**` tokens
+  // to placeholders so subsequent steps don't mis-handle them.
+  const LEADING_DOUBLE_SLASH = 'LDSPLACEHOLDER';
+  const TRAILING_SLASH_DOUBLE = 'TSDPLACEHOLDER';
+  const STANDALONE_DOUBLE = 'DBLPLACEHOLDER';
+
+  let pat = glob;
+  if (pat.startsWith('**/')) {
+    pat = LEADING_DOUBLE_SLASH + pat.slice(3);
+  }
+  if (pat.endsWith('/**')) {
+    pat = pat.slice(0, -3) + TRAILING_SLASH_DOUBLE;
+  }
+  // Lift any remaining bare `**` (e.g., embedded mid-pattern).
+  pat = pat.replace(/\*\*/g, STANDALONE_DOUBLE);
+
+  // Step 2: escape regex metacharacters EXCEPT '*' (and our placeholders).
+  // We escape '?' too — gitignore treats '?' as single-char wildcard, but the
+  // v1 use case is literal paths and `**` directory globs, so treating '?'
+  // as literal is safer than half-implementing it.
+  pat = pat.replace(/[.+^$|()\[\]{}\\?]/g, '\\$&');
+
+  // Step 3: substitute remaining single '*' with [^/]* (single-segment match).
+  pat = pat.replace(/\*/g, '[^/]*');
+
+  // Step 4: resolve placeholders to their regex meanings.
+  pat = pat
+    .replace(new RegExp(LEADING_DOUBLE_SLASH, 'g'), '(?:.*\\/)?')   // zero or more dirs at start
+    .replace(new RegExp(TRAILING_SLASH_DOUBLE, 'g'), '(?:\\/.*)?')  // '' or '/anything' at end
+    .replace(new RegExp(STANDALONE_DOUBLE, 'g'), '.*');             // bare ** matches anything incl '/'
+
+  return new RegExp('^' + pat + '$');
+}
 
 // ─── toGfmSlug ────────────────────────────────────────────────────────────────
 
@@ -330,29 +415,45 @@ function globMdFiles(dir, results = []) {
  * Falls back to a recursive glob if git is unavailable (non-git directory or
  * fixture directory used in unit tests).
  *
- * @param {string} repoRoot  Absolute path to repo root (or fixture root)
- * @returns {string[]}       Absolute paths to .md files
+ * If excludeRegexes is provided, files whose REPO-RELATIVE path matches any
+ * regex are filtered out. Conversion abs-path -> repo-relative uses
+ * `path.relative(repoRoot, abs)` and normalizes path separators to `/` on
+ * Windows so glob authors don't have to think about backslashes.
+ *
+ * @param {string} repoRoot           Absolute path to repo root (or fixture root)
+ * @param {RegExp[]} [excludeRegexes] Optional exclude regexes (each matches repo-relative paths)
+ * @returns {string[]}                Absolute paths to surviving .md files
  */
-function discoverTrackedFiles(repoRoot) {
+function discoverTrackedFiles(repoRoot, excludeRegexes) {
   // Primary path: git ls-files (respects .gitignore, fast on large trees).
   // Uses execFileSync (NOT execSync) — arguments passed as array, no shell injection.
+  let files;
   try {
     const out = execFileSync('git', ['ls-files', '--', '*.md'], {
       cwd: repoRoot,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
     });
-    const files = out
+    const tracked = out
       .split('\n')
       .filter(Boolean)
       .map(f => path.resolve(repoRoot, f));
-    if (files.length > 0) return files;
+    if (tracked.length > 0) {
+      files = tracked;
+    }
     // git ran but returned no .md files — fall through to glob (could be a
     // fixture tree that happens to be inside a parent git repo).
   } catch {
     // git unavailable or repoRoot is not a git working tree — fall through.
   }
-  return globMdFiles(repoRoot);
+  if (!files) files = globMdFiles(repoRoot);
+
+  if (!excludeRegexes || excludeRegexes.length === 0) return files;
+
+  return files.filter(abs => {
+    const rel = path.relative(repoRoot, abs).split(path.sep).join('/');
+    return !excludeRegexes.some(rx => rx.test(rel));
+  });
 }
 
 // ─── main ─────────────────────────────────────────────────────────────────────
@@ -379,22 +480,39 @@ function discoverTrackedFiles(repoRoot) {
 function main(argv) {
   const wantJson = argv.includes('--json');
   let repoRoot = process.cwd();
-  const rootIdx = argv.indexOf('--root');
-  if (rootIdx !== -1) {
-    // Pass 2 Codex MEDIUM fix: validate that `--root` has a following value.
-    // Without this, `--root` followed by `--json` would silently use `--json`
-    // as the directory argument.
-    const next = argv[rootIdx + 1];
-    if (!next || next.startsWith('--')) {
-      process.stderr.write(
-        'validate-doc-links: --root requires a directory argument\n'
-      );
-      process.exit(2);
+  const excludes = [];
+
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--root') {
+      // Pass 2 Codex MEDIUM fix: validate that `--root` has a following value.
+      // Without this, `--root` followed by `--json` would silently use `--json`
+      // as the directory argument.
+      const next = argv[i + 1];
+      if (!next || next.startsWith('--')) {
+        process.stderr.write(
+          'validate-doc-links: --root requires a directory argument\n'
+        );
+        process.exit(2);
+      }
+      repoRoot = path.resolve(next);
+      i++;
+    } else if (a === '--exclude') {
+      const next = argv[i + 1];
+      if (!next || next.startsWith('--')) {
+        process.stderr.write(
+          'validate-doc-links: --exclude requires a glob argument\n'
+        );
+        process.exit(2);
+      }
+      excludes.push(next);
+      i++;
     }
-    repoRoot = path.resolve(next);
+    // --json is consumed via argv.includes; no separate branch needed here.
   }
 
-  const files = discoverTrackedFiles(repoRoot);
+  const excludeRegexes = excludes.map(gitignoreGlobToRegex);
+  const files = discoverTrackedFiles(repoRoot, excludeRegexes);
   const broken = [];
   let checked = 0;
   // Pass 1 consensus MEDIUM-HIGH fix: shared slug cache across all
@@ -441,6 +559,7 @@ module.exports = {
   validateLink,
   formatTable,
   discoverTrackedFiles,
+  gitignoreGlobToRegex,
 };
 
 // ─── Main guard ───────────────────────────────────────────────────────────────
