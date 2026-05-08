@@ -60,14 +60,3 @@
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete | 2026-05-07 |
 | 56. Doc Drift Detector | v2.8 | 3/3 | Complete | 2026-05-08 |
 | 57. Backfill and CI Integration | v2.8 | 3/3 | Complete | 2026-05-08 |
-
-## Backlog
-
-### Phase 999.1: Documentation Refresh (BACKLOG)
-
-**Goal:** Update CLAUDE.md and README.md to reflect current state — agent counts, test counts, milestone history, and any architectural changes since last doc pass.
-**Requirements:** TBD
-**Plans:** 3/3 plans complete
-
-Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
