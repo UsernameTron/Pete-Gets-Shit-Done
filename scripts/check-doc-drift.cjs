@@ -276,6 +276,34 @@ const METRICS = [
   },
 ];
 
+// ─── Wire measure callbacks onto METRICS ──────────────────────────────────────
+//
+// CONTEXT D-04 maps metric IDs to measurement functions. Each callback receives
+// a context object containing the precomputed coverage and test-stats so per-
+// metric measurement does not redo I/O.
+// NOTE: metricMeasureMap references the measure* functions defined below the
+// METRICS registry. The wiring loop runs at module load time — after all
+// functions are hoisted by Node's CJS module evaluation.
+
+const metricMeasureMap = {
+  test_count: (ctx) => ctx.testStats.tests,
+  suite_count: (ctx) => ctx.testStats.suites,
+  line_coverage: (ctx) => ctx.coverage.line,
+  branch_coverage: (ctx) => ctx.coverage.branch,
+  function_coverage: (ctx) => ctx.coverage.function,
+  agent_count: (ctx) => measureAgentCount(ctx.repoRoot),
+  command_count: (ctx) => measureCommandCount(ctx.repoRoot),
+  skill_count: (ctx) => measureSkillCount(ctx.repoRoot),
+  hook_count_execution: (ctx) => measureHookCount(ctx.repoRoot),
+};
+
+for (const m of METRICS) {
+  m.measure = metricMeasureMap[m.id];
+  if (typeof m.measure !== 'function') {
+    throw new Error(`METRICS registry: no measure callback wired for id=${m.id}`);
+  }
+}
+
 // ─── parseTapSummary ──────────────────────────────────────────────────────────
 
 /**
@@ -326,6 +354,132 @@ function aggregateCoverage(jsonData) {
     branch: bTot > 0 ? (bCov / bTot) * 100 : 0,
     function: fTot > 0 ? (fCov / fTot) * 100 : 0,
   };
+}
+
+// ─── Measurement Functions ────────────────────────────────────────────────────
+
+/**
+ * Read coverage/coverage-final.json under repoRoot and aggregate.
+ * Exits 2 via process.exit if the file is missing or older than staleSecs
+ * (default 3600). Set staleSecs = 0 to disable the freshness check.
+ *
+ * @param {string} repoRoot
+ * @param {number} staleSecs
+ * @returns {{ line: number, branch: number, function: number }}
+ */
+function measureCoverageFromJson(repoRoot, staleSecs = 3600) {
+  const covPath = path.join(repoRoot, 'coverage', 'coverage-final.json');
+  if (!fs.existsSync(covPath)) {
+    process.stderr.write(
+      "coverage data missing or stale — run 'npm run test:coverage' before check-doc-drift.cjs\n"
+    );
+    process.exit(2);
+  }
+  if (staleSecs > 0) {
+    const ageMs = Date.now() - fs.statSync(covPath).mtimeMs;
+    if (ageMs > staleSecs * 1000) {
+      process.stderr.write(
+        "coverage data missing or stale — run 'npm run test:coverage' before check-doc-drift.cjs\n"
+      );
+      process.exit(2);
+    }
+  }
+  const json = JSON.parse(fs.readFileSync(covPath, 'utf8'));
+  return aggregateCoverage(json);
+}
+
+/**
+ * Measure live test count and suite count.
+ *
+ * Resolution order:
+ *   1. If <repoRoot>/coverage/test-stats.json exists, return its {tests, suites}.
+ *   2. Otherwise spawn `node --test --test-reporter=tap` against tests/*.test.cjs.
+ *
+ * @param {string} repoRoot
+ * @returns {{ tests: number, suites: number }}
+ */
+function measureTestCounts(repoRoot) {
+  const statsPath = path.join(repoRoot, 'coverage', 'test-stats.json');
+  if (fs.existsSync(statsPath)) {
+    const s = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
+    return { tests: Number(s.tests) || 0, suites: Number(s.suites) || 0 };
+  }
+  const testsDir = path.join(repoRoot, 'tests');
+  if (!fs.existsSync(testsDir)) return { tests: 0, suites: 0 };
+  const testFiles = fs.readdirSync(testsDir)
+    .filter(f => f.endsWith('.test.cjs'))
+    .sort()
+    .map(f => path.join(testsDir, f));
+  if (testFiles.length === 0) return { tests: 0, suites: 0 };
+  let tap = '';
+  try {
+    // maxBuffer: 16 * 1024 * 1024 hardens against TAP-stdout truncation when the
+    // suite grows past Node's default 1MB limit (Codex MEDIUM, REVIEWS.md). Without
+    // this, large suites can throw ENOBUFS and the catch-block returns 0 tests
+    // even though the run was healthy.
+    tap = execFileSync(process.execPath, ['--test', '--test-reporter=tap', ...testFiles], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 120_000,
+      maxBuffer: 16 * 1024 * 1024,
+    });
+  } catch (err) {
+    // node --test exits non-zero when any test fails; we still want the TAP summary.
+    // If err.stdout is undefined OR an empty string (catastrophic spawn failure
+    // such as a syntax error in a test file before any TAP emission), short-
+    // circuit and return { tests: 0, suites: 0 } without invoking parseTapSummary —
+    // this matches the documented Wave 1 fallback semantics and keeps the catch
+    // resilient to spawn-level failures (Gemini LOW + Codex robustness suggestion).
+    if (err.stdout === undefined || err.stdout === '') {
+      return { tests: 0, suites: 0 };
+    }
+    tap = err.stdout.toString();
+  }
+  return parseTapSummary(tap);
+}
+
+/** @returns {number} */
+function measureAgentCount(repoRoot) {
+  const dir = path.join(repoRoot, 'agents');
+  if (!fs.existsSync(dir)) return 0;
+  return fs.readdirSync(dir).filter(f => /^gsd-.*\.md$/.test(f)).length;
+}
+
+/** @returns {number} */
+function measureCommandCount(repoRoot) {
+  const dir = path.join(repoRoot, 'commands', 'gsd');
+  if (!fs.existsSync(dir)) return 0;
+  return fs.readdirSync(dir).filter(f => f.endsWith('.md')).length;
+}
+
+/**
+ * Count <repoRoot>/plugins/<plugin>/skills/<skill>/ directories — depth-2
+ * directory listing under plugins/, mirroring "ls -d plugins/*\/skills/*\/"
+ * from sync-docs.md.
+ *
+ * @returns {number}
+ */
+function measureSkillCount(repoRoot) {
+  const pluginsDir = path.join(repoRoot, 'plugins');
+  if (!fs.existsSync(pluginsDir)) return 0;
+  let total = 0;
+  for (const plugin of fs.readdirSync(pluginsDir, { withFileTypes: true })) {
+    if (!plugin.isDirectory()) continue;
+    const skillsDir = path.join(pluginsDir, plugin.name, 'skills');
+    if (!fs.existsSync(skillsDir)) continue;
+    for (const skill of fs.readdirSync(skillsDir, { withFileTypes: true })) {
+      if (skill.isDirectory()) total++;
+    }
+  }
+  return total;
+}
+
+/** @returns {number} */
+function measureHookCount(repoRoot) {
+  const dir = path.join(repoRoot, 'hooks', 'dist');
+  if (!fs.existsSync(dir)) return 0;
+  return fs.readdirSync(dir).filter(f => f.endsWith('.js')).length;
 }
 
 // ─── Claim Extraction ─────────────────────────────────────────────────────────
@@ -466,6 +620,173 @@ function formatDriftTable(records, repoRoot) {
   return [headerLine, underline, ...dataLines].join('\n');
 }
 
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
+const HELP_TEXT = [
+  'check-doc-drift.cjs — Doc Drift Detector',
+  '',
+  'Usage:',
+  '  node scripts/check-doc-drift.cjs                       # check the whole repo',
+  '  node scripts/check-doc-drift.cjs --json                # JSON output',
+  '  node scripts/check-doc-drift.cjs --root <dir>          # check a specific tree',
+  '  node scripts/check-doc-drift.cjs --coverage-stale-secs <N>  # override 1h staleness check',
+  '  node scripts/check-doc-drift.cjs --help                # this help',
+  '',
+  'Exit codes:',
+  '  0  All numeric claims match live values',
+  '  1  At least one drift detected',
+  '  2  Runtime error (missing/stale coverage data, argument validation failure)',
+  '',
+].join('\n');
+
+function main(argv) {
+  if (argv.includes('--help')) {
+    process.stdout.write(HELP_TEXT);
+    process.exit(0);
+  }
+  const wantJson = argv.includes('--json');
+
+  let repoRoot = process.cwd();
+  let rootFlagPassed = false;
+  const rootIdx = argv.indexOf('--root');
+  if (rootIdx !== -1) {
+    const next = argv[rootIdx + 1];
+    if (!next || next.startsWith('--')) {
+      process.stderr.write(
+        'check-doc-drift: --root requires a directory argument\n'
+      );
+      process.exit(2);
+    }
+    repoRoot = path.resolve(next);
+    rootFlagPassed = true;
+  }
+
+  let staleSecs = 3600;
+  const staleIdx = argv.indexOf('--coverage-stale-secs');
+  if (staleIdx !== -1) {
+    const next = argv[staleIdx + 1];
+    if (next === undefined || next.startsWith('--') || Number.isNaN(Number(next))) {
+      process.stderr.write(
+        'check-doc-drift: --coverage-stale-secs requires a numeric value\n'
+      );
+      process.exit(2);
+    }
+    staleSecs = Number(next);
+  }
+
+  // Codex LOW concern (REVIEWS.md "Recommended Replanning" #2): derive a
+  // missingDocPolicy to distinguish fixture directories from real repo roots.
+  //
+  //   - If --root is absent OR --root resolves to a repo root (directory that
+  //     contains both package.json AND .gitignore — stable repo-root marker
+  //     pair), enforce strict mode: missing living doc => exit 2.
+  //   - If --root <fixtureDir> is set to a path that is NOT the repo root,
+  //     fall back to silent skip (preserves fixture-convenience behavior).
+  //
+  // The repo-root probe inspects repoRoot only (no upward tree walk).
+  function isRepoRoot(dir) {
+    return fs.existsSync(path.join(dir, 'package.json'))
+      && fs.existsSync(path.join(dir, '.gitignore'));
+  }
+  const missingDocPolicy = (!rootFlagPassed || isRepoRoot(repoRoot))
+    ? 'fail'
+    : 'skip';
+
+  // Measure live values once, share via ctx.
+  const coverage = measureCoverageFromJson(repoRoot, staleSecs);
+  const testStats = measureTestCounts(repoRoot);
+  const ctx = { repoRoot, coverage, testStats };
+
+  // Per-doc claim extraction. Group claims by file across all metrics.
+  const docFiles = ['CLAUDE.md', 'README.md', 'docs/DEVOPS-HANDOFF.md']; // D-11 order
+  const driftRecords = [];
+  let checked = 0;
+
+  for (const docFile of docFiles) {
+    const absDoc = path.join(repoRoot, docFile);
+    if (!fs.existsSync(absDoc)) {
+      if (missingDocPolicy === 'fail') {
+        // Strict mode: required living doc missing means the run cannot make
+        // progress safely. Exit 2 with a remediation message.
+        process.stderr.write(
+          `check-doc-drift: required living doc not found: ${absDoc} — run from repo root or use --root <fixtureDir>\n`
+        );
+        process.exit(2);
+      }
+      // Fixture mode: silently skip (fixture trees may intentionally omit docs).
+      continue;
+    }
+    // Gather every claim entry across the registry whose file === docFile.
+    const claimsForFile = [];
+    for (const metric of METRICS) {
+      for (const c of metric.claims) {
+        if (c.file === docFile) {
+          claimsForFile.push({
+            metric: metric.id,
+            regex: c.regex,
+            captureIndex: c.captureIndex,
+            normalize: c.normalize,
+          });
+        }
+      }
+    }
+    const extracted = extractClaims(absDoc, claimsForFile);
+    for (const claim of extracted) {
+      checked++;
+      const metric = METRICS.find(m => m.id === claim.metric);
+      const actual = metric.measure(ctx);
+      const drift = compareClaim({
+        claimed: claim.claimed,
+        actual,
+        normalize: claim.normalize,
+      });
+      if (drift) {
+        driftRecords.push({
+          file: docFile,
+          line: claim.line,
+          metric: claim.metric,
+          claimed: drift.claimed,
+          actual: drift.actual,
+        });
+      }
+    }
+  }
+
+  // Sort drift records by canonical doc order then line (D-14)
+  const docOrderIdx = (f) => {
+    const i = docFiles.indexOf(f);
+    return i === -1 ? docFiles.length : i;
+  };
+  driftRecords.sort((a, b) => {
+    const ai = docOrderIdx(a.file);
+    const bi = docOrderIdx(b.file);
+    if (ai !== bi) return ai - bi;
+    return a.line - b.line;
+  });
+
+  if (wantJson) {
+    const payload = {
+      status: driftRecords.length === 0 ? 'clean' : 'drift',
+      checked,
+      files: docFiles.length,
+      metrics: METRICS.length,
+      drift: driftRecords,
+    };
+    process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
+  } else if (driftRecords.length === 0) {
+    process.stdout.write(
+      `check-doc-drift: all ${checked} numeric claim(s) match live values (${docFiles.length} files, ${METRICS.length} metrics)\n`
+    );
+  } else {
+    process.stdout.write(
+      `check-doc-drift: ${driftRecords.length} drift(s) found\n\n`
+    );
+    process.stdout.write(formatDriftTable(driftRecords, repoRoot) + '\n');
+  }
+
+  process.exit(driftRecords.length === 0 ? 0 : 1);
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -478,12 +799,16 @@ module.exports = {
   extractClaims,
   compareClaim,
   formatDriftTable,
+  measureCoverageFromJson,
+  measureTestCounts,
+  measureAgentCount,
+  measureCommandCount,
+  measureSkillCount,
+  measureHookCount,
 };
 
 // ─── Main guard ───────────────────────────────────────────────────────────────
 
 if (require.main === module) {
-  // Stub for now — main() lands in plan 56-02
-  process.stderr.write('check-doc-drift: main() not yet implemented (plan 56-02)\n');
-  process.exit(2);
+  main(process.argv.slice(2));
 }
