@@ -84,6 +84,27 @@ GSD uses a multi-agent architecture where thin orchestrators (workflow files) sp
 
 ---
 
+### gsd-research-orchestrator
+
+**Role:** Unified research agent (consolidates `gsd-project-researcher` and `gsd-phase-researcher`). Accepts `scope` parameter (`phase` or `project`) to determine research mode and downstream consumers.
+
+| Property | Value |
+|----------|-------|
+| **Spawned by** | `/gsd:plan-phase` (scope: phase, default), `/gsd:new-project` (scope: project, x4 in parallel) |
+| **Parallelism** | Single instance per phase, or 4 parallel for new-project (one per research focus) |
+| **Tools** | Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp (context7, firecrawl, exa) |
+| **Model (balanced)** | Sonnet |
+| **Color** | Blue |
+| **Produces** | `{phase_dir}/{phase_num}-RESEARCH.md` (scope: phase) or `.planning/research/{focus}-research.md` (scope: project) |
+
+**Key behaviors:**
+- Researches "what do I need to know to PLAN this phase well?" (phase scope) or focus-area research like tech stack, architecture, quality, concerns (project scope)
+- Reads CONTEXT.md (user decisions) before researching to avoid contradicting locked choices
+- Optionally produces a `## Validation Architecture` section that drives Nyquist VALIDATION.md creation
+- Returns `## RESEARCH COMPLETE` or `## RESEARCH BLOCKED` for orchestrator routing
+
+---
+
 ### gsd-advisor-researcher
 
 **Role:** Researches a single gray area decision during discuss-phase advisor mode and returns a structured comparison table.

@@ -38,7 +38,7 @@
 
 - [x] **Phase 55: Internal Link Validator** - A validator script scans all tracked `.md` files for broken relative-path and anchor refs, exits non-zero on failures, and is fully unit-tested (completed 2026-05-07)
 - [x] **Phase 56: Doc Drift Detector** - A detector script measures live test counts, agent/command/skill/hook inventory, and coverage, then fails on any disagreement with numeric claims in living docs (completed 2026-05-08)
-- [ ] **Phase 57: Backfill and CI Integration** - Known broken cross-references are repaired and both validator scripts are wired as blocking CI steps in `test.yml`
+- [x] **Phase 57: Backfill and CI Integration** - Known broken cross-references are repaired and both validator scripts are wired as blocking CI steps in `test.yml` (completed 2026-05-08)
 
 ## Phase Details
 
@@ -116,11 +116,15 @@ Plans:
 **Depends on**: Phase 55, Phase 56 (both scripts must exist before CI wiring)
 **Requirements**: DOCREF-01, DOCREF-02, DOCCI-01, DOCCI-02, DOCCI-03
 **Success Criteria** (what must be TRUE):
-  1. A grep across the entire repo finds zero references to `docs/health-reports/full-audit-2026-04-11.md` or `.planning/codebase/STRUCTURE.md` — all have been repaired or removed
+  1. The validator (`scripts/validate-doc-links.cjs`) reports zero broken link refs to `docs/health-reports/full-audit-2026-04-11.md` or `.planning/codebase/STRUCTURE.md`, AND every textual mention of these paths in the repo is an intentional description of the requirement (e.g., REQUIREMENTS.md DOCREF-01/02 description) rather than a broken hyperlink.
   2. The `.github/workflows/test.yml` file contains a dedicated step that runs `scripts/validate-doc-links.cjs` and a dedicated step that runs `scripts/check-doc-drift.cjs`, each as distinct named steps
   3. Opening a PR with a deliberately introduced broken link causes the CI link-validator step to fail and block merge
   4. Opening a PR with a deliberately introduced doc drift causes the CI drift-detector step to fail and block merge
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [x] 57-01-PLAN.md — Backfill: sed-sweep 83 archived-roadmap cross-refs, repair 16 real broken refs, DOCREF-01/02 closure-via-clarification (Wave 1)
+- [x] 57-02-PLAN.md — Validator `--exclude <glob>` flag with TDD: gitignoreGlobToRegex, fixture tree, ≥80% per-module coverage (Wave 2)
+- [x] 57-03-PLAN.md — CI integration: drift step + docs-integrity job in test.yml, living-docs sync, branch-protection PATCH command, v2.8 milestone close (Wave 3)
 
 ## Progress
 
@@ -136,7 +140,7 @@ Plans:
 | 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete    | 2026-05-07 |
 | 56. Doc Drift Detector | v2.8 | 3/3 | Complete    | 2026-05-08 |
-| 57. Backfill and CI Integration | v2.8 | 0/TBD | Not started | - |
+| 57. Backfill and CI Integration | v2.8 | 3/3 | Complete   | 2026-05-08 |
 
 ## Backlog
 

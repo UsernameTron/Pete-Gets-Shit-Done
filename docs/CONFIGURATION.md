@@ -81,7 +81,7 @@ GSD stores project settings in `.planning/config.json`. Created during `/gsd:new
 | `granularity` | enum | `coarse`, `standard`, `fine` | `standard` | Controls phase count: `coarse` (3-5), `standard` (5-8), `fine` (8-12) |
 | `model_profile` | enum | `quality`, `balanced`, `budget`, `inherit` | `balanced` | Model tier for each agent (see [Model Profiles](#model-profiles)) |
 | `routing_strategy` | enum | `static`, `dynamic`, `auto` | `static` | Controls how the engine selects models for agent tasks (see [Dynamic Model Routing](#dynamic-model-routing)) |
-| `adaptive` | boolean | `true`, `false` | `false` | Feature flag for adaptive workflow behavior (see [Adaptive Workflow](#adaptive-workflow)) |
+| `adaptive` | boolean | `true`, `false` | `false` | Feature flag for adaptive workflow behavior (see [adaptive](#adaptive)) |
 
 > **Note:** `granularity` was renamed from `depth` in v1.22.3. Existing configs are auto-migrated.
 

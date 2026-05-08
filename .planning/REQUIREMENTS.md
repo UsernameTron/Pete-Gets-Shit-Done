@@ -26,8 +26,8 @@
 
 ### Cross-Reference Backfill
 
-- [ ] **DOCREF-01**: All references to relocated `docs/health-reports/full-audit-2026-04-11.md` are repaired or removed across the repo
-- [ ] **DOCREF-02**: All references to relocated `.planning/codebase/STRUCTURE.md` are repaired or removed across the repo
+- [x] **DOCREF-01**: All references to relocated `docs/health-reports/full-audit-2026-04-11.md` are repaired or removed across the repo (Phase 57-01: validator reports zero broken refs to this path; remaining mentions are intentional descriptions in REQUIREMENTS.md, ROADMAP.md, tasks/todo.md, 57-CONTEXT.md per D-03 closure-via-clarification)
+- [x] **DOCREF-02**: All references to relocated `.planning/codebase/STRUCTURE.md` are repaired or removed across the repo (Phase 57-01: validator reports zero broken refs to this path; remaining mentions are intentional descriptions per D-03 closure-via-clarification)
 
 ### CI Integration
 

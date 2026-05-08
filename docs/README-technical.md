@@ -15,7 +15,7 @@ npx get-shit-done-cc@latest
 
 <br>
 
-![GSD Install](assets/terminal.svg)
+![GSD Install](../assets/terminal.svg)
 
 <br>
 
@@ -29,7 +29,7 @@ npx get-shit-done-cc@latest
 
 **Trusted by engineers at Amazon, Google, Shopify, and Webflow.**
 
-[Why I Built This](#why-i-built-this) · [What You Get](#what-you-get) · [How It Works](#how-it-works) · [Governance Layer](#governance-layer) · [Commands](#commands) · [User Guide](docs/USER-GUIDE.md)
+[Why I Built This](#why-i-built-this) · [What You Get](#what-you-get) · [How It Works](#how-it-works) · [Governance Layer](#governance-layer) · [Commands](#commands) · [User Guide](USER-GUIDE.md)
 
 ---
 
@@ -266,7 +266,7 @@ The deeper you go here, the more the system builds what you actually want. Skip 
 
 **Creates:** `{phase_num}-CONTEXT.md`
 
-> **Assumptions Mode:** Prefer codebase analysis over questions? Set `workflow.discuss_mode` to `assumptions` in `/gsd:settings`. The system reads your code, surfaces what it would do and why, and only asks you to correct what's wrong. See [Discuss Mode](docs/workflow-discuss-mode.md).
+> **Assumptions Mode:** Prefer codebase analysis over questions? Set `workflow.discuss_mode` to `assumptions` in `/gsd:settings`. The system reads your code, surfaces what it would do and why, and only asks you to correct what's wrong. See [Discuss Mode](workflow-discuss-mode.md).
 
 ---
 
@@ -605,7 +605,7 @@ The governance framework and execution engine are complementary:
 - **Session commands** manage workflow: `/prime` boots the session, `/wrap` closes it, `/agents` manages specialists
 - **The code factory** extends the system: generate new skills, hooks, agents, plugins, and MCP configs from natural language
 
-For customization details, see [Governance Customization Guide](docs/governance-customization.md).
+For customization details, see [Governance Customization Guide](governance-customization.md).
 
 ---
 
@@ -739,7 +739,7 @@ For customization details, see [Governance Customization Guide](docs/governance-
 
 ## Configuration
 
-GSD stores project settings in `.planning/config.json`. Configure during `/gsd:new-project` or update later with `/gsd:settings`. For the full config schema, workflow toggles, git branching options, and per-agent model breakdown, see the [User Guide](docs/USER-GUIDE.md#configuration-reference).
+GSD stores project settings in `.planning/config.json`. Configure during `/gsd:new-project` or update later with `/gsd:settings`. For the full config schema, workflow toggles, git branching options, and per-agent model breakdown, see the [Configuration Reference](CONFIGURATION.md).
 
 ### Core Settings
 
@@ -972,7 +972,7 @@ These community ports pioneered multi-runtime support:
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](../LICENSE) for details.
 
 ---
 

@@ -2,7 +2,7 @@
  * validate-doc-links.cjs — Unit Tests
  *
  * Tests for: toGfmSlug, extractHeadingSlugs, extractLinks, validateLink, formatTable,
- * discoverTrackedFiles, main() (via spawnSync).
+ * discoverTrackedFiles, gitignoreGlobToRegex, main() (via spawnSync).
  *
  * Requirements: DOCLINK-01, DOCLINK-02, DOCLINK-03, DOCLINK-04
  */
@@ -22,6 +22,7 @@ const {
   validateLink,
   formatTable,
   discoverTrackedFiles,
+  gitignoreGlobToRegex,
 } = require('../scripts/validate-doc-links.cjs');
 
 const SCRIPT = path.join(__dirname, '..', 'scripts', 'validate-doc-links.cjs');
@@ -638,5 +639,291 @@ describe('validate-doc-links: argument validation', () => {
     const combined = result.stderr + result.stdout;
     assert.ok(combined.includes('--root requires a directory argument'),
       `expected "--root requires a directory argument" in output, got stderr: ${result.stderr}, stdout: ${result.stdout}`);
+  });
+});
+
+// ─── gitignoreGlobToRegex ─────────────────────────────────────────────────────
+
+describe('gitignoreGlobToRegex', () => {
+  // ── single-segment *.md ───────────────────────────────────────────────────
+  test('*.md matches root-level a.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('*.md').test('a.md'), true);
+  });
+
+  test('*.md matches root-level index.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('*.md').test('index.md'), true);
+  });
+
+  test('*.md does NOT match sub/a.md (single-segment only)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('*.md').test('sub/a.md'), false);
+  });
+
+  test('*.md does NOT match tests/foo.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('*.md').test('tests/foo.md'), false);
+  });
+
+  // ── **/*.md: REVIEW HIGH — leading **/ matches zero dirs (root files) ──────
+  test('**/*.md matches root-level a.md (REVIEW HIGH — zero-dir leading **/)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('**/*.md').test('a.md'), true);
+  });
+
+  test('**/*.md matches root-level index.md (root-level file, second variant)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('**/*.md').test('index.md'), true);
+  });
+
+  test('**/*.md matches sub/a.md (one directory)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('**/*.md').test('sub/a.md'), true);
+  });
+
+  test('**/*.md matches a/b/c.md (deeply nested)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('**/*.md').test('a/b/c.md'), true);
+  });
+
+  test('**/*.md does NOT match a.txt', () => {
+    assert.strictEqual(gitignoreGlobToRegex('**/*.md').test('a.txt'), false);
+  });
+
+  test('**/*.md does NOT match subdir/file.txt (extension mismatch, nested)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('**/*.md').test('subdir/file.txt'), false);
+  });
+
+  // ── tests/**: trailing /** matches directory itself plus everything below ──
+  test('tests/** matches tests/a.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('tests/**').test('tests/a.md'), true);
+  });
+
+  test('tests/** matches tests/sub/b.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('tests/**').test('tests/sub/b.md'), true);
+  });
+
+  test('tests/** matches tests (the directory name itself — trailing /**)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('tests/**').test('tests'), true);
+  });
+
+  test('tests/** does NOT match test/a.md (different prefix)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('tests/**').test('test/a.md'), false);
+  });
+
+  test('tests/** does NOT match nottests/x.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('tests/**').test('nottests/x.md'), false);
+  });
+
+  // ── deep path with trailing /** ───────────────────────────────────────────
+  test('tests/fixtures/doc-links/** matches tests/fixtures/doc-links/clean/index.md', () => {
+    assert.strictEqual(
+      gitignoreGlobToRegex('tests/fixtures/doc-links/**').test('tests/fixtures/doc-links/clean/index.md'),
+      true
+    );
+  });
+
+  // ── exact path ────────────────────────────────────────────────────────────
+  test('.claude/skills/SKILL.md matches exactly .claude/skills/SKILL.md', () => {
+    assert.strictEqual(
+      gitignoreGlobToRegex('.claude/skills/SKILL.md').test('.claude/skills/SKILL.md'),
+      true
+    );
+  });
+
+  test('.claude/skills/SKILL.md does NOT match .claude/skills/dream-memory-consolidation/SKILL.md', () => {
+    assert.strictEqual(
+      gitignoreGlobToRegex('.claude/skills/SKILL.md').test('.claude/skills/dream-memory-consolidation/SKILL.md'),
+      false
+    );
+  });
+
+  // ── single-segment with parent path ──────────────────────────────────────
+  test('docs/*.md matches docs/README.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('docs/*.md').test('docs/README.md'), true);
+  });
+
+  test('docs/*.md does NOT match docs/sub/x.md (single-segment after docs/)', () => {
+    assert.strictEqual(gitignoreGlobToRegex('docs/*.md').test('docs/sub/x.md'), false);
+  });
+
+  // ── REVIEW LOW: empty-string glob is a graceful no-op ────────────────────
+  test("gitignoreGlobToRegex('') does NOT match any-path.md (REVIEW LOW)", () => {
+    assert.strictEqual(gitignoreGlobToRegex('').test('any-path.md'), false);
+  });
+
+  test("gitignoreGlobToRegex('') does NOT match empty string itself", () => {
+    assert.strictEqual(gitignoreGlobToRegex('').test(''), false);
+  });
+
+  // ── regex meta-char escaping ──────────────────────────────────────────────
+  test('dots are literal: a.b.c.md matches a.b.c.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('a.b.c.md').test('a.b.c.md'), true);
+  });
+
+  test('dots are literal: a.b.c.md does NOT match axbycz.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('a.b.c.md').test('axbycz.md'), false);
+  });
+
+  test('parens are literal: a(b)c.md matches a(b)c.md', () => {
+    assert.strictEqual(gitignoreGlobToRegex('a(b)c.md').test('a(b)c.md'), true);
+  });
+});
+
+// ─── discoverTrackedFiles with excludes ───────────────────────────────────────
+
+describe('discoverTrackedFiles with excludes', () => {
+  let tmpDir;
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-doclinks-excl-'));
+    // Create a.md, b.md, sub/c.md
+    fs.writeFileSync(path.join(tmpDir, 'a.md'), '# A\n');
+    fs.writeFileSync(path.join(tmpDir, 'b.md'), '# B\n');
+    fs.mkdirSync(path.join(tmpDir, 'sub'));
+    fs.writeFileSync(path.join(tmpDir, 'sub', 'c.md'), '# C\n');
+  });
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  test('excludeRegexes=[sub/**] filters sub/c.md, returns exactly a.md and b.md', () => {
+    const result = discoverTrackedFiles(tmpDir, [gitignoreGlobToRegex('sub/**')]);
+    assert.strictEqual(result.length, 2, `expected 2 files, got ${result.length}`);
+    const names = result.map(p => path.basename(p)).sort();
+    assert.deepStrictEqual(names, ['a.md', 'b.md']);
+  });
+
+  test('no excludeRegexes arg: backward compatible — returns all 3 files', () => {
+    const result = discoverTrackedFiles(tmpDir);
+    assert.strictEqual(result.length, 3, `expected 3 files, got ${result.length}`);
+  });
+
+  test('excludeRegexes=[] (empty array): returns all 3 files (no filtering)', () => {
+    const result = discoverTrackedFiles(tmpDir, []);
+    assert.strictEqual(result.length, 3, `expected 3 files, got ${result.length}`);
+  });
+
+  test('multiple regexes: [a.md, sub/**] returns just b.md', () => {
+    const result = discoverTrackedFiles(tmpDir, [
+      gitignoreGlobToRegex('a.md'),
+      gitignoreGlobToRegex('sub/**'),
+    ]);
+    assert.strictEqual(result.length, 1, `expected 1 file, got ${result.length}`);
+    assert.ok(result[0].endsWith('b.md'), `expected b.md, got ${result[0]}`);
+  });
+});
+
+// ─── validate-doc-links: --exclude flag ──────────────────────────────────────
+
+describe('validate-doc-links: --exclude flag', () => {
+  const EXCL_FIXTURES = path.join(__dirname, 'fixtures', 'doc-links', 'exclude');
+  let tmpDir;
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-excl-integ-'));
+  });
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  // Test A
+  test('Test A: clean tree without --exclude exits 0', () => {
+    const result = runScript(['--root', path.join(EXCL_FIXTURES, 'clean-with-exclude')]);
+    assert.strictEqual(result.status, 0, `expected exit 0; stderr: ${result.stderr}; stdout: ${result.stdout}`);
+  });
+
+  // Test B
+  test('Test B: broken tree without --exclude exits 1', () => {
+    const result = runScript(['--root', path.join(EXCL_FIXTURES, 'would-fail-without-exclude')]);
+    assert.strictEqual(result.status, 1, `expected exit 1; stderr: ${result.stderr}; stdout: ${result.stdout}`);
+  });
+
+  // Test C: single glob, single match
+  test('Test C: --exclude **/broken.md still fails (another-broken.md not excluded)', () => {
+    const result = runScript([
+      '--root', path.join(EXCL_FIXTURES, 'would-fail-without-exclude'),
+      '--exclude', '**/broken.md',
+    ]);
+    assert.strictEqual(result.status, 1,
+      `expected exit 1 (another-broken.md still present); stdout: ${result.stdout}`);
+    assert.ok(!result.stdout.includes('missing-target.md'),
+      `broken.md was excluded so its broken ref should not appear; stdout: ${result.stdout}`);
+  });
+
+  // Test D: multiple globs, all matching
+  test('Test D: --exclude **/broken.md --exclude **/another-broken.md exits 0', () => {
+    const result = runScript([
+      '--root', path.join(EXCL_FIXTURES, 'would-fail-without-exclude'),
+      '--exclude', '**/broken.md',
+      '--exclude', '**/another-broken.md',
+    ]);
+    assert.strictEqual(result.status, 0, `expected exit 0; stderr: ${result.stderr}; stdout: ${result.stdout}`);
+  });
+
+  // Test E: ** semantics — recursive directory match
+  test('Test E: --exclude **/would-fail-without-exclude/** exits 0 (whole subtree excluded)', () => {
+    const result = runScript([
+      '--root', EXCL_FIXTURES,
+      '--exclude', '**/would-fail-without-exclude/**',
+    ]);
+    assert.strictEqual(result.status, 0, `expected exit 0; stderr: ${result.stderr}; stdout: ${result.stdout}`);
+  });
+
+  // Test F: * semantics — single-segment match
+  test('Test F: --exclude *.md matches root file only, not sub/b.md (single-segment semantics)', () => {
+    // a.md (broken) at root — excluded by *.md
+    // sub/b.md (broken) — NOT excluded by *.md (different segment)
+    fs.writeFileSync(path.join(tmpDir, 'a.md'), '[broken](./none.md)\n');
+    fs.mkdirSync(path.join(tmpDir, 'sub'));
+    fs.writeFileSync(path.join(tmpDir, 'sub', 'b.md'), '[broken](./none.md)\n');
+    const result = runScript([
+      '--root', tmpDir,
+      '--exclude', '*.md',
+    ]);
+    assert.strictEqual(result.status, 1,
+      `expected exit 1 because sub/b.md is not excluded; stdout: ${result.stdout}`);
+    assert.ok(result.stdout.includes('sub/b.md') || result.stdout.includes('sub' + path.sep + 'b.md'),
+      `expected sub/b.md in output; stdout: ${result.stdout}`);
+    assert.ok(!result.stdout.includes('a.md') || result.stdout.indexOf('sub') < result.stdout.indexOf('a.md'),
+      `a.md should be excluded (only sub/b.md should appear); stdout: ${result.stdout}`);
+  });
+
+  // Test G: no --exclude flag, behavior unchanged
+  test('Test G: no --exclude flag, clean fixture exits 0 (behavior unchanged)', () => {
+    const result = runScript(['--root', path.join(FIXTURES, 'clean')]);
+    assert.strictEqual(result.status, 0, `expected exit 0; stderr: ${result.stderr}`);
+  });
+
+  // Test H: --exclude with no value
+  test('Test H: --exclude with no value exits 2 with error message', () => {
+    const result = runScript(['--exclude']);
+    assert.strictEqual(result.status, 2, `expected exit 2, got ${result.status}`);
+    assert.ok(result.stderr.includes('--exclude requires a glob argument'),
+      `expected error message in stderr; got: ${result.stderr}`);
+  });
+
+  // Test I: --exclude followed by another flag
+  test('Test I: --exclude --root exits 2 (next arg starts with --, treated as missing value)', () => {
+    const result = runScript(['--exclude', '--root', path.join(FIXTURES, 'clean')]);
+    assert.strictEqual(result.status, 2, `expected exit 2, got ${result.status}`);
+    assert.ok(result.stderr.includes('--exclude requires a glob argument'),
+      `expected error message in stderr; got: ${result.stderr}`);
+  });
+
+  // Test J: excluded file with working links is also omitted
+  test('Test J: excluding clean-with-exclude/** omits its links from output', () => {
+    const result = runScript([
+      '--root', EXCL_FIXTURES,
+      '--exclude', '**/clean-with-exclude/**',
+    ]);
+    // The excluded directory's links should not appear in output
+    assert.ok(!result.stdout.includes('clean-with-exclude'),
+      `excluded directory should not appear in output; stdout: ${result.stdout}`);
+  });
+
+  // Test K: REVIEW HIGH — **/*.md integration check
+  test('Test K: --exclude **/*.md excludes both root and nested .md files (REVIEW HIGH integration)', () => {
+    // root.md at root (broken), sub/nested.md (broken) — both should be excluded by **/*.md
+    fs.writeFileSync(path.join(tmpDir, 'root.md'), '[broken](./missing-root.md)\n');
+    fs.mkdirSync(path.join(tmpDir, 'sub'));
+    fs.writeFileSync(path.join(tmpDir, 'sub', 'nested.md'), '[broken](./missing-sub.md)\n');
+    const result = runScript([
+      '--root', tmpDir,
+      '--exclude', '**/*.md',
+    ]);
+    assert.strictEqual(result.status, 0,
+      `expected exit 0 (both files excluded by **/*.md); stdout: ${result.stdout}; stderr: ${result.stderr}`);
   });
 });

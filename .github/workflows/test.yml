@@ -50,6 +50,11 @@ jobs:
             npm run test:coverage
           fi
 
+      - name: Check documentation drift
+        if: matrix.full_suite && matrix.os == 'ubuntu-latest' && matrix.node-version == 22
+        shell: bash
+        run: node scripts/check-doc-drift.cjs
+
       - name: Generate coverage report
         if: matrix.full_suite && matrix.node-version == 22
         shell: bash
@@ -83,3 +88,28 @@ jobs:
             echo "=== Running $(basename "$test") ==="
             bash "$test"
           done
+
+  docs-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate documentation links
+        run: |
+          node scripts/validate-doc-links.cjs \
+            --exclude 'tests/fixtures/doc-links/**' \
+            --exclude '.claude/skills/SKILL.md' \
+            --exclude '.claude/skills/dream-memory-consolidation/SKILL.md' \
+            --exclude '.planning/REQUIREMENTS.md' \
+            --exclude '.planning/milestones/v2.7-phases/54-automated-uat-runner/54-03-PLAN.md'

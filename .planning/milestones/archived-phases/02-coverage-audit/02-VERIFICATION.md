@@ -40,7 +40,7 @@ score: 3/3 must-haves verified
 |------|-----|-----|--------|---------|
 | package.json test:coverage | c8 with expanded --include | npm run test:coverage | WIRED | Script includes gsd-tools.cjs, install.js, hooks/*.js, build-hooks.js, excludes hooks/dist/** |
 | scripts/generate-gap-analysis.cjs | coverage/coverage-final.json | readFileSync + JSON.parse | WIRED | Line 50: `JSON.parse(fs.readFileSync(COVERAGE_FILE, 'utf8'))` |
-| docs/coverage-gaps.md | docs/coverage-baseline.md | Cross-reference link | WIRED | Line 94: `See [coverage-baseline.md](coverage-baseline.md)` |
+| docs/coverage-gaps.md | docs/coverage-baseline.md | Cross-reference link | WIRED | Line 94: ``See `coverage-baseline.md``` |
 
 ### Behavioral Spot-Checks
 

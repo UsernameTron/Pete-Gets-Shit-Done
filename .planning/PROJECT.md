@@ -6,16 +6,16 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.8 Documentation Integrity (Phases 55-56 complete; Phase 57 pending)
+**Current milestone:** v2.8 Documentation Integrity (Phases 55-57 implementation complete; v2.8 ship status GATED on operator branch-protection PATCH per Phase 57-03 release-checklist gate)
 **Previous:** v2.7 Session Continuity (shipped 2026-04-18, 3 phases, 23 requirements)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,805 total, all passing (+82 from Phase 56 doc drift detector)
-**Coverage:** 91.58% lines, 83.4% branches, 97.21% functions (check-doc-drift.cjs at 98.28% line)
+**Tests:** 2,764 total, all passing
+**Coverage:** 90.7% lines, 83.28% branches, 94.62% functions (validate-doc-links.cjs at 97.36% line)
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
-**Remote:** `git@github.com:UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git`
+**Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
-**Milestones shipped:** 17 (v1.0 through v2.7)
-**Total phases executed:** 56
+**Milestones shipped:** 17 (v1.0 through v2.7); v2.8 awaiting operator branch-protection PATCH
+**Total phases executed:** 57
 
 ## Core Value
 

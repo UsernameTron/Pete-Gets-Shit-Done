@@ -14,7 +14,7 @@
 - [File System Layout](#file-system-layout)
 - [Installer Architecture](#installer-architecture)
 - [Hook System](#hook-system)
-- [CLI Tools Layer](#cli-tools-layer)
+- [CLI Tools Layer](#cli-tools)
 - [Runtime Abstraction](#runtime-abstraction)
 - [Governance Layer](#governance-layer)
 
@@ -173,9 +173,9 @@ Runtime hooks that integrate with the host AI agent:
 | `gsd-prompt-guard.js` | `PreToolUse` | Scans `.planning/` writes for prompt injection patterns (advisory) |
 | `gsd-workflow-guard.js` | `PreToolUse` | Detects file edits outside GSD workflow context (advisory, opt-in via `hooks.workflow_guard`) |
 
-### CLI Tools (`get-shit-done/bin/`)
+### CLI Tools
 
-Node.js CLI utility (`gsd-tools.cjs`) with 17 domain modules:
+Located at `get-shit-done/bin/`. Node.js CLI utility (`gsd-tools.cjs`) with 17 domain modules:
 
 | Module | Responsibility |
 |--------|---------------|
