@@ -1,29 +1,40 @@
 # Todo
 
-## Current Status: v2.7 Archived — Ready for v2.8
+## Current Status: v2.8 Archived — Ready for v2.9
 
-17 milestones shipped (v1.0 through v2.7). 54 phases executed. 12 phase directories archived.
+18 milestones shipped (v1.0 through v2.8). 57 phases executed. 15 phase directories archived (12 prior + 3 from v2.8). Branch protection on main now enforces 5 required status checks (3 test matrix + governance + docs-integrity).
 
-- **Tests**: 2,667 passing, 0 failures (536 suites)
-- **Coverage**: 91.23% lines, 83.01% branches, 97.41% functions
-- **Branch**: `main`
-- **Tag**: v2.7 (2026-04-18)
+- **Tests**: 2,845 passing, 0 failures (563 suites)
+- **Coverage**: 91.63% lines (local) / 91.69% (CI ubuntu-22), 83.47% branches, 97.22% functions
+- **Branch**: `main` clean, healthy (`/gsd:health` returns `healthy`)
+- **Tag**: v2.8 (2026-05-08)
 
-## Deferred Items (v2.8+ candidates)
+## Deferred Items (v2.9+ candidates)
 
 - [ ] Stop-hook sentinel for human-review gates — source: `tasks/lessons.md` 2026-04-10 [Hook Design]
 - [ ] Resume `everything-claude-code-clean` scan — prior recon in `.extraction-staging/FINDINGS.md` (gitignored)
 - [ ] Investigate duplicate v1.0/v1.1 tag pointers on origin — repo archaeology, low priority
-- [ ] Backfill cross-refs to relocated docs — applies to `docs/health-reports/full-audit-2026-04-11.md` and `.planning/codebase/STRUCTURE.md`
 - [ ] `npm audit --audit-level=moderate` step in test.yml
 - [ ] Make coverage blocking in ci-coverage-report.sh:68
 - [ ] CI-time agent health check with blocking exit
-- [ ] Internal doc link validator script + CI step
-- [ ] esbuild 0.25 to 0.28 upgrade
-- [ ] Migrate legacy `paused_at` regex extraction in `init.cjs:1274` to use `extractFrontmatter` (currently uses markdown body string-match, fragile)
+- [ ] esbuild 0.25 → 0.28 upgrade (audit-deps FLAG — non-blocking, no CVEs)
+- [ ] Migrate legacy `paused_at` regex extraction in `init.cjs:1274` to use `extractFrontmatter`
+- [ ] PR-required protection gap closure — direct pushes to main currently bypass CI gates entirely. Plan at `~/.claude/plans/explain-what-this-is-pure-gadget.md`. Single API call to add `required_pull_request_reviews` with `required_approving_review_count: 0`.
+- [ ] Backfill Nyquist VALIDATION.md for v2.8 phases (55, 56, 57 currently `nyquist_compliant: false` or missing). Optional `/gsd:validate-phase {N}`.
+- [ ] Address audit-agents description-trigger gaps on 3 unified agents (gsd-research-orchestrator, gsd-validator-hub, gsd-verifier — descriptions don't name their invokers, impacts routing clarity).
+- [ ] Investigate stashed README.md mutation (`stash@{0}` — 1,432 → 12-line "Tracks (cloned snapshot)" stub from a different project, looks like cross-project working-tree bleed-through).
+- [ ] Standardize Phase verification: ensure every shipped phase has both `*-VERIFICATION.md` and `*-VALIDATION.md` (Phase 57 lacks separate VERIFICATION.md — verification was embedded in 57-03-SUMMARY.md).
 
 ## Completed
 
+- [x] v2.8 Documentation Integrity shipped + archived + tagged (2026-05-08) — PRs #22, #23, #24, #25
+- [x] Backfill cross-refs to relocated docs (`docs/health-reports/full-audit-2026-04-11.md`, `.planning/codebase/STRUCTURE.md`) — Phase 57-01 closure-via-clarification per D-03 (2026-05-08)
+- [x] Internal doc link validator script + CI step — Phase 55 + Phase 57-03 (2026-05-08)
+- [x] Doc drift detector script + CI step — Phase 56 + Phase 57-03 (2026-05-08)
+- [x] Branch protection grew 4 → 5 required status checks (`docs-integrity` added via contexts-subresource POST) (2026-05-08)
+- [x] Drift detector epsilon widened 0.01 → 0.1 to absorb cross-OS c8 variance (2026-05-08)
+- [x] Workflow exclude list switched to globs (`v*-phases/**`, `v*-REQUIREMENTS.md`) — auto-handles future archives (2026-05-08)
+- [x] Stale Phase 999.1 backlog cruft removed — fixes W006 health warning (PR #26, 2026-05-08)
 - [x] superpowers plugin uninstalled — GSD primacy codified in ~/.claude/CLAUDE.md (2026-05-07)
 - [x] Karpathy attribution + collision-resolution added to ~/projects/CLAUDE.md (2026-05-07)
 - [x] Test counts refreshed across 3 living docs (2,644→2,667, 533→536) — PR #20 (2026-05-07)
