@@ -1,5 +1,50 @@
 # Retrospective
 
+## v2.8 Documentation Integrity (2026-05-08)
+
+**Shipped:** 2026-05-08
+**Phases:** 3 (55-57) | **Plans:** 9 | **Requirements:** 14/14 satisfied
+
+### What Was Built
+
+- **Internal Link Validator** (`scripts/validate-doc-links.cjs`, 97.36% line coverage): TDD-built scanner of tracked .md files for broken relative-path and anchor refs; gitignore-style `--exclude <glob>` flag (multi-value); structured table output; `--json` flag.
+- **Doc Drift Detector** (`scripts/check-doc-drift.cjs`, 98.28% line coverage): Compares 23 numeric claims (test count, suite count, line/branch/function coverage, agent/command/skill/hook counts) across CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md against c8/filesystem-derived live measurements; 0.1% epsilon for percentage comparisons (cross-OS-tolerant).
+- **CI integration**: `docs-integrity` job (parallel with `test` and `governance`) runs link validator with 5-path canonical exempt list; `Check documentation drift` step inside test job runs detector single-leg (ubuntu/22, `full_suite=true`). Both gates strict-block on non-zero exit.
+- **Cross-reference backfill**: 109 → 10 broken doc cross-refs (99 fixes); DOCREF-01/02 closed via validator-evidence clarification.
+
+### What Worked
+
+- **Cross-AI review caught real issues pre-execution.** Phase 57 review (Gemini + Codex) produced REVIEWS.md with 4 must-fix + 5 should-fix edits; replanning via `--reviews` flag landed before any code touched the workflow file.
+- **Independent-validators decomposition was the right call.** Two scripts with separate concerns (path resolution vs numeric measurement) and separate test suites composed cleanly. Single-leg gating for drift, multi-leg for links — different decisions per validator, no awkward shared abstraction.
+- **Trust-reality-over-spec saved the milestone.** Two pre-merge corrections caught at ship time: (1) the documented PATCH command had wrong matrix-tuple check names (would have eternally pended every PR); (2) drift epsilon at 0.01% would have failed every PR due to cross-OS c8 variance. Lesson 2026-04-09 [Spec vs Reality] applied twice in one session.
+- **PR-first flow with branch protection caught a near-miss.** 15 commits had landed on local main directly; the closeout flow detected this, rerouted them onto a feature branch, and the standard PR mechanism + new docs-integrity gate caught both issues above. Worth the 30s overhead per commit batch.
+
+### What Was Inefficient
+
+- **Phase 57 lacks separate VERIFICATION.md.** Verification evidence lives inline in 57-03-SUMMARY.md (validator outputs, CI green status, branch-protection read-back). Functionally fine; bookkeeping debt that audit-milestone flagged.
+- **The originally-documented operator PATCH command was wrong.** The spec was authored from memory rather than from a live `gh api` read-back. Lesson now in `tasks/lessons.md` (2026-05-08 [Spec vs Reality / Status Checks]) — verify branch-protection check names via API before authoring PATCHes.
+- **REQUIREMENTS.md traceability table fell behind shipped work.** DOCREF-01/02 + DOCCI-01..03 stayed marked `[ ]` and "Pending" until the milestone audit caught them.
+
+### Patterns Established
+
+- **Drift gates need OS-tolerant epsilon by default.** Cross-platform c8 variance is real (~0.06% on ~23k statements). Default percentage-comparison epsilon is now 0.1% with per-claim override available. Documented in `compareClaim` JSDoc.
+- **Branch protection PATCH uses subresource POST, not parent PATCH.** Surgical add via `POST /required_status_checks/contexts` preserves all other settings. The parent endpoint only accepts PUT (full replace).
+- **Pre-merge correction commits land on the feature branch, not on the merged squash.** Caught issues this milestone landed in commits 5588c2f and fff42db on `feat/phase-57-backfill-and-ci-integration` BEFORE merge.
+
+### Key Lessons
+
+- **Verify operator-facing commands against live state before shipping the spec.** A 30-second `gh api repos/.../branches/main/protection -q '.required_status_checks.contexts'` would have caught the wrong PATCH command at planning time.
+- **Cross-OS test variance is a first-class design constraint for drift gates, not a flake.** Widen epsilon to absorb it, with per-claim overrides where strictness matters.
+- **Track audit FLAGs as "acked + reason" not just "acked".** `.planning/state/closeout-acks.md` captures why each FLAG was non-blocking.
+
+### Cost Observations
+
+- Model mix: ~95% Opus 4.7 1M context (heavy lifting in closeout), small Haiku usage for measurement helpers
+- Sessions: 3 (PR #22 ship, PR #23 ship + closeout, PR #24 state cleanup)
+- Notable: real-time CI watching via `gh pr checks --watch` substantially faster than polling `gh run list` manually
+
+---
+
 ## v2.6 Developer Experience (2026-04-18)
 
 ### What Was Built

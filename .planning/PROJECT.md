@@ -6,15 +6,16 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.8 Documentation Integrity (Phases 55-57 implementation complete; v2.8 ship status GATED on operator branch-protection PATCH per Phase 57-03 release-checklist gate)
-**Previous:** v2.7 Session Continuity (shipped 2026-04-18, 3 phases, 23 requirements)
+**Current milestone:** Between milestones — run `/gsd:new-milestone` to start v2.9
+**Previous:** v2.8 Documentation Integrity (shipped 2026-05-08, 3 phases, 14 requirements)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,764 total, all passing
-**Coverage:** 90.7% lines, 83.28% branches, 94.62% functions (validate-doc-links.cjs at 97.36% line)
+**Tests:** 2,845 total, all passing
+**Coverage:** 91.63% lines local / 91.69% CI ubuntu-22, 83.47% branches, 97.22% functions
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
-**Milestones shipped:** 17 (v1.0 through v2.7); v2.8 awaiting operator branch-protection PATCH
+**Milestones shipped:** 18 (v1.0 through v2.8)
+**Branch protection:** 5 required status checks on `main` (3 test matrix legs + governance + docs-integrity)
 **Total phases executed:** 57
 
 ## Core Value
@@ -25,10 +26,12 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ### Active
 
-See `.planning/REQUIREMENTS.md` for v2.8 Documentation Integrity scope (REQ-IDs assigned during requirements phase).
+(No active requirements — v2.8 shipped 2026-05-08. Run `/gsd:new-milestone` to define v2.9 scope.)
 
 ### Validated
 
+- Cross-Reference Backfill (DOCREF-01, DOCREF-02) — v2.8 Phase 57 (validated 2026-05-08)
+- CI Integration (DOCCI-01, DOCCI-02, DOCCI-03) — v2.8 Phase 57 (validated 2026-05-08)
 - Doc Drift Detector (DOCDRIFT-01 through DOCDRIFT-05) — v2.8 Phase 56 (validated 2026-05-08)
 - Internal Link Validator (DOCLINK-01 through DOCLINK-04) — v2.8 Phase 55 (validated 2026-05-07)
 - Automated UAT Runner (UAT-01 through UAT-10) — v2.7 Phase 54
@@ -43,19 +46,16 @@ See `.planning/REQUIREMENTS.md` for v2.8 Documentation Integrity scope (REQ-IDs 
 - GUI installer — CLI-only project, no graphical installer needed
 - CI provider abstraction — GitHub Actions only, no Jenkins/GitLab/Circle support
 
-## Current Milestone: v2.8 Documentation Integrity
+## Most Recent: v2.8 Documentation Integrity (shipped 2026-05-08)
 
-**Goal:** Turn documentation accuracy from manually-maintained to CI-enforced — broken links, stale counts, and cross-doc inconsistencies must fail CI before merge.
+Three phases turning documentation accuracy from manually-maintained to CI-enforced:
+- Internal Link Validator — `scripts/validate-doc-links.cjs` scans tracked .md files for broken refs; gitignore-style `--exclude <glob>` flag; 296 links / 723 files in v2.8 corpus
+- Doc Drift Detector — `scripts/check-doc-drift.cjs` compares 23 numeric claims across 3 living docs against c8/filesystem live measurements; 0.1% epsilon (cross-OS-tolerant)
+- CI integration — `docs-integrity` job + `Check documentation drift` step wired as blocking gates in `.github/workflows/test.yml`; branch protection grew 4 → 5 required status checks via `POST /required_status_checks/contexts` subresource
 
-**Target features:**
-- Internal link validator (`scripts/validate-doc-links.cjs`) — scans tracked `.md` files for broken relative paths and anchor refs; CLI + CI step
-- Doc drift detector (`scripts/check-doc-drift.cjs`) — compares living docs (CLAUDE.md, README.md, DEVOPS-HANDOFF.md) against measured truth and fails on disagreement
-- Cross-reference backfill — repair known-broken refs to relocated docs
-- CI integration — both validators wired as blocking checks in `test.yml`
+3 phases (55-57), 9 plans, 14 requirements complete. PR #22, PR #23, PR #24 merged.
 
-**Motivating evidence:** PR #20 had to ship just to refresh test counts (533→536, 2,644→2,667). `/gsd:sync-docs` provides measurement primitives but no enforcement. 2 of 10 deferred items in todo.md scope into this milestone (link validator + cross-ref backfill).
-
-## Most Recent: v2.7 Session Continuity (shipped 2026-04-18)
+## Previous: v2.7 Session Continuity (shipped 2026-04-18)
 
 Three operational-friction fixes — context loss on /clear, slow session starts, and manual UAT checks:
 - Checkpoint Engine — `lib/checkpoint.cjs` writes `.planning/CHECKPOINT.json` before context resets; `/gsd:resume-work` and `/prime` consume it to skip completed work
@@ -312,6 +312,9 @@ All 6 requirements verified complete:
 | JSONL for execution history | Append-only, zero-dep, line-by-line parseable, trivially rotatable — no SQLite | v2.0 Phase 32 |
 | Rule-based pattern detection | Zero-dependency constraint forbids ML libs — heuristic/rule-based only | v2.0 Phase 32 |
 | routing_strategy defaults to static | Existing users see zero behavior change until explicit opt-in | v2.0 Phase 30 |
+| Drift detector epsilon = 0.1% | c8 instrumentation produces ~0.06% delta between macOS and ubuntu for the same SHA; 0.01% epsilon would fail every PR | v2.8 Phase 57 |
+| Status-check context names use 3-element matrix tuples | GitHub Actions includes ALL matrix dimensions in check context — `test (X, Y, Z)` not `test (X, Y)` | v2.8 closeout |
+| `POST /required_status_checks/contexts` for branch protection | Surgical add preserves all other protection settings; `-X PATCH /protection` parent doesn't accept PATCH per GitHub REST | v2.8 closeout |
 
 ## Context
 
@@ -327,7 +330,8 @@ All 6 requirements verified complete:
 - v2.0 adds 2 new modules: classify.cjs (task classification), history.cjs (execution history)
 - v2.0 extends model-profiles.cjs with dynamicSelect(), core.cjs with optional taskContext
 - v2.3 added 3 execution hooks (prompt guard, config protection, cost tracker), security guardian agent, and 4D verifier rubric
-- 17 active agents, 64 commands
+- v2.8 added 2 doc-integrity scripts and 1 CI job (docs-integrity); branch protection enforces both validators
+- 17 active agents, 66 commands
 
 ## Tech Debt
 
@@ -351,4 +355,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-08 — v2.8 Phase 56 (Doc Drift Detector) complete; DOCDRIFT-01..05 validated; +82 tests; only Phase 57 (CI integration) remaining in v2.8*
+*Last updated: 2026-05-08 — v2.8 Documentation Integrity shipped; 14/14 requirements validated; branch protection PATCH applied; 18 milestones shipped to date.*

@@ -1,5 +1,27 @@
 # Milestones
 
+## v2.8 Documentation Integrity (Shipped: 2026-05-08)
+
+**Phases completed:** 3 phases (55-57), 9 plans, 14 requirements satisfied
+
+**Key accomplishments:**
+
+- Internal Link Validator (`scripts/validate-doc-links.cjs`): TDD-built validator scans tracked .md files for broken relative-path and anchor refs; gitignore-style `--exclude <glob>` flag (multi-value); 296 links checked across 723 files in v2.8 corpus; 97.36% line coverage.
+- Doc Drift Detector (`scripts/check-doc-drift.cjs`): compares 23 numeric claims across 3 living docs against c8/filesystem-derived live measurements; 0.1% epsilon for percentage comparisons (widened from 0.01% mid-flight to absorb ~0.06% c8 delta between macOS-local and ubuntu-CI); 98.28% line coverage.
+- 109 → 10 broken doc cross-refs repaired (99 fixes); DOCREF-01/02 closed via validator-evidence clarification per D-03 (remaining 10 are intentional descriptions).
+- Strict-blocking CI gates wired into `.github/workflows/test.yml`: new top-level `docs-integrity` job runs link validator with 5-path canonical exempt list; `Check documentation drift` step runs detector single-leg (ubuntu/22, `full_suite=true`) inside test job. Branch protection on `main` grew from 4 → 5 required status checks.
+- Pre-merge corrections (caught in real-time during ship): (a) the documented branch-protection PATCH used 2-element matrix tuple check names that GitHub doesn't produce — corrected to 3-element form including `full_suite` flag; (b) used `POST /required_status_checks/contexts` subresource (surgical add) instead of the documented `-X PATCH /protection` parent (which GitHub REST doesn't accept).
+
+**Shipped via:** PR #22 (Phases 55+56), PR #23 (Phase 57 + spec-vs-reality fixes + drift epsilon widening), PR #24 (state cleanup). 2,845 / 2,845 tests pass at ship. 91.63% line coverage local / 91.69% on CI ubuntu/22.
+
+**Known gaps (acknowledged, not blockers):**
+- Phase 57 lacks separate VERIFICATION.md (verification embedded in 57-03-SUMMARY.md).
+- Phase 55 + 56 have `nyquist_compliant: false`; Phase 57 lacks VALIDATION.md. Optional `/gsd:validate-phase {N}` to backfill.
+- Description-trigger gaps on 3 unified agents (gsd-research-orchestrator, gsd-validator-hub, gsd-verifier).
+- esbuild dev dep is 3 minor versions behind (0.25.12 vs 0.28.0). No CVEs/license issues.
+
+---
+
 ## v2.7 Session Continuity (Shipped: 2026-04-18)
 
 **Phases completed:** 3 phases (52-54), 7 plans, 23 requirements satisfied

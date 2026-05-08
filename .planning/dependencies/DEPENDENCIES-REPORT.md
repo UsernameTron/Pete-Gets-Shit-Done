@@ -1,19 +1,21 @@
 === GSD DEPENDENCY AUDIT REPORT ===
-Generated: 2026-04-10T00:00:00Z
+Generated: 2026-05-08T00:00:00Z
 Scope: npm
 Project root: /Users/cpconnor/projects/Pete-Gets-Shit-Done
 
 --- SUMMARY ---
-Overall verdict: PASS
+Overall verdict: FLAG
 Security: PASS — 0 critical, 0 high, 0 moderate, 0 low
-Staleness: PASS — 0 packages flagged
+Staleness: FLAG — 1 package flagged
 Licenses:  PASS — 0 packages flagged
 
 --- SECURITY FINDINGS ---
 (none)
 
 --- STALENESS FINDINGS ---
-(none)
+esbuild@0.25.12 → 0.28.0 (minor) — dev dep, 3 minor versions behind latest
+  Last release: 2026-04-02
+  Prod/Dev: dev
 
 --- LICENSE FINDINGS ---
 (none)
@@ -22,60 +24,82 @@ Licenses:  PASS — 0 packages flagged
 (all tools present)
 
 --- RECOMMENDATIONS ---
-1. No action required. Re-audit after any dependency change.
+1. Update esbuild from 0.25.12 to 0.28.0 (dev dep only, no blocking concerns). Run `npm install --save-dev esbuild@0.28.0` and verify hook build pipeline with `npm run build:hooks && npm test`.
 
 === END REPORT ===
 
 ## DETAILED FINDINGS
 
 ### Project Structure
-- **Package manager**: npm
-- **Manifest**: package.json
-- **Lockfile**: package-lock.json (present and reliable)
-- **Project type**: Development-only (0 production dependencies, 2 development dependencies)
+- **Framework**: npm (Node.js 20+)
+- **Type**: CommonJS plugin for Claude Code (v1.30.0)
+- **Manifest**: `package.json`, `package-lock.json` (v3)
+- **Lockfile present**: Yes (accurate, reliable audit)
+- **Production dependencies**: 0 external runtime dependencies
+- **Development dependencies**: 2 direct (`c8@11.0.0`, `esbuild@0.25.12`), 82 total including transitive
+- **Dependency scope**: dev-only project — all external dependencies are development/build tools
 
-### Direct Dependencies Summary
-| Package | Current | Latest | Type | Status |
-|---------|---------|--------|------|--------|
-| c8 | 11.0.0 | 11.0.0 | dev | Current |
-| esbuild | 0.25.12 | 0.28.0 | dev | 2 minor versions behind |
+### Security Status
+**npm audit result**: 0 vulnerabilities across all 82 packages (including transitives).
+- No critical, high, moderate, or low CVEs detected
+- All transitive dependencies are clean
+- Audit performed against current npm registry (2026-05-08)
+
+**Supply chain confidence**: High. All dependencies (direct and transitive) maintain active upstream maintenance, no abandoned packages, no unusual hosting patterns.
 
 ### Staleness Analysis
 
-**esbuild@0.25.12 → 0.28.0 (minor version delta)**
-- Current: 0.25.12, released 2025-11-01
-- Latest: 0.28.0, released 2026-04-02
-- Type: dev dependency
-- Assessment: PASS (no flag) — This is a dev-only dependency. While it is 2 minor versions behind, minor-version upgrades for development tools do not constitute a security or staleness risk. The upgrade would be for feature/enhancement purposes, which falls outside the audit scope. The current version is recent (5 months old as of audit date) and has no known CVEs.
+**c8@11.0.0** (test coverage tool)
+- Current: 11.0.0
+- Latest: 11.0.0 (matches latest)
+- Last release: 2026-02-25 (recent, ~2 months)
+- Status: Current, no flag
 
-**c8@11.0.0 (at latest)**
-- Current: 11.0.0, which is the latest version
-- Type: dev dependency
-- Assessment: PASS — No action needed.
+**esbuild@0.25.12** (hook bundler)
+- Current: 0.25.12
+- Latest: 0.28.0 (minor version lag)
+- Last release of latest: 2026-04-02 (~1 month ago)
+- Status: FLAGGED (minor version lag, but not critical)
+- Rationale: esbuild maintains rapid release cadence. The gap from 0.25 to 0.28 represents 3 minor versions with enhancements and stability improvements. Patch-level staleness is not flagged (per policy), but the minor gap warrants a note since build tools should track upstream closely. No security advisories for any 0.25.x version. Recommend upgrade as maintenance hygiene, not urgent.
 
-### Security Analysis
-- **npm audit result**: 0 vulnerabilities across all dependency levels
-- **Transitive dependencies**: 82 total (1 prod, 82 dev + optional)
-- **CVE count**: 0 critical, 0 high, 0 moderate, 0 low
-- **Audit confidence**: High (lockfile present, audit tool functioning)
+### License Summary
+All 84 packages (direct + transitive) use permissive licenses:
+- `c8@11.0.0` — ISC (permissive)
+- `esbuild@0.25.12` — MIT (permissive)
+- Transitive packages include MIT, ISC, Apache-2.0, BSD-* — all permissive
 
-### License Analysis
-**Direct dependencies:**
-- **c8@11.0.0**: ISC (permissive)
-- **esbuild@0.25.12**: MIT (permissive)
+**No GPL, AGPL, SSPL, BSL, or proprietary licenses detected.**
+**No custom/unclear UNLICENSED entries in dependency tree.**
 
-**Transitive dependencies**: All major transitive dependencies (via c8 and esbuild build chains) carry standard permissive licenses (MIT, Apache-2.0, ISC, BSD-*). No license conflicts detected.
+License policy: Project has no `LICENSE-POLICY.md` or `dependencies-policy.yml`. Defaults applied: all detected licenses pass, no violations.
 
-**Project-wide license policy**: No LICENSE-POLICY.md or dependencies-policy.yml found. Audit uses default permissive policy.
+### Transitive Dependency Tree (Key Packages)
+Coverage and instrumentation layer (c8 deps):
+- `istanbul-lib-coverage@3.2.2`, `istanbul-lib-report@3.0.1`, `v8-to-istanbul@9.3.0` (MIT)
+- `@bcoe/v8-coverage@1.0.2`, `@istanbuljs/schema@0.1.3` (MIT)
 
-### Assessment Notes
-1. **Dev-only structure**: This project ships only development tooling (no runtime dependencies). All dependencies are used for testing (c8) and bundling (esbuild) during the build/test lifecycle. This is a safe, intentional design.
-2. **Transitive depth**: 82 transitive dependencies is typical for Node.js projects with c8 and esbuild, both of which have rich dependency trees. However, none of these transitive dependencies pose security or compliance risks.
-3. **Lockfile integrity**: The package-lock.json is present and well-formed, enabling deterministic installs.
-4. **Minor version lag**: esbuild@0.25.12 is 2 minor versions behind 0.28.0. Per audit policy, minor-version gaps are not flagged unless they fix a CVE or the package is 2+ years stale. Neither condition applies here.
+CLI and utilities (shared):
+- `yargs@17.7.2`, `yargs-parser@21.1.1` (MIT)
+- `cliui@8.0.1`, `escalade@3.2.0` (MIT)
+
+Globbing and path utilities:
+- `glob@13.0.6`, `minimatch@10.2.3`, `path-scurry@2.0.2` (ISC/MIT)
+- `lru-cache@11.2.6`, `minipass@7.1.3` (ISC)
+
+Platform-specific esbuild binaries (all optional, MIT):
+- `@esbuild/darwin-arm64@0.25.12` and 26 other platform variants
+- Only loaded on matching OS; not executed on other platforms
 
 ### Audit Confidence
-- **Lockfile present**: Yes
-- **Network stability**: Stable (no transient failures during audit)
-- **Audit tool**: npm 10.x (standard)
-- **Overall confidence**: High — all audit data is authoritative and complete.
+- **Lockfile status**: Present, pinned, current (npm install would not change anything)
+- **Network status**: Stable (all registry queries succeeded first attempt)
+- **Tool availability**: `npm audit`, `npm outdated`, `npm ls` all functional
+- **Coverage**: 100% of npm ecosystem (no undetected dependencies)
+
+### Closeout Status (v2.8 Phase 57)
+- No blocking security issues (PASS)
+- One minor dev-dependency version lag (FLAG, low priority)
+- No license violations (PASS)
+- All code coverage validators green (c8, check-doc-drift, validate-doc-links)
+
+Recommendation for release: Safe to ship. Optional: update esbuild before next development cycle to maintain build-tool freshness, but not a release blocker.

@@ -1,36 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.8
-milestone_name: Documentation Integrity
-status: shipped
-current_phase: 57
-current_phase_status: complete
-last_updated: "2026-05-08T18:10:00.000Z"
-last_activity: 2026-05-08 -- v2.8 shipped (PR #23 merged, branch protection PATCH applied, docs-integrity required)
+milestone: between-milestones
+milestone_name: (run /gsd:new-milestone to start v2.9)
+status: archived
+last_updated: "2026-05-08T18:45:00.000Z"
+last_activity: 2026-05-08 -- v2.8 archived; ROADMAP collapsed; REQUIREMENTS reset; PROJECT.md evolution complete
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-07)
+See: .planning/PROJECT.md (updated 2026-05-08 after v2.8 milestone)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** Phase 57 — backfill-and-ci-integration
+**Current focus:** Between milestones — `/gsd:new-milestone` to start v2.9
 
 ## Current Position
 
-Phase: 57 (backfill-and-ci-integration) — COMPLETE
-Plan: 3 of 3 complete
-Status: v2.8 Documentation Integrity milestone SHIPPED. Phase 57 PR #23 squash-merged to main as commit f41d23c (2026-05-08). Branch-protection PATCH applied autonomously via the contexts subresource POST endpoint (preserves all other protection settings); read-back verified 5 required status checks: `test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity`. Both validators (validate-doc-links.cjs and check-doc-drift.cjs) now block all future PRs to main. Pre-merge corrections applied on the feature branch: (1) the documented PATCH command originally used 2-element matrix tuples that didn't match GitHub's actual context naming — corrected to 3-element form including `full_suite` flag; (2) drift detector epsilon widened from 0.01% to 0.1% to tolerate cross-OS coverage variance (~0.06% delta between macOS-local and ubuntu-CI). All 5 v2.8 requirements (DOCREF-01, DOCREF-02, DOCCI-01, DOCCI-02, DOCCI-03) closed in code, docs, and CI gates.
-Last activity: 2026-05-08 -- v2.8 shipped, branch protection PATCH applied, milestone closed
+v2.8 Documentation Integrity SHIPPED + ARCHIVED on 2026-05-08. ROADMAP.md collapsed (v2.8 phase details moved to milestones/v2.8-ROADMAP.md). REQUIREMENTS.md deleted (will be re-created by `/gsd:new-milestone`). PROJECT.md evolution complete (Validated requirements updated, current state refreshed, key decisions extended with v2.8 lessons). Branch protection on `main` enforces 5 required status checks. Working tree clean. 2,845 tests pass. 91.63% line coverage.
+
+Last activity: 2026-05-08 -- /gsd:closeout v2.8 → /gsd:finalize → /gsd:complete-milestone executed end-to-end
 Tests: 2,845 assertions, 563 suites
-Coverage: 91.63% lines local / 91.69% lines CI (cross-OS variance now tolerated), 83.47% branches, 97.22% functions (overall); scripts/validate-doc-links.cjs at 97.36% line
+Coverage: 91.63% lines local / 91.69% lines CI (cross-OS variance tolerated), 83.47% branches, 97.22% functions
 
 Key decisions from ship/merge:
 

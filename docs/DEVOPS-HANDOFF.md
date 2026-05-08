@@ -1,6 +1,6 @@
 # DevOps Handoff — get-shit-done-cc
 
-> Last verified: 2026-04-24 | Version: 1.30.0 | Milestone: v2.7 (archived)
+> Last verified: 2026-05-08 | Version: 1.30.0 | Milestone: v2.8 (shipped)
 
 ---
 
