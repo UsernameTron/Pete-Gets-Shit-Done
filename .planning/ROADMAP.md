@@ -4,7 +4,7 @@
 
 - v2.6 Developer Experience — Phases 49-51 (shipped 2026-04-18) — [archive](milestones/v2.6-ROADMAP.md)
 - v2.7 Session Continuity — Phases 52-54 (shipped 2026-04-18) — [archive](milestones/v2.7-ROADMAP.md)
-- v2.8 Documentation Integrity — Phases 55-57 (active)
+- v2.8 Documentation Integrity — Phases 55-57 (shipped 2026-05-08) — [archive](milestones/v2.8-ROADMAP.md)
 
 ## Phases
 
@@ -32,115 +32,34 @@
 
 </details>
 
-### v2.8 Documentation Integrity (ACTIVE)
+<details>
+<summary>v2.8 Documentation Integrity (Phases 55-57) — SHIPPED 2026-05-08</summary>
 
 **Milestone Goal:** Turn documentation accuracy from manually-maintained to CI-enforced — broken links, stale counts, and cross-doc inconsistencies must fail CI before merge.
 
-- [x] **Phase 55: Internal Link Validator** - A validator script scans all tracked `.md` files for broken relative-path and anchor refs, exits non-zero on failures, and is fully unit-tested (completed 2026-05-07)
-- [x] **Phase 56: Doc Drift Detector** - A detector script measures live test counts, agent/command/skill/hook inventory, and coverage, then fails on any disagreement with numeric claims in living docs (completed 2026-05-08)
-- [x] **Phase 57: Backfill and CI Integration** - Known broken cross-references are repaired and both validator scripts are wired as blocking CI steps in `test.yml` (completed 2026-05-08)
+- [x] **Phase 55: Internal Link Validator** (3/3 plans) — completed 2026-05-07
+- [x] **Phase 56: Doc Drift Detector** (3/3 plans) — completed 2026-05-08
+- [x] **Phase 57: Backfill and CI Integration** (3/3 plans) — completed 2026-05-08
+
+</details>
 
 ## Phase Details
 
-### Phase 52: Checkpoint Engine
-**Goal**: Session state is captured deterministically before context resets so resumed sessions skip work that is already done
-**Depends on**: Nothing (Phase 51 shipped)
-**Requirements**: CP-01, CP-02, CP-03, CP-04, CP-05, CP-06, CP-07
-**Success Criteria** (what must be TRUE):
-  1. Running `/gsd:checkpoint` produces a valid `.planning/CHECKPOINT.json` that can be read back by `readCheckpoint()` with no data loss
-  2. `/gsd:resume-work` reads the checkpoint and skips any plan IDs already listed in `plans.completed` — the user sees a "skipping N completed plans" message, not a re-execution prompt
-  3. `/prime` includes checkpoint data in its initialization summary when a checkpoint file is present
-  4. A checkpoint older than 24 hours triggers a visible staleness warning but does not crash or block startup
-  5. Running `/prime` or `/gsd:resume-work` in a project with no checkpoint file completes silently with no error
-**Plans**: TBD
-
-### Phase 53: Daily Dashboard
-**Goal**: Developers can run one command at session start and immediately know their exact state and next action
-**Depends on**: Phase 52 (consumes `readCheckpoint()` from checkpoint.cjs)
-**Requirements**: DAILY-01, DAILY-02, DAILY-03, DAILY-04, DAILY-05, DAILY-06
-**Success Criteria** (what must be TRUE):
-  1. `/gsd:daily` completes and prints a formatted dashboard in under 2 seconds
-  2. When a checkpoint is present, the dashboard reflects checkpoint data; when absent, it falls back to STATE.md without error
-  3. The dashboard shows the correct next GSD command for every project state: active phase with in-progress plan, active phase with pending plans, between milestones, and maintenance mode
-  4. A dirty git working tree and a stale checkpoint each produce their own visible warning in the dashboard output
-**Plans**: TBD
-
-### Phase 54: Automated UAT Runner
-**Goal**: must_have assertions from plan frontmatter are executed automatically as shell commands before any conversational verification is requested
-**Depends on**: Nothing (independent of Phases 52-53, though benefits from checkpoint data)
-**Requirements**: UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, UAT-06, UAT-07, UAT-08, UAT-09, UAT-10
-**Success Criteria** (what must be TRUE):
-  1. `verify-work` automatically parses must_haves from all phase PLAN.md files and executes shell assertions before prompting the user for anything
-  2. The runner matches at least 8 distinct must_have pattern types (file exists, file not exists, test suite green, coverage threshold, file contains, file not contains, files identical, module export count)
-  3. Failed assertions display the must_have text, the expected value, the actual value, and the exact command that was run
-  4. must_haves that match no pattern are routed to manual conversational UAT — the user is only asked to verify what cannot be automated
-  5. All runner commands are read-only; no file writes occur during automated verification
-**Plans**: 3 plans
-Plans:
-- [x] 54-01-PLAN.md -- Pattern registry (TDD)
-- [x] 54-02-PLAN.md -- Runner orchestrator (TDD)
-- [x] 54-03-PLAN.md -- Integration + full suite green
-
-### Phase 55: Internal Link Validator
-**Goal**: Every broken relative-path and anchor ref in tracked `.md` files is detected, reported in a structured table, and fails CI on a non-zero exit
-**Depends on**: Nothing (independent — no dependency on Phase 56)
-**Requirements**: DOCLINK-01, DOCLINK-02, DOCLINK-03, DOCLINK-04
-**Success Criteria** (what must be TRUE):
-  1. Running `scripts/validate-doc-links.cjs` on the repo produces a table listing every broken ref (file, line number, broken ref text, reason) and exits non-zero when any broken link exists
-  2. Running the validator on a repo with no broken links exits zero and prints a clean-pass message
-  3. Running the validator with `--json` outputs a machine-readable JSON object envelope `{ status: "clean"|"broken", checked: <number>, files: <number>, broken: [<{file, line, ref, reason}>] }` suitable for programmatic consumption (resolves cross-AI review pass-1 HIGH finding — envelope chosen over raw array for diagnostic value)
-  4. Broken anchor refs (e.g., `#section-name` not present in the target document) are identified and reported separately from broken file-path refs
-**Plans**: 3 plans
-Plans:
-- [x] 55-01-PLAN.md — TDD core: fixtures + toGfmSlug + extractHeadingSlugs + extractLinks + validateLink + formatTable (Wave 1)
-- [x] 55-02-PLAN.md — Discovery + main() + integration tests + .c8rc.json coverage tracking (Wave 2)
-- [x] 55-03-PLAN.md — Real-repo run + suite green + living-docs updates (Wave 3)
-
-### Phase 56: Doc Drift Detector
-**Goal**: Numeric claims in the three living docs are automatically compared against measured live values, and any disagreement fails the run with a structured drift report
-**Depends on**: Nothing (independent — no dependency on Phase 55)
-**Requirements**: DOCDRIFT-01, DOCDRIFT-02, DOCDRIFT-03, DOCDRIFT-04, DOCDRIFT-05
-**Success Criteria** (what must be TRUE):
-  1. Running `scripts/check-doc-drift.cjs` on a clean repo where all numeric claims match live values exits zero
-  2. Running the detector after manually editing a claimed test count in CLAUDE.md to an incorrect value produces a drift table row identifying the file, line, claimed value, actual value, and metric name, then exits non-zero
-  3. The detector measures at least six metric categories: test count, suite count, line coverage, branch coverage, function coverage, and filesystem-derived counts (agent, command, skill, or hook count)
-  4. Running the detector with `--json` outputs machine-readable JSON suitable for programmatic consumption
-**Plans**: 3 plans
-Plans:
-- [x] 56-01-PLAN.md — TDD core: fixtures + METRICS registry + stripCommas/parsePercent/asInt/parseTapSummary/aggregateCoverage/extractClaims/compareClaim/formatDriftTable (Wave 1)
-- [x] 56-02-PLAN.md — Measurement + integration: measure* functions, METRICS measure callbacks, main() with --json/--root/--coverage-stale-secs/--help, .c8rc.json coverage tracking (Wave 2)
-- [x] 56-03-PLAN.md — Real-repo run + drift fixes + living-docs updates (Wave 3)
-
-### Phase 57: Backfill and CI Integration
-**Goal**: Known broken cross-references are repaired and both validator scripts run as blocking CI steps on every PR so documentation drift cannot merge undetected
-**Depends on**: Phase 55, Phase 56 (both scripts must exist before CI wiring)
-**Requirements**: DOCREF-01, DOCREF-02, DOCCI-01, DOCCI-02, DOCCI-03
-**Success Criteria** (what must be TRUE):
-  1. The validator (`scripts/validate-doc-links.cjs`) reports zero broken link refs to `docs/health-reports/full-audit-2026-04-11.md` or `.planning/codebase/STRUCTURE.md`, AND every textual mention of these paths in the repo is an intentional description of the requirement (e.g., REQUIREMENTS.md DOCREF-01/02 description) rather than a broken hyperlink.
-  2. The `.github/workflows/test.yml` file contains a dedicated step that runs `scripts/validate-doc-links.cjs` and a dedicated step that runs `scripts/check-doc-drift.cjs`, each as distinct named steps
-  3. Opening a PR with a deliberately introduced broken link causes the CI link-validator step to fail and block merge
-  4. Opening a PR with a deliberately introduced doc drift causes the CI drift-detector step to fail and block merge
-**Plans**: 3 plans
-Plans:
-- [x] 57-01-PLAN.md — Backfill: sed-sweep 83 archived-roadmap cross-refs, repair 16 real broken refs, DOCREF-01/02 closure-via-clarification (Wave 1)
-- [x] 57-02-PLAN.md — Validator `--exclude <glob>` flag with TDD: gitignoreGlobToRegex, fixture tree, ≥80% per-module coverage (Wave 2)
-- [x] 57-03-PLAN.md — CI integration: drift step + docs-integrity job in test.yml, living-docs sync, branch-protection PATCH command, v2.8 milestone close (Wave 3)
+(All v2.6, v2.7, and v2.8 phase details archived to milestones/v2.6-ROADMAP.md, milestones/v2.7-ROADMAP.md, milestones/v2.8-ROADMAP.md respectively. Run `/gsd:new-milestone` to start the next milestone with fresh phases.)
 
 ## Progress
-
-**Execution Order (v2.8):** Phases 55 and 56 are independent and can run in parallel or in either order. Phase 57 depends on both Phases 55 and 56.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 49. One-Command Install | v2.6 | 1/1 | Complete | 2026-04-17 |
 | 50. CI Watch | v2.6 | 2/2 | Complete | 2026-04-17 |
 | 51. Sync Docs | v2.6 | 1/1 | Complete | 2026-04-18 |
-| 52. Checkpoint Engine | v2.7 | 2/2 | Complete    | 2026-04-18 |
-| 53. Daily Dashboard | v2.7 | 2/2 | Complete    | 2026-04-18 |
-| 54. Automated UAT Runner | v2.7 | 3/3 | Complete   | 2026-04-18 |
-| 55. Internal Link Validator | v2.8 | 3/3 | Complete    | 2026-05-07 |
-| 56. Doc Drift Detector | v2.8 | 3/3 | Complete    | 2026-05-08 |
-| 57. Backfill and CI Integration | v2.8 | 3/3 | Complete   | 2026-05-08 |
+| 52. Checkpoint Engine | v2.7 | 2/2 | Complete | 2026-04-18 |
+| 53. Daily Dashboard | v2.7 | 2/2 | Complete | 2026-04-18 |
+| 54. Automated UAT Runner | v2.7 | 3/3 | Complete | 2026-04-18 |
+| 55. Internal Link Validator | v2.8 | 3/3 | Complete | 2026-05-07 |
+| 56. Doc Drift Detector | v2.8 | 3/3 | Complete | 2026-05-08 |
+| 57. Backfill and CI Integration | v2.8 | 3/3 | Complete | 2026-05-08 |
 
 ## Backlog
 

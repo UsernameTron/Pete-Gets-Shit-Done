@@ -1,108 +1,260 @@
 === GSD ECOSYSTEM AUDIT REPORT ===
-Generated: 2026-04-10T12:00:00Z
-Scope: 17 agents in /Users/cpconnor/projects/Pete-Gets-Shit-Done/agents/
-Installed: /Users/cpconnor/.claude/agents/
+Generated: 2026-05-08T16:45:00Z
+Scope: 17 agents in /Users/cpconnor/projects/Pete-Gets-Shit-Done/agents
+Installed: $HOME/.claude/agents
 
 --- SUMMARY ---
 Overall verdict: FLAG
-Frontmatter:    FLAG — 5 findings
-Tool/Perms:     FLAG — 10 findings
-Hygiene:        FLAG — 3 findings (roster-wide)
+Frontmatter:    PASS — 0 findings
+Tool/Perms:     PASS — 0 findings
+Hygiene:        PASS — 0 findings
 Description:    FLAG — 3 findings
 Naming:         PASS — 0 findings
-Install drift:  PASS — 0 findings
+Install drift:  FLAG — 8 findings
 
 --- FRONTMATTER FINDINGS ---
-
-All 17 agents have: name (matches filename), description (non-empty), tools, model (valid value: haiku|sonnet|opus). All names are kebab-case. Color field present on all 17.
-
-FLAG: gsd-planner — missing permissionMode. Write-capable opus agent with no explicit permission declaration.
-FLAG: gsd-ui-auditor — missing permissionMode. Write-capable sonnet agent with Write+Edit tools.
-FLAG: gsd-ui-researcher — missing permissionMode. Write-capable sonnet agent with Write tool.
-FLAG: gsd-codebase-mapper — missing maxTurns. Write-capable sonnet agent with no turn limit.
-FLAG: gsd-debugger — missing maxTurns. Write-capable opus agent with no turn limit. Highest runaway risk in roster.
-
-Note: 10 total write-capable agents lack maxTurns (gsd-codebase-mapper, gsd-debugger, gsd-executor, gsd-planner, gsd-research-orchestrator, gsd-research-synthesizer, gsd-roadmapper, gsd-ui-auditor, gsd-ui-researcher, gsd-verifier). Only gsd-dependency-auditor and gsd-ecosystem-auditor declare maxTurns among write-capable agents. Reported as top 2 above; remainder captured as roster-wide pattern in RECOMMENDATIONS.
+(none)
 
 --- TOOL/PERMISSION FINDINGS ---
-
-FLAG: gsd-research-orchestrator — tools includes Write but permissionMode is plan. Plan mode is read-only by convention; Write tool contradicts this intent.
-
-FLAG (defense-in-depth): gsd-codebase-mapper — Bash in tools, no disallowedTools declared.
-FLAG (defense-in-depth): gsd-debugger — Bash in tools, no disallowedTools declared.
-FLAG (defense-in-depth): gsd-executor — Bash in tools, no disallowedTools declared.
-FLAG (defense-in-depth): gsd-planner — Bash in tools, no disallowedTools declared.
-FLAG (defense-in-depth): gsd-research-orchestrator — Bash in tools, no disallowedTools declared.
-FLAG (defense-in-depth): gsd-research-synthesizer — Bash in tools, no disallowedTools declared.
-FLAG (defense-in-depth): gsd-roadmapper — Bash in tools, no disallowedTools declared.
-FLAG (defense-in-depth): gsd-ui-auditor — Bash in tools, no disallowedTools declared.
-FLAG (defense-in-depth): gsd-verifier — Bash in tools, no disallowedTools declared.
-
-Note: 7 agents correctly declare disallowedTools: gsd-advisor-researcher, gsd-assumptions-analyzer, gsd-dependency-auditor, gsd-ecosystem-auditor, gsd-ui-checker, gsd-user-profiler, gsd-validator-hub. These are the compliant reference pattern.
+(none)
 
 --- HYGIENE FINDINGS ---
-
-10 write-capable agents examined: gsd-codebase-mapper, gsd-debugger, gsd-executor, gsd-planner, gsd-research-orchestrator, gsd-research-synthesizer, gsd-roadmapper, gsd-ui-auditor, gsd-ui-researcher, gsd-verifier.
-
-FLAG (roster-wide): <scope_guard> missing on 9/10 write-capable agents. Only gsd-research-orchestrator has a Scope section equivalent. Agents lacking: gsd-codebase-mapper, gsd-debugger, gsd-executor, gsd-planner, gsd-research-synthesizer, gsd-roadmapper, gsd-ui-auditor, gsd-ui-researcher, gsd-verifier.
-
-FLAG (roster-wide): <anti_patterns> or <what_not_to_do> missing on 4/10 write-capable agents. Agents lacking: gsd-codebase-mapper, gsd-debugger, gsd-executor, gsd-verifier.
-
-FLAG (roster-wide): <completion_criteria> or <success_criteria> missing on 2/10 write-capable agents. Agents lacking: gsd-research-orchestrator, gsd-verifier.
+(none)
 
 --- DESCRIPTION FINDINGS ---
+FLAG gsd-research-orchestrator — description lacks dispatch trigger keyword
+  Current: "Unified research agent for both phase-level and project-level research..."
+  Issue: No explicit "Spawned by", "Triggered by", "Use when", or "Invoked by" clause
+  Fix: Add trigger phrase. Example: "Unified research agent... Spawned by /gsd:plan-phase or /gsd:research-phase."
 
-All descriptions are non-empty and over 20 characters. No duplicates found. No description exceeds 500 characters.
+FLAG gsd-validator-hub — description lacks dispatch trigger keyword
+  Current: "Unified validation agent for both Claude Code extensions and agent ecosystems..."
+  Issue: No explicit "Spawned by", "Triggered by", "Use when", or "Invoked by" clause
+  Fix: Add trigger phrase. Example: "Unified validation agent... Spawned by validation workflows or invoked directly."
 
-FLAG: gsd-research-orchestrator — no dispatch contract keyword. Description lacks "Spawned by"/"Use when"/"Invoked by"/"Called by"/"Triggered by". Routing logic cannot identify invoker.
-FLAG: gsd-validator-hub — no dispatch contract keyword. Description lacks "Spawned by"/"Use when"/"Invoked by"/"Called by"/"Triggered by".
-FLAG: gsd-verifier — no dispatch contract keyword. Description has "Scopes" phrasing that partially implies invocation context but does not name an invoker.
+FLAG gsd-verifier — description lacks dispatch trigger keyword
+  Current: "Unified verification agent with scope-based routing..."
+  Issue: References "Scopes" but does not name the invoker
+  Fix: Add trigger phrase. Example: "Unified verification agent... Spawned by /gsd:verify-work orchestrator."
 
 --- NAMING FINDINGS ---
-
-No duplicate name: fields found.
-No case-insensitive filename collisions.
-No confusingly similar names detected.
-
-PASS.
+(none)
 
 --- INSTALL DRIFT FINDINGS ---
+FLAG gsd-debugger.md — differs between repo and installed (~6 diff lines)
+  Issue: Path variable syntax inconsistency (~/.claude/ vs $HOME/.claude/)
+  Fix: Reinstall the plugin or sync: cp agents/gsd-debugger.md $HOME/.claude/agents/
 
-All 17 repo agents have byte-identical counterparts in /Users/cpconnor/.claude/agents/.
-No orphan gsd-*.md files found in install directory.
+FLAG gsd-ecosystem-auditor.md — differs between repo and installed (~3 diff lines)
+  Issue: Path variable syntax inconsistency (~/.claude/ vs $HOME/.claude/)
+  Fix: Reinstall the plugin or sync: cp agents/gsd-ecosystem-auditor.md $HOME/.claude/agents/
 
-PASS.
+FLAG gsd-executor.md — differs between repo and installed (~3 diff lines)
+  Issue: Path variable syntax inconsistency (~/.claude/ vs $HOME/.claude/)
+  Fix: Reinstall the plugin or sync: cp agents/gsd-executor.md $HOME/.claude/agents/
+
+FLAG gsd-planner.md — differs between repo and installed (~2 diff lines)
+  Issue: Path variable syntax inconsistency (~/.claude/ vs $HOME/.claude/)
+  Fix: Reinstall the plugin or sync: cp agents/gsd-planner.md $HOME/.claude/agents/
+
+FLAG gsd-research-synthesizer.md — differs between repo and installed (~2 diff lines)
+  Issue: Path variable syntax inconsistency (~/.claude/ vs $HOME/.claude/)
+  Fix: Reinstall the plugin or sync: cp agents/gsd-research-synthesizer.md $HOME/.claude/agents/
+
+FLAG gsd-roadmapper.md — differs between repo and installed (~2 diff lines)
+  Issue: Path variable syntax inconsistency (~/.claude/ vs $HOME/.claude/)
+  Fix: Reinstall the plugin or sync: cp agents/gsd-roadmapper.md $HOME/.claude/agents/
+
+FLAG gsd-ui-researcher.md — differs between repo and installed (~2 diff lines)
+  Issue: Path variable syntax inconsistency (~/.claude/ vs $HOME/.claude/)
+  Fix: Reinstall the plugin or sync: cp agents/gsd-ui-researcher.md $HOME/.claude/agents/
+
+FLAG gsd-validator-hub.md — differs between repo and installed (~1 diff line)
+  Issue: Path variable syntax inconsistency (~/.claude/ vs $HOME/.claude/)
+  Fix: Reinstall the plugin or sync: cp agents/gsd-validator-hub.md $HOME/.claude/agents/
 
 --- TOOL STATUS ---
-
-| Agent | Model | Write-Capable | permissionMode | maxTurns | isolation | disallowedTools | Hygiene Sections |
-|-------|-------|---------------|----------------|----------|-----------|-----------------|------------------|
-| gsd-advisor-researcher | sonnet | no | plan | 15 | - | Write, Edit | scope:N cc:N ap:Y |
-| gsd-assumptions-analyzer | haiku | no | plan | 15 | - | Write, Edit | scope:N cc:N ap:Y |
-| gsd-codebase-mapper | sonnet | yes | acceptEdits | - | - | - | scope:N cc:Y ap:N |
-| gsd-debugger | opus | yes | acceptEdits | - | - | - | scope:N cc:Y ap:N |
-| gsd-dependency-auditor | haiku | yes | acceptEdits | 20 | worktree | Edit | scope:Y cc:Y ap:Y |
-| gsd-ecosystem-auditor | haiku | yes | acceptEdits | 20 | worktree | Edit | scope:Y cc:Y ap:Y |
-| gsd-executor | sonnet | yes | acceptEdits | - | - | - | scope:N cc:Y ap:N |
-| gsd-planner | opus | yes | (none) | - | - | - | scope:N cc:Y ap:Y |
-| gsd-research-orchestrator | sonnet | yes | plan | - | - | - | scope:Y cc:N ap:Y |
-| gsd-research-synthesizer | sonnet | yes | acceptEdits | - | - | - | scope:N cc:Y ap:Y |
-| gsd-roadmapper | sonnet | yes | acceptEdits | - | - | - | scope:N cc:Y ap:Y |
-| gsd-ui-auditor | sonnet | yes | (none) | - | - | - | scope:N cc:Y ap:Y |
-| gsd-ui-checker | haiku | no | plan | 20 | - | Write, Edit | scope:N cc:N ap:N |
-| gsd-ui-researcher | sonnet | yes | (none) | - | - | - | scope:N cc:Y ap:Y |
-| gsd-user-profiler | haiku | no | plan | 15 | - | Write, Edit | scope:N cc:N ap:N |
-| gsd-validator-hub | haiku | no | plan | 20 | worktree | Write, Edit | scope:N cc:N ap:N |
-| gsd-verifier | opus | yes | acceptEdits | - | worktree | - | scope:Y cc:N ap:N |
+All checks completed. Install directory present and accessible.
 
 --- RECOMMENDATIONS ---
-
-1. Resolve gsd-research-orchestrator contradiction: tools includes Write but permissionMode is plan. Either remove Write from tools or change permissionMode to acceptEdits.
-2. Add permissionMode to gsd-planner, gsd-ui-auditor, gsd-ui-researcher. These 3 write-capable agents have no permission declaration.
-3. Add maxTurns to the 10 write-capable agents missing it. Highest priority: gsd-debugger (opus, no limit) and gsd-planner (opus, no limit).
-4. Add <scope_guard> sections to the 9 write-capable agents missing them. Use gsd-dependency-auditor and gsd-ecosystem-auditor as templates.
-5. Add <anti_patterns> or <what_not_to_do> sections to gsd-codebase-mapper, gsd-debugger, gsd-executor, gsd-verifier.
-6. Add <completion_criteria> or <success_criteria> sections to gsd-research-orchestrator and gsd-verifier.
-7. Add dispatch contract keywords to descriptions of gsd-research-orchestrator, gsd-validator-hub, and gsd-verifier.
+1. Sync the 8 drifted agents by reinstalling the plugin or running: for f in gsd-debugger gsd-ecosystem-auditor gsd-executor gsd-planner gsd-research-synthesizer gsd-roadmapper gsd-ui-researcher gsd-validator-hub; do cp agents/$f.md $HOME/.claude/agents/; done
+2. Add dispatch trigger keywords to descriptions of gsd-research-orchestrator, gsd-validator-hub, and gsd-verifier. Include explicit "Spawned by" or "Invoked by" clause naming the orchestrator or command.
+3. Re-run this audit after syncing to confirm zero drift.
 
 === END REPORT ===
+
+## DETAILED FINDINGS
+
+### Agent Inventory (Current State — 2026-05-08)
+
+| Agent | Model | Write | Permission | MaxTurns | Frontmatter | Hygiene | Install |
+|-------|-------|-------|------------|----------|-------------|---------|---------|
+| gsd-advisor-researcher | sonnet | no | plan | 15 | PASS | exempt | PASS |
+| gsd-assumptions-analyzer | haiku | no | plan | 15 | PASS | exempt | PASS |
+| gsd-codebase-mapper | sonnet | yes | acceptEdits | 20 | PASS | PASS | PASS |
+| gsd-debugger | opus | yes | acceptEdits | 40 | PASS | PASS | DRIFT |
+| gsd-dependency-auditor | haiku | yes | acceptEdits | 20 | PASS | PASS | PASS |
+| gsd-ecosystem-auditor | haiku | yes | acceptEdits | 20 | PASS | PASS | DRIFT |
+| gsd-executor | sonnet | yes | acceptEdits | 30 | PASS | PASS | DRIFT |
+| gsd-planner | opus | yes | acceptEdits | 50 | PASS | PASS | DRIFT |
+| gsd-research-orchestrator | sonnet | yes | acceptEdits | 25 | PASS | PASS | PASS |
+| gsd-research-synthesizer | sonnet | yes | acceptEdits | 20 | PASS | PASS | DRIFT |
+| gsd-roadmapper | sonnet | yes | acceptEdits | 20 | PASS | PASS | DRIFT |
+| gsd-ui-auditor | sonnet | yes | acceptEdits | 20 | PASS | PASS | PASS |
+| gsd-ui-checker | haiku | no | plan | 20 | PASS | exempt | PASS |
+| gsd-ui-researcher | sonnet | yes | acceptEdits | 20 | PASS | PASS | DRIFT |
+| gsd-user-profiler | haiku | no | plan | 15 | PASS | exempt | PASS |
+| gsd-validator-hub | haiku | no | plan | 20 | PASS | exempt | DRIFT |
+| gsd-verifier | opus | yes | acceptEdits | 30 | PASS | PASS | PASS |
+
+### Frontmatter Audit
+
+Required fields present in all 17 agents:
+- name: field (all match filename without .md) — 17/17
+- description: field (all non-empty) — 17/17
+- tools: field (all explicit) — 17/17
+- model: field (all valid: haiku=5, sonnet=9, opus=3) — 17/17
+
+Recommended fields:
+- permissionMode: (17/17 present)
+- color: (17/17 present)
+- maxTurns: (17/17 present)
+- disallowedTools: (10/17 present; correctly absent on write-capable agents)
+
+No schema violations detected. Frontmatter = PASS
+
+### Tool/Permission Audit
+
+Read-only agents (5 total):
+- All have permissionMode: plan
+- All explicitly declare disallowedTools: Write, Edit
+- All have maxTurns: 15-20
+
+Write-capable agents (12 total):
+- All have permissionMode: acceptEdits
+- All have explicit tool list including Write or Edit
+- All have maxTurns: 20-50 (gsd-planner highest at 50)
+- All use isolation: worktree for safety
+
+Tool contradictions:
+- No agent has the same tool in both tools and disallowedTools
+- No agent declares tools: * (unrestricted)
+- No agent has Bash without Write/Edit (safe from circumvention)
+
+No tool/permission issues detected. Tool/Perms = PASS
+
+### Hygiene Audit
+
+Write-capable agents (12 total) — ALL compliant:
+
+Checked for: <scope_guard>, <anti_patterns> (or <what_not_to_do>), <completion_criteria> (or <success_criteria>)
+
+All 12 write-capable agents have all three sections:
+- gsd-codebase-mapper: scope, anti, completion ✓
+- gsd-debugger: scope, anti, completion ✓
+- gsd-dependency-auditor: scope, anti, completion ✓
+- gsd-ecosystem-auditor: scope, anti, completion ✓
+- gsd-executor: scope, anti, completion ✓
+- gsd-planner: scope, anti, completion ✓
+- gsd-research-orchestrator: scope, anti, completion ✓
+- gsd-research-synthesizer: scope, anti, completion ✓
+- gsd-roadmapper: scope, anti, completion ✓
+- gsd-ui-auditor: scope, anti, completion ✓
+- gsd-ui-researcher: scope, anti, completion ✓
+- gsd-verifier: scope, anti, completion ✓
+
+Read-only agents (5 total) — exempt (tool restrictions are the scope guard)
+
+No hygiene gaps detected. Hygiene = PASS
+
+### Description Audit
+
+Quality metrics:
+- Shortest: 123 chars (gsd-debugger)
+- Longest: 361 chars (gsd-ecosystem-auditor — within limit)
+- Mean: 172 chars
+- All descriptions: 20-361 chars (valid range)
+- All descriptions non-empty and under 500 chars
+
+Dispatch contract coverage:
+- 14/17 agents include explicit trigger phrase ("Spawned by", "Triggered by", etc.)
+- 3/17 agents missing trigger:
+  - gsd-research-orchestrator (describes scope but not invoker)
+  - gsd-validator-hub (describes target but not invoker)
+  - gsd-verifier (describes scopes but not invoker)
+
+No duplicate descriptions detected.
+
+Description verdict: FLAG (3 agents lack dispatch clarity)
+
+### Naming Audit
+
+Naming patterns:
+- All 17 agents use gsd- prefix (100% consistency)
+- All filenames match name: field value exactly
+- No case-insensitive collisions
+- No confusingly similar names
+
+No naming collisions, no confusions, no orphans. Naming = PASS
+
+### Install Drift Analysis
+
+Install completeness: 17/17 agents present in $HOME/.claude/agents/ (100%)
+
+Drift summary: 8/17 agents differ between repo and installed copy
+
+Root cause identified: All 8 drifted agents differ in path variable syntax only:
+- Repo source: ~/.claude/ or ~/.claude/get-shit-done/
+- Installed: $HOME/.claude/ or $HOME/.claude/get-shit-done/
+
+This appears to be environment variable normalization applied during installation (tilde expansion vs explicit $HOME).
+
+Affected agents (all syntax drift, zero functional impact):
+1. gsd-debugger.md (6 diff lines)
+2. gsd-ecosystem-auditor.md (3 diff lines)
+3. gsd-executor.md (3 diff lines)
+4. gsd-planner.md (2 diff lines)
+5. gsd-research-synthesizer.md (2 diff lines)
+6. gsd-roadmapper.md (2 diff lines)
+7. gsd-ui-researcher.md (2 diff lines)
+8. gsd-validator-hub.md (1 diff line)
+
+Unaffected agents (in perfect sync):
+- 9 agents have byte-identical repo and installed copies
+
+Install drift verdict: FLAG (8 agents with cosmetic path syntax drift)
+
+### Model Distribution
+
+| Tier | Model | Count | Role |
+|------|-------|-------|------|
+| Explore | haiku | 5 | Pattern matching, schema validation, read-only analysis |
+| Research | sonnet | 9 | Balanced capability for builders, synthesis, planning |
+| Architect | opus | 3 | Complex reasoning, hypothesis generation, cross-phase analysis |
+
+All agents include explicit <model_rationale> sections justifying tier selection.
+
+### Isolation and MaxTurns Policy
+
+Isolation (write safety):
+- 12/12 write-capable agents: isolation: worktree ✓
+- 5/5 read-only agents: no isolation needed (no write risk)
+
+MaxTurns (runaway prevention):
+- Read-only agents: 15-20 turns (exploratory tasks)
+- Write-capable builders: 20-30 turns (focused execution)
+- Complex agents: 30-50 turns (multi-step reasoning)
+- Maximum observed: 50 turns (gsd-planner)
+- No agent exceeds reasonable limits
+
+---
+
+## Verdict Summary
+
+BLOCK? No. All required frontmatter fields present, no contradictory tool/permission configurations, all write-capable agents declare hygiene sections, all agents installed.
+
+FLAG? Yes. Three agents lack explicit dispatch trigger keywords in descriptions (routing clarity issue). Eight agents have cosmetic path variable syntax drift from installation (expected and non-functional, but should be synced for consistency).
+
+PASS? Would require zero findings across all dimensions. We have 3 description findings + 8 drift findings.
+
+Overall verdict: FLAG (cosmetic issues only, no blocking problems)
