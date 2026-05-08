@@ -112,4 +112,5 @@ jobs:
             --exclude '.claude/skills/SKILL.md' \
             --exclude '.claude/skills/dream-memory-consolidation/SKILL.md' \
             --exclude '.planning/REQUIREMENTS.md' \
-            --exclude '.planning/milestones/v2.7-phases/54-automated-uat-runner/54-03-PLAN.md'
+            --exclude '.planning/milestones/v*-REQUIREMENTS.md' \
+            --exclude '.planning/milestones/v*-phases/**'
