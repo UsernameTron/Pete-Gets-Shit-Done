@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: between-milestones
 milestone_name: (run /gsd:new-milestone to start v2.9)
 status: archived
-last_updated: "2026-05-08T18:45:00.000Z"
-last_activity: 2026-05-08 -- v2.8 archived; ROADMAP collapsed; REQUIREMENTS reset; PROJECT.md evolution complete
+last_updated: "2026-05-11T13:30:00.000Z"
+last_activity: 2026-05-11 -- harden-repo coverage restored above 80% floor (PR #28 merged); doc-drift lesson captured
 progress:
   total_phases: 0
   completed_phases: 0

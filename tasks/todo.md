@@ -98,3 +98,32 @@
 **Next:**
 1. `/gsd:new-milestone` for v2.8
 2. Triage deferred items list above as v2.8 phase candidates
+
+---
+
+## Session Handoff (2026-05-11 — harden-repo coverage shipped)
+
+**Branch**: `main` (clean, includes PR #28 squash merge `be46ae2`)
+
+**Session actions:**
+1. /gsd:prime-patterns boot — 5 KB v2.1 patterns loaded (6, 7, 10, 11, 12)
+2. /subagent-companion status check — 3 deployed specialists healthy
+3. Started chore/test-runner-description-drift; abandoned after operator-intent revert on main
+4. Full validation flagged harden-repo.cjs below 80% per-module floor (77.17%)
+5. Added 16 pure-function tests + exposed `applyFix`/`formatGapTable` exports — coverage 77.17% → 83.33%
+6. /gsd:ship created PR #28
+7. /gsd:ci-watch caught docs-integrity drift on first run; fixed inline in commit 1e868fc
+8. CI all-green on retry (10/10); Pete merged PR #28 + deleted remote branch
+9. Captured 2026-05-11 [Pre-Push Validation / Drift] lesson
+
+**Tests:** 2,861 passing / 566 suites / 0 failures. Coverage 91.82% line / 83.54% branch / 97.61% function (CI ubuntu/22).
+
+**Loose ends:**
+- 4 uncovered ranges in harden-repo.cjs (readProtection, extractEnabled non-object, applyFix non-dry-run, cmdHardenRepo fix path) all require gh stub or live API — deferred as v2.9 candidate work.
+
+**Next:**
+1. Either `/gsd:new-milestone` to start v2.9, or pick one deferred backlog item as a standalone chore
+2. v2.9 phase candidates (from prior wrap notes still applicable):
+   - **CI hardening** — Stop-hook sentinel for review-pending state, blocking coverage gate, agent health check, npm audit step
+   - **Maintenance** — esbuild upgrade, ECC scan, tag archaeology, legacy paused_at regex migration to extractFrontmatter
+   - **Test infrastructure** — `execGh` injection + gh-mocked tests for the 4 deferred harden-repo ranges
