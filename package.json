@@ -31,11 +31,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gsd-build/get-shit-done.git"
+    "url": "git+https://github.com/UsernameTron/Pete-Gets-Shit-Done.git"
   },
-  "homepage": "https://github.com/gsd-build/get-shit-done",
+  "homepage": "https://github.com/UsernameTron/Pete-Gets-Shit-Done",
   "bugs": {
-    "url": "https://github.com/gsd-build/get-shit-done/issues"
+    "url": "https://github.com/UsernameTron/Pete-Gets-Shit-Done/issues"
   },
   "engines": {
     "node": ">=20.0.0"
