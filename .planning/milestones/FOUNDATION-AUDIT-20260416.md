@@ -250,7 +250,7 @@ CLAUDE.md also states 16 agents — same stale count.
 
 ### claude-code-factory
 - Skills on disk (GSD repo): 1 (extension-guide)
-- Skills on disk (external project): 38 (full factory at ~/projects/claude-code-factory/)
+- Skills on disk (external project): 38 (full factory; since consolidated into ~/projects/Pete-Gets-Shit-Done/plugins/claude-code-factory/)
 - README: Documents 38 — matches the external project, not the GSD repo copy
 - Mismatches: None against external project
 
