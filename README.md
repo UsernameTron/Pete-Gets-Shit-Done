@@ -222,7 +222,7 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 
 ## Command Syntax
 
-Before we get into the 64 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
+Before we get into the 66 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
 
 | Runtime | Pattern | Example |
 |---------|---------|---------|
