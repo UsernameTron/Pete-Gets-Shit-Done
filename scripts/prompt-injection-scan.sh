@@ -81,6 +81,7 @@ ALLOWLIST=(
   '.planning/research/security-reviews/2026-04-07-hooks-review.md'
   '.planning/REQUIREMENTS.md'
   'get-shit-done/references/agent-threat-model.md'
+  '.planning/milestones/FOUNDATION-AUDIT-20260416.md'
   '.planning/milestones/archived-phases/'
   '.planning/milestones/v2.3-phases/'
   '.planning/milestones/v2.4-phases/'
