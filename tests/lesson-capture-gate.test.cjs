@@ -14,6 +14,7 @@ const {
   checkLessonsWindow,
   deriveSlug,
   parseTranscript,
+  resolveLessonsPath,
   splitSentences,
   hasRebuttalMarker,
   isBootTurn,
@@ -155,6 +156,35 @@ test('checkLessonsWindow: >4h old with unparseable timestamp is not updated', ()
   const res = checkLessonsWindow(lessonsPath, null, now);
   assert.equal(res.reason, 'fallback-4h');
   assert.equal(res.updated, false);
+});
+
+test('resolveLessonsPath: finds lessons.md directly in startDir', () => {
+  const dir = makeSandbox();
+  const lpath = writeLessons(dir, '# Lessons\n');
+  assert.equal(resolveLessonsPath(dir), lpath);
+});
+
+test('resolveLessonsPath: walks up from a subdirectory to an ancestor tasks/lessons.md', () => {
+  const dir = makeSandbox();
+  const lpath = writeLessons(dir, '# Lessons\n');
+  const nested = path.join(dir, 'sub', 'nested');
+  fs.mkdirSync(nested, { recursive: true });
+  assert.equal(resolveLessonsPath(nested), lpath);
+});
+
+test('resolveLessonsPath: stops at .git boundary and returns repo-root candidate even when lessons.md is absent', () => {
+  const dir = makeSandbox();
+  fs.mkdirSync(path.join(dir, '.git'));
+  const sub = path.join(dir, 'sub');
+  fs.mkdirSync(sub, { recursive: true });
+  assert.equal(resolveLessonsPath(sub), path.join(dir, 'tasks', 'lessons.md'));
+});
+
+test('resolveLessonsPath: falls back to resolved-startDir candidate when neither lessons.md nor .git exists up-tree', () => {
+  const dir = makeSandbox();
+  const probe = path.join(dir, 'sub', 'nested');
+  fs.mkdirSync(probe, { recursive: true });
+  assert.equal(resolveLessonsPath(probe), path.join(probe, 'tasks', 'lessons.md'));
 });
 
 // ---------- Integration tests (spawned hook) ----------

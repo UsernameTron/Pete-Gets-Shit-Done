@@ -336,6 +336,26 @@ function checkLessonsWindow(lessonsPath, firstTimestamp, now = Date.now()) {
 }
 
 /**
+ * Resolve the canonical tasks/lessons.md. The hook may run from a
+ * subdirectory of the repo (cwd != repo root); walk upward from `startDir`
+ * and return the first existing `tasks/lessons.md`, or — failing that —
+ * the path at the enclosing git repo root. Falls back to the cwd-relative
+ * path so behavior is unchanged when neither is found.
+ */
+function resolveLessonsPath(startDir) {
+  let dir = path.resolve(startDir || '.');
+  for (let i = 0; i < 64; i++) {
+    const candidate = path.join(dir, 'tasks', 'lessons.md');
+    if (fs.existsSync(candidate)) return candidate;
+    if (fs.existsSync(path.join(dir, '.git'))) return candidate;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return path.join(path.resolve(startDir || '.'), 'tasks', 'lessons.md');
+}
+
+/**
  * Derive the Claude Code project slug from a working directory path.
  * Matches Claude Code's on-disk layout — the leading "/" of an absolute
  * path becomes the single leading "-" of the slug, e.g.
@@ -500,7 +520,7 @@ function main() {
 
   const { messages, firstTimestamp } = parseTranscript(transcriptRaw);
   const signals = countSignals(messages);
-  const lessonsPath = path.join(cwd, 'tasks', 'lessons.md');
+  const lessonsPath = resolveLessonsPath(cwd);
   const { updated, lessonsMtimeMs } = checkLessonsWindow(lessonsPath, firstTimestamp);
 
   if (signals === 0) {
@@ -565,6 +585,7 @@ exports.countSignals = countSignals;
 exports.checkLessonsWindow = checkLessonsWindow;
 exports.deriveSlug = deriveSlug;
 exports.parseTranscript = parseTranscript;
+exports.resolveLessonsPath = resolveLessonsPath;
 
 exports.STRONG_USER = STRONG_USER;
 exports.STRONG_USER_SENTENCE_START = STRONG_USER_SENTENCE_START;
