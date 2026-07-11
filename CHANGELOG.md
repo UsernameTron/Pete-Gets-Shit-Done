@@ -22,6 +22,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Finalization: agent quality fixes** — partial-failure revert rule (plugin-developer), CLAUDE.md governance preservation (docs-sync), self-referential protection (all 3 project agents), coverage threshold clarification (test-runner) (f6ad23e)
 - **Finalization: codebase audit** — ARCHITECTURE.md resynced (5 drift dimensions), repo-map.txt regenerated (240 lines), 8 drifted built-in agents resynced, 11 stale .bak files cleaned (48a56ae)
 - **Post-v2.8 housekeeping** — stale `~/projects` doc references cleaned (4e6dd43); agent-governance-framework reference adopted from orphaned Claude/ dir (0e07ad7); stale Phase 999.1 backlog entry removed (8b73f50); harden-repo module coverage restored above the 80% floor (be46ae2)
+- **esbuild 0.25 → 0.28** — dev dependency bumped from 0.25.12 to 0.28.1 for hook bundling (6406b0e, PR #30)
 - **Verified counts:** 67 commands, 17 agents, 45 skills, 568 test suites, 2,879 assertions, 91.76% statement / 83.53% branch / 97.62% function coverage
 
 ### Fixed
