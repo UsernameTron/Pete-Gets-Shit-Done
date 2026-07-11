@@ -56,7 +56,7 @@ GSD is two layers in one install:
 
 | Layer | What it does | Components |
 |-------|-------------|------------|
-| Execution Engine | discuss → plan → execute → verify → ship | 66 commands, 17 agents, 6 hooks, wave-based parallel execution |
+| Execution Engine | discuss → plan → execute → verify → ship | 67 commands, 17 agents, 6 hooks, wave-based parallel execution |
 | Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (45 skills, 10 subagents), 7 reference docs |
 | Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | classify.cjs, model-profiles.cjs, history.cjs — all opt-in, off by default |
 
@@ -66,14 +66,14 @@ The full inventory:
 
 | Metric | Count |
 |--------|-------|
-| GSD commands | 66 |
+| GSD commands | 67 |
 | Specialized agents | 17 |
 | Runtime hooks | 16 (6 execution + 10 governance, 1 shared) |
 | Plugin skills | 45 (38 code factory + 7 MCP ecosystem) |
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
-| Test suites | 566 |
-| Test assertions | 2,865 |
+| Test suites | 568 |
+| Test assertions | 2,879 |
 | Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
@@ -222,7 +222,7 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 
 ## Command Syntax
 
-Before we get into the 66 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
+Before we get into the 67 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
 
 | Runtime | Pattern | Example |
 |---------|---------|---------|

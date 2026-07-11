@@ -17,7 +17,6 @@
 - [ ] `npm audit --audit-level=moderate` step in test.yml
 - [ ] Make coverage blocking in ci-coverage-report.sh:68
 - [ ] CI-time agent health check with blocking exit
-- [ ] esbuild 0.25 → 0.28 upgrade (audit-deps FLAG — non-blocking, no CVEs)
 - [ ] Migrate legacy `paused_at` regex extraction in `init.cjs:1274` to use `extractFrontmatter`
 - [ ] PR-required protection gap closure — direct pushes to main currently bypass CI gates entirely. Plan at `~/.claude/plans/explain-what-this-is-pure-gadget.md`. Single API call to add `required_pull_request_reviews` with `required_approving_review_count: 0`.
 - [ ] Backfill Nyquist VALIDATION.md for v2.8 phases (55, 56, 57 currently `nyquist_compliant: false` or missing). Optional `/gsd:validate-phase {N}`.
@@ -27,6 +26,7 @@
 
 ## Completed
 
+- [x] esbuild dev-dependency upgraded 0.25.12 → 0.28.1 via Dependabot PR #30 (2026-07-11) — clears the deferred audit-deps FLAG; picks up upstream security-advisory fixes (GHSA-g7r4-m6w7-qqqr, GHSA-gv7w-rqvm-qjhr). All 5 required checks green pre-merge; squash-merged to main (6406b0e).
 - [x] v2.8 Documentation Integrity shipped + archived + tagged (2026-05-08) — PRs #22, #23, #24, #25
 - [x] Backfill cross-refs to relocated docs (`docs/health-reports/full-audit-2026-04-11.md`, `.planning/codebase/STRUCTURE.md`) — Phase 57-01 closure-via-clarification per D-03 (2026-05-08)
 - [x] Internal doc link validator script + CI step — Phase 55 + Phase 57-03 (2026-05-08)

@@ -1,6 +1,6 @@
 # DevOps Handoff — get-shit-done-cc
 
-> Last verified: 2026-07-11 | Version: 1.30.0 | Milestone: Between milestones (v2.8 shipped)
+> Last verified: 2026-05-08 | Version: 1.30.0 | Milestone: v2.8 (shipped)
 
 ---
 
@@ -43,7 +43,7 @@ The installer (`bin/install.js`) copies the following into the user's Claude Cod
 
 | Component | Destination | Contents |
 |-----------|-------------|----------|
-| Commands | `~/.claude/get-shit-done/commands/` | 66 GSD slash commands |
+| Commands | `~/.claude/get-shit-done/commands/` | 67 GSD slash commands |
 | Agents | `~/.claude/get-shit-done/agents/` | 17 specialized agent definitions |
 | Hooks | `~/.claude/get-shit-done/hooks/` | 6 execution hooks (bundled JS) |
 | Workflows | `~/.claude/get-shit-done/workflows/` | Orchestration templates |
@@ -69,7 +69,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Script | Purpose |
 |--------|---------|
-| `npm test` | Run 2,865 unit tests via `scripts/run-tests.cjs` |
+| `npm test` | Run 2,879 unit tests via `scripts/run-tests.cjs` |
 | `npm run test:e2e` | Run 143 E2E integration tests via `scripts/run-e2e-tests.cjs` |
 | `npm run test:e2e:smoke` | Run E2E smoke subset (12 tests) |
 | `npm run test:coverage` | Unit tests with text + JSON coverage report |
@@ -85,9 +85,9 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Metric | Count |
 |--------|-------|
-| Unit tests | 2,865 |
+| Unit tests | 2,879 |
 | E2E tests | 143 |
-| **Total tests** | **3,004** |
+| **Total tests** | **3,022** |
 | Unit test files | 82 |
 | E2E test files | 12 |
 | **Total test files** | **94** |

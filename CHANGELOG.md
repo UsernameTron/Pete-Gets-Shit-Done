@@ -7,6 +7,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **`/gsd:ecosystem-map` command** — Regenerates the lifecycle-organized ecosystem map on demand: live filesystem scan, baseline reconciliation with append-only drift history, canonical C0–C10 clustering, `--exec` one-pager, `--dry-run`, `--review`, `--baseline <path>`. Workflow at `get-shit-done/workflows/ecosystem-map.md`; contract test `tests/ecosystem-map.test.cjs`
+- **GSD Ecosystem Map** — `.planning/GSD-ECOSYSTEM-MAP.md` + executive one-pager: 237-component inventory clustered by lifecycle stage, with drift report and doc-claims reconciliation
 - **Phase 54: Automated UAT Runner** — `lib/uat-runner.cjs` with pattern registry, `matchPattern()`, `runAutomatedUAT()`, pass/fail table before conversational UAT (4f4234d)
 - **Phase 53: Daily Dashboard** — `lib/daily.cjs` with `gatherDailyState()`, `determineNextAction()`, `formatDashboard()` for one-command morning status (8c39d22)
 - **Phase 52: Checkpoint Engine** — `lib/checkpoint.cjs` for session state persistence and recovery (7fb4137)
@@ -20,7 +22,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Finalization: agent quality fixes** — partial-failure revert rule (plugin-developer), CLAUDE.md governance preservation (docs-sync), self-referential protection (all 3 project agents), coverage threshold clarification (test-runner) (f6ad23e)
 - **Finalization: codebase audit** — ARCHITECTURE.md resynced (5 drift dimensions), repo-map.txt regenerated (240 lines), 8 drifted built-in agents resynced, 11 stale .bak files cleaned (48a56ae)
 - **Post-v2.8 housekeeping** — stale `~/projects` doc references cleaned (4e6dd43); agent-governance-framework reference adopted from orphaned Claude/ dir (0e07ad7); stale Phase 999.1 backlog entry removed (8b73f50); harden-repo module coverage restored above the 80% floor (be46ae2)
-- **Verified counts:** 66 commands, 17 agents, 45 skills, 566 test suites, 2,865 assertions, 91.76% statement / 83.55% branch / 97.62% function coverage
+- **Verified counts:** 67 commands, 17 agents, 45 skills, 568 test suites, 2,879 assertions, 91.76% statement / 83.53% branch / 97.62% function coverage
 
 ### Fixed
 - **`lesson-capture-gate` subdirectory resolution** — `resolveLessonsPath()` walks upward from cwd so the Stop gate finds `tasks/lessons.md` when run from a subdirectory (b2b6327)

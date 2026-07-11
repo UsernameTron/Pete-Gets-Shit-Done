@@ -9,7 +9,7 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 **Current milestone:** Between milestones — run `/gsd:new-milestone` to start v2.9
 **Previous:** v2.8 Documentation Integrity (shipped 2026-05-08, 3 phases, 14 requirements)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,865 total, all passing
+**Tests:** 2,879 total, all passing
 **Coverage:** 91.63% lines local / 91.69% CI ubuntu-22, 83.47% branches, 97.22% functions
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
