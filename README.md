@@ -73,7 +73,7 @@ The full inventory:
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
 | Test suites | 568 |
-| Test assertions | 2,875 |
+| Test assertions | 2,879 |
 | Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
@@ -222,7 +222,7 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 
 ## Command Syntax
 
-Before we get into the 64 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
+Before we get into the 67 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
 
 | Runtime | Pattern | Example |
 |---------|---------|---------|
