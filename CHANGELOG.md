@@ -7,6 +7,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **`/gsd:ecosystem-map` command** — Regenerates the lifecycle-organized ecosystem map on demand: live filesystem scan, baseline reconciliation with append-only drift history, canonical C0–C10 clustering, `--exec` one-pager, `--dry-run`, `--review`, `--baseline <path>`. Workflow at `get-shit-done/workflows/ecosystem-map.md`; contract test `tests/ecosystem-map.test.cjs`
+- **GSD Ecosystem Map** — `.planning/GSD-ECOSYSTEM-MAP.md` + executive one-pager: 237-component inventory clustered by lifecycle stage, with drift report and doc-claims reconciliation
 - **Phase 54: Automated UAT Runner** — `lib/uat-runner.cjs` with pattern registry, `matchPattern()`, `runAutomatedUAT()`, pass/fail table before conversational UAT (4f4234d)
 - **Phase 53: Daily Dashboard** — `lib/daily.cjs` with `gatherDailyState()`, `determineNextAction()`, `formatDashboard()` for one-command morning status (8c39d22)
 - **Phase 52: Checkpoint Engine** — `lib/checkpoint.cjs` for session state persistence and recovery (7fb4137)
