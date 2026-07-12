@@ -7,6 +7,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **`wrap-and-sync` workflow** — `get-shit-done/workflows/wrap-and-sync.md`: single-intent session wrap (coverage re-measure → doc-drift closure in the same commit unit → STATE/todo handoff refresh → lesson capture-or-exempt → checkpoint → session report) with exactly one gate before anything is committed or pushed; review-pending sentinel caps the gate at commit-local-only. Codifies lessons 2026-05-11 [Pre-Push Validation/Drift] and 2026-04-10 [Hook Design]. Contract test `tests/wrap-and-sync.test.cjs`. First build from the autonomous-workflows design (`.planning/GSD-AUTONOMOUS-WORKFLOWS.md` W6); `/gsd:do` routing lands with the entry-point phase
 - **`/gsd:ecosystem-map` command** — Regenerates the lifecycle-organized ecosystem map on demand: live filesystem scan, baseline reconciliation with append-only drift history, canonical C0–C10 clustering, `--exec` one-pager, `--dry-run`, `--review`, `--baseline <path>`. Workflow at `get-shit-done/workflows/ecosystem-map.md`; contract test `tests/ecosystem-map.test.cjs`
 - **GSD Ecosystem Map** — `.planning/GSD-ECOSYSTEM-MAP.md` + executive one-pager: 237-component inventory clustered by lifecycle stage, with drift report and doc-claims reconciliation
 - **Phase 54: Automated UAT Runner** — `lib/uat-runner.cjs` with pattern registry, `matchPattern()`, `runAutomatedUAT()`, pass/fail table before conversational UAT (4f4234d)
