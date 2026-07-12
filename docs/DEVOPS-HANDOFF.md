@@ -1,6 +1,6 @@
 # DevOps Handoff — get-shit-done-cc
 
-> Last verified: 2026-05-08 | Version: 1.30.0 | Milestone: v2.8 (shipped)
+> Last verified: 2026-07-11 | Version: 1.30.0 | Milestone: Between milestones (v2.8 shipped)
 
 ---
 
@@ -26,7 +26,7 @@
 | Runtime | Node.js >= 20.0.0 |
 | Platform | macOS, Windows, Linux |
 | Runtime dependencies | **0** (zero) |
-| Dev dependencies | 2 (`c8` ^11.0.0 for coverage, `esbuild` ^0.25.12 for hook bundling) |
+| Dev dependencies | 2 (`c8` ^11.0.0 for coverage, `esbuild` ^0.28.1 for hook bundling) |
 | Host tool | Claude Code CLI (installed separately) |
 
 No database, no Docker, no cloud services required. The package installs entirely into the user's Claude Code configuration directory.
