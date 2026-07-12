@@ -1,14 +1,14 @@
 # Todo
 
-## ACTIVE PROGRAM: Autonomous Workflows Build-Out (started 2026-07-12, operator-approved order)
+## COMPLETED PROGRAM: Autonomous Workflows Build-Out (2026-07-12, operator-approved order)
 
 Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop: plan → execute → verify → merge on full-green CI → next. Operator away; merge-on-green explicitly delegated.
 
-- [ ] **Phase A** — Merge PR #36 (design doc + ship-milestone shelved + program plan). Gate: all CI checks green.
-- [ ] **Phase B** — Build `wrap-and-sync` (`get-shit-done/workflows/wrap-and-sync.md` + contract test + CHANGELOG + doc-count sync if tests change counts). Score 100, codifies lesson 2026-05-11.
-- [ ] **Phase C** — Build `daily-startup` (`get-shit-done/workflows/daily-startup.md` + contract test). Read-only flow.
-- [ ] **Phase D** — Extract `smart_discuss` from `workflows/autonomous.md` into a callable workflow (behavior-neutral for `/gsd:autonomous`), then build `idea-to-shipped` (workflow + contract test).
-- [ ] **Phase E** — Wire `/gsd:do` routing rows for built flows; run `/gsd:ecosystem-map` to refresh the map (also fixes stale line 396 count); final verification + wrap.
+- [x] **Phase A** — PR #36 merged (`eecc72a`): design doc + ship-milestone shelved + program plan + review-policy lesson.
+- [x] **Phase B** — PR #37 merged (`1c3e480`): `wrap-and-sync` workflow + 13-assertion contract test. Score 100, codifies lesson 2026-05-11.
+- [x] **Phase C** — PR #38 merged (`838f17c`): `daily-startup` workflow + 17-assertion contract test. Read-only, zero gates.
+- [x] **Phase D** — PR #39 merged (`26e9ccf`): `smart_discuss` extracted from `autonomous.md` (behavior-neutral thin caller, CTRL-03 fulfilled) + `idea-to-shipped` workflow + 18-assertion contract test + `<available_agent_types>` per #1357.
+- [x] **Phase E** — PR #40: `/gsd:do` routes the three built flows via `workflow:` targets (+9-assertion routing test); ecosystem map regenerated at 241 components (drift-history row 3 appended; stale 75-command line fixed); living docs synced.
 - SHELVED: `ship-milestone` (until `finalize` ungated pushes repaired). DEFERRED to second pass: `quick-change`, `bug-to-branch`.
 
 ## Current Status: v2.8 Archived — Ready for v2.9
@@ -138,3 +138,23 @@ Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop:
    - **CI hardening** — Stop-hook sentinel for review-pending state, blocking coverage gate, agent health check, npm audit step
    - **Maintenance** — esbuild upgrade, ECC scan, tag archaeology, legacy paused_at regex migration to extractFrontmatter
    - **Test infrastructure** — `execGh` injection + gh-mocked tests for the 4 deferred harden-repo ranges
+
+---
+
+## Session Handoff (2026-07-12 — autonomous workflows designed AND built end-to-end)
+
+**Branch**: `main` (all program PRs merged; working branch synced content-identical)
+
+**Session actions:**
+1. Meta-prompt Stage 2 executed under /gsd:autonomous: GSD-AUTONOMOUS-WORKFLOWS.md designed (7 workflows, evidence-cited, cold-reviewed, 5 findings fixed) — PR #36
+2. Build-out program A–E executed autonomously (operator away, merge-on-green delegated): wrap-and-sync (PR #37), daily-startup (PR #38), smart-discuss extraction + idea-to-shipped (PR #39), /gsd:do routing + map refresh (PR #40)
+3. ship-milestone SHELVED per operator until finalize's ungated pushes are repaired; quick-change + bug-to-branch deferred to a second pass
+4. Ecosystem map regenerated at 241 components, drift history row 3, stale count line fixed
+5. Review-policy lesson captured (factual findings auto-apply with disclosure; judgment findings never)
+
+**Tests:** 2,932 passing / 573 suites / 0 failures. All 23 doc-drift claims match (CI-verified per PR).
+
+**Next:**
+1. Repair `/gsd:finalize` (2 ungated pushes, allowed-tools mismatch, cross-plugin agent dependency) — unblocks building ship-milestone (W5)
+2. Second-pass flows when wanted: quick-change (W4), bug-to-branch (W3)
+3. Version the hook registrations (map's top gap) — clone-reproducible enforcement
