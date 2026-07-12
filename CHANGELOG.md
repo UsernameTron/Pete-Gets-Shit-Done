@@ -21,7 +21,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **v2.6 Developer Experience milestone** — 3 phases (49-51), 5 plans, all shipped (f1bbcae)
 - **Finalization: agent quality fixes** — partial-failure revert rule (plugin-developer), CLAUDE.md governance preservation (docs-sync), self-referential protection (all 3 project agents), coverage threshold clarification (test-runner) (f6ad23e)
 - **Finalization: codebase audit** — ARCHITECTURE.md resynced (5 drift dimensions), repo-map.txt regenerated (240 lines), 8 drifted built-in agents resynced, 11 stale .bak files cleaned (48a56ae)
-- **Verified counts:** 65 commands, 17 agents, 45 skills, 529 test suites, 2,621 assertions, 91.51% statement / 83.24% branch / 98.01% function coverage
+- **Post-v2.8 housekeeping** — stale `~/projects` doc references cleaned (4e6dd43); agent-governance-framework reference adopted from orphaned Claude/ dir (0e07ad7); stale Phase 999.1 backlog entry removed (8b73f50); harden-repo module coverage restored above the 80% floor (be46ae2)
+- **Verified counts:** 67 commands, 17 agents, 45 skills, 568 test suites, 2,879 assertions, 91.76% statement / 83.53% branch / 97.62% function coverage
+
+### Fixed
+- **`lesson-capture-gate` subdirectory resolution** — `resolveLessonsPath()` walks upward from cwd so the Stop gate finds `tasks/lessons.md` when run from a subdirectory (b2b6327)
+- **Package metadata** — `repository`/`homepage`/`bugs` now point at the actual origin (4de89d7)
 
 ## [v2.5] - 2026-04-17
 
