@@ -1,5 +1,16 @@
 # Todo
 
+## ACTIVE PROGRAM: Autonomous Workflows Build-Out (started 2026-07-12, operator-approved order)
+
+Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop: plan → execute → verify → merge on full-green CI → next. Operator away; merge-on-green explicitly delegated.
+
+- [ ] **Phase A** — Merge PR #36 (design doc + ship-milestone shelved + program plan). Gate: all CI checks green.
+- [ ] **Phase B** — Build `wrap-and-sync` (`get-shit-done/workflows/wrap-and-sync.md` + contract test + CHANGELOG + doc-count sync if tests change counts). Score 100, codifies lesson 2026-05-11.
+- [ ] **Phase C** — Build `daily-startup` (`get-shit-done/workflows/daily-startup.md` + contract test). Read-only flow.
+- [ ] **Phase D** — Extract `smart_discuss` from `workflows/autonomous.md` into a callable workflow (behavior-neutral for `/gsd:autonomous`), then build `idea-to-shipped` (workflow + contract test).
+- [ ] **Phase E** — Wire `/gsd:do` routing rows for built flows; run `/gsd:ecosystem-map` to refresh the map (also fixes stale line 396 count); final verification + wrap.
+- SHELVED: `ship-milestone` (until `finalize` ungated pushes repaired). DEFERRED to second pass: `quick-change`, `bug-to-branch`.
+
 ## Current Status: v2.8 Archived — Ready for v2.9
 
 18 milestones shipped (v1.0 through v2.8). 57 phases executed. 15 phase directories archived (12 prior + 3 from v2.8). Branch protection on main now enforces 5 required status checks (3 test matrix + governance + docs-integrity).
