@@ -132,7 +132,9 @@ Two design consequences, applied to every workflow below: (1) no chain may assum
 7. **Involvement reduction:** Before: 2 invocations + 1 decision → **After: 1 intent + 1 gate.** The win is small per run but the safety delta is large: verification becomes structurally impossible to forget.
 8. **Failure & rollback:** verifier gap → one fix iteration, then stop-and-report; rollback = drop the local commit (`git reset --hard HEAD~1` on the working branch, never `main`).
 
-## W5 — `ship-milestone`
+## W5 — `ship-milestone` — SHELVED
+
+> **Status: shelved by operator decision (2026-07-12).** A milestone ship is exactly the kind of irreversible sequence that must be gated, and `/gsd:finalize` — the existing primitive closest to this chain — carries two ungated pushes plus a tool-permission mismatch (details in item 8). The design below already routes around `finalize`, but this workflow stays unbuilt until `finalize` is repaired or the chain is re-verified end-to-end. Spec retained for that day.
 
 1. **Name:** `ship-milestone`
 2. **Trigger intent:** "Close out the milestone."
@@ -251,7 +253,7 @@ Score = Involvement saved (1–5) × Frequency (1–5) × Safety confidence (1�
 | 3 | `daily-startup` | 3 | 5 | 5 | **75** | Read-only, trivial to build, completes the session bookends |
 | 4 | `quick-change` | 3 | 4 | 4 | 48 | Small win per run; big "can't forget --full" safety delta |
 | 5 | `bug-to-branch` | 4 | 3 | 4 | 48 | Debug state machine already does the heavy lifting |
-| 6 | `ship-milestone` | 5 | 3 | 3 | 45 | Irreversible cluster at the end; `finalize` excluded until fixed |
+| 6 | `ship-milestone` | 5 | 3 | 3 | 45 | SHELVED (operator, 2026-07-12) until `finalize`'s ungated pushes are repaired |
 | 7 | `refresh-ecosystem-map` | 3 | 2 | 5 | 30 | Already built — score moot |
 
 **Build order (top 3):** `wrap-and-sync` first — highest score, highest frequency, zero-risk content, and it directly retires the failure mode that produced lesson 2026-05-11. `daily-startup` second — cheapest build (read-only), and pairing both bookends doubles the per-session win immediately. `idea-to-shipped` third — the biggest single prize, deliberately after the two safe ones because it needs the smart-discuss extraction and the most careful gate-transcript verification before it earns L3 trust.
