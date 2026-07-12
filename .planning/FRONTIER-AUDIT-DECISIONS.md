@@ -1,0 +1,11 @@
+# Frontier Autonomy Audit — Decision Journal
+
+Run date: 2026-07-12 · Session: autonomous single-session audit · Contract: ask nothing, decide and log.
+Every judgment call made during the run is recorded here. IRREVERSIBLE decisions are never executed — they are deferred to the Gate List in `GSD-AUTONOMY-AUDIT.md`.
+
+| # | UTC | Phase | Decision | Basis | Tag | Disposition |
+|---|-----|-------|----------|-------|-----|-------------|
+| 1 | 2026-07-12T16:26Z | 0 | Run on branch `autonomy/frontier-audit` (audit-specified) rather than the session-designated branch | Operator granted push permission pre-run ("ok to push elsewhere") when the conflict was surfaced during planning | REVERSIBLE | Executed — branch created from clean `7a43f87` (== origin/main tip) |
+| 2 | 2026-07-12T16:26Z | 0 | Emulate GSD commands instead of installing: follow `commands/gsd/<cmd>.md` → routed workflow, run deterministic logic via `node get-shit-done/bin/gsd-tools.cjs`, substitute in-repo paths for hardcoded `$HOME/.claude/get-shit-done/` | `/gsd:` slash commands are not registered in this session (no root `.claude-plugin/`, no `.claude/commands/`); mid-session install cannot register commands into a live session. Interaction prompts live in the workflow markdown, so telemetry fidelity is preserved | REVERSIBLE | Executed — every `$HOME` dependency hit is additionally logged as a portability friction row |
+| 3 | 2026-07-12T16:26Z | 0 | No writes to `tasks/todo.md` or `tasks/lessons.md` this run; progress tracked in-session | Audit branch-purity rule (branch carries only `.planning/` artifacts) overrides the CLAUDE.md todo-file habit for this run | REVERSIBLE | Executed — any lesson candidates surfaced by the run are recorded in the audit report for the operator to promote |
+| 4 | 2026-07-12T16:26Z | 0 | Treat the audit prompt's corpus expectations (~76 commands, ~62 workflows, 17 runtime hooks) as stale; audit against measured reality (67+4 commands, 66 workflows, 6 hooks, 17 agents) | Measured on disk this run; README.md self-report agrees ("67 commands, 17 agents, 6 hooks"). The prompt's "17 hooks" conflates the agent count with the hook count | REVERSIBLE | Executed — corrections recorded in baseline section |
