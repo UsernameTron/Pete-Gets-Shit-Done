@@ -766,6 +766,83 @@ describe('config-set workflow.skip_discuss', () => {
   });
 });
 
+// ─── config-set (workflow.finalize_auto_push) ─────────────────────────────────
+
+describe('config-set workflow.finalize_auto_push', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+    runGsdTools('config-ensure-section', tmpDir);
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('workflow.finalize_auto_push is a valid config key', () => {
+    const result = runGsdTools('config-set workflow.finalize_auto_push true', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const config = readConfig(tmpDir);
+    assert.strictEqual(config.workflow.finalize_auto_push, true);
+  });
+
+  test('finalize_auto_push defaults to false in new configs', () => {
+    const config = readConfig(tmpDir);
+    assert.strictEqual(config.workflow.finalize_auto_push, false);
+  });
+
+  test('finalize_auto_push can be toggled back to false', () => {
+    runGsdTools('config-set workflow.finalize_auto_push true', tmpDir);
+    const result = runGsdTools('config-set workflow.finalize_auto_push false', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const config = readConfig(tmpDir);
+    assert.strictEqual(config.workflow.finalize_auto_push, false);
+  });
+
+  describe('finalize_auto_push in config-new-project', () => {
+    let emptyDir;
+
+    beforeEach(() => {
+      emptyDir = createTempProject();
+    });
+
+    afterEach(() => {
+      cleanup(emptyDir);
+    });
+
+    test('finalize_auto_push is present in config-new-project output', () => {
+      const result = runGsdTools(['config-new-project', '{}'], emptyDir, { HOME: emptyDir, USERPROFILE: emptyDir });
+      assert.ok(result.success, `Command failed: ${result.error}`);
+
+      const config = readConfig(emptyDir);
+      assert.strictEqual(config.workflow.finalize_auto_push, false, 'finalize_auto_push should default to false');
+    });
+
+    test('finalize_auto_push can be set via config-new-project choices', () => {
+      const choices = JSON.stringify({
+        workflow: { finalize_auto_push: true },
+      });
+      const result = runGsdTools(['config-new-project', choices], emptyDir, { HOME: emptyDir, USERPROFILE: emptyDir });
+      assert.ok(result.success, `Command failed: ${result.error}`);
+
+      const config = readConfig(emptyDir);
+      assert.strictEqual(config.workflow.finalize_auto_push, true);
+    });
+  });
+
+  test('config-get workflow.finalize_auto_push returns the set value', () => {
+    runGsdTools('config-set workflow.finalize_auto_push true', tmpDir);
+    const result = runGsdTools('config-get workflow.finalize_auto_push', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.strictEqual(output, true);
+  });
+});
+
 // ─── config-set (routing_strategy) ────────────────────────────────────────────
 
 describe('config-set routing_strategy', () => {

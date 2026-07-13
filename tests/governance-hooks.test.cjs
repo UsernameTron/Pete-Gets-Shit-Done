@@ -59,6 +59,19 @@ describe('governance settings-hooks.json', () => {
     assert.ok(hasStopPlanning, 'Stop hooks should reference .planning/');
   });
 
+  test('Stop hook adds the review-pending sentinel branch without dropping the dirty-tree block', () => {
+    content = fs.readFileSync(HOOKS_PATH, 'utf8');
+    parsed = JSON.parse(content);
+    const stopCmd = parsed.hooks.Stop
+      .flatMap(e => (e.hooks || []).map(h => h.command || ''))
+      .join('\n');
+    // Sentinel branch added: dirty tree + sentinel present -> approve with a Deferred-review note.
+    assert.ok(stopCmd.includes('.planning/.review-pending'), 'Stop hook must check the review-pending sentinel');
+    assert.ok(stopCmd.includes('Deferred review'), 'Stop hook must approve deferred review with a logged note');
+    // Block branch retained: dirty tree without sentinel still blocks with exit 2.
+    assert.ok(stopCmd.includes('exit 2'), 'Stop hook must retain the dirty-tree block (exit 2) branch');
+  });
+
   test('no Apex content anywhere in the file', () => {
     content = fs.readFileSync(HOOKS_PATH, 'utf8');
     const apexPatterns = [

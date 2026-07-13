@@ -3,6 +3,7 @@ name: gsd-ui-researcher
 description: Produces UI-SPEC.md design contract for frontend phases. Reads upstream artifacts, detects design system state, asks only unanswered questions. Spawned by /gsd:ui-phase orchestrator.
 model: sonnet
 tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*, mcp__firecrawl__*, mcp__exa__*
+disallowedTools: Edit
 permissionMode: acceptEdits
 isolation: worktree
 maxTurns: 20

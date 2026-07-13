@@ -1,6 +1,6 @@
 ---
 name: gsd-verifier
-description: Unified verification agent with scope-based routing. Scopes — general (post-execution goal verification), plan (pre-execution plan quality), integration (cross-phase wiring), nyquist (validation gap filling).
+description: "Unified verification agent with scope-based routing. Scopes — general (post-execution goal verification), plan (pre-execution plan quality), integration (cross-phase wiring), nyquist (validation gap filling). Spawned by execution, verification, planning, and ship workflows (scope: general|plan|integration|nyquist)."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: opus
 permissionMode: acceptEdits
