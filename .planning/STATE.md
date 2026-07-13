@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.8
-milestone_name: Documentation Integrity
-status: archived
-last_updated: "2026-07-13T00:00:00.000Z"
-last_activity: "2026-07-13 -- named-workflows suite W8–W13 shipped via PR #47 (post-v2.8, not a milestone)"
+milestone: v2.9
+milestone_name: Autonomous Workflows Completion
+status: ready_to_plan
+last_updated: "2026-07-13T18:00:00.000Z"
+last_activity: "2026-07-13 -- Roadmap created: Phase 58 (Finalize Hardening + Re-verification), Phase 59 (Ship-Milestone Workflow); 6/6 requirements mapped"
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -14,15 +14,21 @@ last_activity: "2026-07-13 -- named-workflows suite W8–W13 shipped via PR #47 
 See: .planning/PROJECT.md (updated 2026-05-08 after v2.8 milestone)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** Between milestones — `/gsd:new-milestone` to start v2.9
+**Current focus:** v2.9 Autonomous Workflows Completion — Phase 58 (Finalize Hardening & Re-verification), ready to plan
 
 ## Current Position
 
-v2.8 Documentation Integrity SHIPPED + ARCHIVED on 2026-05-08. Since then, post-milestone feature work has shipped through standalone PRs (no open milestone): the named autonomous-workflows suite — W1–W6 from the autonomous-workflows build-out, then W8–W13 (adopt-codebase, ship-and-merge, quality-sweep `--deep`, frontend-phase, hardened-plan, groom-backlog) via PR #47 on 2026-07-13. W7/ship-milestone remains SHELVED (operator, 2026-07-12) until `/gsd:finalize`'s ungated pushes are repaired. Branch protection on `main` enforces 5 required status checks. Working tree clean. 2,969 tests pass. 91.76% line coverage.
+Phase: 58 of 59 (Finalize Hardening & Re-verification) — not started
+Plan: —
+Status: Ready to plan
+Last activity: 2026-07-13 — Roadmap created (2 phases, 6/6 requirements mapped, 0 orphans)
 
-Last activity: 2026-07-13 -- named-workflows suite W8–W13 shipped via PR #47 (post-v2.8, not a milestone)
-Tests: 2,969 assertions, 586 suites
-Coverage: 91.76% lines local / 83.53% branches / 97.62% functions
+**v2.9 goal:** Harden the last `/gsd:finalize` fragility (Gate 5.5 cross-plugin spawn) and build the shelved `ship-milestone` workflow (W7) that routes through it. The two ungated finalize pushes and the `allowed-tools` mismatch were already resolved by the `finalize-push-consent` blueprint (2026-07-12); the cross-plugin `repo-doc-architect` spawn + one end-to-end re-verification are the remaining unshelve preconditions. Phase numbering continues from 57 (v2.9 starts at phase 58) — the named-workflows suite shipped as standalone PRs outside the phase counter.
+
+**Roadmap:** Phase 58 — Finalize Hardening & Re-verification (FIN-01, FIN-02). Phase 59 — Ship-Milestone Workflow (SHIP-01..04), depends on Phase 58. Next: `/gsd:plan-phase 58`.
+
+Prior context: v2.8 Documentation Integrity SHIPPED + ARCHIVED 2026-05-08. Named autonomous-workflows suite W1–W6 (build-out) + W8–W13 (PR #47, 2026-07-13) shipped post-v2.8 as standalone PRs. Branch protection on `main` enforces 5 required status checks.
+Tests: 2,969 assertions, 586 suites. Coverage: 91.76% lines / 83.53% branches / 97.62% functions.
 
 Key decisions from ship/merge:
 
@@ -31,7 +37,16 @@ Key decisions from ship/merge:
 - Squash-merged via `gh pr merge --squash --delete-branch` — clean main history with one merge commit (c1063a2) representing v2.8 phases 55+56
 - Phase 57 cross-AI review (Gemini + Codex) produced REVIEWS.md; replanned via `/gsd:plan-phase 57 --reviews` and applied 4 must-fix + 5 should-fix edits across the three plans before execution
 
-**Next action:** v2.8 milestone closed; named-workflows suite shipped post-milestone. Either run `/gsd:new-milestone` to start v2.9 (would fold the workflow work into a formal milestone record), or pick from the deferred backlog items (CI hardening, esbuild upgrade, ECC scan, tag archaeology, legacy paused_at regex migration).
+**Next action:** v2.9 roadmap created (2026-07-13) — 2 phases, 6/6 requirements mapped, 0 orphans. Run `/gsd:plan-phase 58` to begin Phase 58 (Finalize Hardening & Re-verification).
+
+## v2.9 Phase Summary
+
+| Phase | Name | Requirements | Depends On | Status |
+|-------|------|--------------|------------|--------|
+| 58 | Finalize Hardening & Re-verification | FIN-01, FIN-02 | Nothing | Not started |
+| 59 | Ship-Milestone Workflow | SHIP-01..04 | Phase 58 | Not started |
+
+**v2.9 status:** Roadmap created 2026-07-13. 6/6 requirements mapped across 2 phases, 0 orphans. Next: `/gsd:plan-phase 58`.
 
 ## v2.8 Phase Summary
 

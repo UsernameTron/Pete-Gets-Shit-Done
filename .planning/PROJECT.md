@@ -6,11 +6,12 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** Between milestones — run `/gsd:new-milestone` to start v2.9
+**Current milestone:** v2.9 Autonomous Workflows Completion (started 2026-07-13 — defining requirements)
 **Previous:** v2.8 Documentation Integrity (shipped 2026-05-08, 3 phases, 14 requirements)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,879 total, all passing
-**Coverage:** 91.76% lines, 83.54% branches, 97.62% functions
+**Tests:** 2,969 total, all passing
+**Coverage:** 91.76% lines, 83.53% branches, 97.62% functions
+**Post-v2.8, pre-v2.9:** the named-workflows suite (W1–W6, then W8–W13 via PR #47) shipped as standalone PRs outside the phase counter
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
@@ -22,11 +23,28 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 GSD delivers disciplined, reproducible software delivery inside Claude Code by enforcing a 5-phase lifecycle (discuss → plan → execute → verify → ship) with wave-based parallelization, quality gates, and adaptive task routing. The core value is **predictable, high-quality execution at scale** — turning ambiguous prompts into shipped, tested, documented code without skipped steps.
 
+## Current Milestone: v2.9 Autonomous Workflows Completion
+
+**Goal:** Harden the last `/gsd:finalize` fragility and build the shelved `ship-milestone` workflow (W7) that depends on it — closing the autonomous-workflows suite.
+
+**Target features:**
+- Make `/gsd:finalize`'s Gate 5.5 `repo-doc-architect` spawn degrade gracefully when the agent/plugin is unavailable (the last of the three original finalize issues; the two ungated pushes and `allowed-tools` mismatch were already resolved by the `finalize-push-consent` blueprint, 2026-07-12)
+- Re-verify `/gsd:finalize` end-to-end on a real close-out (the verification the design doc lists as still-open before unshelving)
+- Build `ship-milestone` (W7): compose the proven finalizer critical path with 2 gates, routing through the now-gated finalize; unshelve and route it via `/gsd:do`
+
+**Key context:** W1–W6 and W8–W13 already shipped. `ship-milestone` was shelved by operator decision (2026-07-12) explicitly until finalize's pushes were gated — that precondition is now met. Internal-tooling milestone: no external-domain research required.
+
 ## Requirements
 
 ### Active
 
-(No active requirements — v2.8 shipped 2026-05-08. Run `/gsd:new-milestone` to define v2.9 scope.)
+v2.9 Autonomous Workflows Completion (scoped 2026-07-13):
+- **FIN-01**: `/gsd:finalize` Gate 5.5 spawns `repo-doc-architect` only when it resolves; otherwise it skips with a logged notice instead of dangling
+- **FIN-02**: `/gsd:finalize` is re-verified end-to-end on a real milestone close-out
+- **SHIP-01**: `ship-milestone` workflow composes the finalizer critical path with exactly 2 gates (conditional audit verdict + complete-milestone authorization)
+- **SHIP-02**: `ship-milestone` is routed via `/gsd:do` (`workflow:ship-milestone`) and unshelved
+- **SHIP-03**: `complete-milestone`'s 3 internal prompts (archive, branch, tag push) stay human — never auto-answered by the workflow
+- **SHIP-04**: structural test coverage for `ship-milestone` (routing contract + gate ceiling)
 
 ### Validated
 
@@ -355,4 +373,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-08 — v2.8 Documentation Integrity shipped; 14/14 requirements validated; branch protection PATCH applied; 18 milestones shipped to date.*
+*Last updated: 2026-07-13 — v2.9 Autonomous Workflows Completion started; 6 requirements scoped (FIN-01..02, SHIP-01..04); named-workflows suite W1–W13 shipped post-v2.8 as standalone PRs; 18 milestones shipped to date.*
