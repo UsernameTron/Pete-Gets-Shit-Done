@@ -68,6 +68,21 @@ function asstMsg(text, ts) {
   return o;
 }
 
+// ---------- Registration ----------
+
+test('lesson-capture-gate is registered as a project Stop hook in .claude/settings.json', () => {
+  const settings = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '..', '.claude', 'settings.json'), 'utf8'),
+  );
+  const stopCmds = (settings.hooks.Stop || [])
+    .flatMap(e => (e.hooks || []).map(h => h.command || ''));
+  assert.ok(
+    stopCmds.some(c => c.includes('lesson-capture-gate.cjs')),
+    '.claude/settings.json must register .claude/hooks/lesson-capture-gate.cjs as a Stop hook',
+  );
+  assert.ok(fs.existsSync(HOOK_PATH), 'the registered lesson-capture-gate.cjs must exist on disk');
+});
+
 // ---------- Pure function tests ----------
 
 test('stripCode removes triple-backtick fenced blocks', () => {
