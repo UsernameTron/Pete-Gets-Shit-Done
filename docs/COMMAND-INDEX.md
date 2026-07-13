@@ -2,7 +2,7 @@
 
 A one-line index of every slash command, internal workflow, and runtime hook in the get-shit-done execution engine. For full syntax, flags, options, and examples, see the detailed [Command Reference](COMMANDS.md).
 
-**Inventory:** 67 slash commands &middot; 17 internal workflows &middot; 10 hooks. Generated from the live repository.
+**Inventory:** 67 slash commands &middot; 23 internal workflows &middot; 10 hooks. Generated from the live repository.
 
 Items marked **`NEW`** shipped in the current unreleased cycle (the autonomous-workflows suite, on-demand ecosystem mapping, per-agent spawn telemetry, and two governance safety valves).
 
@@ -25,7 +25,13 @@ A styled, theme-aware HTML version of this index is at [`COMMAND-INDEX.html`](CO
 | `bug-to-branch` (W3) | workflow | A pasted error to a shipped fix: debug, fix, full suite, ship |
 | `quick-change` (W4) | workflow | One small change with verification impossible to skip, then a single gate |
 | `wrap-and-sync` (W6) | workflow | Session wrap: coverage, doc-drift, handoff, lesson, checkpoint, report |
-| `smart-discuss` | workflow | Batch-table discuss variant: accept or override proposed grey-area answers |
+| `smart-discuss` (W5) | workflow | Batch-table discuss variant: accept or override proposed grey-area answers |
+| `adopt-codebase` (W8) | workflow | Put an existing repo under GSD: map, auto-project, health, agents, accept gate |
+| `ship-and-merge` (W9) | workflow | Verified phase to merged PR: verify, tests, PR gate, CI watch, merge gate |
+| `quality-sweep` (W10) | workflow | Parallel read-only audits with one consolidated report and a single repair gate; `--deep` adds ecosystem checks |
+| `frontend-phase` (W11) | workflow | UI phase end-to-end: UI-SPEC contract, plan gate, execute, visual audit, accept gate |
+| `hardened-plan` (W12) | workflow | High-stakes planning with cross-AI review folded back in, two gates |
+| `groom-backlog` (W13) | workflow | Unified triage of notes, todos, backlog, and seeds with one batch-confirm gate |
 | `gsd-spawn-tracker` | hook | Per-agent subagent spawn telemetry to `~/.claude/metrics/spawns.jsonl` |
 | `review-pending sentinel` | hook | Approves a dirty tree with a logged "Deferred review" instead of force-committing |
 
@@ -160,7 +166,13 @@ Engines invoked by commands or the `/gsd:do` router — no direct slash command 
 | `bug-to-branch` **`NEW`** (W3) | A pasted error to a shipped fix: debug, fix, full suite, ship. |
 | `quick-change` **`NEW`** (W4) | One small change with verification impossible to skip, then a single gate. |
 | `wrap-and-sync` **`NEW`** (W6) | Session wrap: coverage, doc-drift, handoff, lesson capture, checkpoint, report. |
-| `smart-discuss` **`NEW`** | Batch-table discuss variant: accept or override proposed grey-area answers. |
+| `smart-discuss` **`NEW`** (W5) | Batch-table discuss variant: accept or override proposed grey-area answers. |
+| `adopt-codebase` **`NEW`** (W8) | Put an existing repo under GSD: map, auto-project, health check, agent setup, accept gate. |
+| `ship-and-merge` **`NEW`** (W9) | A verified phase to a merged PR: verify, tests, PR gate, CI watch, merge gate. |
+| `quality-sweep` **`NEW`** (W10) | Parallel read-only audits, one consolidated report, single repair gate; `--deep` adds ecosystem checks. |
+| `frontend-phase` **`NEW`** (W11) | A UI phase end-to-end: UI-SPEC contract, plan gate, execute, visual audit, accept gate. |
+| `hardened-plan` **`NEW`** (W12) | High-stakes planning with cross-AI review folded back in, two gates. |
+| `groom-backlog` **`NEW`** (W13) | Unified triage of notes, todos, backlog, and seeds with one batch-confirm gate. |
 | `daily` | Formatted dashboard: milestone, phase, plan, branch, tests, next action. |
 | `diagnose-issues` | Orchestrate parallel debug agents to find root causes — the `/gsd:debug` engine. |
 | `discovery-phase` | Run early project discovery at the appropriate depth level. |

@@ -16,7 +16,20 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const DO_PATH = path.join(ROOT, 'get-shit-done', 'workflows', 'do.md');
 
-const FLOWS = ['idea-to-shipped', 'daily-startup', 'wrap-and-sync', 'bug-to-branch', 'quick-change'];
+const FLOWS = [
+  'idea-to-shipped',
+  'daily-startup',
+  'wrap-and-sync',
+  'bug-to-branch',
+  'quick-change',
+  'smart-discuss',
+  'adopt-codebase',
+  'ship-and-merge',
+  'quality-sweep',
+  'frontend-phase',
+  'hardened-plan',
+  'groom-backlog',
+];
 
 describe('do.md workflow routing contract', () => {
   test('do.md exists', () => {
@@ -79,6 +92,68 @@ describe('do.md workflow routing contract', () => {
         `${flow} row must appear before the catch-all /gsd:quick row`,
       );
     }
+  });
+
+  test('first-match ordering: bug-to-branch wins over ship-and-merge', () => {
+    const bugIdx = doc.indexOf('`workflow:bug-to-branch`');
+    const shipIdx = doc.indexOf('`workflow:ship-and-merge`');
+    assert.ok(bugIdx !== -1 && shipIdx !== -1, 'expected rows not found');
+    assert.ok(
+      bugIdx < shipIdx,
+      'bug-to-branch row must precede ship-and-merge ("ship it" + pasted error hits the bug flow first)',
+    );
+  });
+
+  test('first-match ordering: adopt-codebase wins over the map-codebase route', () => {
+    const adoptIdx = doc.indexOf('`workflow:adopt-codebase`');
+    const mapIdx = doc.indexOf('Mapping or analyzing an existing codebase');
+    assert.ok(adoptIdx !== -1 && mapIdx !== -1, 'expected rows not found');
+    assert.ok(adoptIdx < mapIdx, 'adopt-codebase row must precede the /gsd:map-codebase row');
+  });
+
+  test('first-match ordering: frontend-phase and hardened-plan win over plan-phase', () => {
+    const planIdx = doc.indexOf('Planning a specific phase or "plan phase N"');
+    assert.ok(planIdx !== -1, 'plan-phase row not found');
+    for (const flow of ['frontend-phase', 'hardened-plan']) {
+      const idx = doc.indexOf(`\`workflow:${flow}\``);
+      assert.ok(idx !== -1 && idx < planIdx, `${flow} row must precede the /gsd:plan-phase row`);
+    }
+  });
+
+  test('first-match ordering: quality-sweep wins over the generic verify route', () => {
+    const sweepIdx = doc.indexOf('`workflow:quality-sweep`');
+    const verifyIdx = doc.indexOf('A review or quality concern about existing work');
+    assert.ok(sweepIdx !== -1 && verifyIdx !== -1, 'expected rows not found');
+    assert.ok(sweepIdx < verifyIdx, 'quality-sweep row must precede the /gsd:verify-work row');
+  });
+
+  test('first-match ordering: groom-backlog wins over the add-todo capture route', () => {
+    const groomIdx = doc.indexOf('`workflow:groom-backlog`');
+    const todoIdx = doc.indexOf('A note, idea, or "remember to..."');
+    assert.ok(groomIdx !== -1 && todoIdx !== -1, 'expected rows not found');
+    assert.ok(groomIdx < todoIdx, 'groom-backlog row must precede the /gsd:add-todo row');
+  });
+
+  test('first-match ordering: smart-discuss wins over the generic discuss route', () => {
+    const smartIdx = doc.indexOf('`workflow:smart-discuss`');
+    const discussIdx = doc.indexOf('Discussing vision, "how should X look"');
+    assert.ok(smartIdx !== -1 && discussIdx !== -1, 'expected rows not found');
+    assert.ok(smartIdx < discussIdx, 'smart-discuss row must precede the /gsd:discuss-phase row');
+  });
+
+  test('adopt-codebase is exempted from the .planning/ requirement', () => {
+    assert.match(
+      doc,
+      /Requires `\.planning\/` directory:[^\n]*workflow:adopt-codebase/,
+      'adopt-codebase must be listed as not requiring .planning/',
+    );
+  });
+
+  test('shelved milestone workflow is not routed', () => {
+    assert.ok(
+      !doc.includes('workflow:milestone-rollover') && !doc.includes('workflow:ship-milestone'),
+      'ship-milestone/milestone-rollover is shelved (operator, 2026-07-12) and must not be routed',
+    );
   });
 
   test('daily-startup is exempted from the .planning/ requirement', () => {
