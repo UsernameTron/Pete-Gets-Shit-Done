@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.8
-milestone_name: Documentation Integrity
-status: archived
+milestone: v2.9
+milestone_name: Autonomous Workflows Completion
+status: defining_requirements
 last_updated: "2026-07-13T00:00:00.000Z"
-last_activity: "2026-07-13 -- named-workflows suite W8–W13 shipped via PR #47 (post-v2.8, not a milestone)"
+last_activity: "2026-07-13 -- Milestone v2.9 started (finalize hardening + ship-milestone W7)"
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,11 +18,15 @@ See: .planning/PROJECT.md (updated 2026-05-08 after v2.8 milestone)
 
 ## Current Position
 
-v2.8 Documentation Integrity SHIPPED + ARCHIVED on 2026-05-08. Since then, post-milestone feature work has shipped through standalone PRs (no open milestone): the named autonomous-workflows suite — W1–W6 from the autonomous-workflows build-out, then W8–W13 (adopt-codebase, ship-and-merge, quality-sweep `--deep`, frontend-phase, hardened-plan, groom-backlog) via PR #47 on 2026-07-13. W7/ship-milestone remains SHELVED (operator, 2026-07-12) until `/gsd:finalize`'s ungated pushes are repaired. Branch protection on `main` enforces 5 required status checks. Working tree clean. 2,969 tests pass. 91.76% line coverage.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-07-13 — Milestone v2.9 Autonomous Workflows Completion started
 
-Last activity: 2026-07-13 -- named-workflows suite W8–W13 shipped via PR #47 (post-v2.8, not a milestone)
-Tests: 2,969 assertions, 586 suites
-Coverage: 91.76% lines local / 83.53% branches / 97.62% functions
+**v2.9 goal:** Harden the last `/gsd:finalize` fragility (Gate 5.5 cross-plugin spawn) and build the shelved `ship-milestone` workflow (W7) that routes through it. The two ungated finalize pushes and the `allowed-tools` mismatch were already resolved by the `finalize-push-consent` blueprint (2026-07-12); the cross-plugin `repo-doc-architect` spawn + one end-to-end re-verification are the remaining unshelve preconditions. Phase numbering continues from 57 (v2.9 starts at phase 58) — the named-workflows suite shipped as standalone PRs outside the phase counter.
+
+Prior context: v2.8 Documentation Integrity SHIPPED + ARCHIVED 2026-05-08. Named autonomous-workflows suite W1–W6 (build-out) + W8–W13 (PR #47, 2026-07-13) shipped post-v2.8 as standalone PRs. Branch protection on `main` enforces 5 required status checks.
+Tests: 2,969 assertions, 586 suites. Coverage: 91.76% lines / 83.53% branches / 97.62% functions.
 
 Key decisions from ship/merge:
 
