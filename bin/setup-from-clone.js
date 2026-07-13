@@ -65,12 +65,13 @@ const INSTALLED_PATTERNS   = path.join(INSTALLED_LIB_DIR, 'injection-patterns.js
 const SOURCE_PATTERNS      = path.join(PROJECT_ROOT, 'lib', 'injection-patterns.json');
 const REPO_COMMANDS_DIR    = path.join(PROJECT_ROOT, 'commands', 'gsd');
 
-// The 6 hook files that must be present after install
+// The 7 hook files that must be present after install
 const HOOK_FILES = [
   'gsd-check-update.js',
   'gsd-config-protection.js',
   'gsd-context-monitor.js',
   'gsd-cost-tracker.js',
+  'gsd-spawn-tracker.js',
   'gsd-prompt-guard.js',
   'gsd-statusline.js',
 ];
