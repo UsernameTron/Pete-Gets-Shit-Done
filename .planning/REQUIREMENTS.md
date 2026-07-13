@@ -39,11 +39,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FIN-01 | TBD | Pending roadmap |
-| FIN-02 | TBD | Pending roadmap |
-| SHIP-01 | TBD | Pending roadmap |
-| SHIP-02 | TBD | Pending roadmap |
-| SHIP-03 | TBD | Pending roadmap |
-| SHIP-04 | TBD | Pending roadmap |
-
-*(Filled in by the roadmapper.)*
+| FIN-01 | Phase 58 | Pending |
+| FIN-02 | Phase 58 | Pending |
+| SHIP-01 | Phase 59 | Pending |
+| SHIP-02 | Phase 59 | Pending |
+| SHIP-03 | Phase 59 | Pending |
+| SHIP-04 | Phase 59 | Pending |

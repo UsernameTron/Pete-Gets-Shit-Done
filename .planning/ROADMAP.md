@@ -5,6 +5,7 @@
 - v2.6 Developer Experience — Phases 49-51 (shipped 2026-04-18) — [archive](milestones/v2.6-ROADMAP.md)
 - v2.7 Session Continuity — Phases 52-54 (shipped 2026-04-18) — [archive](milestones/v2.7-ROADMAP.md)
 - v2.8 Documentation Integrity — Phases 55-57 (shipped 2026-05-08) — [archive](milestones/v2.8-ROADMAP.md)
+- v2.9 Autonomous Workflows Completion — Phases 58-59 (in progress)
 
 ## Phases
 
@@ -43,9 +44,38 @@
 
 </details>
 
+### v2.9 Autonomous Workflows Completion (Phases 58-59) — IN PROGRESS
+
+**Milestone Goal:** Harden the last `/gsd:finalize` fragility and build the shelved `ship-milestone` workflow that depends on it, closing the autonomous-workflows suite.
+
+- [ ] **Phase 58: Finalize Hardening & Re-verification** - Gate 5.5 degrades gracefully without repo-doc-architect; finalize re-verified end-to-end on a real close-out
+- [ ] **Phase 59: Ship-Milestone Workflow** - Composes the finalizer critical path behind exactly 2 gates, routed via /gsd:do, unshelved
+
 ## Phase Details
 
-(All v2.6, v2.7, and v2.8 phase details archived to milestones/v2.6-ROADMAP.md, milestones/v2.7-ROADMAP.md, milestones/v2.8-ROADMAP.md respectively. Run `/gsd:new-milestone` to start the next milestone with fresh phases.)
+(All v2.6, v2.7, and v2.8 phase details archived to milestones/v2.6-ROADMAP.md, milestones/v2.7-ROADMAP.md, milestones/v2.8-ROADMAP.md respectively.)
+
+### Phase 58: Finalize Hardening & Re-verification
+**Goal**: `/gsd:finalize` completes cleanly whether or not `repo-doc-architect` is available in the current install, and its full gate sequence — including every push consent gate — has been proven safe on a real milestone close-out.
+**Depends on**: Nothing (first phase of v2.9)
+**Requirements**: FIN-01, FIN-02
+**Success Criteria** (what must be TRUE):
+  1. Running `/gsd:finalize` in an install where `repo-doc-architect` does not resolve completes Gate 5.5 without a failed spawn — it logs a skip notice and finalization continues to Gate 6.
+  2. Running `/gsd:finalize` in an install where `repo-doc-architect` does resolve still spawns it and applies its documentation updates as designed, with no regression versus current behavior.
+  3. `/gsd:finalize` has been run end-to-end on a real milestone close-out, with every `git push` confirmed to sit behind an answered consent gate (Gate 1 or Gate 7) and zero ungated remote operations observed.
+  4. GSD-AUTONOMOUS-WORKFLOWS.md's `ship-milestone` entry no longer lists the Gate 5.5 spawn fragility or the end-to-end re-verification as an open unshelve precondition.
+**Plans**: TBD
+
+### Phase 59: Ship-Milestone Workflow
+**Goal**: Operators can close out a milestone through a single `ship-milestone` intent — routed via `/gsd:do` — that automates the proven finalizer critical path behind exactly 2 gates, without weakening any of `complete-milestone`'s human safeguards.
+**Depends on**: Phase 58 (routes through the hardened, re-verified finalize; a safe critical path cannot be composed until FIN-01/FIN-02 land)
+**Requirements**: SHIP-01, SHIP-02, SHIP-03, SHIP-04
+**Success Criteria** (what must be TRUE):
+  1. `get-shit-done/workflows/ship-milestone.md` exists and composes health → audit-agents → sync-docs → coverage+drift → audit-milestone → ship/ci-watch → complete-milestone behind exactly 2 gates (conditional audit-verdict gate + complete-milestone authorization gate) — no additional gates.
+  2. Saying "close out the milestone" (or an equivalent intent) to `/gsd:do` routes to `workflow:ship-milestone`, matched ahead of the existing `/gsd:complete-milestone` row, and the workflow's shelved status is lifted everywhere it was previously flagged.
+  3. Running `ship-milestone` through to Gate 2 still surfaces `complete-milestone`'s 3 internal prompts (archive phases, branch handling, tag push) as live human prompts — the workflow's gates authorize starting the sequence, never auto-answer them.
+  4. A structural test suite asserts the `/gsd:do` routing table includes the `ship-milestone` row, every `/gsd:` command the workflow references resolves to a real command file, and the workflow holds no more than 2 gates.
+**Plans**: TBD
 
 ## Progress
 
@@ -60,3 +90,5 @@
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete | 2026-05-07 |
 | 56. Doc Drift Detector | v2.8 | 3/3 | Complete | 2026-05-08 |
 | 57. Backfill and CI Integration | v2.8 | 3/3 | Complete | 2026-05-08 |
+| 58. Finalize Hardening & Re-verification | v2.9 | 0/TBD | Not started | - |
+| 59. Ship-Milestone Workflow | v2.9 | 0/TBD | Not started | - |
