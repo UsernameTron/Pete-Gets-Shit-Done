@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.6
-milestone_name: milestone
+milestone: v2.8
+milestone_name: Documentation Integrity
 status: archived
-last_updated: "2026-07-12T02:19:29.718Z"
-last_activity: "2026-05-08 -- /gsd:closeout v2.8 → /gsd:finalize → /gsd:complete-milestone executed end-to-end"
+last_updated: "2026-07-13T00:00:00.000Z"
+last_activity: "2026-07-13 -- named-workflows suite W8–W13 shipped via PR #47 (post-v2.8, not a milestone)"
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,11 +18,11 @@ See: .planning/PROJECT.md (updated 2026-05-08 after v2.8 milestone)
 
 ## Current Position
 
-v2.8 Documentation Integrity SHIPPED + ARCHIVED on 2026-05-08. ROADMAP.md collapsed (v2.8 phase details moved to milestones/v2.8-ROADMAP.md). REQUIREMENTS.md deleted (will be re-created by `/gsd:new-milestone`). PROJECT.md evolution complete (Validated requirements updated, current state refreshed, key decisions extended with v2.8 lessons). Branch protection on `main` enforces 5 required status checks. Working tree clean. 2,845 tests pass. 91.63% line coverage.
+v2.8 Documentation Integrity SHIPPED + ARCHIVED on 2026-05-08. Since then, post-milestone feature work has shipped through standalone PRs (no open milestone): the named autonomous-workflows suite — W1–W6 from the autonomous-workflows build-out, then W8–W13 (adopt-codebase, ship-and-merge, quality-sweep `--deep`, frontend-phase, hardened-plan, groom-backlog) via PR #47 on 2026-07-13. W7/ship-milestone remains SHELVED (operator, 2026-07-12) until `/gsd:finalize`'s ungated pushes are repaired. Branch protection on `main` enforces 5 required status checks. Working tree clean. 2,969 tests pass. 91.76% line coverage.
 
-Last activity: 2026-05-08 -- /gsd:closeout v2.8 → /gsd:finalize → /gsd:complete-milestone executed end-to-end
-Tests: 2,845 assertions, 563 suites
-Coverage: 91.63% lines local / 91.69% lines CI (cross-OS variance tolerated), 83.47% branches, 97.22% functions
+Last activity: 2026-07-13 -- named-workflows suite W8–W13 shipped via PR #47 (post-v2.8, not a milestone)
+Tests: 2,969 assertions, 586 suites
+Coverage: 91.76% lines local / 83.53% branches / 97.62% functions
 
 Key decisions from ship/merge:
 
@@ -31,7 +31,7 @@ Key decisions from ship/merge:
 - Squash-merged via `gh pr merge --squash --delete-branch` — clean main history with one merge commit (c1063a2) representing v2.8 phases 55+56
 - Phase 57 cross-AI review (Gemini + Codex) produced REVIEWS.md; replanned via `/gsd:plan-phase 57 --reviews` and applied 4 must-fix + 5 should-fix edits across the three plans before execution
 
-**Next action:** v2.8 milestone closed. Either run `/gsd:new-milestone` to start v2.9, or pick from the deferred backlog items (CI hardening, esbuild upgrade, ECC scan, tag archaeology, legacy paused_at regex migration).
+**Next action:** v2.8 milestone closed; named-workflows suite shipped post-milestone. Either run `/gsd:new-milestone` to start v2.9 (would fold the workflow work into a formal milestone record), or pick from the deferred backlog items (CI hardening, esbuild upgrade, ECC scan, tag archaeology, legacy paused_at regex migration).
 
 ## v2.8 Phase Summary
 
