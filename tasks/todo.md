@@ -158,3 +158,23 @@ Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop:
 1. Repair `/gsd:finalize` (2 ungated pushes, allowed-tools mismatch, cross-plugin agent dependency) — unblocks building ship-milestone (W5)
 2. Second-pass flows when wanted: quick-change (W4), bug-to-branch (W3)
 3. Version the hook registrations (map's top gap) — clone-reproducible enforcement
+
+---
+
+## Session Handoff (2026-07-13 — W8–W13 named workflows shipped; planning state synced)
+
+**Branch**: `main` (clean, 0 unpushed @ `8490ec1`)
+
+**Session actions:**
+1. Second-pass named workflows built and shipped — PR #47 (`339e9c7`): W8 adopt-codebase, W9 ship-and-merge, W10 quality-sweep (`--deep` folds in W14 ecosystem checks), W11 frontend-phase, W12 hardened-plan (external-send consent folded into GATE 1), W13 groom-backlog. 7 new `workflow:` rows in `do.md`; `tests/do-routing.test.cjs` extended to 12 routed flows + ordering/shelf guards. Authored by 3 parallel agents against the `idea-to-shipped` exemplar.
+2. Course-correction mid-flight: first attempt built W1–W6 as a NEW `get-shit-done/flows/` system on branch `docs/workflow-design-recs`, trusting the design doc's claim they didn't exist. Pre-ship `git fetch` comparison revealed origin/main already shipped W1–W6 in the `workflow:<name>` convention (autonomous-workflows build-out). Discarded the duplicate; rebuilt on main's convention. Stale branch deleted.
+3. Branch hygiene: deleted `docs/workflow-design-recs` + 3 stale `chore/*` locals; deleted 2 stale `chore/*` remotes.
+4. Planning sync — PR #48 (`8490ec1`): STATE.md frontmatter `v2.6`→`v2.8` (matched body/history), counts refreshed to 2,969 tests / 586 suites / 91.76% line.
+5. W7/ship-milestone remains SHELVED (operator, 2026-07-12) — not built or routed.
+
+**Tests:** 2,969 passing / 586 suites / 0 failures. Coverage 91.76% line / 83.53% branch / 97.62% function. All 23 doc-drift claims match.
+
+**Next:**
+1. Repair `/gsd:finalize` ungated pushes → unblocks ship-milestone (W5/W7)
+2. `/gsd:new-milestone` to fold the named-workflows suite into a formal v2.9 record, or pick a deferred backlog item
+3. Second-pass flows already done (W3/W4 shipped in the autonomous run); remaining: version hook registrations for clone-reproducible enforcement
