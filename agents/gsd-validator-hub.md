@@ -1,6 +1,6 @@
 ---
 name: gsd-validator-hub
-description: "Unified validation agent for both Claude Code extensions and agent ecosystems. Accepts target parameter (extension|ecosystem) to determine validation scope, checklists, and output format. Replaces extension-validator and validator."
+description: "Unified validation agent for both Claude Code extensions and agent ecosystems. Accepts target parameter (extension|ecosystem) to determine validation scope, checklists, and output format. Replaces extension-validator and validator. Spawned by /gsd:ship and validation workflows (target: extension|ecosystem)."
 tools: Read, Bash, Glob, Grep
 # Tier: Explore
 disallowedTools: Write, Edit

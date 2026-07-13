@@ -36,6 +36,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - **`lesson-capture-gate` subdirectory resolution** — `resolveLessonsPath()` walks upward from cwd so the Stop gate finds `tasks/lessons.md` when run from a subdirectory (b2b6327)
 - **Package metadata** — `repository`/`homepage`/`bugs` now point at the actual origin (4de89d7)
+- **Phantom `agent-skills` lookups** — 9 `agent-skills <name>` calls across 8 workflows (`quick`, `verify-work`, `plan-phase`, `research-phase`, `new-project`, `new-milestone`, `discuss-phase`, `ui-review`) referenced non-existent agent names (`gsd-checker`, `gsd-researcher`, `gsd-synthesizer`, `gsd-advisor`, `gsd-ui-reviewer`), so the skills-hint variable resolved empty and a project's configured `agent_skills` never reached those spawns. Realigned each lookup to the real agent it spawns (`gsd-verifier`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-advisor-researcher`, `gsd-ui-auditor`), matching the convention already used by the other 12 call sites
+- **Agent frontmatter hygiene** — added defense-in-depth `disallowedTools: Edit` to `gsd-research-orchestrator` and `gsd-ui-researcher` (Bash+Write agents that never call Edit), and explicit dispatch keywords to the `gsd-research-orchestrator`, `gsd-verifier`, and `gsd-validator-hub` descriptions; closes the FLAG findings from the ecosystem audit
 
 ## [v2.5] - 2026-04-17
 
