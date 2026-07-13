@@ -669,9 +669,23 @@ The 65 GATE-KEEP rows protect a short list of distinct irreversibles. Grouped, w
 
 Irreversible decisions deferred by the run itself (journal IRREVERSIBLE rows) are appended here at Phase 6 ship time.
 
+## Phase 5 — Adversarial Review Results
+
+Two clean-context reviewers, each given only the artifact under review + the source tree, forbidden from reading the decision journal or each other's output.
+
+**Reviewer 1 (refute the ledger)** — sampled 25 rows stratified across all 11 "ungated irreversible" GATE-KEEP callouts, 5 dangerous-shaped AUTOMATE rows, and INFERRED/random spot-checks; opened every cited `file:line`. Result: **24 CONFIRMED, 0 REFUTED_FACTUAL, 1 DISPUTED_DESIGN.** The highest-priority hunt — an AUTOMATE that could auto-approve something irreversible — came up empty: the AUTOMATE class contains zero push/tag/publish/PUT/remote operations; every real push/tag/PR/merge/branch-protection-PUT/uninstall-delete is classified GATE-KEEP. The `349 VERIFIED / 0 INFERRED` claim held on the sample (all cited constructs present; two-line constructs consistently anchored at their first line).
+
+**Reviewer 2 (break the blueprints)** — took the top 5 by score, re-ran `git apply --check` on every fenced diff independently, attacked test plans, and ran a weakens-a-gate checklist against the real hooks/governance files. Result: **4 of 5 apply fully clean**; the 5th (`agent-skills-fail-loud-resolution`, the sketch) is exactly 7 clean / 3 corrupt as self-disclosed. **One gate-loosening found and flagged** — `bp-f-review-sentinel-lesson-gate` adds a sentinel bypass to the governance Stop dirty-tree block — verified scoped to the Stop event only, always logged, gating no irreversible action, and structurally unable to touch the six PreToolUse blocks (commit-on-main, private-staging, required-docs, secrets, nested-git, pre-push-dirty all byte-identical and sentinel-blind). No blueprint enables an ungated push/tag/delete/publish.
+
+**Disposition:** zero factual errors surfaced, so nothing in the ledger or blueprints was rewritten (the one sketch was already honestly labeled). Three design disagreements are preserved below unresolved — the autonomous run fixes facts; the human settles design.
+
 ## Open Disputes — Design Calls Awaiting the Operator
 
-<!-- populated in Phase 5 -->
+1. **`wrap-and-sync.md:164` — AUTOMATE vs the source's explicit "do not retry automatically."** The ledger classes the PR-create error branch as AUTOMATE (auto-retry, inheriting scope from the already-answered wrap gate). The source line explicitly says *do not retry automatically — a second push is not a git error to paper over.* Reviewer 1: not a factual error and not dangerous (the push already succeeded, PR creation was already consented), but the AUTOMATE directly overrides a deliberate source instruction. **Audit position:** the author's caution targets re-pushing, not the PR-create retry, which is in scope. **Source-author position:** the blanket "do not retry" was chosen deliberately. Human decides whether auto-retry of PR-create-after-successful-push is in scope.
+
+2. **`BP-smart-discuss-auto-parity` — unconditional `--auto` in `idea-to-shipped`.** The blueprint gives `smart-discuss` an `--auto` path (parity with the already-shipped `discuss-phase --auto`). For `autonomous.md` it is gated behind explicit auto opt-in; for `idea-to-shipped.md` it passes `--auto` unconditionally, removing discussion-level per-area consent inside that one flow. Reviewer 2: no safety-gate weakening (folded decisions still surface at GATE 1 plan approval, every auto-acceptance logged), but the unconditional choice is a design tradeoff. Human decides whether `idea-to-shipped` should retain per-area discussion consent.
+
+3. **`bp-f-review-sentinel-lesson-gate` — is any Stop-block bypass admissible policy?** The blueprint implements the 2026-04-10 lesson (`tasks/lessons.md:19`): a `.planning/.review-pending` sentinel lets the governance Stop hook approve (with a logged deferred-review reason) instead of always blocking on a dirty tree. Reviewer 2 confirmed it is scoped, logged, sentinel-gated on explicit operator intent, and structurally incapable of disabling the secrets/commit-on-main/push blocks — but flags that *whether any Stop-block bypass is admissible* is a policy call, and that the sentinel is agent-creatable (mitigated by mandatory per-stop logging + a visible untracked marker). Human decides whether to adopt the sentinel or keep the always-block behavior.
 
 ## Appendix A — Classified Interaction Inventory (raw)
 

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "timestamp": "2026-07-13T00:55:03.262Z",
+  "timestamp": "2026-07-13T01:10:56.570Z",
   "branch": "autonomy/frontier-audit",
-  "commit": "c237227",
+  "commit": "85d3cd8",
   "milestone": "v2.6",
   "phase": 0,
   "phase_name": "milestone",
@@ -17,6 +17,6 @@
     "fail": 0
   },
   "files_modified": [],
-  "next_action": "frontier-audit: begin phase 5 adversarial review",
-  "context_note": "frontier-audit: phase 4 complete — 9 blueprints (8 validated, 1 sketch), 7 mandatory candidates dispositioned"
+  "next_action": "frontier-audit: begin phase 6 ship",
+  "context_note": "frontier-audit: phase 5 complete — adversarial review 0 factual errors, 3 open disputes preserved"
 }
