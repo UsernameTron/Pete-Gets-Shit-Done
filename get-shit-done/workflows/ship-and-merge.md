@@ -289,7 +289,7 @@ Skill(skill="gsd:pause-work")
 completed, and the failure. Then display the exact resume command and stop:
 
 ```
-Resume with: /gsd:ship-and-merge ${PHASE_NUM}
+Resume with: /gsd:do "ship phase ${PHASE_NUM}"
 (completed steps skip themselves — verification and tests are detected as done on re-entry)
 ```
 

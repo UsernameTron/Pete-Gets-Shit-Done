@@ -193,7 +193,7 @@ AskUserQuestion:
  GSD ► ADOPT-CODEBASE — ADOPTED
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
- Next: /gsd:discuss-phase 1   (or /gsd:idea-to-shipped for a fresh idea)
+ Next: /gsd:discuss-phase 1   (or `/gsd:do "take this idea to a PR"` for a fresh idea)
 ```
 
 The workflow ENDS by presenting the routed next command; running it is the operator's next
@@ -228,7 +228,7 @@ If the failure happened before `.planning/` exists (the map step itself), there 
 to write — report plainly instead. Either way, display the exact resume command and stop:
 
 ```
-Resume with: /gsd:adopt-codebase
+Resume with: /gsd:do "adopt this repo"
 (completed steps detect their own output on re-entry — an existing map is offered for reuse
 by map-codebase's own Skip option, and an existing PROJECT.md stops at the adopted guard)
 ```
