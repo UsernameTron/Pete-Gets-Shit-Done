@@ -1,183 +1,130 @@
 ---
-assessment_date: 2026-04-13
+assessment_date: 2026-07-13
 crew_size: 20 active agents (17 GSD + 3 project-scoped); 8 archived
 mode: diagnostic
-status: all findings closed
+status: refreshed against current state (workflow-authoring initiative)
+supersedes: 2026-04-13 assessment
+hygiene_verdict: FLAG (2026-07-13 ecosystem audit)
 ---
 
-# GSD Crew Assessment — 2026-04-13
+# GSD Crew Assessment — 2026-07-13
 
-> **Updated 2026-04-13 (close-out):** all findings resolved. Orphan `gsd-stack-analyzer` deleted in `e42b9b0` (file removed + copilot-install test expected list updated). Three project agents (`plugin-developer`, `test-runner`, `docs-sync`) upgraded from 7/10 to 10/10 defense-in-depth in `dedad83`, `ac6e342`, `b7acc84`. Medium-severity overlap (`validator-hub` ecosystem-mode ↔ `ecosystem-auditor`) dispatch boundary documented. Crew now at 20 active agents (17 GSD + 3 project-scoped), 8 archived.
->
-> **Updated 2026-04-13:** reassessed after PR #39-45 defense-in-depth work. Original assessment read stale snapshot. Blocker #1 (gsd-ui-checker model field) struck — `model: haiku` is present in source and installed copy. Blocker #2 reclassified from blocker to active work item (quality gap, not hard blocker).
-
-Diagnostic report only. No remediation plans, no architectural proposals, no gray-area questions. Findings with citations.
+> **Refresh of the 2026-04-13 assessment against current state.** The `agents/` roster is byte-identical since `1a609a3` (2026-04-17 doc-sync) — quality scores carry forward, verified. What changed since April is the **command/workflow layer** (wrap-and-sync, daily-startup, smart-discuss, idea-to-shipped, `/gsd:do` routing). Coverage, overlap, and efficiency were re-run against that current layer; the 2026-07-13 ecosystem hygiene audit (verdict **FLAG**) is folded in. Diagnostic report only — findings with citations, no remediation plans, no architectural proposals. The build/don't-build recommendation lives separately in `.planning/ecosystem/AGENT-EXPANSION-RECOMMENDATION.md`.
 
 ---
 
 ## COVERAGE
 
-**Agents discovered:** 17 active GSD + 3 project-scoped + 8 archived (`agents/_archived/`). (`gsd-stack-analyzer` removed in `e42b9b0`.)
+**Agents discovered:** 17 active GSD (`agents/gsd-*.md`) + 3 project-scoped (`.claude/agents/`) + 8 archived (`agents/_archived/`).
 
-### Workflow → Agent Map (verified via grep)
+### Spawning map (real agent refs, by frequency — live grep)
 
-| Command | Agents spawned |
-|---------|----------------|
-| `/gsd:discuss-phase` | advisor-researcher, planner, research-orchestrator |
-| `/gsd:discuss-phase-assumptions` | assumptions-analyzer, planner, research-orchestrator |
-| `/gsd:plan-phase` | planner, research-orchestrator, verifier |
-| `/gsd:execute-phase` | codebase-mapper, debugger, executor, planner, research-orchestrator, ui-auditor, ui-checker, ui-researcher, verifier |
-| `/gsd:verify-work` | planner, verifier |
-| `/gsd:validate-phase` | verifier |
-| `/gsd:ship` | validator-hub |
-| `/gsd:ui-phase` | ui-researcher, ui-checker |
-| `/gsd:ui-review` | ui-auditor |
-| `/gsd:debug` | debugger |
-| `/gsd:map-codebase` | codebase-mapper |
-| `/gsd:audit-deps` | dependency-auditor |
-| `/gsd:audit-agents` | ecosystem-auditor |
-| `/gsd:new-project`, `/gsd:new-milestone` | research-orchestrator, research-synthesizer, roadmapper |
-| `/gsd:research-phase` | research-orchestrator |
-| `/gsd:profile-user` | user-profiler |
-| `/gsd:quick` | planner, executor, verifier |
-| `/gsd:fast` | (none — inline) |
+| Count | Agent |
+|------:|-------|
+| 48 | gsd-verifier (execute/quick/verify-work/ship/audit-milestone/idea-to-shipped) |
+| 37 | gsd-research-orchestrator |
+| 35 | gsd-planner |
+| 23 | gsd-executor |
+| 16 | gsd-codebase-mapper |
+| 14 | gsd-debugger |
+| 13 / 12 / 9 | gsd-ui-researcher / gsd-ui-checker / gsd-ui-auditor |
+| 12 | gsd-roadmapper |
+| 6 each | gsd-user-profiler, gsd-research-synthesizer, gsd-ecosystem-auditor, gsd-dependency-auditor, gsd-assumptions-analyzer |
+| 4 | gsd-advisor-researcher (`discuss-phase.md:495`) |
+| 3 | gsd-validator-hub (`ship.md:140`) |
 
-### Gaps (workflow stages lacking a dedicated agent)
+_Non-agent noise excluded: `gsd-tools` (296) = `get-shit-done/bin/gsd-tools.cjs` CLI._
 
-1. ~~**Discover / stack-analysis** — `gsd-stack-analyzer` exists but no `/gsd:` command references it.~~ **RESOLVED 2026-04-13** — agent deleted in `e42b9b0`; no longer an orphan lifecycle area.
-2. **Forensics** — `/gsd:forensics` spawns only `gsd-debugger`; no issue-classification agent for non-bug cases.
-3. **Workstream coordination** — `/gsd:workstreams` references agent name `gsd-workspaces`, which does not resolve to a .md file.
-4. **Review coordination** — `/gsd:review` references prefix patterns (`gsd-review-claude-*`, `gsd-review-codex-*`, `gsd-review-gemini-*`, `gsd-review-prompt-*`) that do not resolve to any agent file.
-5. **Update/patch management** — `/gsd:update`, `/gsd:reapply-patches` reference `gsd-build`, `gsd-check-update`, `gsd-update-check`, `gsd-local-patches` — none exist.
-6. **Plan-milestone-gaps** — `/gsd:plan-milestone-gaps` spawns no agents.
-7. **Milestone completion audit** — `/gsd:audit-milestone` routes to no dedicated milestone auditor agent. (Archived `gsd-nyquist-auditor` was consolidated into `gsd-verifier` scope=nyquist, but no command routes there.)
+### Real phantom references (NEW — April missed these)
 
-### Orphan agents (never referenced)
+Five agent names passed to `gsd-tools.cjs agent-skills <name>` resolve to **no** agent file. Each silently returns empty (`2>/dev/null`), so the `AGENT_SKILLS_*` hint is unpopulated while the real `subagent_type` spawn nearby uses the correct agent. Low-severity live bug (agents spawn without their skills hint):
 
-_None. (`gsd-stack-analyzer` removed in `e42b9b0` — 2026-04-13.)_
+- `gsd-checker` — `verify-work.md:36`, `quick.md:123`, `plan-phase.md:29` (real: gsd-verifier/gsd-planner)
+- `gsd-synthesizer` — `new-project.md:63`, `new-milestone.md:150` (real: gsd-research-synthesizer)
+- `gsd-researcher` — `plan-phase.md:27`, `research-phase.md:45` (real: gsd-research-orchestrator)
+- `gsd-advisor` — `discuss-phase.md:137` (real: gsd-advisor-researcher)
+- `gsd-ui-reviewer` — `ui-review.md:21` (real: gsd-ui-auditor)
 
-### Description/reality mismatches
+**April's phantom-ref list was grep false positives** — non-agent strings still present but never real agent spawns: `gsd-workspaces` (a `~/gsd-workspaces/` path), `gsd-review-{claude,codex,gemini,prompt}-*` (`/tmp/` filenames), `gsd-build`/`gsd-check-update`/`gsd-update-check`/`gsd-local-patches` (URL/script/cache/backup-dir names in `update.md`, `reapply-patches.md`).
 
-- **`gsd-user-profiler`** — description says "profile orchestration workflows" (plural); only `/gsd:profile-user` spawns it.
-- **`gsd-assumptions-analyzer`** — description says "discuss-phase assumptions mode"; actual spawn is `/gsd:discuss-phase-assumptions` (conditional on `DISCUSS_MODE` config).
-- **`gsd-research-synthesizer`** — description says "after 4 researcher agents complete"; only `gsd-research-orchestrator` exists, so the "4" count is phantom.
+### Gaps (command steps needing an agent, spawning none)
+
+1. **`/gsd:forensics`** — `forensics.md` spawns **zero** agents (no `subagent_type`/`Task`). Regressed vs April, which claimed it spawned gsd-debugger.
+2. **`/gsd:plan-milestone-gaps`** — `plan-milestone-gaps.md` spawns **zero** agents.
+3. _(Resolved since April)_ **`/gsd:audit-milestone`** now routes to `gsd-verifier` (`audit-milestone.md:84`).
+
+### Orphan agents (never spawned by the command graph)
+
+- **GSD agents:** none — all 17 have ≥1 real spawn.
+- **Meta-agents:** all 3 (`docs-sync`, `test-runner`, `plugin-developer`) are unreferenced by `subagent_type`; they rely on Claude Code's description-based auto-invocation, not GSD routing (`sync-docs.md:18` explicitly states it "runs inline — no agent delegation"). This is by design, not drift.
+
+### New workflows
+
+wrap-and-sync, daily-startup, smart-discuss, idea-to-shipped, `/gsd:do` introduce **no** new phantom refs — idea-to-shipped correctly spawns gsd-verifier/gsd-executor.
 
 ---
 
 ## OVERLAPS
 
-### High severity (>80%)
-None.
+### The one known pair — `gsd-validator-hub` (target=ecosystem) ↔ `gsd-ecosystem-auditor`
 
-### Medium severity (60–80%)
+**Severity: LOW** (down from MEDIUM in April). Both audit agent-ecosystem structural correctness, but they are operationally disjoint on three axes, and the boundary is now *more* strongly encoded than in April:
 
-~~**`gsd-validator-hub` (target=ecosystem) ↔ `gsd-ecosystem-auditor`**~~ **RESOLVED 2026-04-13** — dispatch boundary documented:
+| Axis | validator-hub (ecosystem) | ecosystem-auditor |
+|------|---------------------------|-------------------|
+| Invoker | `/gsd:ship` pre-PR gate (`ship.md:140`) | `/gsd:audit-agents` on-demand (`audit-agents.md:16,61`) |
+| Scan target | `.claude/agents/` project helpers (`gsd-validator-hub.md:214`) | `./agents/gsd-*.md` roster; **explicitly ignores `.claude/agents/`** (`gsd-ecosystem-auditor.md:52-54`) |
+| Depth / output | Fast read-only structural gate, no write | Deep 6-dimension diagnostic incl. hygiene + drift; writes ECOSYSTEM-REPORT.md |
 
-- **`gsd-validator-hub` (target=ecosystem)** — pre-ship structural gate. Spawned by `/gsd:ship`. Fast, narrow: frontmatter schema + tool-permission consistency. Fails the ship if structurally broken.
-- **`gsd-ecosystem-auditor`** — on-demand diagnostic. Spawned by `/gsd:audit-agents`. Full BLOCK/FLAG/PASS report across schema, tool/permission mismatches, hygiene, description quality, naming collisions, install drift. Deeper than validator-hub; not on the ship path.
+Dispatch rule (still holds): **structural breakage blocks ship → validator-hub; diagnostic sweep → ecosystem-auditor.** The disjoint scan-target split means they no longer inspect the same directory.
 
-Dispatch rule: **structural breakage blocks ship → validator-hub; diagnostic sweep → ecosystem-auditor.** Overlap is intentional (validator-hub is a subset of ecosystem-auditor for latency reasons on the ship path).
+### New overlaps since April: NONE
+Roster composition, descriptions, and unification notes unchanged. No pair crosses 60%. Sub-threshold pairs checked and cleared: ui-checker↔ui-auditor (~35%, spec-time/build-time pair), planner↔roadmapper (~30%, phase/project altitude), research-orchestrator↔advisor-researcher (~30%, sweep/single-decision).
 
-### Low severity (identical tools, distinct roles)
+### Identical tool sets (benign — distinct domains)
 
-Read-only BLOCK/FLAG/PASS quality gates sharing `Read, Bash, Glob, Grep`: `gsd-verifier`, `gsd-dependency-auditor`, `gsd-ui-checker`. Domains are distinct (code goals / dependencies / UI design) — overlap is tool surface, not responsibility.
+- `{Read,Write,Edit,Bash,Glob,Grep}` — 8 agents (standard builder set): codebase-mapper, executor, research-synthesizer, roadmapper, ui-auditor, verifier, docs-sync, plugin-developer.
+- `{Read,Bash,Glob,Grep}` — 4 agents (read-only gate set): assumptions-analyzer, ui-checker, user-profiler, validator-hub.
+- `{Read,Write,Bash,Grep,Glob,WebSearch,WebFetch,mcp__context7__*,mcp__firecrawl__*,mcp__exa__*}` — 2 agents (web-research set): research-orchestrator, ui-researcher.
 
-### Clean unifications (flagged for completeness)
-
-- `gsd-verifier` — scopes: general | plan | integration | nyquist. Archived peers: `gsd-nyquist-auditor`, `gsd-plan-checker`, `gsd-integration-checker`.
-- `gsd-research-orchestrator` — scope: phase | project. Archived peers: `gsd-phase-researcher`, `gsd-project-researcher`.
-- `gsd-validator-hub` — target: extension | ecosystem. Archived peer: `extension-validator`, `validator`. (Ecosystem mode still overlaps with `gsd-ecosystem-auditor` — see Medium above.)
+_Correction: April's "low-severity identical tools" line (old `:83`) named verifier/dependency-auditor/ui-checker — factually stale; those carry three different tool sets._
 
 ---
 
 ## QUALITY SCORES
 
-Rubric (0–10): frontmatter completeness (2) + role clarity (2) + model_rationale + scope_guard (2) + anti_patterns ≥6 rules (2) + completion_criteria (2).
+Rubric (0–10): frontmatter completeness (2) + role clarity (2) + model_rationale + scope_guard (2) + anti_patterns ≥6 rules (2) + completion_criteria (2). **Scores carry forward from the 2026-04-13 assessment** — verified: only one commit (`1a609a3`, 2026-04-17 doc-sync) touched `agents/` since, no structural change.
 
-| Agent | Score | Key deficiency |
-|-------|-------|----------------|
-| gsd-planner | 10/10 | — (reference standard, PR #41) |
-| gsd-verifier | 10/10 | — (reference standard, PR #39) |
-| gsd-executor | 10/10 | — (full defense-in-depth, PR #45) |
-| gsd-debugger | 10/10 | — (full defense-in-depth, PR #40) |
-| gsd-advisor-researcher | 9/10 | Missing `model_rationale` body; weak `anti_patterns` |
-| gsd-assumptions-analyzer | 9/10 | Missing `model_rationale`; embedded anti-patterns not numbered |
-| gsd-codebase-mapper | 9/10 | Missing `<project_context>` section |
-| gsd-dependency-auditor | 9/10 | No explicit `anti_patterns` section |
-| gsd-ecosystem-auditor | 9/10 | No explicit `anti_patterns` section |
-| gsd-research-orchestrator | 9/10 | Scope detection in docstring, not body handler |
-| gsd-research-synthesizer | 9/10 | Weak `anti_patterns` (not numbered) |
-| gsd-roadmapper | 9/10 | Missing `<project_context>` section |
-| gsd-ui-auditor | 9/10 | Hex color literal (`#F472B6`) — convention uses CSS names |
-| gsd-ui-researcher | 9/10 | Hex color literal (`#E879F9`) — convention uses CSS names |
-| gsd-user-profiler | 9/10 | No explicit "mandatory read" instruction for reference doc |
-| gsd-validator-hub | 8/10 | Missing `isolation`, `maxTurns`; weak scope-selection handler |
-| gsd-ui-checker | 9/10 | ~~BLOCKER: no explicit `model:` field~~ — **STRUCK 2026-04-13**: `model: haiku` present at `agents/gsd-ui-checker.md:6` (source + installed copy verified). Original reading was stale. |
-| plugin-developer | 10/10 | — (full defense-in-depth, `dedad83` 2026-04-13) |
-| test-runner | 10/10 | — (full defense-in-depth, `ac6e342` 2026-04-13) |
-| docs-sync | 10/10 | — (full defense-in-depth, `b7acc84` 2026-04-13) |
+| Tier | Agents |
+|------|--------|
+| **10/10** (7) | gsd-planner, gsd-verifier, gsd-executor, gsd-debugger, plugin-developer, test-runner, docs-sync |
+| **9/10** (12) | advisor-researcher, assumptions-analyzer, codebase-mapper, dependency-auditor, ecosystem-auditor, research-orchestrator, research-synthesizer, roadmapper, ui-auditor, ui-checker, ui-researcher, user-profiler |
+| **8/10** (1) | validator-hub (missing `isolation`/`maxTurns`; weak scope-selection handler) |
 
-_`gsd-stack-analyzer` removed from scoring — agent deleted in `e42b9b0` 2026-04-13._
+### Hygiene audit overlay (2026-07-13 ecosystem audit — verdict FLAG)
 
-### Defense-in-depth hygiene status
-
-| Status | Agents |
-|--------|--------|
-| **Complete** (all 4 hygiene sections + frontmatter) | gsd-planner, gsd-verifier, gsd-executor, gsd-debugger, plugin-developer, test-runner, docs-sync |
-| **Partial** (1–2 gaps) | gsd-advisor-researcher, gsd-assumptions-analyzer, gsd-codebase-mapper, gsd-dependency-auditor, gsd-ecosystem-auditor, gsd-research-orchestrator, gsd-research-synthesizer, gsd-roadmapper, gsd-ui-auditor, gsd-ui-checker, gsd-ui-researcher, gsd-user-profiler, gsd-validator-hub |
-| **Not started** (minimal frontmatter, no body sections) | _none_ |
-
-### Blockers
-
-_All original blockers resolved or reclassified on 2026-04-13. None currently outstanding._
-
-### Active work items (reclassified 2026-04-13)
-
-_All closed as of 2026-04-13._
-
-1. ~~**`gsd-ui-checker` — missing `model:` field**~~ — **RESOLVED (stale reading).** Verified `model: haiku` present in source (`agents/gsd-ui-checker.md:6`) and installed copy (`~/.claude/agents/gsd-ui-checker.md:6`). Original assessment read a pre-PR-39 snapshot.
-2. ~~**Three project agents need defense-in-depth hygiene upgrade**~~ — **RESOLVED 2026-04-13**. `plugin-developer` (`dedad83`), `test-runner` (`ac6e342`), `docs-sync` (`b7acc84`) upgraded to 10/10. All three now carry `maxTurns`, `isolation: worktree`, `disallowedTools` in frontmatter plus `<role>`, `<model_rationale>`, `<scope_guard>`, `<project_context>`, `<anti_patterns>` (10 rules each), `<completion_criteria>` body blocks. Scope-tailored per agent; triangulation enforced (plugin-developer delegates tests + docs; test-runner never edits source; docs-sync never edits code).
-3. ~~**Orphan `gsd-stack-analyzer`**~~ — **RESOLVED 2026-04-13** in `e42b9b0`. Agent file deleted, `tests/copilot-install.test.cjs` expected-agents list updated.
-4. ~~**`validator-hub` ecosystem-mode ↔ `ecosystem-auditor` dispatch boundary undocumented**~~ — **RESOLVED 2026-04-13**. Boundary captured under _OVERLAPS → Medium severity_ above: validator-hub is the ship-path structural gate, ecosystem-auditor is the on-demand diagnostic sweep.
+The dedicated hygiene sweep surfaced live nits not in the April quality rubric:
+- **Tool/perms (FLAG ×2):** `gsd-research-orchestrator`, `gsd-ui-researcher` have Bash+Write without `disallowedTools: Edit` (defense-in-depth gap).
+- **Description (FLAG ×3):** `gsd-research-orchestrator`, `gsd-validator-hub`, `gsd-verifier` lack an explicit dispatch keyword (parametrized agents; dispatch implicit in scope/target param).
+- **Frontmatter / Hygiene / Naming:** all PASS.
 
 ---
 
 ## BOTTLENECKS & EFFICIENCY
 
-### Spawn frequency (v2.0–v2.2)
+### Data-source caveat
+`.planning/agent-health.log` is **262 DRIFT events, 0 SPAWN records** — it measures ~33 SubagentStop hook firings + a standing drift set, **not** per-agent spawn counts. No per-agent spawn ledger exists anywhere in the repo (the v2.3 cost-tracker hook's JSONL is not persisted). Spawn frequency is inferred from the coverage grep, milestone SUMMARYs, and design docs.
 
-| Agent | Spawns | Context |
-|-------|--------|---------|
-| gsd-verifier | 7 | Most frequent — multi-scope verification |
-| gsd-validator-hub | 6 | Core for audit phases (35, 36) |
-| gsd-planner | 3 | Model-routing, classification |
-| gsd-debugger | 3 | Hygiene backfill activity |
-| gsd-research-orchestrator | 2 | Phase 30-03 only |
-| gsd-executor | 1 | v2.2 shipped without subagent delegation |
-| gsd-research-synthesizer | 0 | No explicit spawn in milestone records |
-| gsd-codebase-mapper | 0 | No materialized use in v2.0–v2.2 |
+### Utilization
+- **Most-used (every window):** gsd-verifier, then gsd-planner and gsd-research-orchestrator.
+- **Dormant in current context** (no trigger surface between milestones / CLI plugin has no frontend): the UI trio (ui-auditor/ui-checker/ui-researcher), roadmapper, research-synthesizer, codebase-mapper, user-profiler, advisor-researcher, assumptions-analyzer, dependency-auditor.
+- **Execution-vs-verification imbalance persists and intensifies** — the gate-authoring initiative is verifier-dominant (blueprints skew verifier:executor ~40:5). Not a defect given the work type; the roster simply leans toward verification while build/discovery agents idle.
 
-### Ceremony bypass
+### Only real bottleneck: config drift
+From 2026-07-12 20:35 → 2026-07-13 04:51 (~9h, 32 consecutive SubagentStop firings), the **same 8 installed agent copies drift** with identical diff-line counts, never reconciled — led by `gsd-ecosystem-auditor` (~48 lines), down to `gsd-validator-hub` (~4). Cause: the July initiative **edits** agent definitions faster than they are reinstalled. **Zero FAIL/ERROR events** — version mismatch only; no GSD agent causes rework. (The one recent revision cycle — Phase 57 replan — was driven by external cross-AI review, not a GSD agent.)
 
-- **v2.2 Phases 39, 40** — No PLAN.md, SUMMARY.md, or VERIFICATION.md. Shipped directly from REQUIREMENTS.md. Audited `PASS` in `v2.2-MILESTONE-AUDIT.md:21`.
-- **v2.0 Phase 32** — PLAN.md present, SUMMARY.md absent.
-- **v2.1 Phase 38** — SUMMARY.md present, phase-level PLAN.md absent; backfilled during v2.1 audit.
-
-### Agent-health drift
-
-`.planning/agent-health.log:2-15` (2026-04-10T22:37:18Z): 12 agents had stale installed copies post-hygiene-backfill.
-- Largest drift: `gsd-planner` (~88 lines), `gsd-debugger` (~63), `gsd-research-orchestrator` (~54).
-- Minimal drift: `gsd-validator-hub` (~2 lines).
-- No execution failures observed — version mismatch only.
-
-### Recurring artifact-creation issues
-
-- v2.1 retrospective: "fast execution in later phases skipped artifact creation. Fix: verify-work should enforce VERIFICATION.md creation as a gate."
-- v1.1 and v2.1 retrospectives both report REQUIREMENTS.md checkbox drift — `execute-phase` does not sync requirement status with task completion.
-
-### Execution-vs-verification imbalance
-
-Verifier + validator: 13 spawns. Executor: 1 spawn. v2.1–v2.2 were audit-heavy milestones; imbalance reflects milestone mix, not necessarily a structural bottleneck.
+### Observability gap
+For a governance-focused product, the absence of a first-class spawn/attribution ledger is the obvious missing instrument — frequency questions currently require archaeological inference.
 
 ---
 
@@ -187,15 +134,16 @@ Verifier + validator: 13 spawns. Executor: 1 spawn. v2.1–v2.2 were audit-heavy
 |-----------|---------|
 | Active agents | 20 (17 GSD + 3 project-scoped) |
 | Archived | 8 |
-| Orphan agents | 0 (`gsd-stack-analyzer` removed `e42b9b0`) |
-| Coverage gaps | 6 lifecycle areas (stack-analysis retired; 3 still have phantom agent references) |
-| Medium-severity overlaps | 0 (`validator-hub` ↔ `ecosystem-auditor` boundary documented) |
-| Gold-standard agents (10/10) | 7 (gsd-planner, gsd-verifier, gsd-executor, gsd-debugger, plugin-developer, test-runner, docs-sync) |
-| Blocking quality issues | 0 |
-| Open findings | **0 — all resolved 2026-04-13** |
-| Ceremony-bypass phases | 3 (v2.0-P32, v2.1-P38, v2.2-P39+P40) |
-| Drift events | 1 (2026-04-10, 12 agents stale) |
+| Orphan GSD agents | 0 |
+| Real phantom refs | 5 (`agent-skills` lookups: checker/synthesizer/researcher/advisor/ui-reviewer) — NEW |
+| Coverage gaps | 2 (`/gsd:forensics`, `/gsd:plan-milestone-gaps` spawn zero); audit-milestone resolved |
+| Overlaps | 1 LOW (validator-hub ↔ ecosystem-auditor, boundary strengthened); 0 new |
+| Gold-standard agents (10/10) | 7 |
+| Hygiene verdict (2026-07-13) | FLAG — 2 tool/perm + 3 description + 7 install-drift; no BLOCK |
+| Bottlenecks | 1 (unreconciled config drift, 8 agents; hygiene/propagation, not runtime failure) |
+| Runtime failures | 0 |
+| Observability | No per-agent spawn ledger (instrument gap) |
 
 ---
 
-Assessment complete. Run `/gsd:plan-phase` on a specific finding if you want to act on it.
+Assessment complete. The build/don't-build recommendation — **no net-new agents** — is in `.planning/ecosystem/AGENT-EXPANSION-RECOMMENDATION.md`, derived by running each gap candidate through `get-shit-done/references/agent-necessity-gate.md`.
