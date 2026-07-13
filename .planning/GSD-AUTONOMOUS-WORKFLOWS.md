@@ -135,6 +135,8 @@ Two design consequences, applied to every workflow below: (1) no chain may assum
 ## W5 — `ship-milestone` — SHELVED
 
 > **Status: shelved by operator decision (2026-07-12).** A milestone ship is exactly the kind of irreversible sequence that must be gated, and `/gsd:finalize` — the existing primitive closest to this chain — carries two ungated pushes plus a tool-permission mismatch (details in item 8). The design below already routes around `finalize`, but this workflow stays unbuilt until `finalize` is repaired or the chain is re-verified end-to-end. Spec retained for that day.
+>
+> **Update (2026-07-12, blueprint `finalize-push-consent`):** the two ungated pushes (Gate 1 and Gate 7) and the missing AskUserQuestion in `allowed-tools` are resolved — both pushes now sit behind a consent gate: AskUserQuestion when interactive; the `--yes-push` flag or the `workflow.finalize_auto_push` config key (default `false`) pre-approve it for autonomous chains, always printing an `[auto-push]` receipt. `ship-milestone` can now route THROUGH `finalize` by granting push consent at its own approved gate. Still open before unshelving: the cross-plugin `repo-doc-architect` spawn (Gate 5.5) and one end-to-end chain re-verification.
 
 1. **Name:** `ship-milestone`
 2. **Trigger intent:** "Close out the milestone."

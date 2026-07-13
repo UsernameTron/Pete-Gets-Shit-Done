@@ -1,7 +1,7 @@
 ---
 name: gsd:finalize
 description: End-to-end project finalization — verify, archive, report, push, confirm clean
-argument-hint: "[milestone version, e.g., 'v2.2']"
+argument-hint: "[milestone version, e.g., 'v2.2'] [--yes-push]"
 allowed-tools:
   - Read
   - Bash
@@ -10,6 +10,7 @@ allowed-tools:
   - Edit
   - Write
   - Task
+  - AskUserQuestion
 ---
 <!-- workflow-exemption: inline — orchestrates existing commands (complete-milestone, cleanup, stats, session-report) inline -->
 
@@ -24,6 +25,8 @@ Output: Clean git state, all commits pushed, milestone archived, session report 
 <context>
 Milestone: $ARGUMENTS (optional — if omitted, read from .planning/STATE.md `milestone` field)
 
+Flags: `--yes-push` — pre-approves the push consent gates (Gate 1 and Gate 7). Strip it from $ARGUMENTS before reading the milestone version.
+
 **Automatically detected from project root:**
 - CLAUDE.md → project identity, build commands, test commands
 - .planning/STATE.md → current milestone, status, phase count
@@ -32,6 +35,15 @@ Milestone: $ARGUMENTS (optional — if omitted, read from .planning/STATE.md `mi
 - .gitignore → what's tracked vs local-only
 
 **This command works on ANY project.** It does not hardcode package counts, test frameworks, or file structures. It reads the project's own configuration to determine what to verify.
+
+**Push consent — applies to every `git push` this command performs:**
+1. If `--yes-push` was passed: consent is pre-approved (source: flag).
+2. Else read the project config (missing file or key falls back to `false`):
+   `AUTO_PUSH=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow.finalize_auto_push 2>/dev/null || echo "false")`
+   If `true`: consent is pre-approved (source: config).
+3. Else consent is unresolved: use AskUserQuestion at each push point (Gates 1 and 7).
+
+When consent is pre-approved, do not ask — print the receipt line `[auto-push] gate=<1|7> branch=<branch> commits=<count> source=<flag|config>` immediately before each push so the auto-approval stays visible in the transcript. Pre-approved consent never bypasses Gate 2: build-health failures still stop the command.
 </context>
 
 <process>
@@ -62,6 +74,10 @@ Milestone: $ARGUMENTS (optional — if omitted, read from .planning/STATE.md `mi
 1. Run `git log origin/$(git branch --show-current)..HEAD --oneline`
 2. If commits exist:
    - Show them
+   - Resolve push consent (protocol in <context>):
+     - Pre-approved: print the receipt `[auto-push] gate=1 branch=<branch> commits=<count> source=<flag|config>`, then push.
+     - Otherwise AskUserQuestion: "Gate 1: push these commits to origin/<branch> now? Build health is not verified until Gate 2." Options: "Push now" / "Skip push (keep local)" / "Stop finalize".
+     - Skip push: leave the commits local and continue to Gate 2 — Gate 7 re-offers the push. Stop finalize: halt and report.
    - Push: `git push origin $(git branch --show-current)`
    - Confirm push succeeded
 3. If nothing to push, skip.
@@ -140,13 +156,20 @@ Spawn `repo-doc-architect` as a subagent to refresh project documentation before
    - Stage all modified .planning/ files, tasks/todo.md, and any generated reports
    - Do NOT stage .gitignored files
    - Commit: `chore: finalize [milestone] — archive, report, clean state`
+   - Show `git log origin/$(git branch --show-current)..HEAD --oneline` — everything the push will publish, including commits kept local at Gate 1
+   - Resolve push consent (protocol in <context>):
+     - Pre-approved: print the receipt `[auto-push] gate=7 branch=<branch> commits=<count> source=<flag|config>`, then push.
+     - Otherwise AskUserQuestion: "Gate 7: push the finalize commit(s) to origin/<branch>?" Options: "Push now" / "Skip push (keep local)" / "Stop finalize".
+     - Skip push: keep the commits local and continue to Gate 8. Stop finalize: halt and report.
    - Push to origin
-3. If no changes: skip
+3. If no changes to commit but unpushed commits remain (kept local at Gate 1): run the same push-consent step for them before continuing
+4. If no changes and nothing unpushed: skip
 
 ## Gate 8: Confirm Clean State
 
 1. Run `git status` — should be clean (nothing modified, nothing untracked that matters)
 2. Run `git log origin/$(git branch --show-current)..HEAD --oneline` — should be empty
+   - Exception: commits whose push was declined at Gate 1/7 are expected here — report their count as "kept local by operator choice" instead of presenting the all-clean confirmation
 3. Run `git log --oneline -5` — show recent history
 4. Present final confirmation:
    ```
@@ -168,6 +191,7 @@ Spawn `repo-doc-architect` as a subagent to refresh project documentation before
 - **Gate-based:** Do not skip gates. Do not proceed past a failed gate. Report the failure and stop.
 - **Idempotent:** Running this command twice should be safe. If everything is already done, it confirms and exits at Gate 0.
 - **No destructive operations:** Never force-push, reset, or delete unarchived work. Archive first, always.
+- **Gated pushes:** Never `git push` without resolved consent — an AskUserQuestion approval this run, the `--yes-push` flag, or `workflow.finalize_auto_push=true`. Pre-approved pushes always print the `[auto-push]` receipt line first.
 - **Read before assuming:** Check what build commands actually exist before trying to run them. Not every project has make, bun, pytest, etc.
 - **Respect .gitignore:** Some artifacts (like knowledge base files) may be gitignored. Note them but don't try to commit them.
 - **One commit:** Gates 3-6 may each produce changes. Batch them into one finalization commit at Gate 7, not one per gate.

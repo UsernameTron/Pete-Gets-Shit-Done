@@ -23,6 +23,7 @@ const VALID_CONFIG_KEYS = new Set([
   'workflow.discuss_mode',
   'workflow.skip_discuss',
   'workflow.adaptive',
+  'workflow.finalize_auto_push',
   'workflow._auto_chain_active',
   'git.branching_strategy', 'git.phase_branch_template', 'git.milestone_branch_template', 'git.quick_branch_template',
   'planning.commit_docs', 'planning.search_gitignored',
@@ -129,6 +130,7 @@ function buildNewProjectConfig(userChoices) {
       discuss_mode: 'discuss',
       skip_discuss: false,
       adaptive: false,
+      finalize_auto_push: false,
     },
     hooks: {
       context_warnings: true,
