@@ -764,6 +764,7 @@ async function runCommand(command, args, cwd, raw) {
         const phaseArg = options.phase;
         if (!phaseArg) { error('--phase required for uat run-automated'); }
         const phasesDir = path.join(core.planningDir(cwd), 'phases');
+        if (!fs.existsSync(phasesDir)) { error('No phases directory found in planning directory'); }
         const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
         const phaseDir = entries
           .filter(e => e.isDirectory())
