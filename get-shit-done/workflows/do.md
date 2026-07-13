@@ -39,6 +39,7 @@ Evaluate `$ARGUMENTS` against these routing rules. Apply the **first matching** 
 |--------------------------|----------|-----|
 | Starting a new project, "set up", "initialize" | `/gsd:new-project` | Needs full project initialization |
 | Mapping or analyzing an existing codebase | `/gsd:map-codebase` | Codebase discovery |
+| Fixing a bug end-to-end through to a shipped fix: "just fix this bug", "fix this and ship it", a pasted error with fix intent | `workflow:bug-to-branch` | Debug → gated fix path → full suite → gated ship, two gates (W3) |
 | A bug, error, crash, failure, or something broken | `/gsd:debug` | Needs systematic investigation |
 | Exploring, researching, comparing, or "how does X work" | `/gsd:research-phase` | Domain research before planning |
 | Discussing vision, "how should X look", brainstorming | `/gsd:discuss-phase` | Needs context gathering |
@@ -55,6 +56,7 @@ Evaluate `$ARGUMENTS` against these routing rules. Apply the **first matching** 
 | A note, idea, or "remember to..." | `/gsd:add-todo` | Capture for later |
 | Adding tests, "write tests", "test coverage" | `/gsd:add-tests` | Test generation |
 | Completing a milestone, shipping, releasing | `/gsd:complete-milestone` | Milestone lifecycle |
+| A small verified change pushed to a draft PR: "quick change: X", "small fix, push it up" | `workflow:quick-change` | Scope-checked quick `--full` + single push gate (W4) |
 | A specific, actionable, small task (add feature, fix typo, update config) | `/gsd:quick` | Self-contained, single executor |
 
 **Requires `.planning/` directory:** All routes except `/gsd:new-project`, `/gsd:map-codebase`, `/gsd:help`, `/gsd:join-discord`, and `workflow:daily-startup` (which handles a missing `.planning/` itself and routes to project setup). If the project doesn't exist and the route requires it, suggest `/gsd:new-project` first.

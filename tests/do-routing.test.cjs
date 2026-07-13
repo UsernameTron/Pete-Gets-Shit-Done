@@ -2,7 +2,7 @@
  * GSD Tests - `/gsd:do` routing contract for named autonomous workflows
  *
  * Validates the do.md dispatcher's workflow routes (Option A of
- * .planning/GSD-AUTONOMOUS-WORKFLOWS.md): the three built flows are routed,
+ * .planning/GSD-AUTONOMOUS-WORKFLOWS.md): every built flow is routed,
  * each target workflow file exists, the dispatch step documents workflow:
  * semantics, and first-match ordering keeps the new rows from being shadowed
  * by (or shadowing) existing routes.
@@ -16,7 +16,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const DO_PATH = path.join(ROOT, 'get-shit-done', 'workflows', 'do.md');
 
-const FLOWS = ['idea-to-shipped', 'daily-startup', 'wrap-and-sync'];
+const FLOWS = ['idea-to-shipped', 'daily-startup', 'wrap-and-sync', 'bug-to-branch', 'quick-change'];
 
 describe('do.md workflow routing contract', () => {
   test('do.md exists', () => {
@@ -25,7 +25,7 @@ describe('do.md workflow routing contract', () => {
 
   const doc = fs.readFileSync(DO_PATH, 'utf8');
 
-  test('routes all three built autonomous flows', () => {
+  test('routes all built autonomous flows', () => {
     for (const flow of FLOWS) {
       assert.ok(
         doc.includes(`\`workflow:${flow}\``),
