@@ -14,47 +14,25 @@ Completes in under 2 seconds. No side effects — read-only operation.
 
 <process>
 
-<step name="gather_state">
-Call gatherDailyState to collect all dashboard data from CHECKPOINT.json or STATE.md fallback.
+<step name="gather_and_render">
+Gather and render in one self-contained node invocation. Shell variables set in one Bash step
+do not survive into the next tool call, and formatDashboard already computes the next action
+internally, so a separate determine-next step is unnecessary.
 
 ```bash
-DAILY_STATE=$(node -e "
-  const { gatherDailyState } = require('$HOME/.claude/get-shit-done/bin/lib/daily.cjs');
+node -e "
+  const { gatherDailyState, formatDashboard } = require('$HOME/.claude/get-shit-done/bin/lib/daily.cjs');
   const state = gatherDailyState('.planning');
-  console.log(JSON.stringify(state));
-")
+  console.log(JSON.stringify({ _source: state._source, dashboard: formatDashboard(state) }));
+"
 ```
 
-Parse the JSON result. The `_source` field tells you where data came from:
+Parse the single-line JSON result into `_source` and `dashboard`. The `_source` field tells you where data came from:
 - `checkpoint` — fresh checkpoint data
 - `state` — STATE.md fallback (no checkpoint present)
 - `none` — no project state found
-</step>
 
-<step name="determine_next">
-Call determineNextAction to get the exact next command.
-
-```bash
-NEXT_CMD=$(node -e "
-  const { determineNextAction } = require('$HOME/.claude/get-shit-done/bin/lib/daily.cjs');
-  const state = JSON.parse(process.env.DAILY_STATE);
-  console.log(determineNextAction(state));
-" DAILY_STATE="$DAILY_STATE")
-```
-</step>
-
-<step name="format_and_print">
-Call formatDashboard to get the formatted output string.
-
-```bash
-DASHBOARD=$(node -e "
-  const { formatDashboard } = require('$HOME/.claude/get-shit-done/bin/lib/daily.cjs');
-  const state = JSON.parse(process.env.DAILY_STATE);
-  console.log(formatDashboard(state));
-" DAILY_STATE="$DAILY_STATE")
-```
-
-Print the dashboard output to the user verbatim. Do not add extra commentary — the dashboard is self-contained.
+Print `dashboard` to the user verbatim. Do not add extra commentary — the dashboard is self-contained.
 
 After the dashboard, add a single line:
 

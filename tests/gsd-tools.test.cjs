@@ -8,7 +8,7 @@ const { test, describe, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
-const { runGsdTools, createTempProject, cleanup } = require('./helpers.cjs');
+const { runGsdTools, createTempProject, createTempDir, cleanup } = require('./helpers.cjs');
 
 // Seed fixture data directly into JSONL to avoid import coupling
 function seedHistory(tmpDir, count = 5) {
@@ -106,5 +106,44 @@ describe('history prune command', () => {
     );
     const lines = content.trim().split('\n');
     assert.strictEqual(lines.length, 3);
+  });
+});
+
+describe('uat run-automated command', () => {
+  let tmpDir;
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('missing phases directory fails cleanly, no raw ENOENT stack', () => {
+    // createTempDir (not createTempProject) leaves .planning/phases absent —
+    // createTempProject pre-creates it, which is exactly why no prior test
+    // caught the unguarded readdirSync crash.
+    tmpDir = createTempDir();
+    fs.mkdirSync(path.join(tmpDir, '.planning'));
+
+    const result = runGsdTools(['uat', 'run-automated', '--phase', '1'], tmpDir);
+    assert.strictEqual(result.success, false, 'Command should fail without a phases dir');
+    assert.strictEqual(
+      result.error,
+      'Error: No phases directory found in planning directory'
+    );
+    // The bug was a raw Node stack from an unguarded readdirSync; assert none leaks.
+    assert.ok(!/ENOENT/.test(result.error), 'Should not surface a raw ENOENT');
+    assert.ok(!/readdirSync/.test(result.error), 'Should not surface an fs stack frame');
+    assert.ok(!/node:fs/.test(result.error), 'Should not surface a node:fs stack frame');
+  });
+
+  test('empty phases directory still hits the unchanged Phase not found error', () => {
+    // Regression guard: the new existsSync gate must fire ONLY on a missing
+    // directory — an existing-but-empty phases/ must reach the pre-existing
+    // Phase-not-found path untouched.
+    tmpDir = createTempDir();
+    fs.mkdirSync(path.join(tmpDir, '.planning', 'phases'), { recursive: true });
+
+    const result = runGsdTools(['uat', 'run-automated', '--phase', '1'], tmpDir);
+    assert.strictEqual(result.success, false, 'Command should fail for an unknown phase');
+    assert.strictEqual(result.error, 'Error: Phase not found: 1');
   });
 });
