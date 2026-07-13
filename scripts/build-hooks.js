@@ -21,6 +21,7 @@ const HOOKS_TO_COPY = [
   'gsd-config-protection.js',
   'gsd-context-monitor.js',
   'gsd-cost-tracker.js',
+  'gsd-spawn-tracker.js',
   'gsd-prompt-guard.js',
   'gsd-statusline.js'
 ];

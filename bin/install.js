@@ -3451,7 +3451,7 @@ function uninstall(isGlobal, runtime = 'claude') {
   // 4. Remove GSD hooks
   const hooksDir = path.join(targetDir, 'hooks');
   if (fs.existsSync(hooksDir)) {
-    const gsdHooks = ['gsd-statusline.js', 'gsd-check-update.js', 'gsd-check-update.sh', 'gsd-context-monitor.js', 'gsd-cost-tracker.js', 'gsd-config-protection.js', 'gsd-prompt-guard.js'];
+    const gsdHooks = ['gsd-statusline.js', 'gsd-check-update.js', 'gsd-check-update.sh', 'gsd-context-monitor.js', 'gsd-cost-tracker.js', 'gsd-spawn-tracker.js', 'gsd-config-protection.js', 'gsd-prompt-guard.js'];
     let hookCount = 0;
     for (const hook of gsdHooks) {
       const hookPath = path.join(hooksDir, hook);
@@ -4789,6 +4789,9 @@ function install(isGlobal, runtime = 'claude') {
   const costTrackerCommand = isGlobal
     ? buildHookCommand(targetDir, 'gsd-cost-tracker.js')
     : 'node ' + dirName + '/hooks/gsd-cost-tracker.js';
+  const spawnTrackerCommand = isGlobal
+    ? buildHookCommand(targetDir, 'gsd-spawn-tracker.js')
+    : 'node ' + dirName + '/hooks/gsd-spawn-tracker.js';
 
   // Enable experimental agents for Gemini CLI (required for custom sub-agents)
   if (isGemini) {
@@ -4929,6 +4932,25 @@ function install(isGlobal, runtime = 'claude') {
         ]
       });
       console.log(`  ${green}✓${reset} Configured config protection hook`);
+    }
+
+    // Configure PreToolUse hook for subagent spawn tracking (Task/Agent)
+    const hasSpawnTrackerHook = settings.hooks[preToolEvent].some(entry =>
+      entry.hooks && entry.hooks.some(h => h.command && h.command.includes('gsd-spawn-tracker'))
+    );
+
+    if (!hasSpawnTrackerHook) {
+      settings.hooks[preToolEvent].push({
+        matcher: 'Task|Agent',
+        hooks: [
+          {
+            type: 'command',
+            command: spawnTrackerCommand,
+            timeout: 5
+          }
+        ]
+      });
+      console.log(`  ${green}✓${reset} Configured spawn tracker hook`);
     }
   }
 
