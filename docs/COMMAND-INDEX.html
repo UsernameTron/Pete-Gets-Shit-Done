@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GSD Command &amp; Automation Reference</title>
+<style>
+  :root {
+    /* Obsidian executive — cream ground, deep navy, gold accent (light theme default) */
+    --bg:        #F3EEDF;
+    --surface:   #FBF7EB;
+    --surface-2: #ECE5D1;
+    --ink:       #171A2E;
+    --ink-soft:  #545977;
+    --ink-faint: #8A8296;
+    --gold:      #937226;
+    --gold-line: #CBB477;
+    --gold-solid:#B08828;
+    --on-gold:   #1B1526;
+    --rule:      #E2DAC3;
+    --cmd:       #24284A;
+    --shadow:    0 1px 2px rgba(23,26,46,.05), 0 8px 24px -12px rgba(23,26,46,.14);
+    --focus:     #7A5CC4;
+
+    --maxw: 76rem;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #101227;
+      --surface:   #191C39;
+      --surface-2: #21254A;
+      --ink:       #ECE6D4;
+      --ink-soft:  #A6A7C0;
+      --ink-faint: #71749A;
+      --gold:      #D9B863;
+      --gold-line: #4A4326;
+      --gold-solid:#CBA84C;
+      --on-gold:   #171A2E;
+      --rule:      #2A2E52;
+      --cmd:       #EBDCA6;
+      --shadow:    0 1px 2px rgba(0,0,0,.30), 0 12px 30px -14px rgba(0,0,0,.55);
+      --focus:     #A98CF0;
+    }
+  }
+  /* explicit toggle overrides — must win both directions */
+  :root[data-theme="light"] {
+    --bg:#F3EEDF; --surface:#FBF7EB; --surface-2:#ECE5D1; --ink:#171A2E; --ink-soft:#545977; --ink-faint:#8A8296;
+    --gold:#937226; --gold-line:#CBB477; --gold-solid:#B08828; --on-gold:#1B1526; --rule:#E2DAC3; --cmd:#24284A;
+    --shadow:0 1px 2px rgba(23,26,46,.05),0 8px 24px -12px rgba(23,26,46,.14); --focus:#7A5CC4;
+  }
+  :root[data-theme="dark"] {
+    --bg:#101227; --surface:#191C39; --surface-2:#21254A; --ink:#ECE6D4; --ink-soft:#A6A7C0; --ink-faint:#71749A;
+    --gold:#D9B863; --gold-line:#4A4326; --gold-solid:#CBA84C; --on-gold:#171A2E; --rule:#2A2E52; --cmd:#EBDCA6;
+    --shadow:0 1px 2px rgba(0,0,0,.30),0 12px 30px -14px rgba(0,0,0,.55); --focus:#A98CF0;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.5;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: clamp(1.5rem, 4vw, 4rem) clamp(1rem, 4vw, 2.5rem) 5rem; }
+
+  /* ---- masthead ---- */
+  .eyebrow { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+  header.mast { border-bottom: 1px solid var(--rule); padding-bottom: 1.75rem; margin-bottom: 2.25rem; }
+  h1 { font-size: clamp(2rem, 5vw, 3.15rem); line-height: 1.02; letter-spacing: -.02em; margin: .5rem 0 .35rem; text-wrap: balance; font-weight: 800; }
+  h1 .amp { color: var(--gold); font-weight: 500; }
+  .lede { color: var(--ink-soft); max-width: 46rem; font-size: 1.02rem; margin: 0; }
+  .counts { display: flex; flex-wrap: wrap; gap: .5rem .9rem; margin-top: 1.35rem; align-items: baseline; }
+  .stat { display: inline-flex; align-items: baseline; gap: .4rem; background: var(--surface); border: 1px solid var(--rule);
+          padding: .4rem .7rem; border-radius: 8px; font-size: .82rem; color: var(--ink-soft); box-shadow: var(--shadow); }
+  .stat b { font-family: var(--mono); font-size: 1.02rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .legend { margin-left: auto; display: inline-flex; align-items: center; gap: .5rem; font-size: .8rem; color: var(--ink-soft); }
+
+  /* ---- what's new band ---- */
+  .whatsnew { background: var(--surface); border: 1px solid var(--gold-line);
+    border-radius: 14px; padding: 1.2rem 1.35rem; margin-bottom: 2.75rem; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .whatsnew::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; background: var(--gold-solid); }
+  .whatsnew h2 { margin: 0 0 .2rem; font-size: 1.02rem; letter-spacing: -.01em; display:flex; align-items:center; gap:.6rem; padding-left:.3rem; }
+  .whatsnew p { margin: .15rem 0 .9rem .3rem; color: var(--ink-soft); font-size: .88rem; }
+  .newgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: .55rem; padding-left:.3rem; }
+  .newchip { display: flex; flex-direction: column; gap: .1rem; background: var(--surface-2); border: 1px solid var(--rule);
+    border-radius: 9px; padding: .5rem .65rem; }
+  .newchip code { font-family: var(--mono); font-size: .82rem; color: var(--cmd); font-weight: 600; }
+  .newchip span { font-size: .74rem; color: var(--ink-faint); }
+
+  /* ---- sections ---- */
+  section { margin-top: 2.75rem; scroll-margin-top: 1rem; }
+  .sechead { display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1rem; border-bottom: 1px solid var(--rule); padding-bottom: .5rem; }
+  .sechead h2 { font-size: 1.28rem; margin: 0; letter-spacing: -.015em; font-weight: 750; }
+  .sechead .n { font-family: var(--mono); font-size: .8rem; color: var(--ink-faint); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: .7rem; }
+  .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: .8rem .9rem;
+    box-shadow: var(--shadow); display: flex; flex-direction: column; gap: .3rem; }
+  .card.isnew { border-color: var(--gold-line); }
+  .card .top { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+  .card code { font-family: var(--mono); font-size: .86rem; color: var(--cmd); font-weight: 650; letter-spacing: -.01em; word-break: break-word; }
+  .card p { margin: 0; font-size: .855rem; color: var(--ink-soft); line-height: 1.42; }
+  .meta { font-family: var(--mono); font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-faint); }
+
+  .badge { font-size: .6rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase;
+    background: var(--gold-solid); color: var(--on-gold); padding: .16rem .4rem; border-radius: 5px; line-height: 1; white-space: nowrap; }
+  .badge.ghost { background: transparent; color: var(--gold); border: 1px solid var(--gold-line); }
+
+  .kicker { color: var(--ink-faint); font-size: .82rem; margin: .1rem 0 1rem; }
+  footer { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); color: var(--ink-faint); font-size: .8rem; }
+  footer code { font-family: var(--mono); color: var(--ink-soft); }
+
+  a { color: var(--gold); }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  @media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s ease, transform .15s ease; } .card:hover { transform: translateY(-1px); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow">get-shit-done &middot; plugin reference</div>
+    <h1>GSD Command <span class="amp">&amp;</span> Automation Reference</h1>
+    <p class="lede">Every slash command, internal workflow, and runtime hook in the get-shit-done execution engine — one line each. Items shipped in the current unreleased cycle are marked <span class="badge">NEW</span>.</p>
+    <div class="counts">
+      <span class="stat"><b>67</b> slash commands</span>
+      <span class="stat"><b>17</b> internal workflows</span>
+      <span class="stat"><b>10</b> hooks</span>
+      <span class="stat"><b>v2.8</b> last shipped</span>
+      <span class="legend"><span class="badge">NEW</span> = added this cycle</span>
+    </div>
+  </header>
+
+  <div class="whatsnew">
+    <h2>New this cycle <span class="badge ghost">unreleased</span></h2>
+    <p>The autonomous-workflows suite (W1–W6) behind a single front door, on-demand ecosystem mapping, per-agent spawn telemetry, and two governance safety valves.</p>
+    <div class="newgrid" id="newgrid"></div>
+  </div>
+
+  <div id="sections"></div>
+
+  <footer>
+    Slash commands live in <code>commands/gsd/*.md</code>; workflows in <code>get-shit-done/workflows/*.md</code>; hooks in <code>hooks/*.js</code>. Run <code>/gsd:help</code> in any session for the interactive guide. Generated from the live repository at <code>main</code>.
+  </footer>
+</div>
+
+<script>
+  const NEW = "new";
+  const sections = [
+    { title: "Discuss & Plan", items: [
+      ["/gsd:discuss-phase", "Gather phase context through adaptive questioning before planning; --auto folds groundable grey areas.", null, "+auto"],
+      ["/gsd:list-phase-assumptions", "Surface Claude's assumptions about a phase approach before you commit to a plan.", null],
+      ["/gsd:plan-phase", "Create a detailed phase plan (PLAN.md) with a built-in verification loop.", null],
+      ["/gsd:research-phase", "Research how to implement a phase standalone; usually folded into plan-phase.", null],
+      ["/gsd:plan-milestone-gaps", "Create phases to close every gap a milestone audit identified.", null],
+    ]},
+    { title: "Execute & Verify", items: [
+      ["/gsd:execute-phase", "Execute all plans in a phase with wave-based parallelization.", null],
+      ["/gsd:quick", "Run a quick task with GSD guarantees (atomic commits, state) but no optional agents.", null],
+      ["/gsd:fast", "Run a trivial task inline — no subagents, no planning overhead.", null],
+      ["/gsd:verify-work", "Validate built features through conversational UAT.", null],
+      ["/gsd:add-tests", "Generate tests for a completed phase from its UAT criteria and implementation.", null],
+      ["/gsd:validate-phase", "Retroactively audit and fill Nyquist validation gaps for a completed phase.", null],
+      ["/gsd:debug", "Systematic debugging with state that persists across context resets.", null],
+      ["/gsd:autonomous", "Run every remaining phase unattended: discuss to plan to execute, per phase.", null],
+    ]},
+    { title: "Ship & Release", items: [
+      ["/gsd:ship", "Open a PR, run review, and prepare for merge once verification passes.", null],
+      ["/gsd:pr-branch", "Create a clean PR branch with the .planning/ commits filtered out.", null],
+      ["/gsd:ci-watch", "Poll GitHub Actions for the branch, stream status, and diagnose failures.", null],
+      ["/gsd:review", "Request cross-AI peer review of phase plans from external AI CLIs.", null],
+      ["/gsd:finalize", "End-to-end finalization: verify, archive, report, push — now consent-gated on every push.", null, "+consent"],
+      ["/gsd:closeout", "Full project closeout: orient, audit, verify, capture, ship, finalize, polish.", null],
+    ]},
+    { title: "Milestone Management", items: [
+      ["/gsd:new-milestone", "Start a new milestone cycle and route into requirements.", null],
+      ["/gsd:complete-milestone", "Archive a completed milestone and prepare the next version.", null],
+      ["/gsd:audit-milestone", "Audit milestone completion against original intent before archiving.", null],
+      ["/gsd:milestone-summary", "Generate an onboarding-grade project summary from milestone artifacts.", null],
+      ["/gsd:add-phase", "Append a phase to the end of the current milestone's roadmap.", null],
+      ["/gsd:insert-phase", "Insert urgent work as a decimal phase (e.g. 72.1) between existing phases.", null],
+      ["/gsd:remove-phase", "Remove a future phase and renumber the phases after it.", null],
+      ["/gsd:cleanup", "Archive accumulated phase directories from completed milestones.", null],
+    ]},
+    { title: "Workspaces & Parallelism", items: [
+      ["/gsd:new-workspace", "Create an isolated workspace with repo copies and its own .planning/.", null],
+      ["/gsd:list-workspaces", "List active GSD workspaces and their status.", null],
+      ["/gsd:remove-workspace", "Remove a workspace and clean up its git worktrees.", null],
+      ["/gsd:workstreams", "Manage parallel workstreams: create, switch, status, resume, complete.", null],
+      ["/gsd:manager", "Interactive command center for driving multiple phases from one terminal.", null],
+    ]},
+    { title: "Research, Audit & UI", items: [
+      ["/gsd:map-codebase", "Map the codebase with parallel agents into .planning/codebase/ documents.", null],
+      ["/gsd:crew", "Show the agent roster and capability map, and self-assess for coverage gaps.", null],
+      ["/gsd:audit-agents", "Audit the agent ecosystem for schema, tool, hygiene, naming, and install-drift issues.", null],
+      ["/gsd:audit-deps", "Audit package dependencies for CVEs, staleness, and license compatibility.", null],
+      ["/gsd:audit-uat", "Cross-phase audit of every outstanding UAT and verification item.", null],
+      ["/gsd:ecosystem-map", "Regenerate the lifecycle-clustered ecosystem map with append-only drift history.", NEW],
+      ["/gsd:forensics", "Post-mortem a failed workflow from git history, artifacts, and planning state.", null],
+      ["/gsd:ui-phase", "Produce a UI design contract (UI-SPEC.md) for a frontend phase.", null],
+      ["/gsd:ui-review", "Retroactive six-pillar visual audit of implemented frontend code.", null],
+    ]},
+    { title: "Session & Navigation", items: [
+      ["/gsd:prime-patterns", "Boot a session with full context plus the KB pattern library injected.", null],
+      ["/gsd:resume-work", "Resume from a previous session with full context restored.", null],
+      ["/gsd:pause-work", "Write a context handoff when pausing mid-phase.", null],
+      ["/gsd:progress", "Check progress, show context, and route to the next action.", null],
+      ["/gsd:next", "Advance automatically to the next logical step in the workflow.", null],
+      ["/gsd:do", "Route freeform text to the right command — or a named autonomous flow.", NEW],
+      ["/gsd:session-report", "Generate a session report with token estimates, work summary, and outcomes.", null],
+      ["/gsd:stats", "Show project statistics: phases, plans, requirements, git metrics, timeline.", null],
+      ["/gsd:portfolio", "Cross-project dashboard that recommends what to work on next.", null],
+      ["/gsd:thread", "Manage persistent context threads for cross-session work.", null],
+      ["/gsd:profile-user", "Generate a developer behavioral profile as Claude-discoverable artifacts.", null],
+    ]},
+    { title: "Capture & Backlog", items: [
+      ["/gsd:note", "Zero-friction idea capture: append, list, or promote a note to a todo.", null],
+      ["/gsd:add-todo", "Capture an idea or task as a todo from the current conversation.", null],
+      ["/gsd:check-todos", "List pending todos and pick one to work on.", null],
+      ["/gsd:add-backlog", "Park an idea in the backlog parking lot (999.x numbering).", null],
+      ["/gsd:review-backlog", "Review backlog items and promote them into the active milestone.", null],
+      ["/gsd:plant-seed", "Capture a forward-looking idea that surfaces at the right milestone.", null],
+    ]},
+    { title: "Project & Config", items: [
+      ["/gsd:new-project", "Initialize a project with deep context gathering and a PROJECT.md.", null],
+      ["/gsd:settings", "Configure GSD workflow toggles and the model profile.", null],
+      ["/gsd:set-profile", "Switch the model profile for agents: quality, balanced, budget, or inherit.", null],
+      ["/gsd:health", "Diagnose .planning/ integrity and optionally repair it.", null],
+      ["/gsd:update", "Update GSD to the latest version with a changelog display.", null],
+      ["/gsd:reapply-patches", "Reapply your local modifications after a GSD update.", null],
+      ["/gsd:sync-docs", "Rewrite all project docs from the live codebase, then report what changed.", null],
+      ["/gsd:help", "Show the available commands and a usage guide.", null],
+      ["/gsd:join-discord", "Join the GSD Discord community.", null],
+    ]},
+  ];
+
+  const workflows = { title: "Internal Workflows", kicker: "Engines invoked by commands or the /gsd:do router — no direct slash command of their own.", items: [
+    ["daily-startup", "One-intent session start: project boot, dashboard, context restore, and next command.", NEW, "W1"],
+    ["idea-to-shipped", "A freeform idea to shipped code, unattended, with exactly two human gates.", NEW, "W2"],
+    ["bug-to-branch", "A pasted error to a shipped fix: debug, fix, full suite, ship.", NEW, "W3"],
+    ["quick-change", "One small change with verification impossible to skip, then a single gate.", NEW, "W4"],
+    ["wrap-and-sync", "Session wrap: coverage, doc-drift, handoff, lesson capture, checkpoint, report.", NEW, "W6"],
+    ["smart-discuss", "Batch-table discuss variant: accept or override proposed grey-area answers.", NEW],
+    ["daily", "Formatted dashboard: milestone, phase, plan, branch, tests, next action.", null],
+    ["diagnose-issues", "Orchestrate parallel debug agents to find root causes — the /gsd:debug engine.", null],
+    ["discovery-phase", "Run early project discovery at the appropriate depth level.", null],
+    ["discuss-phase-assumptions", "Extract downstream decisions via codebase-first analysis; a discuss sub-flow.", null],
+    ["execute-plan", "Execute a single PLAN.md and write its SUMMARY.md — the unit execute-phase runs.", null],
+    ["verify-phase", "Verify phase-goal achievement through goal-backward analysis.", null],
+    ["transition", "Mark the current phase complete and advance, evolving PROJECT.md.", null],
+    ["checkpoint", "Write a deterministic session checkpoint to .planning/CHECKPOINT.json.", null],
+    ["resume-project", "Restore full project context instantly after time away.", null],
+    ["node-repair", "Autonomous repair operator for a failed task's done-criteria; called by execute-plan.", null],
+    ["harden-repo", "Audit and enforce GitHub branch-protection rules.", null],
+  ]};
+
+  const hooks = { title: "Hooks & Automations", kicker: "Runtime hooks that fire on Claude Code lifecycle events. Execution hooks ship bundled in hooks/dist/; governance hooks are registered per-project.", items: [
+    ["gsd-spawn-tracker", "Logs every subagent spawn to ~/.claude/metrics/spawns.jsonl for per-agent attribution.", NEW, "PreToolUse"],
+    ["gsd-cost-tracker", "Logs token usage and estimated USD cost per tool call.", null, "PostToolUse"],
+    ["gsd-prompt-guard", "Scans Write/Edit content for 23 prompt-injection patterns.", null, "PreToolUse"],
+    ["gsd-config-protection", "Blocks edits to 32 linter/formatter config files, steering back to the source.", null, "PreToolUse"],
+    ["gsd-context-monitor", "Warns as the context window fills toward its budget.", null, "PostToolUse"],
+    ["gsd-check-update", "Checks for a newer GSD release on session start.", null, "SessionStart"],
+    ["gsd-statusline", "Renders the terminal status line for the session.", null, "statusLine"],
+    ["review-pending sentinel", "Approves a dirty tree with a logged Deferred review note when .planning/.review-pending exists, instead of force-committing.", NEW, "Stop template"],
+    ["lesson-capture-gate", "Blocks stop until a lesson is captured or explicitly exempted.", null, "Stop"],
+    ["gsd-agent-health-check", "Logs agent install drift on each subagent completion.", null, "SubagentStop"],
+  ]};
+
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function card(item){
+    const [cmd, desc, tag, meta] = item;
+    const isNew = tag === NEW;
+    const badge = isNew ? '<span class="badge">NEW</span>' : '';
+    const metaEl = meta ? '<span class="meta">'+esc(meta)+'</span>' : '';
+    return '<div class="card'+(isNew?' isnew':'')+'">'
+      + '<div class="top"><code>'+esc(cmd)+'</code>'+badge+metaEl+'</div>'
+      + '<p>'+esc(desc)+'</p></div>';
+  }
+
+  function renderSection(sec){
+    const cards = sec.items.map(card).join("");
+    return '<section>'
+      + '<div class="sechead"><h2>'+esc(sec.title)+'</h2><span class="n">'+sec.items.length+'</span></div>'
+      + (sec.kicker ? '<p class="kicker">'+esc(sec.kicker)+'</p>' : '')
+      + '<div class="grid">'+cards+'</div></section>';
+  }
+
+  // new chips
+  const newItems = [];
+  [...sections, workflows, hooks].forEach(s => s.items.forEach(it => { if (it[2] === NEW) newItems.push(it); }));
+  document.getElementById("newgrid").innerHTML = newItems.map(it =>
+    '<div class="newchip"><code>'+esc(it[0])+'</code><span>'+esc(it[1].split(/[—.:]/)[0].trim())+'</span></div>'
+  ).join("");
+
+  document.getElementById("sections").innerHTML =
+    sections.map(renderSection).join("") + renderSection(workflows) + renderSection(hooks);
+</script>
+</body>
+</html>
