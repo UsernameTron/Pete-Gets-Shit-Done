@@ -211,4 +211,24 @@ describe('smart-discuss extraction contract', () => {
       'execute_phase\'s call into smart_discuss no longer resolves',
     );
   });
+
+  test('smart-discuss.md derives an AUTO_MODE flag for autonomous callers', () => {
+    assert.match(sd, /AUTO_MODE/, 'smart-discuss.md must derive AUTO_MODE from --auto / _auto_chain_active / yolo');
+  });
+
+  test('smart-discuss.md auto path emits the [auto] receipt table', () => {
+    assert.match(
+      sd,
+      /\[auto\] Grey areas resolved by default/,
+      'auto-mode fold must emit the [auto] receipt table so zero-interaction stays auditable',
+    );
+  });
+
+  test('idea-to-shipped invokes smart-discuss with --auto', () => {
+    const wf = fs.readFileSync(WORKFLOW_PATH, 'utf8');
+    assert.ok(
+      wf.includes('${PHASE_NUM} --auto'),
+      'idea-to-shipped.md must call smart-discuss with `${PHASE_NUM} --auto` (unattended between two gates)',
+    );
+  });
 });

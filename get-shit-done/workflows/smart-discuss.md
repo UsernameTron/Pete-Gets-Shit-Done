@@ -1,6 +1,6 @@
 <purpose>
 
-Autonomous-optimized variant of the `gsd:discuss-phase` skill. Proposes grey area answers in batch tables — the user accepts or overrides per area — instead of sequential questioning. Produces **identical CONTEXT.md output** to regular discuss-phase: same template, same sections, same commit shape.
+Autonomous-optimized variant of the `gsd:discuss-phase` skill. Proposes grey area answers in batch tables — the user accepts or overrides per area — instead of sequential questioning. In auto mode (`--auto` flag, active `--auto` chain, or yolo mode) the per-area acceptance folds to recommended defaults with an `[auto]` receipt table, and only unresolvable areas are asked. Produces **identical CONTEXT.md output** to regular discuss-phase: same template, same sections, same commit shape.
 
 > **Note (CTRL-03):** Smart discuss is an autonomous-optimized variant of the `gsd:discuss-phase` skill. It produces identical CONTEXT.md output but uses batch table proposals instead of sequential questioning. The original `discuss-phase` skill remains unchanged. This workflow is the extraction anticipated by `get-shit-done/workflows/autonomous.md`'s original `smart_discuss` step note ("Future milestones may extract this to a separate skill file") — `autonomous.md` now invokes this file as a thin caller, and `get-shit-done/workflows/idea-to-shipped.md` invokes it directly as a second caller.
 
@@ -9,6 +9,15 @@ Autonomous-optimized variant of the `gsd:discuss-phase` skill. Proposes grey are
 <input_contract>
 
 **Required:** `PHASE_NUM` — the phase number to run smart discuss for, supplied by the caller (e.g., `autonomous.md`'s `execute_phase` step, or `idea-to-shipped.md`'s discuss step).
+
+**Optional:** `--auto` — activates auto mode explicitly (same flag family as `discuss-phase --auto`). When the flag is absent, derive auto context from config:
+
+```bash
+AUTO_CHAIN=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow._auto_chain_active 2>/dev/null || echo "false")
+GSD_MODE=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get mode 2>/dev/null || echo "interactive")
+```
+
+Set `AUTO_MODE` true when `--auto` was passed, when `AUTO_CHAIN` is `true`, or when `GSD_MODE` is `yolo`; otherwise false. When `AUTO_MODE` is false, every behavior below is unchanged.
 
 Run init to get phase paths:
 
@@ -166,7 +175,19 @@ Display a table:
 | 4 | {question} | {answer} — {rationale} | {alt1} |
 ```
 
-Then prompt the user via **AskUserQuestion**:
+**Auto path (`AUTO_MODE` true):** do not open the acceptance prompt for resolvable areas. An area is **unresolvable** only when at least one of its questions has no recommended answer grounded in a prior decision, codebase pattern, domain convention, or ROADMAP success criterion — or when the grounded answer would contradict a recorded prior decision. For each resolvable area: record all recommended answers, log `[auto] Area {M}/{N} "{Area Name}" — accepted {q_count} recommended answers.`, and move to the next area. After the last area, emit the receipt table:
+
+```
+### [auto] Grey areas resolved by default ({K}/{N})
+
+| Area | Default taken | Why |
+|------|---------------|-----|
+| {Area Name} | {one-line summary of accepted answers} | {grounding: prior decision / codebase pattern / convention / success criterion} |
+```
+
+Unresolvable areas are the residue: run ONLY those through the interactive path below, stating why each could not be defaulted. Zero unresolvable areas means Sub-step 4 completes with zero AskUserQuestion calls.
+
+**Interactive path (`AUTO_MODE` false — and each unresolvable residue area in auto mode):** prompt the user via **AskUserQuestion**:
 - **header:** "Area {M}/{N}"
 - **question:** "Accept these answers for {Area Name}?"
 - **options:** Build dynamically — always "Accept all" first, then "Change Q1" through "Change QN" for each question (up to 4), then "Discuss deeper" last. Cap at 6 explicit options max (AskUserQuestion adds "Other" automatically).
@@ -288,6 +309,12 @@ Created: {path}
 Decisions captured: {count} across {area_count} areas
 ```
 
+**If `AUTO_MODE`:** add one receipt line under the confirmation so the zero-interaction path stays auditable:
+
+```
+[auto] {K}/{N} grey areas defaulted (receipt table above) — CONTEXT.md committed; edit it and re-run /gsd:plan-phase to change any decision.
+```
+
 </process>
 
 <success_criteria>
@@ -296,8 +323,9 @@ Decisions captured: {count} across {area_count} areas
 - [ ] Codebase scouted lightweight, under ~5% context (Sub-step 2)
 - [ ] Infrastructure-only phases detected first and skip straight to minimal CONTEXT.md (Sub-step 3)
 - [ ] Non-infrastructure phases generate 3-4 grey areas with ~4 questions each, each with a recommended answer and alternatives (Sub-step 3)
-- [ ] Grey areas presented one at a time as batch tables via AskUserQuestion, not sequential single-question interrogation (Sub-step 4)
+- [ ] Grey areas presented one at a time as batch tables via AskUserQuestion on the interactive path, not sequential single-question interrogation (Sub-step 4)
 - [ ] "Accept all", "Change QN", "Discuss deeper", and free-text "Other" are all handled distinctly (Sub-step 4)
+- [ ] Auto mode (`--auto` flag, `workflow._auto_chain_active` true, or `mode: yolo`) folds resolvable areas to recommended defaults, emits the `[auto]` receipt table and final receipt line, and asks only unresolvable areas (Sub-steps 4-5)
 - [ ] Scope creep is deferred and tracked, never silently dropped or silently accepted into phase scope (Sub-step 4)
 - [ ] CONTEXT.md written using the exact template shared with discuss-phase (Sub-step 5)
 - [ ] CONTEXT.md committed via `gsd-tools.cjs commit` with the `docs({padded_phase}): smart discuss context` message shape (Sub-step 5)

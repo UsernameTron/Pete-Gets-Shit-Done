@@ -61,10 +61,12 @@ Display:
 ## 2. Discuss
 
 Execute the smart-discuss workflow from
-`@$HOME/.claude/get-shit-done/workflows/smart-discuss.md` with `${PHASE_NUM}` — the same
-extracted workflow `autonomous.md`'s `smart_discuss` step now calls. Produces
-`${phase_dir}/${padded_phase}-CONTEXT.md`, batch grey-area proposal tables instead of sequential
-questioning, identical output shape to `discuss-phase`.
+`@$HOME/.claude/get-shit-done/workflows/smart-discuss.md` with `${PHASE_NUM} --auto` — the same
+extracted workflow `autonomous.md`'s `smart_discuss` step now calls. Under `--auto` it folds each
+grey area to its recommended defaults, emits an `[auto]` receipt table (area | default taken |
+why), and asks only areas it cannot responsibly default; the folded decisions still reach human
+review at GATE 1 through the plan built from them, so the two-gate contract holds. Produces
+`${phase_dir}/${padded_phase}-CONTEXT.md`, identical output shape to `discuss-phase`.
 
 After it completes, verify context was written:
 
@@ -347,7 +349,8 @@ red — happens strictly after `gate_2_approve_ship` resolves to "Ship it."
 - [ ] Intake parses the freeform idea, resolves or creates `PHASE_NUM`, and detects `PLAN_ONLY`
       intent before any other step runs
 - [ ] Discuss step invokes the extracted `get-shit-done/workflows/smart-discuss.md` workflow with
-      `PHASE_NUM` — not an inlined copy of its sub-steps
+      `PHASE_NUM --auto` — not an inlined copy of its sub-steps — so only unresolvable grey areas
+      pause the chain before GATE 1
 - [ ] Plan step invokes `gsd:plan-phase` and its internal revision loop, no separate plan-quality
       gate added on top
 - [ ] GATE 1 carries the exact verbatim prompt text: "Plan verified (N tasks, M waves, files:

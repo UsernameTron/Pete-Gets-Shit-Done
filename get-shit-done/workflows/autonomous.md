@@ -331,11 +331,11 @@ On **"Stop autonomous mode"**: Go to handle_blocker with "User stopped — gaps 
 
 ## Smart Discuss
 
-Execute the smart-discuss workflow from @$HOME/.claude/get-shit-done/workflows/smart-discuss.md with `${PHASE_NUM}`. That workflow proposes grey area answers in batch tables — the user accepts or overrides per area — and produces identical CONTEXT.md output to regular discuss-phase.
+Execute the smart-discuss workflow from @$HOME/.claude/get-shit-done/workflows/smart-discuss.md with `${PHASE_NUM}` — append `--auto` when config `mode` is `yolo` or `workflow._auto_chain_active` is `true` (smart-discuss also derives auto context itself from config; passing the flag keeps the chain explicit). That workflow proposes grey area answers in batch tables — the user accepts or overrides per area; in auto mode it accepts recommended defaults with an `[auto]` receipt table and asks only unresolvable areas — and produces identical CONTEXT.md output to regular discuss-phase.
 
 > **Note (CTRL-03):** Smart discuss is an autonomous-optimized variant of the `gsd:discuss-phase` skill. It produces identical CONTEXT.md output but uses batch table proposals instead of sequential questioning. The original `discuss-phase` skill remains unchanged. The full sub-step implementation (load prior context, scout codebase, analyze phase and generate proposals, present proposals per area, write CONTEXT.md) has been extracted to `get-shit-done/workflows/smart-discuss.md` — this step is now a thin caller. `get-shit-done/workflows/idea-to-shipped.md` invokes the same extracted workflow directly as a second caller.
 
-**Inputs:** `PHASE_NUM` from execute_phase — pass it through as the sole argument to smart-discuss.md. That workflow re-derives `phase_dir`, `phase_slug`, `padded_phase`, and `phase_name` itself via its own `init phase-op ${PHASE_NUM}` call, so no additional handoff is required here.
+**Inputs:** `PHASE_NUM` from execute_phase — pass it through as the sole argument to smart-discuss.md (plus `--auto` per the rule above). That workflow re-derives `phase_dir`, `phase_slug`, `padded_phase`, and `phase_name` itself via its own `init phase-op ${PHASE_NUM}` call, so no additional handoff is required here. Interactive runs are unchanged: grey-area acceptance still pauses per CTRL-01; the auto fold applies only when yolo mode or an active `--auto` chain already sanctions auto-approval.
 
 </step>
 
