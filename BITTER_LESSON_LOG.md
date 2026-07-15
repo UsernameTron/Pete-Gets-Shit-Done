@@ -35,6 +35,8 @@ Branch: `bitter-lesson-surgery` (never pushed). Started 2026-07-15.
 | get-shit-done/bin/lib/model-profiles.cjs | 64 (net −64) | MODEL_TIERS + dynamicSelect() encode "trivial tasks deserve cheap models" — a user-set profile is config, auto tier selection is judgment. Kept: _modelProfiles data, lazy init, MODEL_PROFILES/VALID_PROFILES getters, map/table helpers — facts about what exists. |
 | tests/model-profiles.test.cjs | 212 | MODEL_TIERS + dynamicSelect describes pinned the deleted tier judgment; data-integrity describes kept. |
 | tests/perf/routing-benchmark.test.cjs | 301 (file) | Perf pin ("dynamicSelect < 2ms") for a deleted judgment function; benchmarking judgment scaffolding is still judgment scaffolding. (Deletion landed via concurrent commit b730f8d — shared index.) |
+| get-shit-done/bin/lib/classify.cjs | 278 (file) | Keyword scoring and score→tier thresholds are pure encoded judgment; adaptWorkflowGates had zero production consumers. Sole consumer (init.cjs) already rewired in commit 2. |
+| tests/classify.test.cjs | 223 (file) | Pinned the deleted classifier's keyword scores and thresholds. |
 
 ## Deletions — Vendored skills
 
