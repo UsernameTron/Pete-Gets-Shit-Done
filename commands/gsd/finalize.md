@@ -131,7 +131,15 @@ When consent is pre-approved, do not ask — print the receipt line `[auto-push]
 
 ## Gate 5.5: Auto-Update Project Documentation
 
-Spawn `repo-doc-architect` as a subagent to refresh project documentation before final reports:
+**Availability check first:** `repo-doc-architect` ships in the `claude-mcp-ecosystem` plugin, not GSD core — it may not resolve in this install. Before spawning, check whether `repo-doc-architect` is listed among the agent types available in this session. If it is NOT available (plugin not installed or disabled), that is non-fatal: print
+
+```
+[skip] Gate 5.5: repo-doc-architect unavailable (claude-mcp-ecosystem not enabled) — documentation refresh skipped; any doc drift deferred by closeout remains unapplied. Run /gsd:sync-docs manually if needed.
+```
+
+and continue directly to Gate 6. Never error, never attempt a spawn that cannot resolve.
+
+If it IS available, spawn `repo-doc-architect` as a subagent to refresh project documentation before final reports:
 
 **Contract:**
 - **Input:** Project root path, CLAUDE.md path, .planning/STATE.md path
