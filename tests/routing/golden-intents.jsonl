@@ -3,7 +3,7 @@
 {"id":3,"intent":"prod is throwing this stack trace — root-cause it and get the fix merged","expected":"workflow:bug-to-branch","freq":"high"}
 {"id":4,"intent":"my tests are failing with a weird error, figure out what's going on","expected":"gsd:debug","freq":"high"}
 {"id":5,"intent":"phase 58 is verified and done — take it through PR and merge","expected":"workflow:ship-and-merge","freq":"high"}
-{"id":6,"intent":"fix the typo in the README title, nothing fancy","expected":"gsd:quick","freq":"high"}
+{"id":6,"intent":"fix the typo in the README title, nothing fancy","expected":"gsd:fast","freq":"high"}
 {"id":7,"intent":"let's talk through what the checkpoint phase should look like before planning","expected":"gsd:discuss-phase","freq":"high"}
 {"id":8,"intent":"discuss phase 58 but just take your recommended defaults, don't quiz me","expected":"workflow:smart-discuss","freq":"med"}
 {"id":9,"intent":"take this idea all the way to a merged PR: a /gsd:changelog command","expected":"workflow:idea-to-shipped","freq":"med"}
@@ -20,6 +20,6 @@
 {"id":20,"intent":"pick up exactly where I left off yesterday","expected":"gsd:resume-work","freq":"high"}
 {"id":21,"intent":"wrap my session — log it, sync state, capture lessons","expected":"workflow:wrap-and-sync","freq":"high"}
 {"id":22,"intent":"go through all the notes and todos we've piled up and triage them","expected":"workflow:groom-backlog","freq":"low"}
-{"id":23,"intent":"note for later: add retry logic to the CI watcher","expected":"gsd:add-todo","freq":"high"}
+{"id":23,"intent":"note for later: add retry logic to the CI watcher","expected":"gsd:note","freq":"high"}
 {"id":24,"intent":"write tests for the checkpoint module's edge cases","expected":"gsd:add-tests","freq":"med"}
 {"id":25,"intent":"tiny verified fix — bump ci-watch timeout to 60s and push it up as a draft PR","expected":"workflow:quick-change","freq":"med"}
