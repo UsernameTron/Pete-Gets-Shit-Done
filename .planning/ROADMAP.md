@@ -5,7 +5,7 @@
 - v2.6 Developer Experience — Phases 49-51 (shipped 2026-04-18) — [archive](milestones/v2.6-ROADMAP.md)
 - v2.7 Session Continuity — Phases 52-54 (shipped 2026-04-18) — [archive](milestones/v2.7-ROADMAP.md)
 - v2.8 Documentation Integrity — Phases 55-57 (shipped 2026-05-08) — [archive](milestones/v2.8-ROADMAP.md)
-- v2.9 Autonomous Workflows Completion — Phases 58-59 (in progress)
+- v2.9 Autonomous Workflows Completion — Phases 57.1, 58-59 (shipped 2026-07-15)
 
 ## Phases
 
@@ -44,7 +44,7 @@
 
 </details>
 
-### v2.9 Autonomous Workflows Completion (Phases 58-59) — IN PROGRESS
+### v2.9 Autonomous Workflows Completion (Phases 57.1, 58-59) — SHIPPED 2026-07-15
 
 **Milestone Goal:** Harden the last `/gsd:finalize` fragility and build the previously-shelved `ship-milestone` workflow that depends on it (built Phase 59, 2026-07-15), closing the autonomous-workflows suite.
 
