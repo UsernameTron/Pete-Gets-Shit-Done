@@ -42,6 +42,9 @@ animation/
 .planning/PROJECT.md
 .planning/config.json
 .planning/research/
+# pause-work resume pointers are session-local — never commit them
+/.continue-here.md
+/.planning/.continue-here.md
 reports/
 analysis/
 
