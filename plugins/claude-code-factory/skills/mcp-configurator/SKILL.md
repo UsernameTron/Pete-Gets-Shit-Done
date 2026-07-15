@@ -42,10 +42,7 @@ with proper transport, authentication, and scope.
 | **SSE** (deprecated) | Legacy servers only, prefer HTTP | `claude mcp add --transport sse` |
 | **stdio** | Local tools, CLI apps, custom scripts, database CLIs | `claude mcp add --transport stdio` |
 
-**Decision rules:**
-- Cloud service with a URL → `http`
-- Local binary or npm package → `stdio`
-- Only use `sse` if the service explicitly requires it and has no HTTP endpoint
+Pick the transport that fits the service using your own judgment.
 
 ---
 
@@ -64,11 +61,11 @@ with proper transport, authentication, and scope.
 
 ### Scope Guide
 
-| User Says | Scope | Where Stored |
-|-----------|-------|-------------|
-| "just for me" / "personal" / (default) | `local` | Project-specific user settings |
-| "for the team" / "shared" | `project` | `.mcp.json` in repo root |
-| "all my projects" / "everywhere" | `user` | `~/.claude/settings.json` |
+| Scope | Where Stored |
+|-------|-------------|
+| `local` (default) | Project-specific user settings |
+| `project` | `.mcp.json` in repo root |
+| `user` | `~/.claude/settings.json` |
 
 ---
 

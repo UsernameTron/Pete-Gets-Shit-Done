@@ -1,3 +1,7 @@
+---
+name: workflow:groom-backlog
+description: Triage everything captured across GSD's four capture surfaces — notes, todos, 999.x backlog phases, and planted seeds — in one unified table with promote/defer/drop dispositions, then batch-apply all roadmap mutations behind one confirm gate.
+---
 <trigger>
 Use when:
 - User runs /gsd:do with intent "groom the backlog" | "triage my notes" | "review everything captured"

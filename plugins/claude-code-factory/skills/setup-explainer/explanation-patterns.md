@@ -169,4 +169,4 @@ After cataloging all extensions, check these conditions. Report the top 3 most i
 | O14 | Skill allowed-tools is unrestricted | "Your [name] skill has full tool access." | "Want to restrict it to read-only for safety?" |
 | O15 | MCP server configured but no permission rules for it | "Your [server] MCP is connected but has no permission rules." | "Want to add allow/deny rules for [server] tools?" |
 
-**Rules**: Maximum 3 observations. Pick the most impactful (O1-O3 are highest value). If nothing notable, omit the observations section entirely.
+**Rules**: Maximum 3 observations. Pick the most impactful with your own judgment. If nothing notable, omit the observations section entirely.

@@ -36,11 +36,12 @@ produce the JSON config and any supporting scripts.
 
 ---
 
-## 2. Intent-to-Event Mapping
+## 2. Event & Matcher Reference
 
-Match the user's intent to the correct hook event. First match wins:
+Event capabilities and their matcher schemas — match the user's intent to an
+event with your own judgment:
 
-| User Intent | Event | Matcher |
+| Fires For | Event | Matcher |
 |-------------|-------|---------|
 | "block/prevent/deny [command]" | `PreToolUse` | `Bash` |
 | "block/prevent [file write]" | `PreToolUse` | `Write\|Edit` |
@@ -86,13 +87,6 @@ Choose the handler type based on what the hook needs to do:
 | `prompt` | Single-turn LLM evaluation (yes/no decision) | `prompt`, `model` (default: haiku) |
 | `agent` | Multi-turn subagent with tool access for verification | `prompt`, `model` (default: haiku) |
 
-**Decision rules:**
-- If the hook runs a script, linter, or CLI command → `command`
-- If the hook calls a webhook or external service → `http`
-- If the hook needs LLM judgment on a simple yes/no question → `prompt`
-- If the hook needs LLM judgment PLUS file reading/exploration → `agent`
-- If unsure → default to `command`
-
 **Handler availability by event:**
 - All 4 types: `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `SubagentStop`
 - `command` only: `SessionStart`, `SessionEnd`, `SubagentStart`, `Notification`, `PreCompact`, `InstructionsLoaded`, `ConfigChange`, `WorktreeCreate`, `WorktreeRemove`, `TeammateIdle`, `TaskCompleted`
@@ -105,7 +99,7 @@ Resolve ALL decisions before writing files:
 
 | Decision | How to Resolve |
 |----------|---------------|
-| **Event** | Use Intent-to-Event Mapping (Section 2) |
+| **Event** | Use the Event & Matcher Reference (Section 2) |
 | **Matcher** | Derive from target: file ops → `Write\|Edit`, bash → `Bash`, specific tool → exact name, MCP → `mcp__server__.*`, all tools → omit or `*`. Events without matcher support: omit. |
 | **Handler type** | Use Handler Type Selection (Section 3) |
 | **Handler config** | command: write the `command` string or script path. http: determine `url`, `headers`, `allowedEnvVars`. prompt/agent: write the `prompt` text with `$ARGUMENTS` placeholder. |

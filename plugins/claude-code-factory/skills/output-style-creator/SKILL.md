@@ -63,10 +63,7 @@ rules. Use skills for task-specific workflows.
 | **name** | Descriptive, human-readable. Can use spaces and mixed case: "Executive Briefing", "Casual Chat". |
 | **description** | Brief explanation shown in `/config` picker. What this style does. |
 | **keep-coding-instructions** | Default `false`. Set `true` if the style should retain Claude's coding capabilities (test running, code verification). Set `false` for non-coding styles. |
-| **Tone** | Extract from request: "executive" → formal/concise, "casual" → conversational, "technical" → precise/detailed, "teaching" → patient/educational. |
-| **Format** | Derive structure: "briefing" → headers + bullets + bottom line, "report" → sections + data, "chat" → short paragraphs, "documentation" → structured with examples. |
-| **Length** | "brief" → emphasize conciseness, "detailed" → allow expansive responses, default → balanced. |
-| **Audience** | Infer: "board/executives" → non-technical, "engineers" → technical depth, "students" → educational, "mixed" → adaptive. |
+| **Tone / Format / Length / Audience** | Derive from the request with your own judgment; confirm with the user before writing. |
 | **Scope** | User level: `~/.claude/output-styles/`. Project level: `.claude/output-styles/`. |
 
 ---

@@ -91,7 +91,7 @@ For each agent `.md` file, extract frontmatter and check:
 | No `permissionMode` specified | LOW | Explicit permission mode improves security posture |
 | No `memory` field | LOW | Agent memory enables cross-session learning |
 | Using `tools: *` (all tools) | MEDIUM | Restrict to minimum needed tools for security |
-| No `model` specified | LOW | Explicit model selection optimizes cost — use `haiku` for simple tasks |
+| No `model` specified | LOW | Explicit model selection optimizes cost |
 | Description lacks invocation triggers | HIGH | Description should explain WHEN to invoke, not just WHAT it does |
 
 ### 3.2 Deprecated Patterns

@@ -5,8 +5,8 @@ description: |
   Detects when a project needs subagent specialists, routes to setup (concierge) or
   management (companion) workflows, and handles the "I don't know what I need" case.
   Catches frustration signals, implicit complexity indicators, and direct agent requests.
-  Also performs proactive complexity detection and suggests specialist setup when
-  observable thresholds are exceeded.
+  Also proactively suggests specialist setup when the project has visibly outgrown
+  a single thread.
 
   This skill is the single entry point for the subagent lifecycle suite. Non-coders
   never need to know which downstream skill or subagent handles their request — this
@@ -35,8 +35,8 @@ description: |
 
 1. Read `.claude/agents/` to determine if specialists already exist
 2. Read `.claude/project-health.md` for cross-session state (if it exists)
-3. Run the passive complexity check (Phase 3 detection)
-4. Classify the user's request using the routing decision tree
+3. Silently judge whether project complexity warrants suggesting specialists
+4. Decide the right path for the user's request
 5. Execute the appropriate path: concierge skill, companion skill, or direct response
 6. Never announce which skill is handling the request — the infrastructure is invisible
 
@@ -53,8 +53,8 @@ has no specialists deployed.
 
 Do not invoke for domain-specific work that specialists handle (CSS questions, API
 implementation, data analysis). Do not invoke for skill creation — redirect to skill-factory.
-Do not invoke when the user is clearly doing simple, focused work in a small project with
-fewer than 3 distinct concerns.
+Do not invoke when the user is clearly doing simple, focused work in a project small
+enough that specialists would add overhead.
 
 ---
 
@@ -78,27 +78,11 @@ cross-session state loaded (yes/no).
 Before responding to the user's message, run a silent assessment. This check does NOT
 produce visible output unless a suggestion is warranted.
 
-```
-IF .claude/agents/ is empty or missing:
-  1. Count project files (excluding node_modules, .git, build, dist, __pycache__)
-  2. Count distinct top-level directories matching domain patterns
-  3. Count file extension categories spanning domains
-
-  IF total files > 50 AND domain directories > 3:
-    SET internal flag SUGGEST_SETUP = true
-
-  IF the user's message contains 2+ frustration signals:
-    SET internal flag SUGGEST_SETUP = true
-
-  IF SUGGEST_SETUP is true:
-    Check .claude/project-health.md for suggestion cooldown
-    IF cooldown is active → suppress suggestion
-    IF no cooldown → allow suggestion AFTER answering the user's actual question
-```
-
-**Frustration signals to detect:** "you forgot", "I already told you", "why did you
-lose that", "this doesn't look right", "that's not what I wanted", "it was better
-before", "quality is dropping", "context keeps running out."
+If no specialists are deployed, judge for yourself — from the project you can observe
+and from how the user is talking — whether the project has grown complex enough, or the
+user frustrated enough, that specialist setup is worth suggesting. If so, check
+`.claude/project-health.md` for a suggestion cooldown; suggest only if no cooldown is
+active, and always AFTER answering the user's actual question.
 
 **Suggestion rules:**
 - One suggestion per session maximum
@@ -116,42 +100,14 @@ Want me to do that?
 
 ### Step 3: Route the Request
 
-Use this decision tree to determine the correct path.
-
-```
-STEP A: Do specialists already exist?
-  Check: Does .claude/agents/ contain .md files?
-
-  YES → go to STEP B
-  NO  → go to STEP C
-
-STEP B: What does the user want? (specialists exist)
-  - Asking about status, health, or what specialists do
-    → Execute companion skill logic (status operation)
-  - Asking to add, remove, change, or reset specialists
-    → Execute companion skill logic (modification operation)
-  - Complaining about speed, quality, or broken behavior
-    → Execute companion skill logic (diagnosis operation)
-  - Asking what a specialist has learned or remembers
-    → Execute companion skill logic (memory inspection)
-  - Describing a new project or wanting to start fresh
-    → Execute concierge skill logic (fresh start)
-  - Asking for a demo or explanation of how specialists work
-    → Execute concierge skill logic (demo mode)
-
-STEP C: Should specialists be set up? (none exist)
-  - User explicitly asked for agents/specialists
-    → Execute concierge skill logic (direct request)
-  - User is frustrated with project complexity
-    → Execute concierge skill logic (complexity signal)
-  - User describes 3+ distinct project domains
-    → Execute concierge skill logic (implicit complexity)
-  - User's project has < 3 distinct concerns
-    → DO NOT invoke concierge or companion.
-    → Say: "Your project is still small enough that specialists would add
-      overhead. Keep building — I'll suggest splitting things up if it
-      gets more complex."
-```
+Decide the correct path yourself from what the user wants and whether `.claude/agents/`
+contains .md files. When specialists exist, management requests (status, add/remove/
+change/reset, diagnosis, memory inspection) are the companion's domain, while fresh
+starts and demos are the concierge's. When none exist, setup requests — explicit or
+implied by real complexity — go to the concierge. If the project is simple enough that
+specialists would add overhead, do NOT invoke either skill; say: "Your project is still
+small enough that specialists would add overhead. Keep building — I'll suggest splitting
+things up if it gets more complex."
 
 **Critical: invisible delegation.** Never say "I'm handing this to the concierge" or
 "Let me bring in the companion." Since this skill and the concierge/companion are all
@@ -160,8 +116,7 @@ asks a question and gets an answer. They never see the infrastructure.
 
 ### Step 4: Expert Escape Hatch
 
-If at any point the user demonstrates expert knowledge — mentions viability matrices,
-frontmatter fields, architecture specs, tool profiles, or asks for the raw agent files —
+If at any point the user demonstrates expert knowledge of agent architecture,
 acknowledge their expertise and offer the choice:
 
 "Looks like you know your way around this. Want me to keep handling things automatically,
@@ -210,38 +165,6 @@ After every interaction where the complexity check ran, update `.claude/project-
 | validator (subagent) | Invoked by concierge, never by project-guide directly |
 | auditor (subagent) | Invoked by companion, never by project-guide directly |
 | skill-factory | Project-guide redirects skill creation requests there |
-
----
-
-## TRIGGER TEST MATRIX
-
-### Direct Triggers — Must Fire Every Time
-
-| Prompt | Expected |
-|:-------|:---------|
-| "Help me organize this project with agents" | FIRES → concierge |
-| "How are my agents doing?" | FIRES → companion |
-| "Remove the tester agent" | FIRES → companion |
-| "Set up specialists for my project" | FIRES → concierge |
-| "Show me how specialists work" | FIRES → concierge (demo) |
-
-### Semantic Triggers — Must Fire 80% or More
-
-| Prompt | Expected |
-|:-------|:---------|
-| "Quality is getting worse as the project grows" | FIRES → concierge (complexity signal) |
-| "I keep having to re-explain my conventions" | FIRES → concierge (frustration signal) |
-| "Something's wrong with my frontend specialist" | FIRES → companion (diagnosis) |
-| "My project does frontend, API, and data processing" | FIRES → concierge (implicit complexity) |
-
-### Negative Triggers — Must NOT Fire
-
-| Prompt | Expected | Correct Target |
-|:-------|:---------|:---------------|
-| "Fix this CSS bug" | NO FIRE | Main thread or frontend specialist |
-| "Write a Python function to parse CSV" | NO FIRE | Main thread |
-| "Build me a skill for data processing" | NO FIRE | skill-factory |
-| "Design a subagent architecture with viability scoring" | NO FIRE | Offer expert escape hatch |
 
 ---
 

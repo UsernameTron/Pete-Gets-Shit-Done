@@ -14,7 +14,7 @@ const LIB_DIR = path.join(__dirname, '..', 'get-shit-done', 'bin', 'lib');
 
 // Layer map — Layer 3 is dynamically computed from whatever is left
 const LAYERS = {
-  0: ['model-profiles.cjs', 'security.cjs', 'classify.cjs'],
+  0: ['model-profiles.cjs', 'security.cjs'],
   1: ['core.cjs'],
   2: ['frontmatter.cjs', 'config.cjs', 'state.cjs', 'history.cjs'],
 };

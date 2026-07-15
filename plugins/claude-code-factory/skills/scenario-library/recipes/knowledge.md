@@ -6,7 +6,6 @@
 
 ### K01: coding-standards
 **Name**: Team coding standards
-**Triggers**: "coding standards", "style guide", "code conventions", "our standards", "team rules"
 **Type**: Reference Skill (user-invocable: false) | **Generator**: skill-factory
 **Pre-resolved**: name: coding-standards, user-invocable: false, scope: .claude/skills/ (project, shared)
 **Customize**: language-specific rules, naming conventions, formatting preferences, architectural patterns
@@ -16,7 +15,6 @@
 
 ### K02: api-conventions
 **Name**: API design conventions
-**Triggers**: "API conventions", "REST patterns", "endpoint standards", "API style guide"
 **Type**: Reference Skill (user-invocable: false) | **Generator**: skill-factory
 **Pre-resolved**: name: api-conventions, user-invocable: false, scope: .claude/skills/ (project, shared)
 **Customize**: REST vs GraphQL patterns, naming schemes, error response format, versioning strategy
@@ -26,7 +24,6 @@
 
 ### K03: architecture-context
 **Name**: Project architecture context
-**Triggers**: "project architecture", "how our system works", "codebase context", "system design docs"
 **Type**: Reference Skill (user-invocable: false) | **Generator**: skill-factory
 **Pre-resolved**: name: architecture-context, user-invocable: false, scope: .claude/skills/ (project, shared)
 **Customize**: system components, data flow, deployment topology, key design decisions
@@ -36,7 +33,6 @@
 
 ### K04: domain-knowledge
 **Name**: Business domain knowledge
-**Triggers**: "domain knowledge", "business rules", "industry terms", "domain context"
 **Type**: Reference Skill (user-invocable: false) | **Generator**: skill-factory
 **Pre-resolved**: name: domain-knowledge, user-invocable: false, scope: .claude/skills/ (project, shared)
 **Customize**: domain terminology, business rules, regulatory requirements, industry context
@@ -46,7 +42,6 @@
 
 ### K05: testing-patterns
 **Name**: Project testing patterns and conventions
-**Triggers**: "testing patterns", "how we test", "test conventions", "testing standards"
 **Type**: Reference Skill (user-invocable: false) | **Generator**: skill-factory
 **Pre-resolved**: name: testing-patterns, user-invocable: false, scope: .claude/skills/ (project, shared)
 **Customize**: test framework, file naming, mock strategy, coverage requirements, fixture patterns

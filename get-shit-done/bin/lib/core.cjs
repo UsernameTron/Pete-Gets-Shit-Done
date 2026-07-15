@@ -387,18 +387,9 @@ const configMigrations = [
   },
   {
     from: 1, to: 2,
-    migrate(parsed, _cwd) {
-      // Add intelligence layer defaults for existing v1 configs
-      if (!('routing_strategy' in parsed)) {
-        parsed.routing_strategy = 'static';
-      }
-      // Check both top-level and nested workflow.adaptive (loadConfig reads both)
-      const hasAdaptive = ('adaptive' in parsed) ||
-        (parsed.workflow && 'adaptive' in parsed.workflow);
-      if (!hasAdaptive) {
-        parsed.adaptive = false;
-      }
-    },
+    // No-op version bump. v2 previously injected routing_strategy/adaptive
+    // defaults; those keys were retired with the intelligence layer.
+    migrate(_parsed, _cwd) {},
   },
 ];
 
@@ -430,7 +421,6 @@ function loadConfig(cwd) {
   const configPath = path.join(cwd, '.planning', 'config.json');
   const defaults = {
     model_profile: 'balanced',
-    routing_strategy: 'static',
     commit_docs: true,
     search_gitignored: false,
     branching_strategy: 'none',
@@ -446,7 +436,6 @@ function loadConfig(cwd) {
     firecrawl: false,
     exa_search: false,
     text_mode: false,
-    adaptive: false,
     sub_repos: [],
     resolve_model_ids: false,
     context_window: 200000,
@@ -515,7 +504,6 @@ function loadConfig(cwd) {
 
     return deepFreeze({
       model_profile: get('model_profile') ?? defaults.model_profile,
-      routing_strategy: get('routing_strategy') ?? defaults.routing_strategy,
       commit_docs: (() => {
         const explicit = get('commit_docs', { section: 'planning', field: 'commit_docs' });
         // If explicitly set in config, respect the user's choice
@@ -539,7 +527,6 @@ function loadConfig(cwd) {
       firecrawl: get('firecrawl') ?? defaults.firecrawl,
       exa_search: get('exa_search') ?? defaults.exa_search,
       text_mode: get('text_mode', { section: 'workflow', field: 'text_mode' }) ?? defaults.text_mode,
-      adaptive: get('adaptive', { section: 'workflow', field: 'adaptive' }) ?? defaults.adaptive,
       sub_repos: get('sub_repos', { section: 'planning', field: 'sub_repos' }) ?? defaults.sub_repos,
       resolve_model_ids: get('resolve_model_ids') ?? defaults.resolve_model_ids,
       context_window: get('context_window') ?? defaults.context_window,
@@ -1287,10 +1274,10 @@ const MODEL_ALIAS_MAP = {
   'haiku': 'claude-haiku-3-5',
 };
 
-function resolveModelInternal(cwd, agentType, taskContext) {
+function resolveModelInternal(cwd, agentType) {
   const config = loadConfig(cwd);
 
-  // 1. User overrides always win — regardless of resolve_model_ids or routing_strategy.
+  // 1. User overrides always win — regardless of resolve_model_ids.
   // Users who set fully-qualified model IDs (e.g., "openai/gpt-5.4") get exactly that.
   const override = config.model_overrides?.[agentType];
   if (override) {
@@ -1304,27 +1291,7 @@ function resolveModelInternal(cwd, agentType, taskContext) {
     return '';
   }
 
-  // 3. Dynamic routing — only when taskContext provided AND routing_strategy !== 'static'
-  const strategy = config.routing_strategy || 'static';
-  if (taskContext && strategy !== 'static') {
-    const { dynamicSelect } = require('./model-profiles.cjs');
-    const result = dynamicSelect(agentType, taskContext, config);
-
-    // INTEL-06: Log routing rationale via debugLog
-    debugLog('MODEL_ROUTE', `agent=${agentType} strategy=${strategy} ${result.rationale} → ${result.alias}`, { agent: agentType, tier: result.tier });
-
-    if (taskContext.complexity === 'critical') {
-      debugLog('MODEL_ROUTE_CRITICAL', `CRITICAL override: agent=${agentType} forced to quality tier`, { agent: agentType });
-    }
-
-    const alias = result.alias;
-    if (config.resolve_model_ids) {
-      return MODEL_ALIAS_MAP[alias] || alias;
-    }
-    return alias;
-  }
-
-  // 4. Static profile lookup — existing v1.9 behavior (unchanged)
+  // 3. Static profile lookup
   const profile = String(config.model_profile || 'balanced').toLowerCase();
   const agentModels = MODEL_PROFILES[agentType];
   if (!agentModels) return 'sonnet';

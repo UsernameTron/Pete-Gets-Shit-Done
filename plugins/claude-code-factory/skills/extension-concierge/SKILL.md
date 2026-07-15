@@ -32,63 +32,33 @@ English. You figure out the type, the technical details, and the output format.
 
 For every request, determine these four things before generating anything:
 
-### A. Extension Type (Intent Classification)
+### A. Extension Type
 
-Determine extension type by running the intent-engine classification pipeline:
+If the user names a specific extension type or uses Claude Code vocabulary
+(PreToolUse, frontmatter, plugin.json, etc.), take them at their word.
+Requests routed from the intent-engine may arrive pre-classified — respect
+that classification. Otherwise decide the extension type from the request
+with your own judgment; prefer the simplest thing that works. If two or more
+extension types are genuinely needed, this is a compound intent — note
+primary and secondary types (handled in Section 1B).
 
-**Step 1 — Expert bypass.** If the user names a specific extension type or
-uses Claude Code vocabulary (PreToolUse, frontmatter, plugin.json, etc.),
-take them at their word. Record the type and skip to Section 1B.
-
-**Step 2 — Scenario match.** If the scenario library (Cap 2) is available,
-compare the request. High-confidence match (≥ 0.85) → use scenario's type
-and pre-resolved config. Skip to Section 1B.
-
-**Step 3 — Walk the decision tree.** Use the intent-engine's behavioral
-decision tree to classify. The tree's primary question is "When does this
-happen?" — it branches into automatic (hooks), on-demand (skills), knowledge
-(reference skills), integration (MCP), restriction (permissions), distribution
-(plugins), CI/CD, and output style.
-
-**Step 4 — Disambiguate if needed.** If the tree doesn't reach a clear leaf:
-- Ask ONE plain-English question from the disambiguation protocol
+If the type is unclear:
+- Ask ONE plain-English question
 - NEVER ask "do you want a hook or a skill?"
 - Max 2 questions total
 
-**Step 5 — Check for compounds.** If the tree indicates multiple branches
-match simultaneously, this is a compound intent. Note primary and secondary
-types. Route to combo engine (Cap 5) if available, or generate sequentially.
-
-**Step 6 — Present plan.** Compose a one-sentence summary: "I'll create a
+Before generating, present the plan in one sentence: "I'll create a
 [type] that [does what you described]." Show key decisions. Ask: "Does this
 sound right?" On confirmation, continue to Section 1B.
 
-The intent-engine handles WHAT (which extension type + event resolution).
-Sections 1B-1D handle HOW (complexity, reference docs, remaining technical decisions).
-
-**Fallback:** When invoked directly (without intent-engine pre-classification),
-determine type from explicit keywords in the request: "hook" → hook, "plugin"
-→ plugin, "MCP" → MCP, "CI/CD" → cicd, "settings" → settings, "subagent" →
-subagent, "output style" → output-style, default → skill.
-
 ### B. Complexity
 
-| Complexity | Criteria | Path |
-|------------|----------|------|
-| **Simple** (80%) | Single file output, one extension type | Direct to generator skill |
-| **Complex** (20%) | Multi-file output, coordinated components, full plugin | Chain subagents |
-
-Complex triggers:
-- "Package my X into a plugin" (plugin-builder subagent)
-- "Coaching enforcement system with hooks on 3 events" (hook-engineer subagent)
-- "Complete CI/CD pipeline with PR review and auto-merge" (multiple generators)
-- "Full plugin with skills, hooks, and MCP server" (plugin-builder subagent)
-
-**Compound intents:** If the intent engine detected compound intent (two
-extension types needed), treat as Complex regardless of other criteria.
-Generate the primary type first, then the secondary type. If Cap 5
-(Extension Combos) is available, route to the combo engine for coordinated
-generation.
+Two paths exist: **Simple** (single-file output, one extension type — direct
+to a generator skill, Section 2) and **Complex** (multi-file or coordinated
+components — chain subagents, Section 3). Decide which with your own judgment.
+Compound intents (two or more extension types) always take the Complex path:
+route to the combo engine (Cap 5) if available, or generate the primary type
+first, then the secondary.
 
 ### C. Reference Docs Needed
 
@@ -125,7 +95,7 @@ Resolve these silently. Show the user your choices before writing files:
 - Permission patterns: exact match vs prefix (`*`) vs glob
 
 **For subagents:**
-- Model: `sonnet` (default), `opus` (complex reasoning), `haiku` (fast/simple)
+- Model: legal values are `sonnet` (default), `opus`, `haiku` — or omit to inherit
 - `permissionMode`: `default` (safest), `acceptEdits`, `plan` (read-only)
 - Tool access: minimal set
 
@@ -161,11 +131,9 @@ For simple (single-file) requests, invoke the appropriate generator skill:
 | output-style | `output-style-creator` |
 | subagent | `cc-factory` (subagent generation mode) |
 
-**Subagent complexity check**: If the subagent request involves coordination with
-other components (part of a combo or Tier 3 system), requires specialized domain
-knowledge (multiple preloaded skills), or the user explicitly asks for a
-"production-ready" or "full" agent — route to `subagent-generator` agent instead
-of cc-factory.
+**Subagent generators**: two exist — `cc-factory` (simple, single-file subagents)
+and the `subagent-generator` agent (full production agents; runs the three-part
+gate). Pick with your own judgment based on the scope of the request.
 
 **Execution:**
 1. Load the reference skill (Section 1C) for schema accuracy.
@@ -187,7 +155,7 @@ compound intent with 2-4 components):
 3. Combo engine generates all components with wiring between them.
 4. Combo engine presents a blueprint (replaces standard output format for combos).
 5. Run `extension-validator` subagent on all generated files.
-6. Apply teaching annotations (Section 4A) at per-component brief level.
+6. Apply teaching annotations (Section 4A).
 
 ### Plugin Creation
 1. Invoke `plugin-builder` subagent — designs architecture, creates all files.
@@ -213,7 +181,7 @@ When smart-scaffold classifies as Tier 3 (or combo engine escalates a 5+ compone
 2. The architect produces a blueprint. Present it to the user for approval.
 3. On approval, the architect coordinates generation across phases — dispatching to appropriate generators/agents per component.
 4. After all phases complete, run `extension-validator` on all generated files as a batch.
-5. Apply teaching annotations (Section 4A) at architecture-overview level.
+5. Apply teaching annotations (Section 4A).
 6. Present results with the unified installation guide from the architect.
 
 ### Multi-Type Request (no combo pattern match)
@@ -243,8 +211,6 @@ Created a [extension type] for [purpose]:
 
   Why this type: [one sentence — e.g., "This is a hook because you wanted
   it to happen automatically after every edit."]
-  Signals: [behavioral signals that drove classification — e.g.,
-  "Detected: 'automatically' + 'after every edit' → PostToolUse hook"]
 
   To test: [specific command or action]
   To use: [specific instruction]
@@ -268,13 +234,9 @@ After generating ANY output (simple or complex path), append teaching annotation
 These annotations turn every generation into a learning moment. Reference
 `teaching-vocabulary.md` for plain-English definitions and customization pointers.
 
-**Tier-aware verbosity:**
-
-| Tier | Annotation Level |
-|------|-----------------|
-| **Tier 1** (single extension) | Full annotations — all 4 sections below |
-| **Tier 2** (combo, 2-4 pieces) | Per-component brief — 1-2 sentences each section |
-| **Tier 3** (system, 5+ pieces) | Architecture overview only — skip per-field explanations |
+Scale annotation depth with your own judgment: full annotations for a single
+extension, briefer per-component notes as the component count grows, and an
+architecture-level overview only for large multi-component systems.
 
 **The 4 annotation sections:**
 
@@ -286,7 +248,7 @@ Derive from the generated config. Plain English, no field names.
 > sees the output and knows what changed.
 ```
 
-**2. Why it's structured this way** (Tier 1 and 2 only)
+**2. Why it's structured this way**
 Introduce concepts in context. Reference `teaching-vocabulary.md` for definitions.
 Only explain concepts that appear in this specific generation.
 ```
@@ -296,7 +258,7 @@ Only explain concepts that appear in this specific generation.
 > was Write or Edit." So: after any file change → run formatter.
 ```
 
-**3. What you'd change** (Tier 1 and 2 only)
+**3. What you'd change**
 Point to specific lines/fields with concrete modification examples.
 Reference the customization pointers in `teaching-vocabulary.md`.
 ```
@@ -321,8 +283,8 @@ Suggest related capabilities or upgrade paths. Keep to 1-2 suggestions.
 - Never repeat information already in the main output
 - Use "you" language, not "the user"
 - Explain concepts the FIRST time they appear; don't re-explain in subsequent generations
-- Skip annotations entirely if the user says "skip the explanation" or shows expert signals (uses field names, references schemas)
-- Keep total annotation length under 15 lines for Tier 1, 8 lines per component for Tier 2
+- Skip annotations entirely if the user asks to skip the explanation
+- Keep annotations brief — no more than ~15 lines total for a single extension, less per component in multi-part outputs
 
 ---
 
@@ -458,10 +420,8 @@ Circuit breaker rules (Section 5F) apply per-component: if a single component fa
 
 ## 7. Expert Escape Hatch
 
-If the user mentions schema internals by name (frontmatter fields, event schemas,
-matcher syntax, manifest fields, hookSpecificOutput), they're an expert.
-
-Acknowledge and offer choice:
+If the user clearly knows the internals or specifies schema fields explicitly,
+acknowledge and offer choice:
 
 > "You know the internals — want me to auto-resolve the rest, or give you full
 > control over every field?"

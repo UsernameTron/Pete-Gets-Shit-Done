@@ -1,3 +1,7 @@
+---
+name: workflow:idea-to-shipped
+description: Turn a freeform idea into shipped code end-to-end — discuss → plan → execute → verify → ship, unattended between two gates (plan approval, ship approval). Also covers research/plan-only asks, which end cleanly at the plan gate with the plan kept.
+---
 <purpose>
 
 Turn a freeform idea into shipped code: discuss → plan → execute → verify → ship, unattended

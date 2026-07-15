@@ -112,13 +112,10 @@ actually exists in the project.
 
 #### Check 4 — Usage Staleness
 
-Check last-modified timestamp of each agent's MEMORY.md.
-
-| Condition | Action |
-|:----------|:-------|
-| Not modified in 30+ days | Queue suggestion: "Your {name} specialist hasn't been used. Keep or remove?" |
-| Not modified in 90+ days | Auto-remove agent. Log. Inform user at end of interaction. |
-| Modified recently | Healthy. No action. |
+Check last-modified timestamp of each agent's MEMORY.md. Judge staleness yourself:
+for a specialist that looks long-unused, queue the suggestion "Your {name} specialist
+hasn't been used. Keep or remove?"; remove one only when it is clearly abandoned, log
+the removal, and inform the user at the end of the interaction.
 
 #### Repair Log
 
@@ -134,18 +131,19 @@ unless they explicitly ask ("show me repair log," "what did you fix").
 
 ### Step 1: Classify the Operation
 
-Classify the user's request into one of 8 operation types.
+Classify the user's request into one of 8 operation types using your own judgment about
+what they are actually asking for.
 
-| Operation | Trigger Pattern | Action |
-|:----------|:---------------|:-------|
-| **Status** | "how are my agents," "specialist status," "what agents do I have" | Read all agents, produce scannable health report |
-| **Addition** | "add an agent for," "I need a new specialist," "create an agent" | Design, scaffold, seed, validate a single new agent |
-| **Removal** | "remove the tester," "delete the API agent," "I don't need X" | Confirm → remove agent file + memory dir + routing references |
-| **Diagnosis** | "X isn't working right," "quality dropped on Y," "what's wrong" | Invoke auditor subagent → translate findings to plain English |
-| **Memory Inspection** | "what has X learned," "show me agent memory," "what does X know" | Read MEMORY.md → present as human-readable summary |
-| **Reset** | "start X fresh," "reset the tester," "wipe agent memory" | Confirm → clear MEMORY.md contents, keep agent file intact |
-| **Modification** | "change X's model," "add Slack to the deployer," "update agent" | Modify frontmatter fields → validate → confirm |
-| **Explanation** | "what do my specialists do," "explain my agents," "why do I have these" | Read all agents → produce plain-English ecosystem overview |
+| Operation | Action |
+|:----------|:-------|
+| **Status** | Read all agents, produce scannable health report |
+| **Addition** | Design, scaffold, seed, validate a single new agent |
+| **Removal** | Confirm → remove agent file + memory dir + routing references |
+| **Diagnosis** | Invoke auditor subagent → translate findings to plain English |
+| **Memory Inspection** | Read MEMORY.md → present as human-readable summary |
+| **Reset** | Confirm → clear MEMORY.md contents, keep agent file intact |
+| **Modification** | Modify frontmatter fields → validate → confirm |
+| **Explanation** | Read all agents → produce plain-English ecosystem overview |
 
 ### Step 2: Execute the Operation
 

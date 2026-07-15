@@ -30,40 +30,17 @@ technical details, and the output format.
 
 ## 1. Inference Engine
 
-For every request, determine the user's intent from `$ARGUMENTS` and conversation context.
-Classify into one of three modes:
+For every request, determine the user's intent from `$ARGUMENTS` and conversation
+context. Classify into one of three modes with your own judgment:
 
-### Mode Detection
+- **SINGLE AGENT** -- the user needs one specialist. Resolve one archetype, dispatch to agent-factory.
+- **TEAM ASSEMBLY** -- the user needs a coordinated team. Match a team pattern or compose a custom team.
+- **RECOMMEND** -- the user wants advice on composition. Analyze the project, suggest an optimal set.
 
-| Mode | Signal | Action |
-|------|--------|--------|
-| **SINGLE AGENT** | Names a role, framework, or domain keyword | Resolve one archetype, dispatch to agent-factory |
-| **TEAM ASSEMBLY** | "team", "set up a dev team", "development team", "[domain] team" | Match a team pattern or compose custom team |
-| **RECOMMEND** | "what agents should I have", "recommend agents", "which agents for my project" | Analyze project, suggest optimal agent composition |
-
-### Trigger Table -- Natural Language to Archetype Domain
-
-Map the user's words to one of the 10 archetype domains:
-
-| Domain | Archetype Count | Example Triggers |
-|--------|----------------|------------------|
-| **core-team** | 4 | "code reviewer", "performance optimizer", "code archaeologist", "refactorer", "documentation specialist", "doc writer" |
-| **web-frameworks** | 13 | "Django specialist", "Rails developer", "Laravel", "React expert", "Vue specialist", "Next.js agent", "FastAPI", "Spring Boot", "Express", "Flask", "Svelte", "Angular", "Nuxt" |
-| **mobile** | 6 | "iOS developer", "Android agent", "Flutter specialist", "React Native", "KMP", "Swift", "Kotlin", "mobile testing", "mobile CI/CD" |
-| **data-ml** | 8 | "data pipeline", "ML engineer", "PyTorch specialist", "pandas expert", "sklearn", "Jupyter", "MLOps", "feature engineering", "model serving", "visualization" |
-| **systems** | 6 | "Rust expert", "C++ specialist", "embedded developer", "concurrency", "memory safety", "OS-level", "Zig", "systems programming" |
-| **cloud-infra** | 7 | "AWS architect", "GCP specialist", "Terraform", "Kubernetes", "serverless", "Azure", "Pulumi", "cost optimizer", "infra security" |
-| **devops** | 6 | "CI/CD specialist", "SRE", "monitoring", "incident response", "observability", "chaos engineering", "containerization", "logging" |
-| **universal** | 4 | "testing specialist", "security reviewer", "database expert", "API designer", "accessibility", "backend generalist", "frontend generalist" |
-| **domain-specialists** | 16 | "fintech", "healthcare compliance", "gaming", "e-commerce", "real-time systems", "IoT", "SEO", "i18n", "GraphQL", "WebSocket", "caching", "state management", "design system", "migration", "error handling", "dependency management" |
-| **orchestrators** | 2 | "tech lead", "team lead", "workflow coordinator", "release manager", "team configurator" |
-
-### Disambiguation
-
-If the request does not clearly map to a single domain:
-1. Check for compound signals (e.g., "Django REST API" maps to web-frameworks, not universal).
-2. Prefer the more specific domain (e.g., "React testing" maps to web-frameworks, not universal).
-3. If genuinely ambiguous, ask ONE clarifying question with concrete options. Never ask more than two questions total.
+Then pick the archetype domain with your own judgment — the 10 domains and their
+reference files are listed in Section 3; prefer the most specific domain that fits.
+If genuinely ambiguous, ask ONE clarifying question with concrete options. Never
+ask more than two questions total.
 
 ---
 
@@ -77,17 +54,14 @@ For each agent to be generated, resolve these fields before dispatching:
 |-------|--------|---------|
 | **name** | Archetype template or user input | Required -- no default |
 | **description** | Archetype template, refined by user context | Required -- no default |
-| **model** | Archetype recommendation or model selection table | `sonnet` |
+| **model** | Archetype recommendation or your judgment | `sonnet` |
 | **tools** | Archetype defaults + user overrides | `Read, Grep, Glob, Bash` |
 | **system_prompt_focus** | Archetype template + domain expertise | Required -- no default |
 
 ### Model Selection
 
-| Agent Type | Model | Rationale |
-|-----------|-------|-----------|
-| Read-only reviewers, linters, pattern matchers | `haiku` | Fast, cost-effective for analysis tasks |
-| General specialists, framework experts, most developers | `sonnet` | Best balance of capability and speed |
-| Architects, complex orchestrators, tech leads | `opus` | Maximum reasoning for multi-system decisions |
+Legal `model` values: `haiku`, `sonnet` (default), `opus` — or omit to inherit.
+Choose with your own judgment.
 
 ### Domain-Specific Fields
 
@@ -103,12 +77,8 @@ Resolve additional fields when the domain requires them:
 
 ### Permission Mode
 
-| Tool Access Level | Permission Mode |
-|-------------------|-----------------|
-| Read-only (Read, Grep, Glob) | `plan` |
-| Read + Bash | `default` |
-| Full editing (Read, Write, Edit, Bash) | `default` |
-| Unrestricted | `acceptEdits` |
+Legal `permissionMode` values: `plan` (read-only), `default`, `acceptEdits`.
+Pick the least-privileged mode that fits the agent's tool access.
 
 ---
 

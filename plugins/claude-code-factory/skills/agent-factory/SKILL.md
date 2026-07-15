@@ -105,10 +105,12 @@ Verify:
 
 ## 3. Archetype-Specific Generation Rules
 
+Choose each generated agent's `model` (sonnet | opus | haiku | inherit) with your own judgment from the task at hand, unless the concierge passed an override.
+
 ### 3.1 Core Team (4 archetypes)
 
 #### code-reviewer
-- **Model**: inherit | **Tools**: Read, Grep, Glob, Bash
+- **Tools**: Read, Grep, Glob, Bash
 - **Workflow**: 5-phase review cycle
   1. **Scan** — `git diff` to identify changed files and scope
   2. **Analyze** — Read each changed file, understand intent
@@ -119,7 +121,7 @@ Verify:
 - **Output**: Markdown review with severity badges, grouped by file
 
 #### performance-optimizer
-- **Model**: sonnet | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Workflow**: Baseline → Profile → Fix → Validate cycle
   1. Capture baseline metrics (P50/P95/P99 latency, throughput, memory)
   2. Profile hotspots with language-appropriate tools
@@ -129,7 +131,7 @@ Verify:
 - **Constraint**: Never optimize without a baseline measurement first
 
 #### code-archaeologist
-- **Model**: haiku | **Tools**: Read, Grep, Glob (read-only)
+- **Tools**: Read, Grep, Glob (read-only)
 - **Workflow**: 7-step audit
   1. **Map** — Build dependency graph of target module
   2. **Trace** — Follow call chains to understand data flow
@@ -142,7 +144,7 @@ Verify:
 - **Constraint**: Read-only. Never modify files.
 
 #### documentation-specialist
-- **Model**: sonnet | **Tools**: Read, Write, Glob, Grep
+- **Tools**: Read, Write, Glob, Grep
 - **Workflow**:
   1. Detect doc type: README | API reference | Guide | Changelog | Architecture
   2. Scan existing docs for style patterns (heading levels, tone, formatting)
@@ -156,70 +158,70 @@ Verify:
 ### 3.2 Web Frameworks (13 archetypes)
 
 #### Django Backend (django-backend)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Fat models / thin views, middleware pipeline, signals, management commands, Django settings module pattern
 - **Conventions enforced**: Models contain business logic, views are thin dispatchers, use `select_related`/`prefetch_related` by default, custom managers for complex queries
 - **Workflow**: Analyze request → Check models → Review views → Validate middleware → Test
 
 #### Django API (django-api)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: DRF serializers, viewsets, routers, throttling, pagination, filtering, permissions
 - **Conventions enforced**: ModelSerializer for CRUD, custom serializers for complex operations, proper throttle classes, consistent pagination style
 - **Workflow**: Schema review → Serializer audit → ViewSet patterns → Permission check → Throttle config
 
 #### Django ORM (django-orm)
-- **Model**: sonnet | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Expertise**: QuerySet optimization, N+1 detection, migrations, database indexing, raw SQL escape hatches
 - **Conventions enforced**: Annotate over Python-side computation, `values()`/`values_list()` for lightweight queries, migration squashing strategy, index-first query design
 - **Workflow**: Query analysis → N+1 scan → Index review → Migration plan → Benchmark
 
 #### Rails Backend (rails-backend)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Convention over configuration, concerns, service objects, callbacks, ActiveSupport extensions
 - **Conventions enforced**: Skinny controllers, model concerns for shared behavior, service objects for cross-model operations, proper use of `before_action` chains
 
 #### Rails API (rails-api)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Grape / Rails API mode, serializers (Alba/Blueprinter/AMS), versioning, rate limiting
 - **Conventions enforced**: Consistent serializer pattern, API versioning in URL namespace, proper error response format
 
 #### Rails ActiveRecord (rails-activerecord)
-- **Model**: sonnet | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Expertise**: Scopes, eager loading (`includes`/`preload`/`eager_load`), STI, polymorphic associations, Arel for complex queries
 - **Conventions enforced**: Named scopes over class methods, eager loading audit, counter caches for counts
 
 #### Laravel Backend (laravel-backend)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Facades, service providers, middleware pipeline, event/listener pattern, queues
 - **Conventions enforced**: Repository pattern optional but consistent, service provider registration, proper middleware ordering
 
 #### Laravel Eloquent (laravel-eloquent)
-- **Model**: sonnet | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Expertise**: Relationships, scopes, accessors/mutators, model events, query builder optimization
 - **Conventions enforced**: Eager loading by default, accessor caching, proper relationship definitions
 
 #### React Components (react-components)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Hooks patterns (custom hooks, useCallback/useMemo), composition over inheritance, memoization strategies, error boundaries
 - **Conventions enforced**: Functional components only, custom hooks for reusable logic, `React.memo` for expensive renders, prop drilling → context/composition
 
 #### Next.js (nextjs-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Server components (RSC), app router, server actions, data fetching patterns, middleware, ISR/SSG/SSR selection
 - **Conventions enforced**: Server components by default, `'use client'` only when needed, proper cache/revalidation strategy, route groups for organization
 
 #### Vue Components (vue-components)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Composition API, slots (named/scoped), provide/inject, watchers, lifecycle hooks
 - **Conventions enforced**: `<script setup>` syntax, composables for reusable logic, proper slot design, emits declaration
 
 #### Nuxt (nuxt-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Server routes, `useFetch`/`useAsyncData`, middleware (route/server), Nitro engine, auto-imports
 - **Conventions enforced**: Server routes for API, proper data fetching composable selection, middleware ordering
 
 #### Vue State (vue-state)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Pinia stores, composables for shared state, plugin system, devtools integration
 - **Conventions enforced**: Pinia setup stores, composables for non-persisted state, proper getter/action separation
 
@@ -228,32 +230,32 @@ Verify:
 ### 3.3 Mobile (6 archetypes)
 
 #### iOS Specialist (ios-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Swift/SwiftUI conventions, UIKit bridge patterns, Combine/async-await concurrency, ARC memory management, App Store review guidelines, Xcode project structure
 - **Workflow**: Architecture review → SwiftUI/UIKit pattern check → Concurrency audit → Memory analysis → Store compliance
 
 #### Android Specialist (android-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Kotlin idioms, Jetpack Compose, ViewModel/LiveData/Flow, Hilt DI, ProGuard rules, Gradle build system, Material Design 3
 - **Workflow**: Architecture review → Compose patterns → DI audit → Build config → Material compliance
 
 #### Flutter Specialist (flutter-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Widget lifecycle, state management (Riverpod/Bloc/Provider), platform channels, asset management, pub.dev package selection, Dart idioms
 - **Workflow**: Widget tree review → State management audit → Platform channel check → Package evaluation
 
 #### React Native Specialist (react-native-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: JSI/TurboModules, Hermes engine, navigation patterns (React Navigation), native module bridging, Expo vs bare workflow tradeoffs
 - **Workflow**: Architecture review → Bridge/JSI audit → Navigation check → Performance profiling
 
 #### Mobile Testing Expert (mobile-testing-expert)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: XCTest/Espresso/Detox/widget testing, device matrix strategy, snapshot testing, CI integration, mocking platform APIs
 - **Workflow**: Test strategy design → Framework setup → Device matrix → CI pipeline → Mock layer
 
 #### Mobile CI/CD Architect (mobile-ci-cd-architect)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Fastlane lanes, code signing/provisioning, OTA updates (CodePush), beta distribution (TestFlight/Firebase), store submission automation
 - **Workflow**: Pipeline design → Signing setup → Distribution config → Store automation → Monitoring
 
@@ -262,42 +264,42 @@ Verify:
 ### 3.4 Data Science & ML (8 archetypes)
 
 #### Data Pipeline Engineer (data-pipeline-engineer)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: DAG design (Airflow/Prefect), idempotency patterns, backfill strategies, data quality checks (Great Expectations), schema evolution
 - **Workflow**: DAG architecture → Idempotency audit → Quality gates → Schema versioning → Backfill plan
 
 #### Pandas Specialist (pandas-specialist)
-- **Model**: haiku | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Expertise**: Memory optimization (categorical types, chunked processing), vectorized operations, merge strategies, MultiIndex, profiling
 - **Workflow**: Memory profile → Vectorization audit → Merge optimization → Index strategy
 
 #### PyTorch Specialist (pytorch-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Custom datasets/dataloaders, training loop patterns, gradient accumulation, distributed training (DDP), mixed precision (AMP), model checkpointing
 - **Workflow**: Data pipeline review → Training loop audit → Distribution setup → Checkpoint strategy
 
 #### Scikit-learn Specialist (sklearn-specialist)
-- **Model**: haiku | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Expertise**: Pipeline construction, custom transformers, cross-validation strategies, hyperparameter tuning (Optuna/GridSearch), model persistence (joblib)
 - **Workflow**: Pipeline design → Transformer audit → CV strategy → Tuning setup → Persistence
 
 #### Jupyter Workflow Expert (jupyter-workflow-expert)
-- **Model**: haiku | **Tools**: Read, Write, Bash, Grep, Glob
+- **Tools**: Read, Write, Bash, Grep, Glob
 - **Expertise**: Notebook as pipeline, nbconvert automation, papermill parameterization, kernel management, reproducibility practices, cell organization
 - **Workflow**: Notebook audit → Parameterization → Reproducibility check → Pipeline conversion
 
 #### ML Ops Engineer (ml-ops-engineer)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Experiment tracking (MLflow/W&B), model versioning, serving infrastructure (TorchServe/Triton), A/B testing, feature stores, drift detection
 - **Workflow**: Tracking setup → Model registry → Serving config → Monitoring → Drift detection
 
 #### Data Visualization Expert (data-visualization-expert)
-- **Model**: haiku | **Tools**: Read, Write, Bash, Grep, Glob
+- **Tools**: Read, Write, Bash, Grep, Glob
 - **Expertise**: Chart selection logic, color accessibility (colorblind-safe), interactive dashboards (Plotly/Dash), statistical plots (seaborn), annotation best practices
 - **Workflow**: Data assessment → Chart selection → Accessibility audit → Interactivity → Annotation
 
 #### Feature Engineering Specialist (feature-engineering-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Temporal features, encoding strategies (target/ordinal/one-hot), feature stores, leakage prevention, feature importance analysis, automated feature generation
 - **Workflow**: Feature inventory → Leakage scan → Encoding strategy → Importance ranking → Store design
 
@@ -306,73 +308,72 @@ Verify:
 ### 3.5 Systems Programming (6 archetypes)
 
 #### Rust Specialist (rust-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Ownership model, lifetime elision rules, trait design patterns, unsafe audit checklist, async patterns (tokio), error handling (thiserror/anyhow), cargo ecosystem
 - **Workflow**: Ownership analysis → Lifetime check → Trait design → Unsafe audit → Error handling review
 
 #### C++ Specialist (cpp-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Modern C++ idioms (17/20/23), RAII, smart pointers, move semantics, concepts (C++20), template metaprogramming, CMake best practices
 - **Workflow**: Standards compliance → RAII audit → Smart pointer check → CMake review → Template analysis
 
 #### Embedded Systems Expert (embedded-systems-expert)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Bare-metal programming, RTOS scheduling, DMA configuration, interrupt priorities, power state management, HAL patterns, memory-mapped I/O
 - **Workflow**: Hardware abstraction review → Interrupt priority audit → DMA config → Power management → Memory mapping
 
 #### OS-Level Specialist (os-level-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Syscall wrappers, IPC (pipes/shared memory/sockets), VFS interaction, memory mapping (mmap), procfs/sysfs, kernel module basics
 - **Workflow**: Syscall audit → IPC review → Memory mapping check → VFS interaction → Module analysis
 
 #### Memory Safety Auditor (memory-safety-auditor)
-- **Model**: sonnet | **Tools**: Read, Bash, Grep, Glob (read-heavy)
+- **Tools**: Read, Bash, Grep, Glob (read-heavy)
 - **Expertise**: ASAN/MSAN/TSAN usage, Valgrind analysis, fuzzing setup (AFL/libFuzzer), bounds checking, use-after-free detection, data race identification
 - **Workflow**: Sanitizer setup → Static analysis → Dynamic analysis → Fuzz testing → Report generation
 - **Constraint**: Analysis-focused. Suggests fixes but flags for human review before applying.
 
 #### Concurrency Expert (concurrency-expert)
-- **Model**: opus | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Expertise**: Lock-free algorithms, memory ordering (acquire/release/seq_cst), thread pool design, async runtime internals, deadlock detection, atomics patterns
 - **Workflow**: Concurrency model review → Lock analysis → Memory ordering audit → Deadlock detection → Performance profiling
-- **Model rationale**: Opus for complex reasoning about memory ordering and lock-free correctness
 
 ---
 
 ### 3.6 Cloud & Infrastructure (7 archetypes)
 
 #### AWS Architect (aws-architect)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Well-Architected Framework pillars, IAM least-privilege, VPC design, serverless patterns, CDK constructs, cost optimization
 - **Workflow**: Architecture review → IAM audit → Network design → Serverless evaluation → Cost analysis
 
 #### GCP Architect (gcp-architect)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Cloud Run patterns, GKE Autopilot, BigQuery optimization, Pub/Sub message design, IAM conditions, Terraform for GCP
 - **Workflow**: Service selection → GKE/Run evaluation → Data pipeline → IAM review → Terraform plan
 
 #### Terraform Specialist (terraform-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Module composition, state locking strategies, workspace management, plan review checklist, provider versioning, drift detection
 - **Workflow**: Module structure → State strategy → Plan review → Drift check → Provider audit
 
 #### Kubernetes Specialist (kubernetes-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Pod security standards, resource quotas/limits, Helm chart design, operator patterns, network policies, HPA/VPA, RBAC
 - **Workflow**: Security review → Resource limits → Helm audit → Network policy → RBAC check
 
 #### Serverless Expert (serverless-expert)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Cold start mitigation, event-driven patterns, step functions/workflows, cost modeling, vendor lock-in avoidance
 - **Workflow**: Architecture pattern → Cold start analysis → Event flow → Cost model → Portability review
 
 #### Cloud Cost Optimizer (cloud-cost-optimizer)
-- **Model**: haiku | **Tools**: Read, Bash, Grep, Glob (analysis-focused)
+- **Tools**: Read, Bash, Grep, Glob (analysis-focused)
 - **Expertise**: RI/SP analysis, right-sizing methodology, spot/preemptible strategy, FinOps dashboards, cost allocation tags, savings tracking
 - **Workflow**: Usage analysis → Right-sizing → RI/SP evaluation → Spot strategy → Tag audit → Savings report
 
 #### Infrastructure Security Reviewer (infrastructure-security-reviewer)
-- **Model**: sonnet | **Tools**: Read, Bash, Grep, Glob (read-only)
+- **Tools**: Read, Bash, Grep, Glob (read-only)
 - **Expertise**: CIS benchmarks, encryption audit (at rest/in transit), network segmentation, compliance mapping (SOC2/HIPAA/PCI), IAM policy analysis
 - **Workflow**: CIS benchmark check → Encryption audit → Network review → Compliance mapping → IAM analysis
 - **Constraint**: Read-only. Produces findings report. Never modifies infrastructure code directly.
@@ -382,32 +383,32 @@ Verify:
 ### 3.7 DevOps & Observability (6 archetypes)
 
 #### CI/CD Architect (ci-cd-architect)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Pipeline patterns (fan-out/fan-in), caching strategies, artifact promotion, deployment strategies (blue-green/canary/rolling), rollback procedures
 - **Workflow**: Pipeline design → Cache optimization → Artifact strategy → Deployment pattern → Rollback plan
 
 #### Monitoring Specialist (monitoring-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: RED/USE methods, SLI/SLO design, alert fatigue reduction, dashboard hierarchy, Prometheus/Grafana patterns, anomaly detection
 - **Workflow**: SLI definition → SLO targets → Alert rules → Dashboard design → Anomaly detection setup
 
 #### Incident Response Expert (incident-response-expert)
-- **Model**: sonnet | **Tools**: Read, Write, Bash, Grep, Glob
+- **Tools**: Read, Write, Bash, Grep, Glob
 - **Expertise**: Runbook templates, severity classification (SEV1-4), communication templates, postmortem facilitation, chaos engineering, game day planning
 - **Workflow**: Severity assessment → Runbook execution → Communication → Mitigation → Postmortem
 
 #### Logging Specialist (logging-specialist)
-- **Model**: haiku | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Structured logging standards, correlation IDs, sampling strategies, retention policies, ELK/Loki patterns, log level guidelines
 - **Workflow**: Standards review → Correlation setup → Sampling config → Retention policy → Pipeline design
 
 #### SRE Practices Advisor (sre-practices-advisor)
-- **Model**: sonnet | **Tools**: Read, Bash, Grep, Glob (advisory)
+- **Tools**: Read, Bash, Grep, Glob (advisory)
 - **Expertise**: Error budget policies, toil measurement/reduction, capacity planning, reliability reviews, blameless culture, change management
 - **Workflow**: Error budget review → Toil audit → Capacity analysis → Reliability review → Change management check
 
 #### Containerization Specialist (containerization-specialist)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Multi-stage builds, distroless/minimal images, security scanning (Trivy/Snyk), registry management, orchestration patterns, resource optimization
 - **Workflow**: Dockerfile audit → Image optimization → Security scan → Registry setup → Resource tuning
 
@@ -416,24 +417,24 @@ Verify:
 ### 3.8 Universal Experts (4 archetypes)
 
 #### Backend Developer (backend-developer)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Language-agnostic backend patterns, API design, database interaction, auth, error handling, logging
 - **Workflow**: Architecture review → API design → Database layer → Auth check → Error handling → Logging
 - **Adapts to**: Detected language and framework in project context
 
 #### Frontend Developer (frontend-developer)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: Component architecture, state management, accessibility, performance, responsive design, testing
 - **Workflow**: Component design → State management → A11y audit → Performance check → Responsive test
 - **Adapts to**: Detected framework (React/Vue/Svelte/Angular) in project context
 
 #### API Architect (api-architect)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: REST/GraphQL/gRPC design, versioning, rate limiting, OpenAPI documentation, auth patterns, error standards
 - **Workflow**: API style selection → Schema design → Versioning strategy → Auth pattern → Error format → Documentation
 
 #### DevOps Engineer (devops-engineer)
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Expertise**: CI/CD pipelines, infrastructure as code, monitoring, deployment strategies, security practices, cost optimization
 - **Workflow**: Pipeline review → IaC audit → Monitoring check → Deployment strategy → Security review → Cost analysis
 
@@ -442,71 +443,71 @@ Verify:
 ### 3.9 Domain Specialists (16 archetypes)
 
 #### security-reviewer
-- **Model**: sonnet | **Tools**: Read, Bash, Grep, Glob
+- **Tools**: Read, Bash, Grep, Glob
 - **Focus**: OWASP Top 10, dependency audit, secrets scanning, auth/authz, input validation, CSP headers
 - **Constraint**: Read-only analysis. Flags findings with severity.
 
 #### test-writer
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: Unit/integration/E2E strategies, mocking patterns, fixture design, coverage targets, TDD, property-based testing
 
 #### database-expert
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: Schema design, query optimization, indexing, migration patterns, replication, connection pooling
 
 #### accessibility-auditor
-- **Model**: sonnet | **Tools**: Read, Bash, Grep, Glob
+- **Tools**: Read, Bash, Grep, Glob
 - **Focus**: WCAG 2.1 AA, screen reader testing, keyboard navigation, color contrast, ARIA, focus management
 - **Constraint**: Read-only. Produces compliance report.
 
 #### refactoring-advisor
-- **Model**: sonnet | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Focus**: Code smell detection, refactoring patterns (extract/inline/move), dependency breaking, incremental migration, test preservation
 
 #### migration-specialist
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: Version upgrade paths, breaking change detection, data migration, rollback plans, compatibility layers, deprecation management
 
 #### api-doc-writer
-- **Model**: haiku | **Tools**: Read, Write, Glob, Grep
+- **Tools**: Read, Write, Glob, Grep
 - **Focus**: OpenAPI/Swagger, endpoint documentation, examples, auth docs, error catalog, changelog
 
 #### error-handler
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: Error taxonomy, retry strategies, circuit breakers, graceful degradation, user-facing messages, error reporting
 
 #### dependency-auditor
-- **Model**: haiku | **Tools**: Read, Bash, Grep, Glob
+- **Tools**: Read, Bash, Grep, Glob
 - **Focus**: License compliance, vulnerability scanning, update strategies, lock file management, transitive dependency analysis, SBOM
 - **Constraint**: Read-only. Produces audit report.
 
 #### i18n-specialist
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: String externalization, locale management, pluralization, RTL support, date/number formatting, translation workflow
 
 #### seo-optimizer
-- **Model**: haiku | **Tools**: Read, Edit, Bash, Grep, Glob
+- **Tools**: Read, Edit, Bash, Grep, Glob
 - **Focus**: Meta tags, structured data (JSON-LD), Core Web Vitals, sitemap, canonical URLs, crawl budget
 
 #### design-system-reviewer
-- **Model**: sonnet | **Tools**: Read, Grep, Glob
+- **Tools**: Read, Grep, Glob
 - **Focus**: Component consistency, token usage, accessibility in components, documentation, versioning, breaking changes
 - **Constraint**: Read-only analysis.
 
 #### state-management-expert
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: State architecture, derived state, persistence, synchronization, optimistic updates, undo/redo
 
 #### graphql-specialist
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: Schema design, resolver patterns, DataLoader, subscriptions, federation, caching, N+1 prevention
 
 #### websocket-expert
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: Connection lifecycle, reconnection strategies, heartbeat, message protocol, scaling, security
 
 #### caching-strategist
-- **Model**: sonnet | **Tools**: Read, Write, Edit, Bash, Grep, Glob
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob
 - **Focus**: Cache invalidation patterns, TTL strategies, cache warming, distributed caching, CDN, cache-aside/write-through/write-behind
 
 ---
@@ -514,7 +515,7 @@ Verify:
 ### 3.10 Orchestrators (2 archetypes)
 
 #### Tech Lead Orchestrator (tech-lead-orchestrator)
-- **Model**: opus | **Tools**: Read, Write, Edit, Bash, Grep, Glob, Agent
+- **Tools**: Read, Write, Edit, Bash, Grep, Glob, Agent
 - **Expertise**: Task decomposition, agent delegation, conflict resolution, progress tracking, quality gates, cross-agent communication
 - **Workflow**:
   1. Receive high-level task from user
@@ -523,11 +524,10 @@ Verify:
   4. Monitor progress, resolve conflicts between agents
   5. Run quality gates on combined output
   6. Synthesize final deliverable
-- **Model rationale**: Opus for complex multi-agent coordination and architectural reasoning
 - **Constraint**: Orchestrates only. Does not implement directly unless no specialist is available.
 
 #### Team Configurator (team-configurator)
-- **Model**: sonnet | **Tools**: Read, Bash, Grep, Glob
+- **Tools**: Read, Bash, Grep, Glob
 - **Expertise**: Stack detection, team composition optimization, agent compatibility analysis, workflow wiring, scaling recommendations
 - **Workflow**:
   1. Scan project for languages, frameworks, config files

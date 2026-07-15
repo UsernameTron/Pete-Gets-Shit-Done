@@ -1,3 +1,7 @@
+---
+name: workflow:quick-change
+description: Execute one small verified change (under 3 files) and push it to a draft PR — quick --full so verification cannot be skipped, full test suite, then one gate at the push. Escalates to idea-to-shipped when the 3-file scope rule trips.
+---
 <purpose>
 Execute one small change with verification structurally impossible to forget, then gate exactly
 once — at the push. This is W4 (`.planning/GSD-AUTONOMOUS-WORKFLOWS.md:120-134`), autonomy

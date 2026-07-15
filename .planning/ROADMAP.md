@@ -48,12 +48,25 @@
 
 **Milestone Goal:** Harden the last `/gsd:finalize` fragility and build the shelved `ship-milestone` workflow that depends on it, closing the autonomous-workflows suite.
 
+- [ ] **Phase 57.1: Bitter Lesson Surgery** (inserted 2026-07-15) - Strip judgment scaffolding (do.md routing table, classify.cjs, dynamicSelect tier promotion, vendored-skill classifiers) while preserving leverage scaffolding; replace router with model-readable registry
 - [ ] **Phase 58: Finalize Hardening & Re-verification** - Gate 5.5 degrades gracefully without repo-doc-architect; finalize re-verified end-to-end on a real close-out
 - [ ] **Phase 59: Ship-Milestone Workflow** - Composes the finalizer critical path behind exactly 2 gates, routed via /gsd:do, unshelved
 
 ## Phase Details
 
 (All v2.6, v2.7, and v2.8 phase details archived to milestones/v2.6-ROADMAP.md, milestones/v2.7-ROADMAP.md, milestones/v2.8-ROADMAP.md respectively.)
+
+### Phase 57.1: Bitter Lesson Surgery (inserted 2026-07-15)
+**Goal**: The GSD harness carries no judgment scaffolding — no if-then routing tables, no keyword-scoring classifiers, no tier-promotion heuristics — while every piece of leverage scaffolding (deterministic gates, verification loops, environment facts, user config) survives intact.
+**Depends on**: Nothing (standalone surgery on shipped surface)
+**Requirements**: Operator directive 2026-07-15 (no REQ-IDs — off-milestone insert)
+**Success Criteria** (what must be TRUE):
+  1. `/gsd:do` routes from a model-readable registry (frontmatter aggregation via `gsd-tools do-registry`), not an intent table; do.md contains no routing rules.
+  2. `classify.cjs` does not exist; `dynamicSelect`/`MODEL_TIERS` do not exist; static `MODEL_PROFILES` and history JSONL recording still work.
+  3. All 47 vendored SKILL.md files pass the judgment-vs-leverage rubric; every deletion logged in BITTER_LESSON_LOG.md with line count + defense.
+  4. Full suite green, coverage floors hold (90/80/95), check-doc-drift exit 0, validate-doc-links clean.
+  5. Branch `bitter-lesson-surgery` committed, never pushed.
+**Plans**: Executed directly from approved plan (~/.claude/plans/58-load-the-entire-eventual-hare.md) — orchestrator + 7 executors
 
 ### Phase 58: Finalize Hardening & Re-verification
 **Goal**: `/gsd:finalize` completes cleanly whether or not `repo-doc-architect` is available in the current install, and its full gate sequence — including every push consent gate — has been proven safe on a real milestone close-out.
@@ -90,5 +103,6 @@
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete | 2026-05-07 |
 | 56. Doc Drift Detector | v2.8 | 3/3 | Complete | 2026-05-08 |
 | 57. Backfill and CI Integration | v2.8 | 3/3 | Complete | 2026-05-08 |
+| 57.1. Bitter Lesson Surgery | v2.9 (insert) | 0/1 | In progress | - |
 | 58. Finalize Hardening & Re-verification | v2.9 | 0/TBD | Not started | - |
 | 59. Ship-Milestone Workflow | v2.9 | 0/TBD | Not started | - |
