@@ -23,3 +23,4 @@
 {"id":23,"intent":"note for later: add retry logic to the CI watcher","expected":"gsd:note","freq":"high"}
 {"id":24,"intent":"write tests for the checkpoint module's edge cases","expected":"gsd:add-tests","freq":"med"}
 {"id":25,"intent":"tiny verified fix — bump ci-watch timeout to 60s and push it up as a draft PR","expected":"workflow:quick-change","freq":"med"}
+{"id":26,"intent":"close out the milestone — take it through archive and tag","expected":"workflow:ship-milestone","freq":"med"}
