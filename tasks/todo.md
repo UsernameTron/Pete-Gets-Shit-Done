@@ -9,7 +9,7 @@ Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop:
 - [x] **Phase C** — PR #38 merged (`838f17c`): `daily-startup` workflow + 17-assertion contract test. Read-only, zero gates.
 - [x] **Phase D** — PR #39 merged (`26e9ccf`): `smart_discuss` extracted from `autonomous.md` (behavior-neutral thin caller, CTRL-03 fulfilled) + `idea-to-shipped` workflow + 18-assertion contract test + `<available_agent_types>` per #1357.
 - [x] **Phase E** — PR #40: `/gsd:do` routes the three built flows via `workflow:` targets (+9-assertion routing test); ecosystem map regenerated at 241 components (drift-history row 3 appended; stale 75-command line fixed); living docs synced.
-- SHELVED: `ship-milestone` (until `finalize` ungated pushes repaired). DEFERRED to second pass: `quick-change`, `bug-to-branch`.
+- ~~SHELVED: `ship-milestone`~~ BUILT (Phase 59, 2026-07-15) after finalize repairs + Phase 58 re-verification. Second pass (`quick-change`, `bug-to-branch`) also shipped.
 
 ## Current Status: v2.8 Archived — Ready for v2.9
 
@@ -170,7 +170,7 @@ Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop:
 2. Course-correction mid-flight: first attempt built W1–W6 as a NEW `get-shit-done/flows/` system on branch `docs/workflow-design-recs`, trusting the design doc's claim they didn't exist. Pre-ship `git fetch` comparison revealed origin/main already shipped W1–W6 in the `workflow:<name>` convention (autonomous-workflows build-out). Discarded the duplicate; rebuilt on main's convention. Stale branch deleted.
 3. Branch hygiene: deleted `docs/workflow-design-recs` + 3 stale `chore/*` locals; deleted 2 stale `chore/*` remotes.
 4. Planning sync — PR #48 (`8490ec1`): STATE.md frontmatter `v2.6`→`v2.8` (matched body/history), counts refreshed to 2,969 tests / 586 suites / 91.76% line.
-5. W7/ship-milestone remains SHELVED (operator, 2026-07-12) — not built or routed.
+5. W7/ship-milestone remains SHELVED (operator, 2026-07-12) — not built or routed. *(Lifted 2026-07-15: built as W5 in Phase 59.)*
 
 **Tests:** 2,969 passing / 586 suites / 0 failures. Coverage 91.76% line / 83.53% branch / 97.62% function. All 23 doc-drift claims match.
 

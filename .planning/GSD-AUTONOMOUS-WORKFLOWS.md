@@ -132,11 +132,13 @@ Two design consequences, applied to every workflow below: (1) no chain may assum
 7. **Involvement reduction:** Before: 2 invocations + 1 decision → **After: 1 intent + 1 gate.** The win is small per run but the safety delta is large: verification becomes structurally impossible to forget.
 8. **Failure & rollback:** verifier gap → one fix iteration, then stop-and-report; rollback = drop the local commit (`git reset --hard HEAD~1` on the working branch, never `main`).
 
-## W5 — `ship-milestone` — SHELVED
+## W5 — `ship-milestone` — BUILT (Phase 59, 2026-07-15)
 
 > **Status: shelved by operator decision (2026-07-12).** A milestone ship is exactly the kind of irreversible sequence that must be gated, and `/gsd:finalize` — the existing primitive closest to this chain — carries two ungated pushes plus a tool-permission mismatch (details in item 8). The design below already routes around `finalize`, but this workflow stays unbuilt until `finalize` is repaired or the chain is re-verified end-to-end. Spec retained for that day.
 >
 > **Update (2026-07-12, blueprint `finalize-push-consent`):** the two ungated pushes (Gate 1 and Gate 7) and the missing AskUserQuestion in `allowed-tools` are resolved — both pushes now sit behind a consent gate: AskUserQuestion when interactive; the `--yes-push` flag or the `workflow.finalize_auto_push` config key (default `false`) pre-approve it for autonomous chains, always printing an `[auto-push]` receipt. `ship-milestone` can now route THROUGH `finalize` by granting push consent at its own approved gate. ~~Still open before unshelving: the cross-plugin `repo-doc-architect` spawn (Gate 5.5) and one end-to-end chain re-verification.~~
+>
+> **Update (2026-07-15, Phase 59): BUILT.** `get-shit-done/workflows/ship-milestone.md` implements the spec below verbatim — same chain, same 2 gates, same prompt texts — registry-routable as `workflow:ship-milestone` (blind spot-check 3/3: close-out intent routes here; phase-level ship still routes to ship-and-merge; an explicit complete-milestone ask still reaches the primitive). Structural contract: `tests/ship-milestone.test.cjs`. Autonomy stays L2 by design. The shelf is lifted.
 >
 > **Update (2026-07-15, Phase 58 — FIN-01/FIN-02):** both remaining preconditions are resolved. Gate 5.5 now checks agent availability first and degrades gracefully — `[skip]` notice (naming the closeout-deferred-drift caveat) and continue to Gate 6 when `repo-doc-architect` doesn't resolve; spawn contract unchanged when it does (locked by `tests/finalize.test.cjs`). The full 8-gate chain was re-verified end-to-end twice in a sandbox (fixture project + local bare origin): interactive consent prompts fired live at Gates 1 and 7, `[auto-push]` receipts printed under `--yes-push`, Gate 2 hard-stop proven against an injected build failure, zero ungated remote operations in the origin audit (evidence: `.planning/phases/58-finalize-hardening/VERIFICATION.md`, summarized in the Phase 58 PR). **No open unshelve preconditions remain — W5 is buildable; Phase 59 builds it.**
 
@@ -234,7 +236,7 @@ Two design consequences, applied to every workflow below: (1) no chain may assum
 #   assert ship is never reached without GATE 2 approval; assert draft PR (not ready-for-review)
 ```
 
-**Remaining flows** (`bug-to-branch`, `quick-change`, `ship-milestone`) follow the same wrapper pattern once the top 3 prove the shape — `ship-milestone` additionally blocked on fixing `finalize`'s ungated pushes if it is ever to include it (it currently routes around `finalize` entirely).
+**Remaining flows** (`bug-to-branch`, `quick-change`, `ship-milestone`) follow the same wrapper pattern once the top 3 prove the shape — `ship-milestone` additionally blocked on fixing `finalize`'s ungated pushes if it is ever to include it (it currently routes around `finalize` entirely). *(Since resolved: all three are built — ship-milestone last, Phase 59, 2026-07-15.)*
 
 **Cadence workflows → commands, not scheduled tasks.** `daily-startup` and `wrap-and-sync` are session-boundary events, not clock events — a scheduler can't know when Pete sits down. The `/gsd:daily`-pattern command is the right weight. (If desired later: a Claude Code SessionStart hook can print the `daily-startup` reminder for free.)
 
@@ -257,12 +259,12 @@ Score = Involvement saved (1–5) × Frequency (1–5) × Safety confidence (1�
 | 3 | `daily-startup` | 3 | 5 | 5 | **75** | Read-only, trivial to build, completes the session bookends |
 | 4 | `quick-change` | 3 | 4 | 4 | 48 | Small win per run; big "can't forget --full" safety delta |
 | 5 | `bug-to-branch` | 4 | 3 | 4 | 48 | Debug state machine already does the heavy lifting |
-| 6 | `ship-milestone` | 5 | 3 | 3 | 45 | SHELVED (operator, 2026-07-12) until `finalize`'s ungated pushes are repaired |
+| 6 | `ship-milestone` | 5 | 3 | 3 | 45 | BUILT (Phase 59, 2026-07-15) — shelf lifted after the finalize repairs + Phase 58 re-verification |
 | 7 | `refresh-ecosystem-map` | 3 | 2 | 5 | 30 | Already built — score moot |
 
 **Build order (top 3):** `wrap-and-sync` first — highest score, highest frequency, zero-risk content, and it directly retires the failure mode that produced lesson 2026-05-11. `daily-startup` second — cheapest build (read-only), and pairing both bookends doubles the per-session win immediately. `idea-to-shipped` third — the biggest single prize, deliberately after the two safe ones because it needs the smart-discuss extraction and the most careful gate-transcript verification before it earns L3 trust.
 
-**Would NOT automate yet:** (1) `ship-milestone` at L3 — the tag/archive/branch-delete cluster plus `finalize`'s ungated pushes keep it L2 until `finalize` is repaired; (2) any auto-chain into `/gsd:review` external CLIs — it sends plan content to whatever CLIs are installed with no gate (`review.md:121,126,131`); an unattended chain must never trigger an ungated external send; (3) PR merging — permanently human, by design and by branch protection.
+**Would NOT automate yet:** (1) `ship-milestone` at L3 — the tag/archive/branch-delete cluster keeps it L2 (supervised) permanently by design; it is now built at L2 (Phase 59, 2026-07-15) with the finalize repairs landed; (2) any auto-chain into `/gsd:review` external CLIs — it sends plan content to whatever CLIs are installed with no gate (`review.md:121,126,131`); an unattended chain must never trigger an ungated external send; (3) PR merging — permanently human, by design and by branch protection.
 
 ---
 

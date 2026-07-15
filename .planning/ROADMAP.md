@@ -46,11 +46,11 @@
 
 ### v2.9 Autonomous Workflows Completion (Phases 58-59) — IN PROGRESS
 
-**Milestone Goal:** Harden the last `/gsd:finalize` fragility and build the shelved `ship-milestone` workflow that depends on it, closing the autonomous-workflows suite.
+**Milestone Goal:** Harden the last `/gsd:finalize` fragility and build the previously-shelved `ship-milestone` workflow that depends on it (built Phase 59, 2026-07-15), closing the autonomous-workflows suite.
 
 - [x] **Phase 57.1: Bitter Lesson Surgery** (inserted 2026-07-15) - Strip judgment scaffolding (do.md routing table, classify.cjs, dynamicSelect tier promotion, vendored-skill classifiers) while preserving leverage scaffolding; replace router with model-readable registry (shipped PR #51, 2026-07-15)
 - [x] **Phase 58: Finalize Hardening & Re-verification** - Gate 5.5 degrades gracefully without repo-doc-architect; finalize re-verified end-to-end in sandbox (operator-ratified FIN-02 vehicle, 2026-07-15)
-- [ ] **Phase 59: Ship-Milestone Workflow** - Composes the finalizer critical path behind exactly 2 gates, routed via /gsd:do, unshelved
+- [x] **Phase 59: Ship-Milestone Workflow** - Composes the finalizer critical path behind exactly 2 gates, routed via /gsd:do, unshelved (shipped 2026-07-15)
 
 ## Phase Details
 
@@ -85,10 +85,10 @@
 **Requirements**: SHIP-01, SHIP-02, SHIP-03, SHIP-04
 **Success Criteria** (what must be TRUE):
   1. `get-shit-done/workflows/ship-milestone.md` exists and composes health → audit-agents → sync-docs → coverage+drift → audit-milestone → ship/ci-watch → complete-milestone behind exactly 2 gates (conditional audit-verdict gate + complete-milestone authorization gate) — no additional gates.
-  2. Saying "close out the milestone" (or an equivalent intent) to `/gsd:do` routes to `workflow:ship-milestone`, matched ahead of the existing `/gsd:complete-milestone` row, and the workflow's shelved status is lifted everywhere it was previously flagged.
+  2. Saying "close out the milestone" (or an equivalent intent) to `/gsd:do` routes to `workflow:ship-milestone` — its registry description makes the model prefer it over `gsd:complete-milestone` for close-out intents (blind spot-check evidence) — and the workflow's shelved status is lifted everywhere it was previously flagged. *(Re-pointed 2026-07-15: the routing table was deleted in Phase 57.1; registry routing has no row ordering.)*
   3. Running `ship-milestone` through to Gate 2 still surfaces `complete-milestone`'s 3 internal prompts (archive phases, branch handling, tag push) as live human prompts — the workflow's gates authorize starting the sequence, never auto-answer them.
-  4. A structural test suite asserts the `/gsd:do` routing table includes the `ship-milestone` row, every `/gsd:` command the workflow references resolves to a real command file, and the workflow holds no more than 2 gates.
-**Plans**: TBD
+  4. A structural test suite asserts the do-registry includes `workflow:ship-milestone`, every `/gsd:` command the workflow references resolves to a real command file, and the workflow holds no more than 2 gates. *(Re-pointed 2026-07-15: "routing table" → do-registry, per Phase 57.1.)*
+**Plans**: Executed 2026-07-15 from approved plan (~/.claude/plans/58-load-the-entire-eventual-hare.md, Phase 59 version) — 59-01 ship-milestone.md + audit-milestone filename fix, 59-02 tests (ship-milestone.test.cjs, do-routing flip, golden id 26, blind spot-check 3/3), 59-03 registry re-pointing + shelved-flag lift
 
 ## Progress
 
@@ -105,4 +105,4 @@
 | 57. Backfill and CI Integration | v2.8 | 3/3 | Complete | 2026-05-08 |
 | 57.1. Bitter Lesson Surgery | v2.9 (insert) | 1/1 | Complete | 2026-07-15 |
 | 58. Finalize Hardening & Re-verification | v2.9 | 3/3 | Complete | 2026-07-15 |
-| 59. Ship-Milestone Workflow | v2.9 | 0/TBD | Not started | - |
+| 59. Ship-Milestone Workflow | v2.9 | 3/3 | Complete | 2026-07-15 |

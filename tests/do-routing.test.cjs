@@ -34,6 +34,7 @@ const WORKFLOW_FLOWS = [
   'frontend-phase',
   'hardened-plan',
   'groom-backlog',
+  'ship-milestone',
 ];
 
 function runRegistry() {
@@ -117,8 +118,8 @@ describe('do-registry aggregation contract', () => {
   test('shelved milestone workflow is not routed', () => {
     const names = registry.map(e => e.name);
     assert.ok(
-      !names.includes('workflow:ship-milestone') && !names.includes('workflow:milestone-rollover'),
-      'ship-milestone/milestone-rollover is shelved (operator, 2026-07-12) and must not appear',
+      !names.includes('workflow:milestone-rollover'),
+      'milestone-rollover is shelved and must not appear (ship-milestone was unshelved by Phase 59, 2026-07-15)',
     );
   });
 });

@@ -4,7 +4,7 @@
 
 **Method:** All 67 commands were mapped against the 6 foundational workflows (W1 daily-startup, W2 idea-to-shipped, W3 bug-to-branch, W4 quick-change, W5 smart-discuss, W6 wrap-and-sync — numbering per the shipped files).
 
-**Implementation status (2026-07-13):** W1–W6 shipped via the autonomous-workflows build-out (`.planning/GSD-AUTONOMOUS-WORKFLOWS.md`) as `get-shit-done/workflows/<name>.md` files routed as `workflow:<name>` rows in `/gsd:do`. W8–W13 below were then implemented in that same convention. W7 (milestone-rollover) is NOT built — its `ship-milestone` equivalent was shelved by the operator on 2026-07-12 until `/gsd:finalize`'s ungated pushes are repaired. W14 was folded into W10 as `--deep`.
+**Implementation status (2026-07-13):** W1–W6 shipped via the autonomous-workflows build-out (`.planning/GSD-AUTONOMOUS-WORKFLOWS.md`) as `get-shit-done/workflows/<name>.md` files routed as `workflow:<name>` rows in `/gsd:do`. W8–W13 below were then implemented in that same convention. W7 (milestone-rollover) is NOT built — its `ship-milestone` equivalent was shelved by the operator on 2026-07-12 until `/gsd:finalize`'s ungated pushes are repaired, then built in Phase 59 (2026-07-15) once finalize was repaired and re-verified; milestone-rollover itself remains unbuilt. W14 was folded into W10 as `--deep`.
 
 ---
 

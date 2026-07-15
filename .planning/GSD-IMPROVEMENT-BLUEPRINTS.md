@@ -1136,7 +1136,7 @@ _`.planning/GSD-AUTONOMOUS-WORKFLOWS.md`_
 --- a/.planning/GSD-AUTONOMOUS-WORKFLOWS.md
 +++ b/.planning/GSD-AUTONOMOUS-WORKFLOWS.md
 @@ -135,6 +135,8 @@
- ## W5 — `ship-milestone` — SHELVED
+ ## W5 — `ship-milestone` — SHELVED *(historical record — BUILT 2026-07-15, Phase 59; current status lives in `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` W5)*
  
  > **Status: shelved by operator decision (2026-07-12).** A milestone ship is exactly the kind of irreversible sequence that must be gated, and `/gsd:finalize` — the existing primitive closest to this chain — carries two ungated pushes plus a tool-permission mismatch (details in item 8). The design below already routes around `finalize`, but this workflow stays unbuilt until `finalize` is repaired or the chain is re-verified end-to-end. Spec retained for that day.
 +>
