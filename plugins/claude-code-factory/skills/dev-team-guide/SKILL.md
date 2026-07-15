@@ -27,14 +27,14 @@ never see skill names, layer numbers, or routing decisions.
 
 ## 1. Routing Table
 
-Evaluate the user's request against these intents in priority order. First match wins.
+Four intents exist. Decide which one fits the user's request with your own judgment:
 
-| Priority | Intent | Route To | Signal Phrases |
-|----------|--------|----------|----------------|
-| 1 | **BROWSE** agent recipes | `dev-recipes` skill | "what dev agents available", "show dev recipes", "browse agents", "agent catalog", "list archetypes", "show me [domain] agents", "/dev-recipes" |
-| 2 | **SINGLE AGENT** creation | `dev-team-concierge` skill | Any development role name (reviewer, optimizer, archaeologist, specialist), any framework name (Django, React, Flutter, PyTorch, Rails, Laravel, Spring Boot), any domain keyword (mobile, ML, systems, cloud, DevOps), "create a [role] agent", "I need a [framework] agent", "build me a [domain] agent" |
-| 3 | **TEAM** assembly | `dev-team-concierge` skill (team mode) | "build me a dev team", "assemble a [domain] team", "I need a full stack team", "set up a dev team", "team for my project", "configure agents for", "development team", "agent team", "[domain] team" (e.g., "ML team", "mobile team", "cloud team") |
-| 4 | **RECOMMEND** agents | `dev-team-concierge` skill (recommend mode) | "analyze my tech stack", "what agents should I use for this project", "what agents should I have", "recommend agents for my project", "which agents for my codebase", "improve my agent setup" |
+| Intent | Route To |
+|--------|----------|
+| **BROWSE** agent recipes | `dev-recipes` skill |
+| **SINGLE AGENT** creation | `dev-team-concierge` skill |
+| **TEAM** assembly | `dev-team-concierge` skill (team mode) |
+| **RECOMMEND** agents | `dev-team-concierge` skill (recommend mode) |
 
 ---
 
@@ -100,12 +100,10 @@ user's request matches any of these, do not route — let `extension-guide` hand
 ### Disambiguation Rule
 
 If the request is ambiguous between "create an agent" (dev team domain) and "create
-an agent" (Claude Code subagent), check for context clues:
-- Mentions a programming language, framework, or dev role -> this router (dev-team-guide)
-- Mentions Claude Code internals, tool access, permission modes -> extension-guide
-- Still unclear -> ask ONE clarifying question: "Are you looking for a development
-  specialist agent (like a React expert or code reviewer) or a Claude Code subagent
-  (for automating Claude Code workflows)?"
+an agent" (Claude Code subagent), decide from context with your own judgment. Still
+unclear -> ask ONE clarifying question: "Are you looking for a development
+specialist agent (like a React expert or code reviewer) or a Claude Code subagent
+(for automating Claude Code workflows)?"
 
 ---
 

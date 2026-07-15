@@ -2,8 +2,8 @@
 name: team-configurator
 description: |
   Detects the technology stack of the current project across all domains and
-  assembles an optimal team of development agents. Scans 25+ config file types
-  covering web, mobile, data/ML, systems, cloud, and DevOps. Writes team
+  assembles an optimal team of development agents. Detects web, mobile, data/ML,
+  systems, cloud, and DevOps stacks from project config files. Writes team
   configuration to CLAUDE.md.
 user-invocable: true
 argument-hint: "[scope: project|global] [--detect-only]"
@@ -25,69 +25,18 @@ If `$ARGUMENTS` contains `--detect-only`, execute only §1-2 and print results. 
 
 ## 1. Stack Detection
 
-Scan the project root for these files. For each match, record the detection.
+Scan the project root for config files (dependency manifests, lockfiles, IaC, CI
+configs) and determine the stack with your own judgment: languages, backend and
+frontend frameworks, mobile platforms, data/ML libraries, systems languages, cloud
+providers, infrastructure, databases, testing, CI/CD, and monitoring. Read
+dependency manifests (`package.json`, `pyproject.toml`, `Gemfile`, `build.gradle`,
+etc.) rather than relying on filenames alone — the dependencies identify the
+frameworks, not just the language.
 
-### Config File Detection Matrix (25+ file types)
+Then record codebase size:
 
-| File / Pattern | Detects |
-|----------------|---------|
-| `package.json` | Node.js, React, Vue, Next.js, Express, Vite, TypeScript |
-| `requirements.txt` / `pyproject.toml` / `Pipfile` | Python, Django, Flask, FastAPI |
-| `Gemfile` | Ruby, Rails |
-| `composer.json` | PHP, Laravel |
-| `go.mod` | Go |
-| `Cargo.toml` | Rust |
-| `build.gradle` / `pom.xml` | Java, Spring, Kotlin |
-| `.csproj` / `*.sln` | C#, .NET, ASP.NET |
-| `Podfile` / `*.xcodeproj` | iOS (Swift/ObjC) |
-| `build.gradle` (android block) | Android (Kotlin/Java) |
-| `pubspec.yaml` | Flutter (Dart) |
-| `setup.py` / `setup.cfg` with ML deps | Data Science / ML |
-| `*.ipynb` (Jupyter notebooks) | Jupyter / Data exploration |
-| `CMakeLists.txt` / `Makefile` | C/C++ / Systems |
-| `*.tf` / `terraform/` | Terraform / IaC |
-| `k8s/` or K8s manifests (`*.yaml` with `apiVersion`) | Kubernetes |
-| `serverless.yml` / `sam.yaml` | Serverless |
-| `.aws/` or `aws-cdk.json` | AWS |
-| `Dockerfile` / `docker-compose.yml` | Docker |
-| `.github/workflows/` | CI/CD (GitHub Actions) |
-| `.gitlab-ci.yml` | CI/CD (GitLab) |
-| `tsconfig.json` | TypeScript |
-| `tailwind.config.*` | Tailwind CSS |
-| `jest.config.*` / `vitest.config.*` / `pytest.ini` | Testing frameworks |
-| `prometheus.yml` / `grafana/` | Monitoring / Observability |
-
-### Detection Procedure
-
-1. Run `Glob` for each pattern above. Record hits.
-2. For `package.json`, read and check `dependencies` + `devDependencies` for framework packages:
-   - `react`, `react-dom` → React
-   - `next` → Next.js
-   - `vue` → Vue
-   - `nuxt` → Nuxt
-   - `express` → Express
-   - `@angular/core` → Angular
-   - `svelte` → Svelte
-   - `vite` → Vite
-3. For `requirements.txt` / `pyproject.toml` / `Pipfile`, grep for:
-   - `django` → Django
-   - `flask` → Flask
-   - `fastapi` → FastAPI
-   - `torch`, `pytorch` → PyTorch
-   - `tensorflow` → TensorFlow
-   - `scikit-learn`, `sklearn` → Scikit-learn
-   - `pandas` → Pandas
-   - `airflow`, `prefect` → Data pipelines
-   - `mlflow`, `wandb` → MLOps
-4. For `Gemfile`, grep for `rails` → Rails
-5. For `composer.json`, read and check for `laravel/framework` → Laravel
-6. For `build.gradle`, check for:
-   - `com.android` plugin → Android
-   - `org.jetbrains.kotlin` → Kotlin
-   - `org.springframework` → Spring
-7. For Kubernetes, check for YAML files containing `apiVersion:` + `kind:` patterns
-8. Count total files with `find . -type f | wc -l` (exclude node_modules, .git, vendor, __pycache__)
-9. Estimate LOC with `find . -type f -name '*.{detected-extensions}' | xargs wc -l` (sample if >1000 files)
+1. Count total files with `find . -type f | wc -l` (exclude node_modules, .git, vendor, __pycache__)
+2. Estimate LOC with `find . -type f -name '*.{detected-extensions}' | xargs wc -l` (sample if >1000 files)
 
 ---
 
@@ -114,7 +63,6 @@ After scanning, present results in this format:
   Monitoring:           {detected or "none"}
 
   Codebase size:        {file count} files (~{LOC estimate} LOC)
-  Size category:        {Small (<100) | Medium (100-500) | Large (500+)}
 
 ═══════════════════════════════════════
 ```
@@ -123,76 +71,14 @@ If `--detect-only` was specified, STOP HERE. Print the results and exit.
 
 ---
 
-## 3. Agent Selection Rules
+## 3. Agent Selection
 
-Apply these rules against detection results to build the candidate agent list.
-
-### Always Include
-
-| Agent | Reason |
-|-------|--------|
-| `code-reviewer` | Every project benefits from automated code review |
-
-### Include If Detected
-
-| Detection | Agent(s) |
-|-----------|----------|
-| Django | `django-backend` (+ `django-api` if DRF detected, + `django-orm` if complex models) |
-| Flask / FastAPI | `backend-developer` (Python) |
-| Rails | `rails-backend` (+ `rails-api` if API-only, + `rails-activerecord` if complex models) |
-| Laravel | `laravel-backend` (+ `laravel-eloquent` if complex models) |
-| React | `react-components` |
-| Next.js | `nextjs-specialist` |
-| Vue | `vue-components` (+ `vue-state` if Pinia detected) |
-| Nuxt | `nuxt-specialist` |
-| iOS / Swift | `ios-specialist` |
-| Android / Kotlin | `android-specialist` |
-| Flutter | `flutter-specialist` |
-| React Native | `react-native-specialist` |
-| PyTorch / TensorFlow | `pytorch-specialist` + `ml-ops-engineer` |
-| Scikit-learn / Pandas | `sklearn-specialist` OR `pandas-specialist` (based on primary usage) |
-| Jupyter notebooks (5+) | `jupyter-workflow-expert` |
-| Airflow / Prefect | `data-pipeline-engineer` |
-| MLflow / W&B | `ml-ops-engineer` |
-| Rust | `rust-specialist` |
-| C / C++ | `cpp-specialist` |
-| CMake + embedded patterns | `embedded-systems-expert` |
-| Go | `backend-developer` (Go) |
-| Terraform | `terraform-specialist` |
-| Kubernetes | `kubernetes-specialist` |
-| AWS CDK / CloudFormation | `aws-architect` |
-| GCP (gcloud configs) | `gcp-architect` |
-| Serverless framework | `serverless-expert` |
-| Docker | `containerization-specialist` |
-| Prometheus / Grafana | `monitoring-specialist` |
-| GitHub Actions / GitLab CI | `ci-cd-architect` |
-| >500 files | `code-archaeologist` |
-| Performance-critical indicators | `performance-optimizer` |
-| Poor/missing docs (no README or thin docs/) | `documentation-specialist` |
-| Multiple backend languages | `backend-developer` (polyglot mode) |
-| OpenAPI spec / GraphQL schema | `api-architect` |
-| GraphQL detected | `graphql-specialist` |
-| WebSocket usage | `websocket-expert` |
-| 3+ agents selected | `tech-lead-orchestrator` (add as coordinator) |
-
-### Team Size Constraints
-
-| Codebase Size | Max Agents | Notes |
-|---------------|------------|-------|
-| Small (<100 files) | 2-3 | Focus on core needs only |
-| Medium (100-500 files) | 3-5 | Add domain specialists |
-| Large (500+ files) | 5-8 | Include orchestrator |
-| Maximum | 8 | Beyond 8, orchestrator delegates dynamically |
-
-### Priority Ranking (when trimming to max size)
-
-If candidate list exceeds max team size, prioritize in this order:
-1. **Core**: code-reviewer (always)
-2. **Primary framework**: The main backend/frontend specialist
-3. **Secondary framework**: If project is full-stack
-4. **Orchestrator**: If 3+ specialists selected
-5. **Domain experts**: Based on detected needs
-6. **Nice-to-have**: documentation, performance, archaeology
+Select agents from the archetype library (`cc-ref-agent-archetypes` — 72 archetypes
+across 10 domains) that match the detected stack, with your own judgment. Prefer the
+smallest team that covers the project's real needs, and scale team size to codebase
+size. Hard cap: **8 agents** — beyond that, an orchestrator delegates dynamically.
+Add an orchestrator archetype (e.g., `tech-lead-orchestrator`) when the team is
+large enough to need coordination.
 
 ---
 
@@ -200,31 +86,15 @@ If candidate list exceeds max team size, prioritize in this order:
 
 ### Step 1 — Check Team Combo Patterns
 
-Compare detected stack against known team combos. If a match is found, use the combo as a starting point:
-
-| Pattern | Stack Match | Team Composition |
-|---------|------------|------------------|
-| TQ01 - Full-Stack Web | Backend + Frontend + DB | backend + frontend + api-architect |
-| TQ02 - Django Full | Django + React/Vue | django-backend + django-api + frontend |
-| TQ03 - Rails Full | Rails + Frontend | rails-backend + rails-api + frontend |
-| TQ04 - Mobile App | iOS or Android + API | mobile-specialist + api-architect + mobile-testing |
-| TQ05 - Cross-Platform | Flutter or RN | mobile-specialist + mobile-testing + mobile-ci-cd |
-| TQ06 - ML Pipeline | Python + ML libs + notebooks | data-pipeline + ml-specialist + ml-ops |
-| TQ07 - Data Science | Jupyter + pandas/sklearn | pandas/sklearn + jupyter + visualization |
-| TQ08 - Cloud Native | K8s + Cloud + Docker | cloud-architect + k8s + containerization |
-| TQ09 - Serverless | Lambda/Functions + IaC | serverless + cloud-architect + ci-cd |
-| TQ10 - Systems | Rust/C++ + low-level | language-specialist + memory-safety + concurrency |
-| TQ11 - DevOps Platform | CI/CD + Docker + K8s + Monitoring | ci-cd + containerization + monitoring + sre |
-| TQ12 - API Platform | OpenAPI + Multi-consumer | api-architect + security + test-writer |
-| TQ13 - Microservices | Docker + K8s + Multiple services | backend + api-architect + k8s + monitoring |
-| TQ14 - Monolith | Single large app | code-archaeologist + refactoring + test-writer |
+The `team-combo-engine` skill defines 14 predefined team patterns (TQ01-TQ14)
+spanning full-stack web, mobile, ML, data science, cloud-native, serverless,
+systems, DevOps, API, microservices, and monolith teams. Compare the detected
+stack against those patterns with your own judgment; if one fits, use it as the
+starting point.
 
 ### Step 2 — Build Custom Team (if no combo matches)
 
-1. Start with always-include agents
-2. Add detected-stack agents
-3. Apply team size constraints
-4. Trim by priority ranking
+Compose a custom team from individual archetypes using Section 3.
 
 ### Step 3 — Generate Agent Wiring
 
