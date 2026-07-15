@@ -16,9 +16,7 @@ Assembles multi-agent teams from 14 proven patterns with full wiring and interac
 
 ### 1. Pattern Matching
 
-Match user intent to a team pattern using trigger phrases in the [team registry](team-registry.md).
-
-If no pattern matches, fall back to TQ08 (Custom Team) and let the user select agents manually.
+Match the request to a registry entry in the [team registry](team-registry.md) with your own judgment from the entry descriptions; confirm the pick with the user before wiring.
 
 ### 2. Slot Resolution
 
@@ -62,7 +60,6 @@ Communication protocol: {how to interact with teammates}
 ## Pattern Reference
 
 See [team-registry.md](team-registry.md) for all 14 patterns with:
-- Trigger phrases
 - Component agents
 - Wiring diagrams
 - Interaction protocols

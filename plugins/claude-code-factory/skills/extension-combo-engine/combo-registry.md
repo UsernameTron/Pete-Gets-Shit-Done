@@ -7,7 +7,6 @@ wiring between them, and install order.
 
 ## CQ01: Enforce Coding Standards
 
-**Trigger**: "enforce standards", "coding standards", "style enforcement", "code quality rules"
 **Components**:
 1. Reference skill — `coding-standards` (stores rules)
 2. PostToolUse hook — fires on `Write|Edit`, reads standards skill, validates
@@ -24,7 +23,6 @@ wiring between them, and install order.
 
 ## CQ02: Auto-Format + Lint Pipeline
 
-**Trigger**: "auto-format and lint", "format then lint", "clean up code automatically"
 **Components**:
 1. PostToolUse hook — fires on `Write|Edit`, runs formatter (prettier/black/gofmt)
 2. PostToolUse hook — fires on `Write|Edit`, runs linter after formatter
@@ -41,7 +39,6 @@ wiring between them, and install order.
 
 ## CQ03: Test-On-Change with Gate
 
-**Trigger**: "run tests after changes and block if failing", "test gate", "test enforcement"
 **Components**:
 1. PostToolUse hook — fires on `Write|Edit`, runs test suite
 2. PreToolUse hook — fires on `Bash(git commit*)`, blocks if tests fail
@@ -58,7 +55,6 @@ wiring between them, and install order.
 
 ## CQ04: Deploy Pipeline
 
-**Trigger**: "deploy command", "deployment pipeline", "deploy skill with checks"
 **Components**:
 1. Skill — `/deploy` command with environment selection and confirmation
 2. PreToolUse hook — fires on `Bash(deploy*)`, validates branch and test status
@@ -75,7 +71,6 @@ wiring between them, and install order.
 
 ## CQ05: PR Review System
 
-**Trigger**: "PR review", "pull request review", "code review pipeline"
 **Components**:
 1. Skill — `/review-pr` command that runs review workflow
 2. Subagent — `code-reviewer` specialist with read-only tools
@@ -92,7 +87,6 @@ wiring between them, and install order.
 
 ## CQ06: Session Bootstrap
 
-**Trigger**: "session setup", "initialize context", "load project context at start"
 **Components**:
 1. SessionStart hook — loads project context, checks environment
 2. Reference skill — project context and conventions
@@ -109,7 +103,6 @@ wiring between them, and install order.
 
 ## CQ07: Security Hardening
 
-**Trigger**: "security lockdown", "harden permissions", "restrict access", "secure Claude"
 **Components**:
 1. Permission rules — deny dangerous commands, protect sensitive files
 2. Sandbox config — enable sandboxing with exclusions
@@ -126,7 +119,6 @@ wiring between them, and install order.
 
 ## CQ08: Documentation Auto-Update
 
-**Trigger**: "auto-update docs", "keep docs in sync", "documentation pipeline"
 **Components**:
 1. PostToolUse hook — fires on `Write|Edit`, detects code changes
 2. Subagent — `doc-writer` specialist that updates related docs
@@ -143,7 +135,6 @@ wiring between them, and install order.
 
 ## CQ09: Commit Convention Enforcement
 
-**Trigger**: "enforce commit messages", "conventional commits", "commit standards"
 **Components**:
 1. Reference skill — commit message format and conventions
 2. PreToolUse hook — fires on `Bash(git commit*)`, validates message format
@@ -160,7 +151,6 @@ wiring between them, and install order.
 
 ## CQ10: Environment-Aware Routing
 
-**Trigger**: "different behavior per environment", "dev vs prod", "environment config"
 **Components**:
 1. SessionStart hook — detects current environment (branch, env vars)
 2. Settings — environment-specific configurations
@@ -177,7 +167,6 @@ wiring between them, and install order.
 
 ## CQ11: API Integration Pipeline
 
-**Trigger**: "connect to API", "API integration", "external service with MCP"
 **Components**:
 1. MCP server config — connects to external API
 2. Permission rules — allow MCP tool access patterns
@@ -194,7 +183,6 @@ wiring between them, and install order.
 
 ## CQ12: Coaching System
 
-**Trigger**: "coaching", "teach Claude conventions", "guided behavior", "enforce patterns"
 **Components**:
 1. Reference skill — team conventions, patterns, and anti-patterns
 2. PostToolUse hook — fires on `Write|Edit`, checks output against conventions

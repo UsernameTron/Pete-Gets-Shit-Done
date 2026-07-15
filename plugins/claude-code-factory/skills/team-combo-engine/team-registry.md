@@ -2,8 +2,6 @@
 
 ## TQ01: Full-Stack Web Team
 
-**Trigger**: "full-stack team", "web development team", "frontend and backend"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -37,8 +35,6 @@ code-reviewer ← receives diffs from backend + frontend
 
 ## TQ02: Review Pipeline
 
-**Trigger**: "review pipeline", "multi-pass review", "comprehensive review"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -69,8 +65,6 @@ code-reviewer (pass 1: style, bugs, patterns)
 
 ## TQ03: Optimization Team
 
-**Trigger**: "optimization team", "performance team", "speed team"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -100,8 +94,6 @@ code-archaeologist (maps codebase, finds hotspots)
 ---
 
 ## TQ04: Framework Team (Parameterized)
-
-**Trigger**: "framework team", "Django team", "Rails team", "React team", "Vue team", "Laravel team", "Next.js team"
 
 **Components**:
 | Role | Agent | Model |
@@ -140,8 +132,6 @@ tech-lead-orchestrator
 
 ## TQ05: Legacy Modernization
 
-**Trigger**: "legacy modernization", "refactoring team", "code modernization", "tech debt"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -175,8 +165,6 @@ code-archaeologist (audits codebase, maps dependencies)
 
 ## TQ06: API Development Team
 
-**Trigger**: "API team", "API development", "service development", "API-first"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -208,8 +196,6 @@ api-architect (designs API contract, schemas)
 
 ## TQ07: Security Audit Team
 
-**Trigger**: "security team", "security audit", "vulnerability assessment", "pen test"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -240,8 +226,6 @@ code-archaeologist (maps attack surface, entry points)
 
 ## TQ08: Custom Team
 
-**Trigger**: "custom team", "build my own team", "pick agents", "choose agents"
-
 **Components**: User-defined (2–6 agents from any archetype)
 
 **Slot Resolution**:
@@ -268,8 +252,6 @@ code-archaeologist (maps attack surface, entry points)
 ---
 
 ## TQ09: Mobile App Team
-
-**Trigger**: "mobile team", "app team", "iOS and Android", "mobile development"
 
 **Components**:
 | Role | Agent | Model |
@@ -309,8 +291,6 @@ code-archaeologist (maps attack surface, entry points)
 
 ## TQ10: ML Pipeline Team
 
-**Trigger**: "ML team", "data science team", "machine learning", "model training"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -348,8 +328,6 @@ data-pipeline-engineer (ingests, transforms, validates data)
 
 ## TQ11: Cloud Migration Team
 
-**Trigger**: "cloud migration", "move to cloud", "infrastructure team", "cloud setup"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -386,8 +364,6 @@ data-pipeline-engineer (ingests, transforms, validates data)
 
 ## TQ12: SRE/Reliability Team
 
-**Trigger**: "SRE team", "reliability team", "observability", "on-call setup"
-
 **Components**:
 | Role | Agent | Model |
 |------|-------|-------|
@@ -418,8 +394,6 @@ sre-practices-advisor (sets SLOs, error budgets, toil targets)
 ---
 
 ## TQ13: Systems Development Team
-
-**Trigger**: "systems team", "embedded team", "low-level", "systems programming"
 
 **Components**:
 | Role | Agent | Model |
@@ -457,8 +431,6 @@ sre-practices-advisor (sets SLOs, error budgets, toil targets)
 ---
 
 ## TQ14: Full Platform Team
-
-**Trigger**: "full platform", "complete team", "everything", "all domains"
 
 **Components**:
 | Role | Agent | Model |

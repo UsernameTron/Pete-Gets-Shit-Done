@@ -26,14 +26,7 @@ every component knows about every other component.
 
 ### Pattern Matching
 
-When you receive a request, compare it against the combo registry
-(`combo-registry.md`). Check trigger phrases for matches.
-
-| Match Quality | Action |
-|---------------|--------|
-| **Direct match** (trigger phrase hit) | Use the registry pattern as-is |
-| **Partial match** (1-2 trigger words) | Use registry pattern as starting template, adapt |
-| **No match** | Build custom combo from scratch using the 5-step workflow |
+Match the request to a registry entry in `combo-registry.md` with your own judgment from the entry descriptions; confirm the pick with the user before wiring.
 
 ### Custom Combo Construction
 
@@ -183,27 +176,19 @@ Skill manages the flow, subagents handle specialized work.
 |-----------|--------|
 | Registry match but user wants different components | Adapt the pattern, don't force the template |
 | Generator fails for one component | Generate remaining components, report partial failure |
-| Wiring is unclear from request | Ask ONE question: "Should [A] happen before or after [B]?" |
 | Components are independent (no wiring) | Generate as separate extensions, not a combo |
-| User says "just give me the [one part]" | Downgrade to single generator, mention the full combo as upgrade path |
 
 ---
 
 ## 6. Integration Points
 
 ### From Smart-Scaffold (Tier 2 routing)
-Smart-scaffold classifies as Tier 2 when it detects:
-- Two distinct behaviors connected by "and"
-- Reference + enforcement pattern
-- Gate + reaction in same request
-
 Smart-scaffold passes: the request text, detected tier, and any resolved
 decisions (scope, timing signals). Use these — don't re-ask.
 
 ### From Extension-Concierge (compound intent)
-The concierge detects compound intent when the intent-engine's decision tree
-matches multiple branches. Concierge passes: the request, primary type,
-secondary type, and resolved decisions. Generate coordinated components.
+The concierge passes: the request, primary type, secondary type, and resolved
+decisions. Generate coordinated components.
 
 ### To Extension-Installer
 After presenting the blueprint, offer installation via `extension-installer`.

@@ -4,8 +4,8 @@ description: |
   Browse and execute 86 pre-built recipes for application development agents
   and teams across 11 categories: core team, web frameworks, mobile, data/ML,
   systems, cloud/infra, DevOps, universal experts, domain specialists,
-  orchestrators, and teams. Each recipe includes trigger phrases, pre-resolved
-  decisions, and customization points.
+  orchestrators, and teams. Each recipe includes pre-resolved decisions and
+  customization points.
 user-invocable: true
 argument-hint: "[category|recipe-id|search-terms]"
 ---
