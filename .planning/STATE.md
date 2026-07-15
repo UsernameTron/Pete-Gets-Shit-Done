@@ -18,10 +18,11 @@ See: .planning/PROJECT.md (updated 2026-05-08 after v2.8 milestone)
 
 ## Current Position
 
-Phase: 58 of 59 (Finalize Hardening & Re-verification) — not started
-Plan: —
-Status: Ready to plan
-Last activity: 2026-07-13 — Roadmap created (2 phases, 6/6 requirements mapped, 0 orphans)
+Phase: 57.1 (Bitter Lesson Surgery — decimal insert 2026-07-15) — in progress on branch `bitter-lesson-surgery` (local only, no push)
+Plan: Approved plan at ~/.claude/plans/58-load-the-entire-eventual-hare.md; running log at BITTER_LESSON_LOG.md
+Status: Executing — replace do.md router with model-readable registry, delete classify.cjs, split-cut model-profiles/history, sweep 47 vendored skills (P1–P6 parallel)
+Next after 57.1: Phase 58 (Finalize Hardening & Re-verification) — unchanged, ready to plan
+Last activity: 2026-07-15 — Phase 57.1 inserted, surgery started
 
 **v2.9 goal:** Harden the last `/gsd:finalize` fragility (Gate 5.5 cross-plugin spawn) and build the shelved `ship-milestone` workflow (W7) that routes through it. The two ungated finalize pushes and the `allowed-tools` mismatch were already resolved by the `finalize-push-consent` blueprint (2026-07-12); the cross-plugin `repo-doc-architect` spawn + one end-to-end re-verification are the remaining unshelve preconditions. Phase numbering continues from 57 (v2.9 starts at phase 58) — the named-workflows suite shipped as standalone PRs outside the phase counter.
 
