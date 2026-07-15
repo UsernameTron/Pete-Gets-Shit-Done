@@ -45,6 +45,10 @@ animation/
 # pause-work resume pointers are session-local — never commit them
 /.continue-here.md
 /.planning/.continue-here.md
+# checkpoint/handoff runtime state — tests already treat these as RUNTIME_ARTIFACT_EXCEPTIONS
+# ("not shipped as tracked repo files"); keep them session-local like state/
+/.planning/HANDOFF.json
+/.planning/CHECKPOINT.json
 reports/
 analysis/
 
