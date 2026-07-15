@@ -48,8 +48,8 @@
 
 **Milestone Goal:** Harden the last `/gsd:finalize` fragility and build the shelved `ship-milestone` workflow that depends on it, closing the autonomous-workflows suite.
 
-- [ ] **Phase 57.1: Bitter Lesson Surgery** (inserted 2026-07-15) - Strip judgment scaffolding (do.md routing table, classify.cjs, dynamicSelect tier promotion, vendored-skill classifiers) while preserving leverage scaffolding; replace router with model-readable registry
-- [ ] **Phase 58: Finalize Hardening & Re-verification** - Gate 5.5 degrades gracefully without repo-doc-architect; finalize re-verified end-to-end on a real close-out
+- [x] **Phase 57.1: Bitter Lesson Surgery** (inserted 2026-07-15) - Strip judgment scaffolding (do.md routing table, classify.cjs, dynamicSelect tier promotion, vendored-skill classifiers) while preserving leverage scaffolding; replace router with model-readable registry (shipped PR #51, 2026-07-15)
+- [x] **Phase 58: Finalize Hardening & Re-verification** - Gate 5.5 degrades gracefully without repo-doc-architect; finalize re-verified end-to-end in sandbox (operator-ratified FIN-02 vehicle, 2026-07-15)
 - [ ] **Phase 59: Ship-Milestone Workflow** - Composes the finalizer critical path behind exactly 2 gates, routed via /gsd:do, unshelved
 
 ## Phase Details
@@ -77,7 +77,7 @@
   2. Running `/gsd:finalize` in an install where `repo-doc-architect` does resolve still spawns it and applies its documentation updates as designed, with no regression versus current behavior.
   3. `/gsd:finalize` has been run end-to-end on a real milestone close-out, with every `git push` confirmed to sit behind an answered consent gate (Gate 1 or Gate 7) and zero ungated remote operations observed.
   4. GSD-AUTONOMOUS-WORKFLOWS.md's `ship-milestone` entry no longer lists the Gate 5.5 spawn fragility or the end-to-end re-verification as an open unshelve precondition.
-**Plans**: TBD
+**Plans**: Executed 2026-07-15 from approved plan (~/.claude/plans/58-load-the-entire-eventual-hare.md) — 58-01 Gate 5.5 graceful skip + tests/finalize.test.cjs, 58-02 sandbox e2e (evidence: .planning/phases/58-finalize-hardening/VERIFICATION.md; criterion 3's "real close-out" satisfied by operator-ratified sandbox vehicle; criterion 2 verified structurally — first live spawn lands at v2.9 close-out), 58-03 W5 precondition retirement
 
 ### Phase 59: Ship-Milestone Workflow
 **Goal**: Operators can close out a milestone through a single `ship-milestone` intent — routed via `/gsd:do` — that automates the proven finalizer critical path behind exactly 2 gates, without weakening any of `complete-milestone`'s human safeguards.
@@ -103,6 +103,6 @@
 | 55. Internal Link Validator | v2.8 | 3/3 | Complete | 2026-05-07 |
 | 56. Doc Drift Detector | v2.8 | 3/3 | Complete | 2026-05-08 |
 | 57. Backfill and CI Integration | v2.8 | 3/3 | Complete | 2026-05-08 |
-| 57.1. Bitter Lesson Surgery | v2.9 (insert) | 0/1 | In progress | - |
-| 58. Finalize Hardening & Re-verification | v2.9 | 0/TBD | Not started | - |
+| 57.1. Bitter Lesson Surgery | v2.9 (insert) | 1/1 | Complete | 2026-07-15 |
+| 58. Finalize Hardening & Re-verification | v2.9 | 3/3 | Complete | 2026-07-15 |
 | 59. Ship-Milestone Workflow | v2.9 | 0/TBD | Not started | - |

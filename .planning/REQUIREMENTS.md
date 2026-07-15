@@ -10,8 +10,8 @@
 
 ### FINALIZE — harden the last fragility
 
-- [ ] **FIN-01**: `/gsd:finalize` Gate 5.5 spawns `repo-doc-architect` only when that agent resolves in the current install; when it is unavailable (e.g. `claude-mcp-ecosystem` not enabled), the gate skips with a logged notice and finalization continues instead of dangling on a failed spawn.
-- [ ] **FIN-02**: `/gsd:finalize` is exercised end-to-end on a real milestone close-out (the re-verification the autonomous-workflows design lists as an open unshelve precondition), confirming every push sits behind its consent gate and no step performs an ungated remote operation.
+- [x] **FIN-01**: `/gsd:finalize` Gate 5.5 spawns `repo-doc-architect` only when that agent resolves in the current install; when it is unavailable (e.g. `claude-mcp-ecosystem` not enabled), the gate skips with a logged notice and finalization continues instead of dangling on a failed spawn.
+- [x] **FIN-02**: `/gsd:finalize` is exercised end-to-end on a real milestone close-out (the re-verification the autonomous-workflows design lists as an open unshelve precondition), confirming every push sits behind its consent gate and no step performs an ungated remote operation.
 
 ### SHIP-MILESTONE — build W7
 
@@ -39,8 +39,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FIN-01 | Phase 58 | Pending |
-| FIN-02 | Phase 58 | Pending |
+| FIN-01 | Phase 58 | Complete (2026-07-15) |
+| FIN-02 | Phase 58 | Complete (2026-07-15, sandbox e2e per operator decision) |
 | SHIP-01 | Phase 59 | Pending |
 | SHIP-02 | Phase 59 | Pending |
 | SHIP-03 | Phase 59 | Pending |
