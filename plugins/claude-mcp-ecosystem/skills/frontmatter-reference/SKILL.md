@@ -28,8 +28,6 @@ Format: `disallowedTools: Write, Edit`
 
 `model` — which Claude model to use. Values: `sonnet`, `haiku`, `opus`, `inherit`.
 Default if omitted: `inherit` (uses whatever model the main conversation is using).
-Use `haiku` for pattern-matching tasks (validation, auditing). Use `sonnet` for most
-creation tasks. Use `inherit` for tasks requiring the user's chosen model capability.
 
 `memory` — enables persistent memory. Values: `user` (cross-project, stored in
 `~/.claude/agent-memory/{name}/`), `project` (per-project, stored in
