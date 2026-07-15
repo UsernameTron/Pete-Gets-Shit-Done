@@ -387,18 +387,9 @@ const configMigrations = [
   },
   {
     from: 1, to: 2,
-    migrate(parsed, _cwd) {
-      // Add intelligence layer defaults for existing v1 configs
-      if (!('routing_strategy' in parsed)) {
-        parsed.routing_strategy = 'static';
-      }
-      // Check both top-level and nested workflow.adaptive (loadConfig reads both)
-      const hasAdaptive = ('adaptive' in parsed) ||
-        (parsed.workflow && 'adaptive' in parsed.workflow);
-      if (!hasAdaptive) {
-        parsed.adaptive = false;
-      }
-    },
+    // No-op version bump. v2 previously injected routing_strategy/adaptive
+    // defaults; those keys were retired with the intelligence layer.
+    migrate(_parsed, _cwd) {},
   },
 ];
 
@@ -430,7 +421,6 @@ function loadConfig(cwd) {
   const configPath = path.join(cwd, '.planning', 'config.json');
   const defaults = {
     model_profile: 'balanced',
-    routing_strategy: 'static',
     commit_docs: true,
     search_gitignored: false,
     branching_strategy: 'none',
@@ -446,7 +436,6 @@ function loadConfig(cwd) {
     firecrawl: false,
     exa_search: false,
     text_mode: false,
-    adaptive: false,
     sub_repos: [],
     resolve_model_ids: false,
     context_window: 200000,
@@ -515,7 +504,6 @@ function loadConfig(cwd) {
 
     return deepFreeze({
       model_profile: get('model_profile') ?? defaults.model_profile,
-      routing_strategy: get('routing_strategy') ?? defaults.routing_strategy,
       commit_docs: (() => {
         const explicit = get('commit_docs', { section: 'planning', field: 'commit_docs' });
         // If explicitly set in config, respect the user's choice
@@ -539,7 +527,6 @@ function loadConfig(cwd) {
       firecrawl: get('firecrawl') ?? defaults.firecrawl,
       exa_search: get('exa_search') ?? defaults.exa_search,
       text_mode: get('text_mode', { section: 'workflow', field: 'text_mode' }) ?? defaults.text_mode,
-      adaptive: get('adaptive', { section: 'workflow', field: 'adaptive' }) ?? defaults.adaptive,
       sub_repos: get('sub_repos', { section: 'planning', field: 'sub_repos' }) ?? defaults.sub_repos,
       resolve_model_ids: get('resolve_model_ids') ?? defaults.resolve_model_ids,
       context_window: get('context_window') ?? defaults.context_window,

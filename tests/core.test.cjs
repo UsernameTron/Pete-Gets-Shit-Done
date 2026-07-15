@@ -1978,44 +1978,6 @@ describe('resolveModelInternal — resolve_model_ids', () => {
   });
 });
 
-// ─── loadConfig — workflow.adaptive feature flag ─────────────────────────────
-
-describe('loadConfig — workflow.adaptive feature flag', () => {
-  let tmpDir;
-
-  beforeEach(() => {
-    tmpDir = createTempProject();
-  });
-
-  afterEach(() => {
-    cleanup(tmpDir);
-  });
-
-  function writeConfig(obj) {
-    fs.writeFileSync(
-      path.join(tmpDir, '.planning', 'config.json'),
-      JSON.stringify(obj, null, 2)
-    );
-  }
-
-  test('loadConfig returns adaptive: false by default', () => {
-    const config = loadConfig(tmpDir);
-    assert.strictEqual(config.adaptive, false);
-  });
-
-  test('loadConfig returns adaptive: true when config has it', () => {
-    writeConfig({ workflow: { adaptive: true } });
-    const config = loadConfig(tmpDir);
-    assert.strictEqual(config.adaptive, true);
-  });
-
-  test('config with workflow.adaptive passes validation via config-set', () => {
-    writeConfig({ workflow: { adaptive: false } });
-    const config = loadConfig(tmpDir);
-    assert.strictEqual(typeof config.adaptive, 'boolean');
-  });
-});
-
 // ─── SEC-05: Coverage Expansion — extractOneLinerFromBody ─────────────────────
 
 describe('extractOneLinerFromBody', () => {
@@ -2133,7 +2095,7 @@ describe('config migration system', () => {
     assert.strictEqual(raw.config_version, CONFIG_VERSION);
   });
 
-  test('config at v1 gets migrated to v2 with intelligence layer keys', () => {
+  test('config at v1 gets a no-op version bump to v2 (no key injection)', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
     const original = { config_version: 1, granularity: 'standard' };
     fs.writeFileSync(configPath, JSON.stringify(original));
@@ -2141,8 +2103,8 @@ describe('config migration system', () => {
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     assert.strictEqual(raw.config_version, 2);
     assert.strictEqual(raw.granularity, 'standard');
-    assert.strictEqual(raw.routing_strategy, 'static');
-    assert.strictEqual(raw.adaptive, false);
+    assert.ok(!('routing_strategy' in raw), 'retired key must not be injected');
+    assert.ok(!('adaptive' in raw), 'retired key must not be injected');
   });
 
   test('depth + multiRepo both migrated in single pass (chains through to v2)', () => {
@@ -2225,29 +2187,24 @@ describe('Config migration v1 -> v2', () => {
     cleanup(tmpDir);
   });
 
-  test('v1 config gets routing_strategy and adaptive added', () => {
+  test('v1 config gets version bump without key injection', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
     fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, model_profile: 'balanced' }));
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(raw.routing_strategy, 'static');
-    assert.strictEqual(raw.adaptive, false);
     assert.strictEqual(raw.config_version, 2);
+    assert.strictEqual(raw.model_profile, 'balanced', 'user keys preserved');
+    assert.ok(!('routing_strategy' in raw), 'retired key must not be injected');
+    assert.ok(!('adaptive' in raw), 'retired key must not be injected');
   });
 
-  test('v1 config preserves existing routing_strategy', () => {
+  test('v1 config with retired keys keeps them untouched (migration never strips user keys)', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
-    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, routing_strategy: 'dynamic' }));
+    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, routing_strategy: 'dynamic', adaptive: true }));
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    assert.strictEqual(raw.config_version, 2);
     assert.strictEqual(raw.routing_strategy, 'dynamic');
-  });
-
-  test('v1 config preserves existing adaptive', () => {
-    const configPath = path.join(tmpDir, '.planning', 'config.json');
-    fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, adaptive: true }));
-    loadConfig(tmpDir);
-    const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     assert.strictEqual(raw.adaptive, true);
   });
 
@@ -2257,15 +2214,15 @@ describe('Config migration v1 -> v2', () => {
     loadConfig(tmpDir);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     assert.strictEqual(raw.granularity, 'fine', 'depth->granularity from 0->1');
-    assert.strictEqual(raw.routing_strategy, 'static', 'routing_strategy from 1->2');
-    assert.strictEqual(raw.adaptive, false, 'adaptive from 1->2');
     assert.strictEqual(raw.config_version, 2);
     assert.ok(!('depth' in raw), 'depth key should be removed by 0->1');
+    assert.ok(!('routing_strategy' in raw), '1->2 is a no-op bump — no key injection');
+    assert.ok(!('adaptive' in raw), '1->2 is a no-op bump — no key injection');
   });
 
   test('v2 config is not mutated', () => {
     const configPath = path.join(tmpDir, '.planning', 'config.json');
-    const original = { config_version: 2, routing_strategy: 'auto', adaptive: true };
+    const original = { config_version: 2, model_profile: 'quality' };
     fs.writeFileSync(configPath, JSON.stringify(original));
     const beforeContent = fs.readFileSync(configPath, 'utf-8');
     loadConfig(tmpDir);
@@ -2273,15 +2230,14 @@ describe('Config migration v1 -> v2', () => {
     assert.strictEqual(beforeContent, afterContent, 'config.json should not be rewritten');
     const raw = JSON.parse(afterContent);
     assert.strictEqual(raw.config_version, 2);
-    assert.strictEqual(raw.routing_strategy, 'auto');
-    assert.strictEqual(raw.adaptive, true);
+    assert.strictEqual(raw.model_profile, 'quality');
   });
 
-  test('missing config.json returns defaults with v2 keys', () => {
+  test('loadConfig result carries no retired routing keys', () => {
     // tmpDir has .planning/ but no config.json
     const result = loadConfig(tmpDir);
-    assert.strictEqual(result.routing_strategy, 'static');
-    assert.strictEqual(result.adaptive, false);
+    assert.ok(!('routing_strategy' in result), 'routing_strategy retired from loadConfig output');
+    assert.ok(!('adaptive' in result), 'adaptive retired from loadConfig output');
   });
 
   test('migration is idempotent (loadConfig twice on same v1 config)', () => {
@@ -2289,8 +2245,7 @@ describe('Config migration v1 -> v2', () => {
     fs.writeFileSync(configPath, JSON.stringify({ config_version: 1, model_profile: 'balanced' }));
     const first = loadConfig(tmpDir);
     const second = loadConfig(tmpDir);
-    assert.strictEqual(first.routing_strategy, second.routing_strategy);
-    assert.strictEqual(first.adaptive, second.adaptive);
+    assert.strictEqual(first.model_profile, second.model_profile);
     const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     assert.strictEqual(raw.config_version, 2);
   });

@@ -278,30 +278,18 @@ Agent definitions are in `agents/*.md` with YAML frontmatter specifying name, de
 
 ---
 
-## Intelligence Layer (v2.0)
-
-Added in config_version 2. Three new modules provide optional intelligence features:
+## Execution History (telemetry)
 
 | Module | Layer | Purpose |
 |--------|-------|---------|
-| `classify.cjs` | Layer 0 (zero dependencies) | Task classification: `extractSignals()`, `classifyTask()`, `adaptWorkflowGates()` |
-| `model-profiles.cjs` | Layer 0 | Dynamic model routing: `dynamicSelect()`, `MODEL_TIERS` mapping |
+| `model-profiles.cjs` | Layer 0 | Static agent→model profile data and helpers |
 | `history.cjs` | Layer 2 (imports `core.cjs`) | Execution history: `recordExecution()`, `queryHistory()`, `detectPatterns()`, `pruneHistory()` |
-
-### Execution History File Structure
 
 History is stored as JSONL at `.planning/history/executions.jsonl`. Each line is a JSON record with fields: `timestamp`, `phase`, `plan`, `agent`, `model_used`, `duration_ms`, `outcome` (pass/fail/partial), `error_code`, `files_changed`.
 
 Rotation policy: when the file exceeds 1,000 records, auto-rotates to keep the latest 500. Manual pruning available via `gsd-tools history prune [--keep N]`.
 
-### Configuration
-
-All intelligence features are opt-in. Controlled by two config keys added in the v1→v2 migration:
-
-| Key | Default | Effect |
-|-----|---------|--------|
-| `routing_strategy` | `static` | `static` = v1.9 behavior. `dynamic` = classification-based routing. `auto` = dynamic + history patterns. |
-| `adaptive` | `false` | When `true`, classification runs during init and workflow gates adjust per complexity. |
+The v2.0 dynamic-routing layer (`classify.cjs`, `dynamicSelect()`, and the `routing_strategy`/`adaptive` config keys) was removed in v2.9's Bitter Lesson surgery — model selection is user config (`model_profile`, `model_overrides`) only.
 
 ---
 

@@ -37,6 +37,9 @@ Branch: `bitter-lesson-surgery` (never pushed). Started 2026-07-15.
 | tests/perf/routing-benchmark.test.cjs | 301 (file) | Perf pin ("dynamicSelect < 2ms") for a deleted judgment function; benchmarking judgment scaffolding is still judgment scaffolding. (Deletion landed via concurrent commit b730f8d — shared index.) |
 | get-shit-done/bin/lib/classify.cjs | 278 (file) | Keyword scoring and score→tier thresholds are pure encoded judgment; adaptWorkflowGates had zero production consumers. Sole consumer (init.cjs) already rewired in commit 2. |
 | tests/classify.test.cjs | 223 (file) | Pinned the deleted classifier's keyword scores and thresholds. |
+| get-shit-done/bin/lib/config.cjs + core.cjs | 19 (net −16) | routing_strategy + workflow.adaptive keys validated, defaulted, migrated, and read — but wired to nothing after commits 2–5. A knob wired to nothing is deception, not config. 1→2 migration kept as no-op version bump (CONFIG_VERSION stays 2); migration never strips user keys. |
+| tests/{config,core}.test.cjs (commit 6) | 131 (net −113) | Describes pinning the retired keys' validation/defaults/injection; migration tests rewritten to pin the no-op bump + user-key preservation instead. |
+| docs + references (commit 6) | 154 (net −149) | CONFIGURATION.md / USER-GUIDE.md / DEVOPS-HANDOFF.md / references/model-profiles.md sections documenting the deleted routing machinery (classifyTask signals/scores, dynamicSelect tiers, routing_strategy/adaptive knobs). Stale docs describing deleted judgment are the paper trail of the deception. Execution-history telemetry docs kept. |
 
 ## Deletions — Vendored skills
 
