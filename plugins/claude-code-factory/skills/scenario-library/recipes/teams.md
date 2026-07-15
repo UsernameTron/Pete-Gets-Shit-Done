@@ -6,7 +6,6 @@ Orchestration recipes for coordinating multiple agents and skills.
 
 ## T01: Generation Team
 **Category**: Team Pattern
-**Trigger phrases**: "generate everything in parallel", "build all components", "parallel generation"
 **Extension type**: Combo (Tier 2)
 **Pattern**: Combo engine dispatches generators in parallel phases + extension-validator as quality gate
 **Pre-resolved decisions**:
@@ -20,7 +19,6 @@ Orchestration recipes for coordinating multiple agents and skills.
 
 ## T02: Audit Team
 **Category**: Team Pattern
-**Trigger phrases**: "full environment audit", "check everything", "comprehensive review", "audit all my extensions"
 **Extension type**: Multi-agent coordination
 **Pattern**: recommendation-engine orchestrates setup-explainer + upgrade-scanner + extension-validator in parallel
 **Pre-resolved decisions**:
@@ -34,7 +32,6 @@ Orchestration recipes for coordinating multiple agents and skills.
 
 ## T03: Build Team
 **Category**: Team Pattern
-**Trigger phrases**: "build a complete system", "end-to-end solution", "full pipeline", "everything I need for"
 **Extension type**: System (Tier 3)
 **Pattern**: system-architect designs blueprint → generators execute per phase → extension-validator reviews all
 **Pre-resolved decisions**:

@@ -47,7 +47,6 @@ List all 6 categories with recipe counts and one-line descriptions:
 
 Read the matching recipe file and list all recipes in that category with:
 - Recipe ID and name
-- Trigger phrases (what users say)
 - Extension type produced
 
 ### Execute Recipe: `/recipes auto-lint`
@@ -61,14 +60,13 @@ Read the matching recipe file and list all recipes in that category with:
 
 ### Search: `/recipes search format code`
 
-Fuzzy-match $ARGUMENTS against all recipe names and trigger phrases.
+Match $ARGUMENTS against the recipes with your own judgment.
 Return the top 3 matches with relevance reasoning.
 
 To search:
 1. Read ALL 6 recipe files
-2. Compare search terms against recipe names, trigger phrases, and types
-3. Score by number of matching words/phrases
-4. Return top 3 with: recipe ID, name, match reason, category
+2. Judge relevance against recipe names, types, and pre-resolved decisions
+3. Return top 3 with: recipe ID, name, match reason, category
 
 ---
 
@@ -77,12 +75,12 @@ To search:
 When the intent engine calls this skill for recipe matching:
 
 1. Read ALL recipe files
-2. Compare user's behavioral description against trigger phrases
-3. Score confidence:
-   - **HIGH** (≥ 3 trigger phrase words match): return the recipe directly
-   - **MEDIUM** (1-2 matches): return top 3 candidates for user to pick
-   - **LOW** (no matches): return null — let intent engine fall back to general generation
-4. On HIGH match, pass pre-resolved decisions to the generator — skipping inference
+2. Compare the user's behavioral description against the recipes with your
+   own judgment
+3. Clear match → return the recipe directly. A few plausible candidates →
+   return the top 3 for the user to pick. No match → return null — let the
+   intent engine fall back to general generation
+4. On a clear match, pass pre-resolved decisions to the generator — skipping inference
 
 ---
 
