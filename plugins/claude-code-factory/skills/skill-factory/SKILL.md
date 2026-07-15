@@ -59,7 +59,7 @@ Resolve ALL decisions before writing files:
 | **user-invocable** | Default `true`. Set `false` only for background knowledge / reference skills. |
 | **disable-model-invocation** | Default `false`. Set `true` if user says "only when I ask", "manual only", or skill is destructive. |
 | **allowed-tools** | Derive from purpose: read-only analysis → `Read, Grep, Glob`. File generation → `Read, Write, Edit, Bash, Glob, Grep`. Web research → add `WebFetch, WebSearch`. Omit to inherit all (only for trusted workflows). |
-| **model** | Omit (inherit) unless skill needs specific capability: `opus` for complex reasoning, `haiku` for fast/simple, `sonnet` for balanced. |
+| **model** | One of `sonnet` \| `opus` \| `haiku`, or omit to inherit — choose with your own judgment. |
 | **context** | Omit (inline) by default. Set `fork` if: skill is read-only analysis, could pollute main context, or runs long operations. |
 | **agent** | Only when `context: fork`. Default: `general-purpose`. Use `Explore` for read-only, `Plan` for planning. |
 | **argument-hint** | Add if skill takes arguments: `[filename]`, `[url] [format]`, `[issue-number]`. Omit for no-argument skills. |

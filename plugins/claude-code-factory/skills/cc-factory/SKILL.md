@@ -42,22 +42,10 @@ resolve each one before writing any files.
 
 ## 2. Detection Rules
 
-Apply in priority order — first match wins:
-
-| Priority | Type | Trigger Patterns |
-|----------|------|-----------------|
-| 1 | **hook** | "hook", "block", "validate before", "prevent", "auto-format after", "lint on save", "before/after tool" |
-| 2 | **plugin** | "plugin", "package", "bundle skills", "distribute", "marketplace" |
-| 3 | **mcp** | "MCP", "connect to", "integrate with", "OAuth", "external service", "GitHub/Slack/Notion server" |
-| 4 | **cicd** | "CI/CD", "GitHub Actions", "pipeline", "PR review automation", "deploy with Claude" |
-| 5 | **settings** | "settings", "configure", "lock model", "sandbox", "permissions", "allow/deny" |
-| 6 | **subagent** | "subagent", "agent that", "specialist", "delegate to", "autonomous", "orchestrate agents" |
-| 7 | **output-style** | "output style", "writing style", "tone", "format responses as", "executive briefing" |
-| 8 | **skill** | Everything else — skill is the catch-all. Any "create/build/make a [thing] that [does X]" |
-
-**Disambiguation**: If a request could match multiple types, prefer the more
-specific type (lower priority number). If genuinely ambiguous, ask ONE clarifying
-question: "Should this be a [type A] or a [type B]? Here's the difference: ..."
+The extension types are: **hook**, **plugin**, **mcp**, **cicd**, **settings**,
+**subagent**, **output-style**, and **skill** (the catch-all). Pick the type that
+fits the request using your own judgment; if genuinely ambiguous, ask ONE
+clarifying question with the difference between the candidates.
 
 ---
 
@@ -173,14 +161,8 @@ the merge diff. Always include a test command to verify the hook fires.
 ### 4.7 Output Style Resolution
 
 Output styles are skills with a specific structure — resolve using Skill Resolution
-(4.1) with these additions:
-
-| Decision | How to Resolve |
-|----------|---------------|
-| **Tone** | Extract from user request: "executive" → formal/concise, "casual" → conversational, "technical" → precise |
-| **Format** | Derive structure: "briefing" → headers + bullets + bottom line, "report" → sections + data, "chat" → short paragraphs |
-| **Length** | "brief" → 200 words max, "detailed" → no limit, default → medium |
-| **Audience** | Infer from context: "board" → non-technical decision-makers, "engineers" → technical depth ok |
+(4.1). Derive tone, format, length, and audience from the request with your own
+judgment; confirm with the user before writing.
 
 **Output**: Skill file at `<scope>/skills/<name>/SKILL.md` with tone/format instructions.
 
@@ -209,9 +191,9 @@ Section 4.1 (Skill Resolution).
 | **Description** | Must include WHEN to invoke (trigger phrases), not just WHAT. Write as: "[capability]. Use when [triggers]." |
 | **Tools** | Derive from purpose: read-only analysis → `Read, Grep, Glob, Bash`; code changes → `Read, Write, Edit, Bash, Glob, Grep`; web research → add `WebFetch, WebSearch`; orchestration → add `Agent` |
 | **disallowedTools** | Explicit deny list when inheriting all tools. Use for agents that must NOT write or must NOT run bash. |
-| **Model** | `haiku` for fast/simple validation, `sonnet` for most tasks (default), `opus` for complex multi-step reasoning or architect roles |
+| **Model** | One of `sonnet` \| `opus` \| `haiku` \| `inherit` — choose with your own judgment |
 | **permissionMode** | `default` (normal). `plan` for read-only agents. `acceptEdits` for trusted code writers. |
-| **maxTurns** | 15 for simple agents, 25 for complex (default), 40 for research/exploration agents |
+| **maxTurns** | Optional turn cap to bound runaway execution — set with your own judgment |
 | **skills** | Identify which cc-ref-* skills to preload based on domain. Hook-related → cc-ref-hooks. Skill-related → cc-ref-skills. Multi-agent → cc-ref-multi-agent. |
 | **memory** | `project` for project-specific agents (default), `user` for cross-project utilities |
 | **background** | `true` only for long-running tasks that don't need user interaction |
@@ -269,10 +251,8 @@ Every generated agent `.md` file must include these sections in the body (after 
 
 #### Complexity Routing
 
-For complex subagents (specialized domains, multiple preloaded skills, part of a
-Tier 2/3 system), route to the `subagent-generator` agent instead of generating
-inline. Simple subagents (clear purpose, few tools, standalone) can be generated
-by cc-factory directly.
+The `subagent-generator` agent is an alternative route to generating inline —
+choose between them with your own judgment.
 
 **Output**: Agent markdown file at `<scope>/agents/<name>.md`.
 
