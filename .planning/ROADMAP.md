@@ -85,9 +85,9 @@
 **Requirements**: SHIP-01, SHIP-02, SHIP-03, SHIP-04
 **Success Criteria** (what must be TRUE):
   1. `get-shit-done/workflows/ship-milestone.md` exists and composes health → audit-agents → sync-docs → coverage+drift → audit-milestone → ship/ci-watch → complete-milestone behind exactly 2 gates (conditional audit-verdict gate + complete-milestone authorization gate) — no additional gates.
-  2. Saying "close out the milestone" (or an equivalent intent) to `/gsd:do` routes to `workflow:ship-milestone`, matched ahead of the existing `/gsd:complete-milestone` row, and the workflow's shelved status is lifted everywhere it was previously flagged.
+  2. Saying "close out the milestone" (or an equivalent intent) to `/gsd:do` routes to `workflow:ship-milestone` — its registry description makes the model prefer it over `gsd:complete-milestone` for close-out intents (blind spot-check evidence) — and the workflow's shelved status is lifted everywhere it was previously flagged. *(Re-pointed 2026-07-15: the routing table was deleted in Phase 57.1; registry routing has no row ordering.)*
   3. Running `ship-milestone` through to Gate 2 still surfaces `complete-milestone`'s 3 internal prompts (archive phases, branch handling, tag push) as live human prompts — the workflow's gates authorize starting the sequence, never auto-answer them.
-  4. A structural test suite asserts the `/gsd:do` routing table includes the `ship-milestone` row, every `/gsd:` command the workflow references resolves to a real command file, and the workflow holds no more than 2 gates.
+  4. A structural test suite asserts the do-registry includes `workflow:ship-milestone`, every `/gsd:` command the workflow references resolves to a real command file, and the workflow holds no more than 2 gates. *(Re-pointed 2026-07-15: "routing table" → do-registry, per Phase 57.1.)*
 **Plans**: TBD
 
 ## Progress

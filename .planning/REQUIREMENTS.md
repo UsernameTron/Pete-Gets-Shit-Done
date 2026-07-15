@@ -16,9 +16,9 @@
 ### SHIP-MILESTONE — build W7
 
 - [ ] **SHIP-01**: A `ship-milestone` workflow (`get-shit-done/workflows/ship-milestone.md`) composes the proven finalizer critical path (health → audit-agents → sync-docs → coverage+drift → audit-milestone → ship/ci-watch → complete-milestone) with exactly 2 gates: a conditional audit-verdict gate (fires only when the audit is not `passed`) and a complete-milestone authorization gate before the irreversible tag/archive/branch cluster.
-- [ ] **SHIP-02**: `ship-milestone` is routed via `/gsd:do` as a `workflow:ship-milestone` row (first-match-ordered above `/gsd:complete-milestone`), and its shelved status is lifted in the design doc and any status surface that names it.
+- [ ] **SHIP-02**: `ship-milestone` is routed via `/gsd:do` as a `workflow:ship-milestone` registry entry whose description makes the model prefer it over `gsd:complete-milestone` for close-out intents (blind spot-check evidence), and its shelved status is lifted in the design doc and any status surface that names it. *(Re-pointed 2026-07-15: routing table deleted in Phase 57.1; registry has no row ordering.)*
 - [ ] **SHIP-03**: `complete-milestone`'s three internal prompts (archive phases, branch handling, tag push) continue to fire and stay human — `ship-milestone`'s Gate 2 authorizes *starting* the completion sequence, never auto-answers branch deletion or tag push.
-- [ ] **SHIP-04**: Structural test coverage for `ship-milestone` — the `/gsd:do` routing contract includes it, its referenced `/gsd:` commands all resolve, and it holds no more than 2 gates.
+- [ ] **SHIP-04**: Structural test coverage for `ship-milestone` — the do-registry includes it, its referenced `/gsd:` commands all resolve, and it holds no more than 2 gates. *(Re-pointed 2026-07-15: "routing contract" = registry membership + description quality, per Phase 57.1.)*
 
 ---
 
