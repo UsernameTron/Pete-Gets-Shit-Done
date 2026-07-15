@@ -1,6 +1,6 @@
 ---
 name: gsd:discuss-phase
-description: Gather phase context through adaptive questioning before planning. Use --auto to skip interactive questions (Claude picks recommended defaults).
+description: Gather phase context through adaptive one-question-at-a-time interviewing before planning. For a recommended-defaults batch discussion without the interview, workflow:smart-discuss is the dedicated flow.
 argument-hint: "<phase> [--auto] [--batch] [--analyze] [--text]"
 allowed-tools:
   - Read
