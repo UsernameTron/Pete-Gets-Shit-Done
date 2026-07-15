@@ -27,6 +27,9 @@ Branch: `bitter-lesson-surgery` (never pushed). Started 2026-07-15.
 | File | Lines deleted | Defense (why judgment, not leverage) |
 |------|---------------|--------------------------------------|
 | get-shit-done/workflows/do.md | ~35 (net −33, 118→85) | 30-row intent→command if-then table + worked ambiguity example encoding human routing judgment; replaced by per-target self-descriptions (do-registry) + model judgment. Kept: validate/check_project/display/dispatch gates, .planning/ exemption facts, dispatcher-never-works rule — all leverage. |
+| get-shit-done/bin/lib/init.cjs | 133 (net −128) | buildTaskContext() plan/req-count→complexity thresholds are keyword-adjacent tier judgment; historyHints/failureRate feeding and classifyTask() wiring exist only to bias model choice by encoded heuristics. resolveModelInternal keeps user config (leverage); the taskContext arg that steered it was judgment. |
+| tests/init.test.cjs | 507 | Tests pinning the deleted judgment (buildTaskContext thresholds, taskContext wiring, task_classification shape, INTEL-16/18 history wiring) — scaffolding-of-scaffolding; deleted with the behavior they froze. |
+| tests/e2e/intelligence-pipeline.test.cjs | 357 (file) | End-to-end pin of the classify→route pipeline being excised; nothing left to exercise. |
 
 ## Deletions — Vendored skills
 
