@@ -1,5 +1,14 @@
 # Milestones
 
+## v2.9 Autonomous Workflows Completion (Shipped: 2026-07-15)
+
+**Phases completed:** 3 phases (57.1, 58, 59), 6 requirements satisfied (FIN-01/02, SHIP-01..04). Verdict: `tech_debt` — only the explicitly-deferred HOOK-01 carries forward.
+
+- Bitter Lesson Surgery (57.1, PR #51): `/gsd:do` routes from a model-readable registry (`gsd-tools do-registry`) instead of a judgment table; `classify.cjs` + `dynamicSelect`/`MODEL_TIERS` deleted; judgment scaffolding stripped from 22 of 47 vendored skills; net −4,119 lines. Routing regression fixture + gate at `tests/routing/`.
+- Finalize Hardening & Re-verification (58, PR #52): `/gsd:finalize` Gate 5.5 degrades gracefully when `repo-doc-architect` is unavailable (`[skip]` notice, continue); full 8-gate chain re-verified end-to-end in a sandbox (consent gates, `[auto-push]` receipts, Gate 2 hard-stop). `tests/finalize.test.cjs`.
+- Ship-Milestone Workflow (59, PR #53): `workflow:ship-milestone` composes health → audit-agents → sync-docs → coverage+drift → audit-milestone → ship/ci → complete-milestone behind exactly 2 gates; unshelved; registry-routable (13th named flow). `tests/ship-milestone.test.cjs`.
+- Close-out (PR #54): milestone audit + tech-debt fixes (test-runner tool, discuss-phase/smart-discuss overlap, ecosystem-auditor phantom-drift normalization). Completed via the first live run of `ship-milestone`.
+
 ## v2.8 Documentation Integrity (Shipped: 2026-05-08)
 
 **Phases completed:** 3 phases (55-57), 9 plans, 14 requirements satisfied

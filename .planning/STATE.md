@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.9
 milestone_name: Autonomous Workflows Completion
-status: ready_to_plan
-last_updated: "2026-07-13T18:00:00.000Z"
-last_activity: "2026-07-13 -- Roadmap created: Phase 58 (Finalize Hardening + Re-verification), Phase 59 (Ship-Milestone Workflow); 6/6 requirements mapped"
+status: archived
+last_updated: "2026-07-15T21:00:00.000Z"
+last_activity: "2026-07-15 -- v2.9 COMPLETE + ARCHIVED via first live ship-milestone run (PRs #51-54); phases archived to milestones/v2.9-phases/, tag v2.9"
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -14,7 +14,7 @@ last_activity: "2026-07-13 -- Roadmap created: Phase 58 (Finalize Hardening + Re
 See: .planning/PROJECT.md (updated 2026-05-08 after v2.8 milestone)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** v2.9 Autonomous Workflows Completion — Phase 58 (Finalize Hardening & Re-verification), ready to plan
+**Current focus:** v2.9 Autonomous Workflows Completion — COMPLETE + ARCHIVED 2026-07-15 (tag v2.9). Next: start a new milestone (`/gsd:new-milestone`) or pick up HOOK-01 + the two logged hygiene follow-ups.
 
 ## Current Position
 
