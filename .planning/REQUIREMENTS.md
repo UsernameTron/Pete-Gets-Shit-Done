@@ -1,37 +1,42 @@
-# Requirements — v2.9 Autonomous Workflows Completion
+# Requirements — v3.0 Milestone-Close Hardening
 
-**Milestone goal:** Harden the last `/gsd:finalize` fragility and build the previously-shelved `ship-milestone` workflow (W5) that depends on it (built Phase 59, 2026-07-15), closing the autonomous-workflows suite.
+**Milestone goal:** Close the two runtime-safety gaps the v2.9 close-out surfaced — milestone close-out that works on a protected `main`, and hook enforcement reproducible from a fresh clone.
 
-**Scoped:** 2026-07-13. Phase numbering continues from 57 (v2.9 starts at phase 58).
+**Scoped:** 2026-07-15. Phase numbering continues from 59 (v3.0 starts at phase 60).
 
 ---
 
-## v2.9 Requirements
+## v3.0 Requirements
 
-### FINALIZE — harden the last fragility
+### MERGE — protected-main close-out path (v2.9 audit item 6)
 
-- [x] **FIN-01**: `/gsd:finalize` Gate 5.5 spawns `repo-doc-architect` only when that agent resolves in the current install; when it is unavailable (e.g. `claude-mcp-ecosystem` not enabled), the gate skips with a logged notice and finalization continues instead of dangling on a failed spawn.
-- [x] **FIN-02**: `/gsd:finalize` is exercised end-to-end on a real milestone close-out (the re-verification the autonomous-workflows design lists as an open unshelve precondition), confirming every push sits behind its consent gate and no step performs an ungated remote operation.
+- [ ] **MERGE-01**: When `main` is branch-protected (PR-only), `complete-milestone`'s branch-handling step merges the close-out branch via `gh pr merge` (CI-gated squash) instead of the local `git checkout main; git merge --squash; git push` path that protection rejects.
+- [ ] **MERGE-02**: When `main` is unprotected, the existing local squash/merge-with-history/delete/keep options are preserved unchanged — zero behavior change for repos without protection.
+- [ ] **MERGE-03**: `ship-milestone` inherits the protected-main path through its `complete-milestone` delegation — no divergent merge logic in the workflow file.
+- [ ] **MERGE-04**: Tests assert the branch decision: protected `main` routes to PR-merge, unprotected routes to the local path.
 
-### SHIP-MILESTONE — build W5 (scoped under the old W7 label)
+### HOOKREG — versioned hook registration (the v2.9-deferred "HOOK-01")
 
-- [x] **SHIP-01**: A `ship-milestone` workflow (`get-shit-done/workflows/ship-milestone.md`) composes the proven finalizer critical path (health → audit-agents → sync-docs → coverage+drift → audit-milestone → ship/ci-watch → complete-milestone) with exactly 2 gates: a conditional audit-verdict gate (fires only when the audit is not `passed`) and a complete-milestone authorization gate before the irreversible tag/archive/branch cluster.
-- [x] **SHIP-02**: `ship-milestone` is routed via `/gsd:do` as a `workflow:ship-milestone` registry entry whose description makes the model prefer it over `gsd:complete-milestone` for close-out intents (blind spot-check evidence), and its shelved status is lifted in the design doc and any status surface that names it. *(Re-pointed 2026-07-15: routing table deleted in Phase 57.1; registry has no row ordering.)*
-- [x] **SHIP-03**: `complete-milestone`'s three internal prompts (archive phases, branch handling, tag push) continue to fire and stay human — `ship-milestone`'s Gate 2 authorizes *starting* the completion sequence, never auto-answers branch deletion or tag push.
-- [x] **SHIP-04**: Structural test coverage for `ship-milestone` — the do-registry includes it, its referenced `/gsd:` commands all resolve, and it holds no more than 2 gates. *(Re-pointed 2026-07-15: "routing contract" = registry membership + description quality, per Phase 57.1.)*
+- [ ] **HOOKREG-01**: A versioned settings template registers the full runtime hook set, so a fresh clone gets the same enforcement as the maintainer's workstation without depending on installer side effects.
+- [ ] **HOOKREG-02**: `lesson-capture-gate.cjs` is registered — no shipped hook source is left unwired.
+- [ ] **HOOKREG-03**: An installer contract test fails if any shipped hook source is missing from the registrations — locking reproducibility against future drift.
+
+*(ID note: the deferred item was logged as "HOOK-01"; renamed HOOKREG here because HOOK-01..03 shipped in v2.3 and HOOK-04 in v2.4 — REQ-IDs continue numbering, never reuse.)*
 
 ---
 
 ## Future Requirements (deferred)
 
-- **HOOK-01** (deferred from v2.9): version the hook registrations (settings template + installer contract test) so a fresh clone gets the same runtime safety net — the ecosystem map's flagged top gap. Deferred to keep v2.9 tight; it is hygiene, not a workflow.
-- Second-pass autonomy items already shipped (quick-change W4, bug-to-branch W3) — no longer pending.
+- **BITTER_LESSON_LOG DEFERRED items** (15 logged, Phase 57.1) — lightweight follow-on pass, not milestone scope (operator decision 2026-07-15).
 
 ## Out of Scope
 
-- Re-opening the two already-fixed finalize issues (ungated pushes, `allowed-tools` mismatch) — resolved by the `finalize-push-consent` blueprint (2026-07-12); FIN-02 re-verifies them but does not re-implement.
-- Automating `ship-milestone` to L3 — the tag/archive/branch-delete cluster keeps it L2 (supervised) by design; full unattended milestone completion is explicitly not a goal.
-- Retroactively converting the already-shipped W1–W13 workflows into GSD phases — they shipped as standalone PRs and stay that way.
+| Feature | Reason |
+|---------|--------|
+| Automating `complete-milestone`'s 3 internal prompts | They stay live-human by design (SHIP-03, v2.9) — the protected-main fix changes *how* the merge happens, never *whether* to ask |
+| CI-provider abstraction for the PR-merge path | GitHub (`gh`) only, consistent with the project-wide GitHub-Actions-only stance |
+| Auto-detecting/modifying branch-protection settings | Read-only detection is fine; GSD never edits repo protection rules |
+| BITTER_LESSON_LOG cleanups + env-gotcha fixes | Hygiene follow-on, deliberately excluded to keep v3.0 tight |
 
 ---
 
@@ -39,9 +44,19 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FIN-01 | Phase 58 | Complete (2026-07-15) |
-| FIN-02 | Phase 58 | Complete (2026-07-15, sandbox e2e per operator decision) |
-| SHIP-01 | Phase 59 | Complete (2026-07-15) |
-| SHIP-02 | Phase 59 | Complete (2026-07-15) |
-| SHIP-03 | Phase 59 | Complete (2026-07-15) |
-| SHIP-04 | Phase 59 | Complete (2026-07-15) |
+| MERGE-01 | — | Pending |
+| MERGE-02 | — | Pending |
+| MERGE-03 | — | Pending |
+| MERGE-04 | — | Pending |
+| HOOKREG-01 | — | Pending |
+| HOOKREG-02 | — | Pending |
+| HOOKREG-03 | — | Pending |
+
+**Coverage:**
+- v3.0 requirements: 7 total
+- Mapped to phases: 0 (roadmap pending)
+- Unmapped: 7 ⚠️ (filled by roadmap)
+
+---
+*Requirements defined: 2026-07-15*
+*Last updated: 2026-07-15 after initial definition*
