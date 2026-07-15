@@ -1287,10 +1287,10 @@ const MODEL_ALIAS_MAP = {
   'haiku': 'claude-haiku-3-5',
 };
 
-function resolveModelInternal(cwd, agentType, taskContext) {
+function resolveModelInternal(cwd, agentType) {
   const config = loadConfig(cwd);
 
-  // 1. User overrides always win — regardless of resolve_model_ids or routing_strategy.
+  // 1. User overrides always win — regardless of resolve_model_ids.
   // Users who set fully-qualified model IDs (e.g., "openai/gpt-5.4") get exactly that.
   const override = config.model_overrides?.[agentType];
   if (override) {
@@ -1304,27 +1304,7 @@ function resolveModelInternal(cwd, agentType, taskContext) {
     return '';
   }
 
-  // 3. Dynamic routing — only when taskContext provided AND routing_strategy !== 'static'
-  const strategy = config.routing_strategy || 'static';
-  if (taskContext && strategy !== 'static') {
-    const { dynamicSelect } = require('./model-profiles.cjs');
-    const result = dynamicSelect(agentType, taskContext, config);
-
-    // INTEL-06: Log routing rationale via debugLog
-    debugLog('MODEL_ROUTE', `agent=${agentType} strategy=${strategy} ${result.rationale} → ${result.alias}`, { agent: agentType, tier: result.tier });
-
-    if (taskContext.complexity === 'critical') {
-      debugLog('MODEL_ROUTE_CRITICAL', `CRITICAL override: agent=${agentType} forced to quality tier`, { agent: agentType });
-    }
-
-    const alias = result.alias;
-    if (config.resolve_model_ids) {
-      return MODEL_ALIAS_MAP[alias] || alias;
-    }
-    return alias;
-  }
-
-  // 4. Static profile lookup — existing v1.9 behavior (unchanged)
+  // 3. Static profile lookup
   const profile = String(config.model_profile || 'balanced').toLowerCase();
   const agentModels = MODEL_PROFILES[agentType];
   if (!agentModels) return 'sonnet';

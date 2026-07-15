@@ -30,6 +30,8 @@ Branch: `bitter-lesson-surgery` (never pushed). Started 2026-07-15.
 | get-shit-done/bin/lib/init.cjs | 133 (net −128) | buildTaskContext() plan/req-count→complexity thresholds are keyword-adjacent tier judgment; historyHints/failureRate feeding and classifyTask() wiring exist only to bias model choice by encoded heuristics. resolveModelInternal keeps user config (leverage); the taskContext arg that steered it was judgment. |
 | tests/init.test.cjs | 507 | Tests pinning the deleted judgment (buildTaskContext thresholds, taskContext wiring, task_classification shape, INTEL-16/18 history wiring) — scaffolding-of-scaffolding; deleted with the behavior they froze. |
 | tests/e2e/intelligence-pipeline.test.cjs | 357 (file) | End-to-end pin of the classify→route pipeline being excised; nothing left to exercise. |
+| get-shit-done/bin/lib/core.cjs | 23 (net −20) | dynamicSelect step-3 branch in resolveModelInternal picked model tiers from complexity heuristics — HOW MUCH compute judgment. Kept steps 1/2/static: user overrides, resolve_model_ids runtime facts, user-set profile — all config/leverage. |
+| tests/core.test.cjs | 202 | Dynamic-routing + MODEL_ROUTE debug-logging describes pinned the deleted judgment branch; static-profile describes (user config) kept. |
 
 ## Deletions — Vendored skills
 
