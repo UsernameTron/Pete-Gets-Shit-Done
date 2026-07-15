@@ -1,6 +1,6 @@
 # Requirements — v2.9 Autonomous Workflows Completion
 
-**Milestone goal:** Harden the last `/gsd:finalize` fragility and build the shelved `ship-milestone` workflow (W7) that depends on it, closing the autonomous-workflows suite.
+**Milestone goal:** Harden the last `/gsd:finalize` fragility and build the previously-shelved `ship-milestone` workflow (W5) that depends on it (built Phase 59, 2026-07-15), closing the autonomous-workflows suite.
 
 **Scoped:** 2026-07-13. Phase numbering continues from 57 (v2.9 starts at phase 58).
 
@@ -13,12 +13,12 @@
 - [x] **FIN-01**: `/gsd:finalize` Gate 5.5 spawns `repo-doc-architect` only when that agent resolves in the current install; when it is unavailable (e.g. `claude-mcp-ecosystem` not enabled), the gate skips with a logged notice and finalization continues instead of dangling on a failed spawn.
 - [x] **FIN-02**: `/gsd:finalize` is exercised end-to-end on a real milestone close-out (the re-verification the autonomous-workflows design lists as an open unshelve precondition), confirming every push sits behind its consent gate and no step performs an ungated remote operation.
 
-### SHIP-MILESTONE — build W7
+### SHIP-MILESTONE — build W5 (scoped under the old W7 label)
 
-- [ ] **SHIP-01**: A `ship-milestone` workflow (`get-shit-done/workflows/ship-milestone.md`) composes the proven finalizer critical path (health → audit-agents → sync-docs → coverage+drift → audit-milestone → ship/ci-watch → complete-milestone) with exactly 2 gates: a conditional audit-verdict gate (fires only when the audit is not `passed`) and a complete-milestone authorization gate before the irreversible tag/archive/branch cluster.
-- [ ] **SHIP-02**: `ship-milestone` is routed via `/gsd:do` as a `workflow:ship-milestone` registry entry whose description makes the model prefer it over `gsd:complete-milestone` for close-out intents (blind spot-check evidence), and its shelved status is lifted in the design doc and any status surface that names it. *(Re-pointed 2026-07-15: routing table deleted in Phase 57.1; registry has no row ordering.)*
-- [ ] **SHIP-03**: `complete-milestone`'s three internal prompts (archive phases, branch handling, tag push) continue to fire and stay human — `ship-milestone`'s Gate 2 authorizes *starting* the completion sequence, never auto-answers branch deletion or tag push.
-- [ ] **SHIP-04**: Structural test coverage for `ship-milestone` — the do-registry includes it, its referenced `/gsd:` commands all resolve, and it holds no more than 2 gates. *(Re-pointed 2026-07-15: "routing contract" = registry membership + description quality, per Phase 57.1.)*
+- [x] **SHIP-01**: A `ship-milestone` workflow (`get-shit-done/workflows/ship-milestone.md`) composes the proven finalizer critical path (health → audit-agents → sync-docs → coverage+drift → audit-milestone → ship/ci-watch → complete-milestone) with exactly 2 gates: a conditional audit-verdict gate (fires only when the audit is not `passed`) and a complete-milestone authorization gate before the irreversible tag/archive/branch cluster.
+- [x] **SHIP-02**: `ship-milestone` is routed via `/gsd:do` as a `workflow:ship-milestone` registry entry whose description makes the model prefer it over `gsd:complete-milestone` for close-out intents (blind spot-check evidence), and its shelved status is lifted in the design doc and any status surface that names it. *(Re-pointed 2026-07-15: routing table deleted in Phase 57.1; registry has no row ordering.)*
+- [x] **SHIP-03**: `complete-milestone`'s three internal prompts (archive phases, branch handling, tag push) continue to fire and stay human — `ship-milestone`'s Gate 2 authorizes *starting* the completion sequence, never auto-answers branch deletion or tag push.
+- [x] **SHIP-04**: Structural test coverage for `ship-milestone` — the do-registry includes it, its referenced `/gsd:` commands all resolve, and it holds no more than 2 gates. *(Re-pointed 2026-07-15: "routing contract" = registry membership + description quality, per Phase 57.1.)*
 
 ---
 
@@ -41,7 +41,7 @@
 |-------------|-------|--------|
 | FIN-01 | Phase 58 | Complete (2026-07-15) |
 | FIN-02 | Phase 58 | Complete (2026-07-15, sandbox e2e per operator decision) |
-| SHIP-01 | Phase 59 | Pending |
-| SHIP-02 | Phase 59 | Pending |
-| SHIP-03 | Phase 59 | Pending |
-| SHIP-04 | Phase 59 | Pending |
+| SHIP-01 | Phase 59 | Complete (2026-07-15) |
+| SHIP-02 | Phase 59 | Complete (2026-07-15) |
+| SHIP-03 | Phase 59 | Complete (2026-07-15) |
+| SHIP-04 | Phase 59 | Complete (2026-07-15) |

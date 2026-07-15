@@ -18,13 +18,13 @@ See: .planning/PROJECT.md (updated 2026-05-08 after v2.8 milestone)
 
 ## Current Position
 
-Phase: 58 (Finalize Hardening & Re-verification) — COMPLETE on branch `feat/phase-58-finalize-hardening` (FIN-01 + FIN-02 done; ship pending operator go). Phase 57.1 shipped earlier same day as PR #51 (main @ 963e408).
-Plan: Approved plan at ~/.claude/plans/58-load-the-entire-eventual-hare.md (Phase 58 version)
-Status: Done — Gate 5.5 availability check + graceful [skip] (FIN-01, locked by tests/finalize.test.cjs), sandbox e2e re-verification runs A+B (FIN-02, evidence in .planning/phases/58-finalize-hardening/VERIFICATION.md), W5 unshelve preconditions retired in GSD-AUTONOMOUS-WORKFLOWS.md. Suite 2,872/573 green, drift + links gates pass.
-Next: Phase 59 (Ship-Milestone Workflow) — re-point criterion 4 "routing table" → do-registry when planning (logged DEFERRED).
-Last activity: 2026-07-15 — Phase 58 executed end-to-end
+Phase: 59 (Ship-Milestone Workflow) — COMPLETE on branch `feat/phase-59-ship-milestone` (SHIP-01..04 done; ship pending operator go). Phase 58 shipped earlier same day as PR #52 (main @ 1307be0); Phase 57.1 as PR #51.
+Plan: Approved plan at ~/.claude/plans/58-load-the-entire-eventual-hare.md (Phase 59 version)
+Status: Done — ship-milestone.md built to the W5 spec (2 gates, verbatim prompts, complete-milestone prompts stay live), registry-routable (13 workflows; blind spot-check 3/3), tests/ship-milestone.test.cjs + do-routing flip, shelved status lifted everywhere. Suite 2,884/577 green, drift + links gates pass.
+Next: v2.9 milestone close-out — the first live ship-milestone run (also delivers finalize's live confirmation from Phase 58).
+Last activity: 2026-07-15 — Phase 59 executed end-to-end; v2.9 phases all complete
 
-**v2.9 goal:** Harden the last `/gsd:finalize` fragility (Gate 5.5 cross-plugin spawn) and build the shelved `ship-milestone` workflow (W7) that routes through it. The two ungated finalize pushes and the `allowed-tools` mismatch were already resolved by the `finalize-push-consent` blueprint (2026-07-12); the cross-plugin `repo-doc-architect` spawn + one end-to-end re-verification are the remaining unshelve preconditions. Phase numbering continues from 57 (v2.9 starts at phase 58) — the named-workflows suite shipped as standalone PRs outside the phase counter.
+**v2.9 goal:** Harden the last `/gsd:finalize` fragility (Gate 5.5 cross-plugin spawn) and build the previously-shelved `ship-milestone` workflow (W5 — earlier notes misnumbered it W7; built Phase 59, 2026-07-15). The two ungated finalize pushes and the `allowed-tools` mismatch were already resolved by the `finalize-push-consent` blueprint (2026-07-12); the cross-plugin `repo-doc-architect` spawn + one end-to-end re-verification are the remaining unshelve preconditions. Phase numbering continues from 57 (v2.9 starts at phase 58) — the named-workflows suite shipped as standalone PRs outside the phase counter.
 
 **Roadmap:** Phase 58 — Finalize Hardening & Re-verification (FIN-01, FIN-02). Phase 59 — Ship-Milestone Workflow (SHIP-01..04), depends on Phase 58. Next: `/gsd:plan-phase 58`.
 
