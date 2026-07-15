@@ -34,7 +34,7 @@ If the prompt contains a `<files_to_read>` block, you MUST use the `Read` tool t
 `model: haiku` is explicit. Ecosystem auditing is:
 - Schema validation (does this YAML have the required keys?)
 - Pattern matching (does this agent declare hygiene compliance? does tools include Edit while disallowedTools also lists Edit?)
-- File comparison (does `./agents/foo.md` byte-equal `~/.claude/agents/foo.md`?)
+- File comparison (does `./agents/foo.md` match `~/.claude/agents/foo.md` after normalizing the installer's `~/` ↔ `$HOME/` path rewrite? — see Step 7; a raw byte-diff false-positives on that transform)
 - Description length and structure checks
 
 It is NOT deep reasoning. Haiku is the right tier. Using Sonnet or Opus here is wasted spend.
@@ -149,15 +149,24 @@ Use Bash to list every agent name (filename without extension) and every `name:`
 
 ## Step 7: Install drift check
 
-For each agent file in `./agents/`, diff it against `~/.claude/agents/<filename>` using `diff -q`.
+For each agent file in `./agents/`, compare it against `~/.claude/agents/<filename>`. **Do NOT use a raw `diff -q`** — the installer deliberately rewrites path references (`~/.claude/` → `$HOME/.claude/`) when it writes the installed copy, so a byte-comparison reports every agent that mentions a home-relative path as "drift" even when the content is functionally identical. That is a false positive, not stale install.
+
+Normalize the installer's path transform on both sides first, then diff. For example:
+
+```bash
+diff <(sed 's#\$HOME/\.claude/#~/.claude/#g' "$HOME/.claude/agents/<filename>") \
+     <(sed 's#\$HOME/\.claude/#~/.claude/#g' "./agents/<filename>")
+```
+
+Only differences that survive this normalization are real drift.
 
 **Emit findings for:**
 - **BLOCK:** installed file is MISSING (repo has agent, install does not — the installed roster is incomplete)
-- **FLAG:** installed file DIFFERS from repo source (stale install — run the plugin's install command to resync)
+- **FLAG:** installed file DIFFERS from repo source *after path-transform normalization* (genuine stale install — run the plugin's install command to resync)
 - **FLAG:** installed file EXISTS but no repo counterpart (orphan in install — may be from an older version)
-- **PASS:** every repo agent has a byte-identical installed copy
+- **PASS:** every repo agent has an installed copy that is identical once the installer's `~/` ↔ `$HOME/` path rewrite is normalized out
 
-This is a superset of what the SubagentStop hook catches. The hook reports drift as a running log; this auditor reports it as a structured finding with a specific remediation.
+This is a superset of what the SubagentStop hook catches. The hook reports drift as a running log; this auditor reports it as a structured finding with a specific remediation. **Path-form-only differences are never drift** — report them, if at all, as an informational note, not a FLAG.
 
 ## Step 8: Produce the structured report
 
