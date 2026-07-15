@@ -1,3 +1,7 @@
+---
+name: workflow:wrap-and-sync
+description: Wrap a session before stopping — "wrap", "end my day". Re-measures coverage, closes doc drift in the same commit unit, refreshes state and the todo handoff, captures or exempts a lesson, checkpoints, and generates a session report. One gate — the commit/push approval at the end.
+---
 <purpose>
 Wrap a session before stopping: re-measure coverage, close doc drift in the same commit unit, refresh session state, capture-or-exempt a lesson, checkpoint, and generate a session report — then gate exactly once before anything leaves the working tree. Codifies lesson 2026-05-11 [Pre-Push Validation / Drift] (drift must be re-checked AFTER the session's last change, not trusted from an earlier run) and lesson 2026-04-10 [Hook Design] (never force a commit — or a push — past a state where the operator deferred review) as executable steps, in place of the unwired `.claude/hooks/lesson-capture-gate.cjs` Stop hook.
 </purpose>

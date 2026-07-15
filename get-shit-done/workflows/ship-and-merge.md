@@ -1,3 +1,7 @@
+---
+name: workflow:ship-and-merge
+description: Take a done, verified phase all the way to a merged PR — verify, add missing tests, build a .planning/-filtered PR branch, open the PR (gate 1), watch CI with a bounded fix loop, then merge (gate 2). Two gates; branch protection independently backstops the merge.
+---
 <purpose>
 Take a done phase to a merged PR: verify → tests → clean PR branch → PR → CI → merge. This is
 W9 (`docs/WORKFLOW-DESIGN-RECOMMENDATIONS.md`), autonomy level L2 — verification, test

@@ -966,6 +966,79 @@ function cmdStats(cwd, format, raw) {
   }
 }
 
+/**
+ * Aggregate every routable GSD target for the /gsd:do dispatcher.
+ * Scans commands/gsd/*.md (all except do.md — the dispatcher never routes to
+ * itself) and get-shit-done/workflows/*.md whose frontmatter `name` starts
+ * with "workflow:". Directories resolve relative to the install location,
+ * same pattern as core.cjs getAgentsDir(): this file lives at
+ * <configDir>/get-shit-done/bin/lib/, so commands/ and workflows/ are fixed
+ * hops up from __dirname in both the repo and an installed configDir.
+ * Output is a deterministic name-sorted JSON array of
+ * { name, type: "command"|"workflow", description, argument_hint? } —
+ * the model reads these self-descriptions and routes with its own judgment.
+ */
+function cmdDoRegistry(raw) {
+  const commandsDir = path.join(__dirname, '..', '..', '..', 'commands', 'gsd');
+  const workflowsDir = path.join(__dirname, '..', '..', 'workflows');
+
+  const listMd = (dir) => {
+    try {
+      return fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort();
+    } catch { /* intentional: directory may not exist in partial installs */
+      return [];
+    }
+  };
+
+  // Frontmatter here means the LEADING block only. extractFrontmatter scans
+  // the whole document and keeps the LAST delimiter pair (a STATE.md
+  // corruption-recovery behavior); these prose files legitimately contain
+  // `---` lines in their bodies, so feed the parser just the head block.
+  const leadingFrontmatter = (content) => {
+    if (!content || !content.startsWith('---\n')) return {};
+    const close = content.indexOf('\n---', 4);
+    if (close === -1) return {};
+    return extractFrontmatter(content.slice(0, close + 4) + '\n');
+  };
+
+  const entries = [];
+
+  for (const file of listMd(commandsDir)) {
+    if (file === 'do.md') continue;
+    const content = safeReadFile(path.join(commandsDir, file));
+    if (content === null) continue;
+    const fm = leadingFrontmatter(content);
+    const entry = {
+      name: typeof fm.name === 'string' && fm.name ? fm.name : `gsd:${file.replace(/\.md$/, '')}`,
+      type: 'command',
+      description: typeof fm.description === 'string' ? fm.description : '',
+    };
+    if (typeof fm['argument-hint'] === 'string' && fm['argument-hint']) {
+      entry.argument_hint = fm['argument-hint'];
+    }
+    entries.push(entry);
+  }
+
+  for (const file of listMd(workflowsDir)) {
+    const content = safeReadFile(path.join(workflowsDir, file));
+    if (content === null) continue;
+    const fm = leadingFrontmatter(content);
+    if (typeof fm.name !== 'string' || !fm.name.startsWith('workflow:')) continue;
+    const entry = {
+      name: fm.name,
+      type: 'workflow',
+      description: typeof fm.description === 'string' ? fm.description : '',
+    };
+    if (typeof fm['argument-hint'] === 'string' && fm['argument-hint']) {
+      entry.argument_hint = fm['argument-hint'];
+    }
+    entries.push(entry);
+  }
+
+  entries.sort((a, b) => a.name.localeCompare(b.name));
+  output(entries, raw);
+}
+
 module.exports = {
   cmdGenerateSlug,
   cmdCurrentTimestamp,
@@ -982,5 +1055,6 @@ module.exports = {
   cmdTodoMatchPhase,
   cmdScaffold,
   cmdStats,
+  cmdDoRegistry,
   execGitValidated,
 };

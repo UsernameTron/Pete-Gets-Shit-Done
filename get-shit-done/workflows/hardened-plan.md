@@ -1,3 +1,7 @@
+---
+name: workflow:hardened-plan
+description: Plan a high-stakes phase with cross-AI review baked in — batch discuss, surface assumptions (gate 1 confirms them and consents to the external send), plan, external peer review, replan with feedback folded in (gate 2 approves). Two gates; planning only — never executes, pushes, or ships.
+---
 <purpose>
 
 Plan a high-stakes phase with cross-AI review baked in: batch discuss → surface assumptions →

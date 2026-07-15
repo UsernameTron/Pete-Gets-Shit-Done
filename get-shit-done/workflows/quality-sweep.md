@@ -1,3 +1,7 @@
+---
+name: workflow:quality-sweep
+description: Audit the whole project in one read-only sweep — planning health, outstanding UAT, dependency CVEs, agent ecosystem, and validation gaps — presented as one severity-ordered report. One gate guarding the only mutation (applying repairs); pass --deep to add the ecosystem checkup group.
+---
 <trigger>
 Use when:
 - User runs /gsd:do with intent "audit everything" | "quality sweep" | "health check the project"

@@ -1,3 +1,7 @@
+---
+name: workflow:bug-to-branch
+description: Fix a bug end-to-end from a pasted error or bug report through to a shipped fix — debug to confirmed root cause, gated fix-path choice, full test suite, then a gated push/draft-PR. Two gates; everything stays branch-local until "Ship it".
+---
 <purpose>
 Turn a pasted error into a shipped fix: debug → fix → full suite → ship. This is W3
 (`.planning/GSD-AUTONOMOUS-WORKFLOWS.md:102-118`), autonomy level L2 — investigation and fix run

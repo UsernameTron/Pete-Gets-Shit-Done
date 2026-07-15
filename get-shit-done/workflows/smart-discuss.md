@@ -1,3 +1,7 @@
+---
+name: workflow:smart-discuss
+description: Discuss a phase with recommended defaults instead of sequential questioning — grey areas proposed as batch accept/override tables, one acceptance gate; auto mode folds resolvable areas to defaults with an [auto] receipt and asks only the residue. Produces the same CONTEXT.md as discuss-phase.
+---
 <purpose>
 
 Autonomous-optimized variant of the `gsd:discuss-phase` skill. Proposes grey area answers in batch tables — the user accepts or overrides per area — instead of sequential questioning. In auto mode (`--auto` flag, active `--auto` chain, or yolo mode) the per-area acceptance folds to recommended defaults with an `[auto]` receipt table, and only unresolvable areas are asked. Produces **identical CONTEXT.md output** to regular discuss-phase: same template, same sections, same commit shape.

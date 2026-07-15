@@ -1,3 +1,7 @@
+---
+name: workflow:frontend-phase
+description: Run a frontend/UI phase end to end with the UI lifecycle folded in — UI-SPEC design contract first, discuss, plan (gate 1 approves plan + spec together), execute, 6-pillar visual audit, verify (gate 2 accepts or routes fixes). Two gates; never pushes or ships.
+---
 <purpose>
 
 Run a frontend phase end to end with the UI lifecycle folded in: design contract → discuss →

@@ -26,7 +26,7 @@ Branch: `bitter-lesson-surgery` (never pushed). Started 2026-07-15.
 
 | File | Lines deleted | Defense (why judgment, not leverage) |
 |------|---------------|--------------------------------------|
-| _(populated by core executor, commits 1–6)_ | | |
+| get-shit-done/workflows/do.md | ~35 (net −33, 118→85) | 30-row intent→command if-then table + worked ambiguity example encoding human routing judgment; replaced by per-target self-descriptions (do-registry) + model judgment. Kept: validate/check_project/display/dispatch gates, .planning/ exemption facts, dispatcher-never-works rule — all leverage. |
 
 ## Deletions — Vendored skills
 

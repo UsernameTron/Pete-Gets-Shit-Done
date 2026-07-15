@@ -1,3 +1,7 @@
+---
+name: workflow:daily-startup
+description: Session-start orientation — "start my day", "where am I", or after a /clear. Boots the project, prints the read-only daily dashboard, restores checkpoint/handoff context when present, and recommends exactly one next command. Read-only end to end, zero gates; handles a missing .planning/ itself.
+---
 <trigger>
 Use when:
 - User runs /gsd:do with intent "start my day" | "where am I"

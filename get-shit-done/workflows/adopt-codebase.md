@@ -1,3 +1,7 @@
+---
+name: workflow:adopt-codebase
+description: Put an existing repo under GSD (brownfield onboarding) — map the codebase, synthesize PROJECT.md/ROADMAP.md from the map, health-check, deploy agents, optional developer profile, then one gate accepting the project definition. Creates .planning/ — does not require it; greenfield setup belongs to new-project.
+---
 <purpose>
 Put an existing repo under GSD: map → project definition → health check → agents → optional
 profile → accept. This is W8 (`docs/WORKFLOW-DESIGN-RECOMMENDATIONS.md`) — brownfield

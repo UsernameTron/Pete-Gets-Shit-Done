@@ -28,6 +28,7 @@
  *   verify-path-exists <path>          Check file/directory existence
  *   config-ensure-section              Initialize .planning/config.json
  *   history-digest                     Aggregate all SUMMARY.md data
+ *   do-registry                        List routable commands + workflows for /gsd:do
  *   summary-extract <path> [--fields]  Extract structured data from SUMMARY.md
  *   state-snapshot                     Structured parse of STATE.md
  *   phase-plan-index <phase>           Index plans with waves and status
@@ -286,7 +287,7 @@ async function main() {
   // filesystem traversal on every invocation.
   const SKIP_ROOT_RESOLUTION = new Set([
     'generate-slug', 'current-timestamp', 'verify-path-exists',
-    'verify-summary', 'template', 'frontmatter',
+    'verify-summary', 'template', 'frontmatter', 'do-registry',
   ]);
   if (!SKIP_ROOT_RESOLUTION.has(command)) {
     cwd = findProjectRoot(cwd);
@@ -609,6 +610,11 @@ async function runCommand(command, args, cwd, raw) {
 
     case 'history-digest': {
       commands.cmdHistoryDigest(cwd, raw);
+      break;
+    }
+
+    case 'do-registry': {
+      commands.cmdDoRegistry(raw);
       break;
     }
 
