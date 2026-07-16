@@ -1773,3 +1773,93 @@ None yet.
 // ─────────────────────────────────────────────────────────────────────────────
 // summary-extract command
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─── Stale-milestone frontmatter clobber regression (2026-07-16) ──────────────
+// Every STATE.md writer funnels through syncStateFrontmatter, which re-derives
+// milestone/name/progress. With a shipped-but-uncollapsed v2.9 section sitting
+// before the ACTIVE v3.0 section, `state update` (and begin-phase / phase
+// complete / milestone complete) stamped milestone: v2.9 and counted phases
+// from the shared "## Phase Details" section (total_phases: 5) — clobbering
+// correct v3.0 frontmatter on every write.
+
+describe('state update — preserves active milestone frontmatter', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), [
+      '# Roadmap',
+      '',
+      '## Milestones',
+      '',
+      '- v2.9 Autonomous Workflows Completion — Phases 58-59 (shipped 2026-07-15)',
+      '- v3.0 Milestone-Close Hardening — Phases 60-61 (active, started 2026-07-15)',
+      '',
+      '### v2.9 Autonomous Workflows Completion (Phases 58-59) — SHIPPED 2026-07-15',
+      '',
+      '- [x] **Phase 58: Finalize Hardening** - done',
+      '- [x] **Phase 59: Ship-Milestone Workflow** - done',
+      '',
+      '### v3.0 Milestone-Close Hardening (Phases 60-61) — ACTIVE (started 2026-07-15)',
+      '',
+      '- [x] **Phase 60: Protected-Main Merge Path** - done',
+      '- [ ] **Phase 61: Versioned Hook Registration** - in flight',
+      '',
+      '## Phase Details',
+      '',
+      '### Phase 58: Finalize Hardening',
+      '**Goal**: old milestone phase.',
+      '',
+      '### Phase 59: Ship-Milestone Workflow',
+      '**Goal**: old milestone phase.',
+      '',
+      '### Phase 60: Protected-Main Merge Path',
+      '**Goal**: active milestone phase.',
+      '',
+      '### Phase 61: Versioned Hook Registration',
+      '**Goal**: active milestone phase.',
+    ].join('\n'));
+
+    // Active-milestone phase dirs on disk (plus a leftover from v2.9)
+    for (const dir of ['58-finalize-hardening', '60-protected-main-merge', '61-versioned-hook-registration']) {
+      const d = path.join(tmpDir, '.planning', 'phases', dir);
+      fs.mkdirSync(d, { recursive: true });
+      fs.writeFileSync(path.join(d, `${dir.split('-')[0]}-01-PLAN.md`), '# plan');
+    }
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'phases', '60-protected-main-merge', '60-01-SUMMARY.md'),
+      '# done'
+    );
+
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'STATE.md'), [
+      '---',
+      'milestone: v3.0',
+      'milestone_name: Milestone-Close Hardening',
+      'status: executing',
+      '---',
+      '',
+      '# STATE',
+      '',
+      '**Status:** executing',
+      '**Last Activity:** 2026-07-16',
+    ].join('\n'));
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('a body-field update re-derives the ACTIVE milestone, not the shipped one', () => {
+    const result = runGsdTools(['state', 'update', 'Status', 'Phase 61 shipped'], tmpDir);
+    assert.ok(result.success, `state update should succeed: ${result.error}`);
+
+    const state = fs.readFileSync(path.join(tmpDir, '.planning', 'STATE.md'), 'utf-8');
+    const fm = state.match(/^---\n([\s\S]*?)\n---/)[1];
+
+    assert.match(fm, /^milestone:\s*["']?v3\.0["']?$/m, `frontmatter kept v3.0:\n${fm}`);
+    assert.match(fm, /^milestone_name:\s*["']?Milestone-Close Hardening["']?$/m, 'name kept');
+    assert.match(fm, /total_phases:\s*2/, `progress scoped to active milestone:\n${fm}`);
+    assert.doesNotMatch(fm, /v2\.9/, 'shipped milestone must not leak into frontmatter');
+  });
+});

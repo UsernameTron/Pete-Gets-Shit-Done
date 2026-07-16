@@ -1341,6 +1341,29 @@ function generateSlugInternal(text) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
+/**
+ * Read milestone/milestone_name from STATE.md YAML frontmatter.
+ * Used as a fallback when ROADMAP.md has no derivable active milestone —
+ * preserves the last-known value instead of guessing stale data
+ * (stale-milestone regression, 2026-07-16).
+ */
+function milestoneFromStateFrontmatter(cwd) {
+  try {
+    const stateRaw = fs.readFileSync(path.join(planningDir(cwd), 'STATE.md'), 'utf-8');
+    const fmMatch = stateRaw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fmMatch) return null;
+    const versionMatch = fmMatch[1].match(/^milestone:\s*["']?(v\d+(?:\.\d+)+)["']?\s*$/m);
+    if (!versionMatch) return null;
+    const nameMatch = fmMatch[1].match(/^milestone_name:\s*["']?([^"'\n]+?)["']?\s*$/m);
+    return deepFreeze({
+      version: versionMatch[1],
+      name: nameMatch ? nameMatch[1].trim() : 'milestone',
+    });
+  } catch { /* intentional: STATE.md may not exist — no fallback available */
+    return null;
+  }
+}
+
 function getMilestoneInfo(cwd) {
   try {
     const roadmap = fs.readFileSync(path.join(planningDir(cwd), 'ROADMAP.md'), 'utf-8');
@@ -1356,17 +1379,44 @@ function getMilestoneInfo(cwd) {
       });
     }
 
-    // Second: heading-format roadmaps — strip shipped milestones in <details> blocks
-    const cleaned = stripShippedMilestones(roadmap);
-    // Extract version and name from the same ## heading for consistency
+    // Second: textual active marker on a heading or list line — beats heading
+    // order, so a shipped-but-uncollapsed section can't shadow the active one.
+    // e.g. "### v3.0 Name (Phases 60-61) — ACTIVE (started ...)"
+    // e.g. "- v3.0 Name — Phases 60-61 (active, started ...)"
+    const activeMatch = roadmap.match(
+      /^(?:#{1,4}|\s*[-*])\s+[^\n]*?\bv(\d+(?:\.\d+)+)[:\s]+([^—\n(]+)[^\n]*?\b(?:active|in progress)\b/im
+    );
+    if (activeMatch) {
+      return deepFreeze({
+        version: 'v' + activeMatch[1],
+        name: activeMatch[2].trim(),
+      });
+    }
+
+    // Third: heading-format roadmaps — strip shipped milestones in <details>
+    // blocks, then take the first version heading NOT marked shipped.
+    // Anchored at line start so "### v2.9 ..." can't match via its "## " substring.
     // Supports 2+ segment versions: v1.2, v1.2.1, v2.0.1, etc.
-    const headingMatch = cleaned.match(/## .*v(\d+(?:\.\d+)+)[:\s]+([^\n(]+)/);
-    if (headingMatch) {
+    const cleaned = stripShippedMilestones(roadmap);
+    const headingPattern = /^#{1,4}\s+[^\n]*?\bv(\d+(?:\.\d+)+)[:\s]+([^\n(]+)/gm;
+    let headingMatch;
+    while ((headingMatch = headingPattern.exec(cleaned)) !== null) {
+      // Test the FULL heading line — the name capture stops at "(", but
+      // shipped markers often follow it (e.g. "### v2.9 Name (Phases) — SHIPPED").
+      const lineEnd = cleaned.indexOf('\n', headingMatch.index);
+      const headingLine = cleaned.slice(headingMatch.index, lineEnd === -1 ? cleaned.length : lineEnd);
+      if (/\bshipped\b/i.test(headingLine)) continue;
       return deepFreeze({
         version: 'v' + headingMatch[1],
         name: headingMatch[2].trim(),
       });
     }
+
+    // Fourth: preserve the last-known milestone from STATE.md frontmatter
+    // rather than guessing from stale content.
+    const fromState = milestoneFromStateFrontmatter(cwd);
+    if (fromState) return fromState;
+
     // Fallback: try bare version match (greedy — capture longest version string)
     const versionMatch = cleaned.match(/v(\d+(?:\.\d+)+)/);
     return deepFreeze({
@@ -1374,6 +1424,8 @@ function getMilestoneInfo(cwd) {
       name: 'milestone',
     });
   } catch { /* intentional: ROADMAP.md may not exist — return safe defaults */
+    const fromState = milestoneFromStateFrontmatter(cwd);
+    if (fromState) return fromState;
     return deepFreeze({ version: 'v1.0', name: 'milestone' });
   }
 }
@@ -1386,12 +1438,41 @@ function getMilestoneInfo(cwd) {
 function getMilestonePhaseFilter(cwd) {
   const milestonePhaseNums = new Set();
   try {
-    const roadmap = extractCurrentMilestone(fs.readFileSync(path.join(planningDir(cwd), 'ROADMAP.md'), 'utf-8'), cwd);
-    // Match both numeric phases (Phase 1:) and custom IDs (Phase PROJ-42:)
-    const phasePattern = /#{2,4}\s*Phase\s+([\w][\w.-]*)\s*:/gi;
-    let m;
-    while ((m = phasePattern.exec(roadmap)) !== null) {
-      milestonePhaseNums.add(m[1]);
+    const raw = fs.readFileSync(path.join(planningDir(cwd), 'ROADMAP.md'), 'utf-8');
+
+    // First: narrow scope — the current milestone's own section, from its
+    // version heading to the next same-or-higher-level heading (any heading,
+    // not just version headings). This keeps phases listed in shared sections
+    // like "## Phase Details" — which mix milestones — out of the count
+    // (stale-milestone regression, 2026-07-16). Collects phase refs from both
+    // heading format ("### Phase 60:") and bullet format ("**Phase 60:**").
+    const version = getMilestoneInfo(cwd).version;
+    const cleaned = stripShippedMilestones(raw);
+    const headingRe = new RegExp(`^(#{1,4})\\s+[^\\n]*\\b${escapeRegex(version)}\\b[^\\n]*$`, 'm');
+    const headingMatch = cleaned.match(headingRe);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const rest = cleaned.slice(headingMatch.index + headingMatch[0].length);
+      const endMatch = rest.match(new RegExp(`^#{1,${level}}\\s`, 'm'));
+      const section = endMatch ? rest.slice(0, endMatch.index) : rest;
+      const refPattern = /(?:^#{2,4}\s*|\*\*)Phase\s+([\w][\w.-]*)\s*:/gim;
+      let m;
+      while ((m = refPattern.exec(section)) !== null) {
+        milestonePhaseNums.add(m[1]);
+      }
+    }
+
+    // Second: broad fallback (previous behavior) when the narrow scope yields
+    // nothing — e.g. no heading carries the version, or phases are only listed
+    // outside the milestone's own section.
+    if (milestonePhaseNums.size === 0) {
+      const roadmap = extractCurrentMilestone(raw, cwd);
+      // Match both numeric phases (Phase 1:) and custom IDs (Phase PROJ-42:)
+      const phasePattern = /#{2,4}\s*Phase\s+([\w][\w.-]*)\s*:/gi;
+      let m;
+      while ((m = phasePattern.exec(roadmap)) !== null) {
+        milestonePhaseNums.add(m[1]);
+      }
     }
   } catch { /* intentional: ROADMAP.md may not exist — pass-all filter used as fallback */ }
 
