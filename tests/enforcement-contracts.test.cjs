@@ -195,3 +195,34 @@ describe('Pattern 3: Type Name (gsd- Prefix) Validation', () => {
     validateGsdPrefixAgents('/nonexistent/target', '/nonexistent/source');
   });
 });
+
+// ─── Corrupt settings.json protection (fix 6) ───────────────────────────────
+
+describe('readSettings corrupt-file protection', () => {
+  let tmpDir;
+
+  beforeEach(() => { tmpDir = createTempDir('corrupt-settings-'); });
+  afterEach(() => { cleanup(tmpDir); });
+
+  test('a corrupt settings.json is backed up before any governance write', () => {
+    // readSettings previously swallowed parse errors and returned {}, so a
+    // later writeSettings clobbered the user's real (if broken) file with no
+    // trace. It must now preserve the original in a timestamped backup.
+    const settingsPath = path.join(tmpDir, 'settings.json');
+    const corrupt = '{ "permissions": { "allow": ["Bash"] ,,, INVALID JSON';
+    fs.writeFileSync(settingsPath, corrupt);
+
+    const govPath = path.join(tmpDir, 'gov.json');
+    writeJson(govPath, {
+      hooks: { Stop: [{ hooks: [{ type: 'command', command: 'echo STAGED_DOCS' }] }] },
+    });
+
+    // Runs through readSettings (which handles the corrupt file) then writes.
+    mergeGovernanceJson(settingsPath, govPath, 'test');
+
+    const backups = fs.readdirSync(tmpDir).filter(f => f.startsWith('settings.json.corrupt.'));
+    assert.ok(backups.length >= 1, 'corrupt settings.json must be backed up, not silently discarded');
+    const preserved = fs.readFileSync(path.join(tmpDir, backups[0]), 'utf8');
+    assert.strictEqual(preserved, corrupt, 'the backup must contain the exact original bytes');
+  });
+});

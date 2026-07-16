@@ -9,18 +9,18 @@
  *
  * Requirements: UAT-01, UAT-04, UAT-05, UAT-06, UAT-08, UAT-09
  *
- * Security note: execSync is used intentionally here. The pattern registry
- * generates read-only shell commands (file existence checks, grep, diff,
- * node -p). All commands are structurally verified to contain no write
- * operators. This is the UAT assertion engine — it must execute shell
- * commands to verify system state. See uat-patterns.cjs for the safety
- * guarantees on generated commands.
+ * Security note: assertions carrying PLAN.md-derived data run through
+ * safeExec (spawnSync, no shell) with the captured values as argv elements, so
+ * untrusted must_have text cannot inject commands. Only the two STATIC pipeline
+ * patterns (test_suite_green, coverage_threshold) — which contain no PLAN.md
+ * interpolation — are tagged shell:true and run via execSync. See
+ * uat-patterns.cjs for the assertion contract.
  */
 
 'use strict';
 
 const { execSync } = require('child_process');
-const { safeReadFile } = require('./core.cjs');
+const { safeReadFile, safeExec } = require('./core.cjs');
 const { parseMustHavesBlock } = require('./frontmatter.cjs');
 const { matchPattern } = require('./uat-patterns.cjs');
 
@@ -44,6 +44,39 @@ function compareResult(actual, expected, mode) {
       return parseFloat(actual) >= parseFloat(expected);
     default:
       return actual === expected;
+  }
+}
+
+/**
+ * Execute one assertion and return the derived `actual` token to compare.
+ *
+ * argv assertions carry PLAN.md-derived values as data and run with no shell
+ * (safeExec). Only shell:true assertions — the static test/coverage pipelines,
+ * which never interpolate untrusted text — run via execSync.
+ *
+ * @param {object} assertion
+ * @returns {string}
+ */
+function runAssertion(assertion) {
+  if (assertion.shell) {
+    return execSync(assertion.command, {
+      encoding: 'utf8',
+      timeout: 30000,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+  }
+
+  const res = safeExec(assertion.argv[0], assertion.argv.slice(1), { timeout: 30000 });
+  switch (assertion.result) {
+    case 'exit':
+      return res.exitCode === 0 ? assertion.onZero : assertion.onNonzero;
+    case 'grepcount':
+      // grep -c prints the count on stdout (even "0", exit 1 on no-match); on
+      // error (missing file, exit 2) stdout is empty → treat as "0".
+      return res.stdout || '0';
+    case 'stdout':
+    default:
+      return res.stdout;
   }
 }
 
@@ -72,12 +105,17 @@ function runAutomatedUAT(planPaths) {
         continue;
       }
 
+      // Pattern matched but declined to build a safe assertion (e.g. an unsafe
+      // module path) — route to manual rather than executing anything.
+      if (matched.assertion.manual) {
+        results.manual.push({ mustHave: truth, reason: matched.assertion.reason });
+        continue;
+      }
+
+      const displayCmd = matched.assertion.command || matched.assertion.argv.join(' ');
+
       try {
-        const actual = execSync(matched.assertion.command, {
-          encoding: 'utf8',
-          timeout: 30000,
-          stdio: ['pipe', 'pipe', 'pipe'],
-        }).trim();
+        const actual = runAssertion(matched.assertion);
 
         if (compareResult(actual, matched.assertion.expected, matched.assertion.compare)) {
           results.passed.push({ mustHave: truth, pattern: matched.pattern, actual });
@@ -87,7 +125,7 @@ function runAutomatedUAT(planPaths) {
             pattern: matched.pattern,
             expected: matched.assertion.expected,
             actual,
-            command: matched.assertion.command,
+            command: displayCmd,
           });
         }
       } catch (err) {
@@ -96,7 +134,7 @@ function runAutomatedUAT(planPaths) {
           pattern: matched.pattern,
           expected: matched.assertion.expected,
           actual: 'ERROR: ' + (err.message || String(err)),
-          command: matched.assertion.command,
+          command: displayCmd,
         });
       }
     }

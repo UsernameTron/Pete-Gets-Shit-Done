@@ -23,7 +23,8 @@ FIX_BASE_SHA=$(git rev-parse HEAD)
 
 If on `main`/`master`: create and switch to `fix/{slug}` first and re-record both variables so
 every debug-state and fix commit lands on a working branch; otherwise stay — rapid fix
-iteration on the active branch is the evidenced pattern. `FIX_BASE_SHA` is the auto-revert point.
+iteration on the active branch is the evidenced pattern. `FIX_BASE_SHA` is the rollback point
+printed for the operator on suite failure (never reset automatically).
 </step>
 
 <step name="debug">
@@ -80,9 +81,12 @@ Lesson 2026-03-25 [Testing]: "Run the full test suite, not just tests for the ch
 npm test
 ```
 
-**If the suite fails:** W3's failure contract — auto-revert with `git reset --hard
-${FIX_BASE_SHA}` on the working branch (the branch guard guarantees this never runs on `main`),
-keep the debug state file, report what was reverted, stop. **If it passes:** → `gate_2_approve_ship`.
+**If the suite fails:** stop-and-report; do NOT auto-revert. The fix commits stay
+branch-local for inspection; print the exact rollback command
+(`git reset --hard ${FIX_BASE_SHA}` on `${CURRENT_BRANCH}`) **without executing it**,
+keep the debug state file, report what failed, stop. Discarding uncommitted work is
+the operator's call at a gate, never automatic (mirrors `quick-change.md`'s
+suite-failure contract). **If it passes:** → `gate_2_approve_ship`.
 </step>
 
 <step name="gate_2_approve_ship">

@@ -69,7 +69,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Script | Purpose |
 |--------|---------|
-| `npm test` | Run 2,904 unit tests via `scripts/run-tests.cjs` |
+| `npm test` | Run 2,916 unit tests via `scripts/run-tests.cjs` |
 | `npm run test:e2e` | Run 143 E2E integration tests via `scripts/run-e2e-tests.cjs` |
 | `npm run test:e2e:smoke` | Run E2E smoke subset (12 tests) |
 | `npm run test:coverage` | Unit tests with text + JSON coverage report |
@@ -85,7 +85,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Metric | Count |
 |--------|-------|
-| Unit tests | 2,904 |
+| Unit tests | 2,916 |
 | E2E tests | 143 |
 | **Total tests** | **3,022** |
 | Unit test files | 82 |
