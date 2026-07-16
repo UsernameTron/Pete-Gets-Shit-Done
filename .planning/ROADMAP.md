@@ -118,7 +118,8 @@
   2. `lesson-capture-gate.cjs` appears in the versioned registrations and fires when its event occurs in a live session, confirming it is wired rather than orphaned.
   3. Deleting or omitting any shipped hook source from the registration causes the installer contract test to fail — drift is caught before it reaches a user's clone.
   4. The settings template carries a version marker so future hook additions can be diffed against what's registered, preventing this gap from recurring silently.
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 61-01-PLAN.md — Versioned hook-registration template (settings-gsd-hooks.json) + filesystem-derived contract test (tests/hook-registration-contract.test.cjs) locking all 8 shipped sources to the registry, with installer agreement and version marker
 
 ## Progress
 
