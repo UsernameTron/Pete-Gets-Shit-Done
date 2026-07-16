@@ -17,7 +17,7 @@
 
 ### HOOKREG — versioned hook registration (the v2.9-deferred "HOOK-01")
 
-- [ ] **HOOKREG-01**: A versioned settings template registers the full runtime hook set, so a fresh clone gets the same enforcement as the maintainer's workstation without depending on installer side effects.
+- [ ] **HOOKREG-01**: A versioned settings template registers the full runtime hook set — every hook source the repo ships (7 `hooks/` sources + `lesson-capture-gate.cjs`; repo-shipped scope, not the workstation-wide 17) — so a fresh clone gets the same enforcement as the maintainer's workstation without depending on installer side effects.
 - [ ] **HOOKREG-02**: `lesson-capture-gate.cjs` is registered — no shipped hook source is left unwired.
 - [ ] **HOOKREG-03**: An installer contract test fails if any shipped hook source is missing from the registrations — locking reproducibility against future drift.
 
@@ -44,19 +44,19 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MERGE-01 | — | Pending |
-| MERGE-02 | — | Pending |
-| MERGE-03 | — | Pending |
-| MERGE-04 | — | Pending |
-| HOOKREG-01 | — | Pending |
-| HOOKREG-02 | — | Pending |
-| HOOKREG-03 | — | Pending |
+| MERGE-01 | Phase 60 | Pending |
+| MERGE-02 | Phase 60 | Pending |
+| MERGE-03 | Phase 60 | Pending |
+| MERGE-04 | Phase 60 | Pending |
+| HOOKREG-01 | Phase 61 | Pending |
+| HOOKREG-02 | Phase 61 | Pending |
+| HOOKREG-03 | Phase 61 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 7 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 7 ⚠️ (filled by roadmap)
+- Mapped to phases: 7/7
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-15*
-*Last updated: 2026-07-15 after initial definition*
+*Last updated: 2026-07-15 — roadmap created, 7/7 requirements mapped across 2 phases (60-61), 0 orphans.*

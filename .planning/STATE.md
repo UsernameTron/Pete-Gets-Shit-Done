@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Milestone-Close Hardening
-status: defining_requirements
-last_updated: "2026-07-15T22:00:00.000Z"
-last_activity: "2026-07-15 -- Milestone v3.0 started (protected-main merge path + versioned hook registration)"
+status: roadmap_created
+last_updated: "2026-07-15T22:30:00.000Z"
+last_activity: "2026-07-15 -- v3.0 roadmap created: 2 phases (60-61), 7/7 requirements mapped, 0 orphans"
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,14 +18,23 @@ See: .planning/PROJECT.md (updated 2026-07-15 at v3.0 start)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (next: Phase 60)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-15 — Milestone v3.0 started
+Status: Roadmap created — ready for `/gsd:plan-phase 60`
+Last activity: 2026-07-15 — v3.0 roadmap created (Phases 60-61)
 
 **v3.0 goal:** Teach `complete-milestone`/`ship-milestone` a protected-main merge path (`gh pr merge` instead of local squash+push), and version the hook registrations (settings template + installer contract test) so a fresh clone gets the full runtime hook set. Phase numbering continues from 59 (v3.0 starts at phase 60).
 
 **Scope decision (operator, 2026-07-15):** the two items with teeth only. BITTER_LESSON_LOG DEFERRED cleanups are a lightweight follow-on, not milestone scope.
+
+## v3.0 Phase Summary
+
+| Phase | Name | Requirements | Depends On | Status |
+|-------|------|--------------|------------|--------|
+| 60 | Protected-Main Merge Path | MERGE-01..04 | Nothing | Not started |
+| 61 | Versioned Hook Registration | HOOKREG-01..03 | Nothing | Not started |
+
+**v3.0 status:** Roadmap created 2026-07-15. 7/7 requirements mapped across 2 phases, 0 orphans. Next: `/gsd:plan-phase 60`.
 
 ## Accumulated Context
 
