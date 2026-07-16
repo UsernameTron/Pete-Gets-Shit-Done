@@ -6,18 +6,18 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v3.0 Milestone-Close Hardening (started 2026-07-15 — both phases complete 2026-07-16, ship pending)
-**Previous:** v2.9 Autonomous Workflows Completion (shipped 2026-07-15, 3 phases, 6 requirements, tag v2.9)
+**Current milestone:** None — v3.0 shipped 2026-07-16; next milestone not scoped (`/gsd:new-milestone`)
+**Previous:** v3.0 Milestone-Close Hardening (shipped 2026-07-16, 2 phases, 7 requirements, tag v3.0)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,904 assertions / 586 suites, all passing
-**Coverage:** 91.78% lines (2026-07-16 run)
+**Tests:** 2,916 assertions / 591 suites, all passing
+**Coverage:** 91.71% lines (2026-07-16 run, post-PR #62 remediation)
 **Post-v2.8, pre-v2.9:** the named-workflows suite (W1–W6, then W8–W13 via PR #47) shipped as standalone PRs outside the phase counter
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
-**Milestones shipped:** 18 (v1.0 through v2.8)
+**Milestones shipped:** 20 (v1.0 through v3.0)
 **Branch protection:** 5 required status checks on `main` (3 test matrix legs + governance + docs-integrity)
-**Total phases executed:** 57
+**Total phases executed:** 59
 
 ## Core Value
 
@@ -37,7 +37,7 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ### Active
 
-None — all v3.0 requirements validated; milestone ship/close pending.
+None — v3.0 shipped 2026-07-16; next milestone not scoped.
 
 ### Validated
 
@@ -338,6 +338,8 @@ All 6 requirements verified complete:
 | Rule-based pattern detection | Zero-dependency constraint forbids ML libs — heuristic/rule-based only | v2.0 Phase 32 |
 | routing_strategy defaults to static | Existing users see zero behavior change until explicit opt-in | v2.0 Phase 30 |
 | Drift detector epsilon = 0.1% | c8 instrumentation produces ~0.06% delta between macOS and ubuntu for the same SHA; 0.01% epsilon would fail every PR | v2.8 Phase 57 |
+| Protection detected via `.protected` boolean read | `/branches/main` plain read visible to non-admins; `/protection` endpoint 403s without admin — any gh failure degrades to the local path | v3.0 Phase 60 |
+| Hook registry version marker is a stamped literal | `{{GSD_VERSION}}` only substitutes in build-copied files; a literal makes each package bump force a conscious registry review | v3.0 Phase 61 |
 | Status-check context names use 3-element matrix tuples | GitHub Actions includes ALL matrix dimensions in check context — `test (X, Y, Z)` not `test (X, Y)` | v2.8 closeout |
 | `POST /required_status_checks/contexts` for branch protection | Surgical add preserves all other protection settings; `-X PATCH /protection` parent doesn't accept PATCH per GitHub REST | v2.8 closeout |
 
@@ -380,4 +382,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-16 — Phase 61 complete: versioned hook registration (HOOKREG-01..03) validated; all v3.0 phases done, ship/close pending; 19 milestones shipped to date.*
+*Last updated: 2026-07-16 after v3.0 milestone — Milestone-Close Hardening shipped (protected-main PR-merge path + versioned hook registration); 20 milestones shipped to date.*

@@ -1,6 +1,34 @@
 # Retrospective
 
-## v2.8 Documentation Integrity (2026-05-08)
+## v3.0 Milestone-Close Hardening (2026-07-16)
+
+**Shipped:** 2026-07-16 | **Phases:** 2 (60-61) | **Plans:** 2 | **PRs:** #60, #61 | **Window:** ~7h wall (2026-07-15 18:01 → 2026-07-16 00:44)
+
+### What Was Built
+- Protected-main merge path: complete-milestone detects `main` branch protection and closes out via CI-gated PR (push → PR → checks --watch → squash-merge → branch cleanup → main sync); local squash path preserved verbatim; ship-milestone inherits by delegation. 13 contract tests.
+- Versioned hook registration: declarative registry of all 8 shipped hook sources (version === package.json) + filesystem-derived contract test (4 groups, 7 tests) — a hook shipping unregistered now fails CI instead of silently losing the runtime safety net on fresh clones.
+
+### What Worked
+- Tight operator-set scope ("the two items with teeth only") made both phases single-plan and fully autonomous — no checkpoints fired.
+- TDD RED→GREEN on Phase 61: the contract test written first caught the exact template shape needed; verifier empirically proved drift detection by renaming a source.
+- The Phase 60 deliverable was exercised for real within hours — this very close-out merged through PRs against protected main.
+
+### What Was Inefficient
+- Executor agent stalled twice at turn boundaries on Phase 61 (after writing the test; after doc-sync); orchestrator resumed once, then finished SUMMARY/state bookkeeping inline. Cost: ~2 extra resume round-trips.
+- `gsd-tools` state rewrites (begin-phase, state update, phase complete, milestone complete) stamped stale v2.9 milestone frontmatter into STATE.md four times — hand-corrected each time. Root cause: milestone derivation reads a stale source instead of live ROADMAP/STATE. Needs a fix.
+- Verifier's report was written inside its auto-cleaned worktree and lost (gitignored path → worktree looked unchanged); orchestrator re-persisted it from the agent's return message. Worktree isolation + gitignored artifacts is a sharp edge.
+
+### Patterns Established
+- Declarative registries under `governance/templates/` carry a version marker pinned to package.json — stamped literal, not build placeholder — so every version bump forces a registry review.
+- Contract tests derive expected sets from the filesystem (`readdirSync`), never hardcoded counts: new artifacts fail the gate by default.
+- Installer behavior tested by running the real `install()` in an isolated child process (GSD_TEST_MODE, JSON-on-stdout) because it calls `process.exit(1)` on failure.
+
+### Key Lessons
+- Milestone-close automation must assume protected main from the start; the v2.9 manual workaround is now codified and test-locked.
+- Adjacent work rides the window: PR #62 (data-loss/injection remediation, parallel session) landed between Phase-61 merge and close-out — record it, don't fold it into milestone scope.
+- No formal `/gsd:audit-milestone` was run (2-phase scope, both individually verified, operator-directed close) — acceptable here, but the skipped-audit note belongs in MILESTONES.md, and it is there.
+
+
 
 **Shipped:** 2026-05-08
 **Phases:** 3 (55-57) | **Plans:** 9 | **Requirements:** 14/14 satisfied
