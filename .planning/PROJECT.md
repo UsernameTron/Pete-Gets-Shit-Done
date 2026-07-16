@@ -6,11 +6,11 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v3.0 Milestone-Close Hardening (started 2026-07-15 — defining requirements)
+**Current milestone:** v3.0 Milestone-Close Hardening (started 2026-07-15 — both phases complete 2026-07-16, ship pending)
 **Previous:** v2.9 Autonomous Workflows Completion (shipped 2026-07-15, 3 phases, 6 requirements, tag v2.9)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,884 assertions / 577 suites, all passing
-**Coverage:** 91.78% lines (2026-07-15 run)
+**Tests:** 2,904 assertions / 586 suites, all passing
+**Coverage:** 91.78% lines (2026-07-16 run)
 **Post-v2.8, pre-v2.9:** the named-workflows suite (W1–W6, then W8–W13 via PR #47) shipped as standalone PRs outside the phase counter
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
@@ -37,16 +37,12 @@ GSD delivers disciplined, reproducible software delivery inside Claude Code by e
 
 ### Active
 
-v3.0 Milestone-Close Hardening (scoped 2026-07-15):
-- **MERGE-01**: with `main` branch-protected, `complete-milestone` merges the close-out branch via `gh pr merge` (CI-gated), never local squash+push
-- **MERGE-02**: with `main` unprotected, existing local squash/merge/delete/keep behavior is preserved unchanged
-- **MERGE-03**: `ship-milestone` inherits the protected-main path via `complete-milestone` delegation — no divergent merge logic
-- **MERGE-04**: tests assert the branch decision (protected → PR-merge, unprotected → local)
-- **HOOKREG-01**: versioned settings template registers the full runtime hook set from a fresh clone
-- **HOOKREG-02**: `lesson-capture-gate.cjs` is registered — no shipped hook source left unwired
-- **HOOKREG-03**: installer contract test fails if any shipped hook source is unregistered
+None — all v3.0 requirements validated; milestone ship/close pending.
 
 ### Validated
+
+- Versioned Hook Registration (HOOKREG-01, HOOKREG-02, HOOKREG-03) — v3.0 Phase 61 (validated 2026-07-16: settings-gsd-hooks.json registry + filesystem-derived contract test, verification passed 4/4)
+- Protected-Main Merge Path (MERGE-01 through MERGE-04) — v3.0 Phase 60 (validated 2026-07-15)
 
 - Autonomous Workflows Completion (FIN-01, FIN-02, SHIP-01 through SHIP-04) — v2.9 Phases 58-59 (validated 2026-07-15, audit verdict `tech_debt` with only HOOK-01/HOOKREG deferred by design)
 
@@ -384,4 +380,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-15 — v3.0 Milestone-Close Hardening started; 7 requirements scoped (MERGE-01..04, HOOKREG-01..03); v2.9 shipped same day via first live ship-milestone run; 19 milestones shipped to date.*
+*Last updated: 2026-07-16 — Phase 61 complete: versioned hook registration (HOOKREG-01..03) validated; all v3.0 phases done, ship/close pending; 19 milestones shipped to date.*

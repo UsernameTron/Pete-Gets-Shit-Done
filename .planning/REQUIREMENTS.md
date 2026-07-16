@@ -17,9 +17,9 @@
 
 ### HOOKREG — versioned hook registration (the v2.9-deferred "HOOK-01")
 
-- [ ] **HOOKREG-01**: A versioned settings template registers the full runtime hook set — every hook source the repo ships (7 `hooks/` sources + `lesson-capture-gate.cjs`; repo-shipped scope, not the workstation-wide 17) — so a fresh clone gets the same enforcement as the maintainer's workstation without depending on installer side effects.
-- [ ] **HOOKREG-02**: `lesson-capture-gate.cjs` is registered — no shipped hook source is left unwired.
-- [ ] **HOOKREG-03**: An installer contract test fails if any shipped hook source is missing from the registrations — locking reproducibility against future drift.
+- [x] **HOOKREG-01**: A versioned settings template registers the full runtime hook set — every hook source the repo ships (7 `hooks/` sources + `lesson-capture-gate.cjs`; repo-shipped scope, not the workstation-wide 17) — so a fresh clone gets the same enforcement as the maintainer's workstation without depending on installer side effects.
+- [x] **HOOKREG-02**: `lesson-capture-gate.cjs` is registered — no shipped hook source is left unwired.
+- [x] **HOOKREG-03**: An installer contract test fails if any shipped hook source is missing from the registrations — locking reproducibility against future drift.
 
 *(ID note: the deferred item was logged as "HOOK-01"; renamed HOOKREG here because HOOK-01..03 shipped in v2.3 and HOOK-04 in v2.4 — REQ-IDs continue numbering, never reuse.)*
 
@@ -48,9 +48,9 @@
 | MERGE-02 | Phase 60 | Complete (2026-07-15) |
 | MERGE-03 | Phase 60 | Complete (2026-07-15) |
 | MERGE-04 | Phase 60 | Complete (2026-07-15) |
-| HOOKREG-01 | Phase 61 | Pending |
-| HOOKREG-02 | Phase 61 | Pending |
-| HOOKREG-03 | Phase 61 | Pending |
+| HOOKREG-01 | Phase 61 | Complete |
+| HOOKREG-02 | Phase 61 | Complete |
+| HOOKREG-03 | Phase 61 | Complete |
 
 **Coverage:**
 - v3.0 requirements: 7 total
