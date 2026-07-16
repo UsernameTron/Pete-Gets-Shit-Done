@@ -684,17 +684,35 @@ git checkout "$CURRENT_BRANCH"
 
 **Delete without merging:**
 
+Use safe delete (`git branch -d`) only. It refuses branches with unmerged
+commits — do NOT silently escalate to `git branch -D`. The gate authorized
+"delete branches," not "force-destroy unmerged work"; force-deleting an unmerged
+branch discards commits the operator never agreed to lose. Collect any branches
+`-d` refuses, report them, and require a distinct explicit force-delete
+confirmation before running `-D` on those specific branches.
+
 ```bash
+UNMERGED=""
 if [ "$BRANCHING_STRATEGY" = "phase" ]; then
   for branch in $PHASE_BRANCHES; do
-    git branch -d "$branch" 2>/dev/null || git branch -D "$branch"
+    git branch -d "$branch" 2>/dev/null || UNMERGED="$UNMERGED $branch"
   done
 fi
 
 if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
-  git branch -d "$MILESTONE_BRANCH" 2>/dev/null || git branch -D "$MILESTONE_BRANCH"
+  git branch -d "$MILESTONE_BRANCH" 2>/dev/null || UNMERGED="$UNMERGED $MILESTONE_BRANCH"
+fi
+
+if [ -n "$UNMERGED" ]; then
+  echo "Refused to delete branches with unmerged commits:$UNMERGED"
+  echo "These still hold work not merged anywhere. To discard it, run force-delete yourself:"
+  echo "  git branch -D$UNMERGED"
 fi
 ```
+
+Report any refused branches and **print** the `git branch -D` command without running
+it — force-deleting unmerged work stays a manual, operator-run step, never automatic
+(same print-don't-execute convention as the suite-failure path in `bug-to-branch.md`).
 
 **Keep branches:** Report "Branches preserved for manual handling"
 

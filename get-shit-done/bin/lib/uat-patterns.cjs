@@ -2,7 +2,10 @@
  * uat-patterns.cjs — UAT Pattern Registry
  *
  * Pure function module (no intra-project imports — Layer 0 leaf node).
- * Maps natural-language must_have strings to executable read-only shell commands.
+ * Maps natural-language must_have strings to executable read-only assertions.
+ * PLAN.md-derived captures are emitted as argv data, never interpolated into a
+ * shell string (see the assertion-shape note below), so untrusted must_have
+ * text cannot be turned into command injection.
  *
  * Consumed by: uat-runner.cjs (Plan 02)
  *
@@ -12,12 +15,28 @@
 'use strict';
 
 /**
- * Assertion shape:
+ * Assertion shape (fix: argv contract, no shell interpolation of PLAN.md data).
+ *
+ * Data-driven patterns return an argv assertion — PLAN.md-derived captures are
+ * passed as argv ELEMENTS, never concatenated into a shell string, so a crafted
+ * must_have (e.g. `` foo`; rm -rf ~ ``) cannot execute:
  * {
- *   command: string,   // read-only shell command to execute
- *   expected: string,  // expected output or threshold
- *   compare: 'equals' | 'contains' | 'gt' | 'gte'
+ *   argv: string[],                 // [program, ...args]; args are pure data
+ *   expected: string,
+ *   compare: 'equals' | 'contains' | 'gt' | 'gte',
+ *   result: 'stdout' | 'exit' | 'grepcount',
+ *   onZero?: string, onNonzero?: string,  // result:'exit' — token per exit code
  * }
+ *
+ * The two STATIC pipeline patterns (test_suite_green, coverage_threshold) carry
+ * no PLAN.md interpolation and need shell pipes/awk, so they alone are tagged:
+ * {
+ *   shell: true, command: string, expected, compare, result: 'stdout'
+ * }
+ * (An invariant test asserts these are the ONLY shell:true patterns.)
+ *
+ * A pattern that receives input it cannot safely handle returns:
+ * { manual: true, reason: string }
  *
  * MatchResult shape:
  * {
@@ -42,11 +61,26 @@ const patterns = [
   {
     name: 'module_export_count',
     regex: /(\S+\.(?:cjs|js|mjs))\s+(?:contains?|has|exports?)\s+(\d+)\s+(?:entries|exports?|keys|items|functions)/i,
-    generate: (match) => ({
-      command: `node -p "Object.keys(require('./${match[1]}')).length"`,
-      expected: match[2],
-      compare: 'equals',
-    }),
+    generate: (match) => {
+      const rel = match[1];
+      // require() executes the target module's top-level code, so only accept a
+      // benign relative path. The path is still passed as pure argv data (never
+      // interpolated into the -e script), so this is defense-in-depth, not the
+      // sole guard.
+      if (!/^[\w./-]+$/.test(rel) || rel.includes('..')) {
+        return { manual: true, reason: `unsafe module path: ${rel}` };
+      }
+      return {
+        argv: [
+          'node', '-e',
+          'const p=require("path").resolve(process.argv[1]);process.stdout.write(String(Object.keys(require(p)).length))',
+          rel,
+        ],
+        expected: match[2],
+        compare: 'equals',
+        result: 'stdout',
+      };
+    },
   },
 
   // ── 2. file_not_exists ────────────────────────────────────────────────────
@@ -57,9 +91,12 @@ const patterns = [
     name: 'file_not_exists',
     regex: /(\S+)\s+(?:does not|should not|must not)\s+exist/i,
     generate: (match) => ({
-      command: `test ! -f "${match[1]}" && echo "absent" || echo "present"`,
+      argv: ['test', '-f', match[1]],
       expected: 'absent',
       compare: 'equals',
+      result: 'exit',
+      onZero: 'present',
+      onNonzero: 'absent',
     }),
   },
 
@@ -71,9 +108,12 @@ const patterns = [
     name: 'file_exists',
     regex: /(\S+)\s+(?:exists|should exist|must exist)/i,
     generate: (match) => ({
-      command: `test -f "${match[1]}" && echo "present" || echo "absent"`,
+      argv: ['test', '-f', match[1]],
       expected: 'present',
       compare: 'equals',
+      result: 'exit',
+      onZero: 'present',
+      onNonzero: 'absent',
     }),
   },
 
@@ -84,9 +124,12 @@ const patterns = [
     name: 'files_identical',
     regex: /(\S+)\s+and\s+(\S+)\s+are\s+(?:byte-)?identical/i,
     generate: (match) => ({
-      command: `diff "${match[1]}" "${match[2]}" > /dev/null 2>&1 && echo "identical" || echo "different"`,
+      argv: ['diff', match[1], match[2]],
       expected: 'identical',
       compare: 'equals',
+      result: 'exit',
+      onZero: 'identical',
+      onNonzero: 'different',
     }),
   },
 
@@ -95,13 +138,16 @@ const patterns = [
   //          "test suite passes"
   //          "all tests green"
   //          "2500 tests pass"
+  // Static pipeline (no PLAN.md interpolation) → shell:true is safe here.
   {
     name: 'test_suite_green',
     regex: /npm test passes|test suite passes|all tests (?:green|pass)|(\d+)\s+tests?\s+pass/i,
     generate: () => ({
+      shell: true,
       command: `npm test 2>&1 | grep "# fail" | head -1`,
       expected: '# fail 0',
       compare: 'contains',
+      result: 'stdout',
     }),
   },
 
@@ -109,13 +155,16 @@ const patterns = [
   // Matches: "coverage >= 90%"
   //          "coverage above 80%"
   //          "coverage at least 75%"
+  // Static pipeline (no PLAN.md interpolation) → shell:true is safe here.
   {
     name: 'coverage_threshold',
     regex: /coverage\s*(?:>=?|above|at least)\s*(\d+)%/i,
     generate: (match) => ({
+      shell: true,
       command: `npm run test:coverage 2>&1 | grep "All files" | awk '{print $4}'`,
       expected: match[1],
       compare: 'gte',
+      result: 'stdout',
     }),
   },
 
@@ -126,9 +175,10 @@ const patterns = [
     name: 'file_not_contains',
     regex: /(\S+)\s+does not contain\s+"([^"]+)"/i,
     generate: (match) => ({
-      command: `grep -c "${match[2]}" "${match[1]}" 2>/dev/null || echo "0"`,
+      argv: ['grep', '-c', match[2], match[1]],
       expected: '0',
       compare: 'equals',
+      result: 'grepcount',
     }),
   },
 
@@ -139,9 +189,10 @@ const patterns = [
     name: 'file_contains',
     regex: /(\S+)\s+(?:contains?|includes?)\s+"([^"]+)"/i,
     generate: (match) => ({
-      command: `grep -c "${match[2]}" "${match[1]}"`,
+      argv: ['grep', '-c', match[2], match[1]],
       expected: '0',
       compare: 'gt',
+      result: 'grepcount',
     }),
   },
 ];

@@ -379,6 +379,18 @@ function readSettings(settingsPath) {
     try {
       return JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
     } catch (e) {
+      // Corrupt (unparseable) settings must NOT be treated as empty — a later
+      // writeSettings would silently clobber the user's real file and destroy
+      // their permissions/env/hooks. Preserve it in a timestamped backup and
+      // warn loudly before returning {} (mirrors configureOpencodePermissions'
+      // refuse-to-clobber stance).
+      try {
+        const backupPath = settingsPath + '.corrupt.' + Date.now();
+        fs.copyFileSync(settingsPath, backupPath);
+        console.log(`  ${yellow}⚠${reset} Could not parse ${path.basename(settingsPath)} — backed up to ${path.basename(backupPath)}`);
+        console.log(`    ${dim}Reason: ${e.message}${reset}`);
+        console.log(`    ${dim}Your original settings were preserved in the backup; fix its JSON syntax to recover them.${reset}`);
+      } catch { /* best-effort backup; still fail safe below */ }
       return {};
     }
   }
@@ -4090,15 +4102,28 @@ function installGovernance(targetDir, src, isGlobal) {
   const governanceSrc = path.join(src, 'governance');
   if (!fs.existsSync(governanceSrc)) {
     console.log(`  ${yellow}⚠${reset}  Governance directory not found in package — skipping`);
-    return;
+    return ['governance/ (package source missing)'];
   }
 
   console.log(`\n  ${cyan}Installing governance layer...${reset}`);
 
-  // 1. Copy CLAUDE.md (backup existing)
+  // Path model (fix 2b): CLAUDE.md + context are memory files that must sit
+  // beside the runtime's memory root. For a GLOBAL install that root is
+  // targetDir itself (~/.claude/CLAUDE.md — the path Claude Code actually
+  // reads; the old ~/CLAUDE.md was never loaded). For a LOCAL install it is
+  // the project root (./CLAUDE.md), so keep those two at the parent. settings
+  // ALWAYS lives inside the config dir (targetDir/settings.json) — writing it
+  // to the parent (~/settings.json) meant the governance hooks/permissions
+  // never loaded.
+  const memoryBase = isGlobal ? targetDir : path.dirname(targetDir);
+  const settingsPath = path.join(targetDir, 'settings.json');
+  const missing = [];
+
+  // 1. Copy CLAUDE.md (backup existing — preserved for both global and local)
   const claudeMdSrc = path.join(governanceSrc, 'templates', 'global', 'CLAUDE.md');
-  const claudeMdDest = path.join(path.dirname(targetDir), 'CLAUDE.md');
+  const claudeMdDest = path.join(memoryBase, 'CLAUDE.md');
   if (fs.existsSync(claudeMdSrc)) {
+    fs.mkdirSync(memoryBase, { recursive: true });
     if (fs.existsSync(claudeMdDest)) {
       const backupPath = claudeMdDest + '.backup.' + Date.now();
       fs.copyFileSync(claudeMdDest, backupPath);
@@ -4106,11 +4131,14 @@ function installGovernance(targetDir, src, isGlobal) {
     }
     fs.copyFileSync(claudeMdSrc, claudeMdDest);
     console.log(`  ${green}✓${reset} Installed CLAUDE.md`);
+  } else {
+    missing.push('governance CLAUDE.md template');
   }
 
-  // 2. Copy context reference docs
+  // 2. Copy context reference docs (co-located with CLAUDE.md so its
+  //    @context/... imports resolve)
   const contextSrc = path.join(governanceSrc, 'templates', 'context');
-  const contextDest = path.join(path.dirname(targetDir), 'context');
+  const contextDest = path.join(memoryBase, 'context');
   if (fs.existsSync(contextSrc)) {
     fs.mkdirSync(contextDest, { recursive: true });
     const contextFiles = fs.readdirSync(contextSrc).filter(f => f.endsWith('.md'));
@@ -4118,38 +4146,44 @@ function installGovernance(targetDir, src, isGlobal) {
       fs.copyFileSync(path.join(contextSrc, file), path.join(contextDest, file));
     }
     console.log(`  ${green}✓${reset} Installed ${contextFiles.length} context reference docs`);
+  } else {
+    missing.push('governance context docs');
   }
 
   // 3. Merge hooks into settings.json
-  const settingsPath = path.join(targetDir, '..', 'settings.json');
   const hooksJsonSrc = path.join(governanceSrc, 'templates', 'global', 'settings-hooks.json');
   if (fs.existsSync(hooksJsonSrc)) {
-    const merged = mergeGovernanceJson(
-      path.join(path.dirname(targetDir), 'settings.json'),
-      hooksJsonSrc,
-      'governance hooks'
-    );
+    const merged = mergeGovernanceJson(settingsPath, hooksJsonSrc, 'governance hooks');
     if (merged) {
       console.log(`  ${green}✓${reset} Merged governance hooks into settings.json`);
     } else {
       console.log(`  ${dim}  Governance hooks already present — skipped${reset}`);
     }
+  } else {
+    // The branch-protection / staged-secrets / private-file / docs gates all
+    // live in settings-hooks.json — a missing template silently drops every
+    // one of them. Record it instead of reporting success (fix 2a).
+    missing.push('governance hooks (settings-hooks.json)');
   }
 
   // 4. Merge permissions into settings.json
   const permJsonSrc = path.join(governanceSrc, 'templates', 'global', 'settings-permissions.json');
   if (fs.existsSync(permJsonSrc)) {
-    const merged = mergeGovernanceJson(
-      path.join(path.dirname(targetDir), 'settings.json'),
-      permJsonSrc,
-      'governance permissions'
-    );
+    const merged = mergeGovernanceJson(settingsPath, permJsonSrc, 'governance permissions');
     if (merged) {
       console.log(`  ${green}✓${reset} Merged governance permissions into settings.json`);
     } else {
       console.log(`  ${dim}  Governance permissions already present — skipped${reset}`);
     }
+  } else {
+    missing.push('governance permissions (settings-permissions.json)');
   }
+
+  if (missing.length > 0) {
+    console.log(`\n  ${yellow}⚠  Governance did NOT fully install.${reset} Missing: ${missing.join(', ')}`);
+    console.log(`  ${yellow}   The corresponding protections are NOT active.${reset}`);
+  }
+  return missing;
 }
 
 /**
@@ -4248,49 +4282,95 @@ function scaffoldProject(cwd) {
  * Remove governance files during uninstall.
  */
 function uninstallGovernance(targetDir) {
+  // Install now places CLAUDE.md/context under targetDir for global installs
+  // and under the parent (project root) for local ones (fix 2b). Uninstall does
+  // not know isGlobal, so scan BOTH candidate bases — every removal below is
+  // guarded (CLAUDE.md by content signature, context by known filenames) so
+  // checking both is safe and also cleans up legacy (pre-fix) installs.
+  const memoryBases = [targetDir, path.dirname(targetDir)];
+
   // Remove governance CLAUDE.md if it looks like ours
-  const claudeMdPath = path.join(path.dirname(targetDir), 'CLAUDE.md');
-  if (fs.existsSync(claudeMdPath)) {
-    const content = fs.readFileSync(claudeMdPath, 'utf8');
-    if (content.includes('Global Claude Code Configuration') && content.includes('gsd')) {
-      fs.unlinkSync(claudeMdPath);
-      console.log(`  ${green}✓${reset} Removed governance CLAUDE.md`);
+  for (const base of memoryBases) {
+    const claudeMdPath = path.join(base, 'CLAUDE.md');
+    if (fs.existsSync(claudeMdPath)) {
+      const content = fs.readFileSync(claudeMdPath, 'utf8');
+      if (content.includes('Global Claude Code Configuration') && content.includes('gsd')) {
+        fs.unlinkSync(claudeMdPath);
+        console.log(`  ${green}✓${reset} Removed governance CLAUDE.md`);
+      }
     }
   }
 
   // Remove context docs installed by governance
-  const contextDir = path.join(path.dirname(targetDir), 'context');
   const governanceContextFiles = [
     'cli-reference.md', 'hooks-guide.md', 'mcp-setup-guide.md',
     'settings-reference.md', 'skill-creation-guide.md', 'subagent-guide.md'
   ];
-  if (fs.existsSync(contextDir)) {
-    for (const file of governanceContextFiles) {
-      const filePath = path.join(contextDir, file);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+  for (const base of memoryBases) {
+    const contextDir = path.join(base, 'context');
+    if (fs.existsSync(contextDir)) {
+      for (const file of governanceContextFiles) {
+        const filePath = path.join(contextDir, file);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
       }
+      // Remove context dir if empty
+      try {
+        const remaining = fs.readdirSync(contextDir);
+        if (remaining.length === 0) {
+          fs.rmdirSync(contextDir);
+        }
+      } catch { /* ignore */ }
+      console.log(`  ${green}✓${reset} Removed governance context docs`);
     }
-    // Remove context dir if empty
-    try {
-      const remaining = fs.readdirSync(contextDir);
-      if (remaining.length === 0) {
-        fs.rmdirSync(contextDir);
-      }
-    } catch { /* ignore */ }
-    console.log(`  ${green}✓${reset} Removed governance context docs`);
   }
 
-  // Remove plugins directory
+  // Remove ONLY the GSD-owned plugin subdirs — never the whole plugins/ dir.
+  // For a global install targetDir is ~/.claude, so plugins/ is Claude Code's
+  // native plugin store (repos/, config.json, cache/, other marketplaces).
+  // Wiping it recursively destroyed all of that. Mirror the install-time
+  // enumeration (installGovernancePlugins copies each subdir of the package
+  // plugins/ into targetDir/plugins/<name>) and remove only those names.
   const pluginsDir = path.join(targetDir, 'plugins');
   if (fs.existsSync(pluginsDir)) {
-    fs.rmSync(pluginsDir, { recursive: true });
-    console.log(`  ${green}✓${reset} Removed governance plugins`);
+    let gsdPluginNames;
+    const pkgPluginsSrc = path.join(__dirname, '..', 'plugins');
+    try {
+      gsdPluginNames = fs.readdirSync(pkgPluginsSrc, { withFileTypes: true })
+        .filter(e => e.isDirectory())
+        .map(e => e.name);
+    } catch {
+      // Package plugins dir not resolvable at uninstall — fall back to the
+      // known constant list rather than touching anything we didn't install.
+      gsdPluginNames = ['claude-code-factory', 'claude-mcp-ecosystem'];
+    }
+    let removed = 0;
+    for (const name of gsdPluginNames) {
+      const dir = path.join(pluginsDir, name);
+      if (fs.existsSync(dir)) {
+        try {
+          fs.rmSync(dir, { recursive: true });
+          removed++;
+        } catch (e) {
+          console.log(`  ${yellow}⚠${reset} Could not remove plugin ${name}: ${e.message}`);
+        }
+      }
+    }
+    if (removed > 0) {
+      console.log(`  ${green}✓${reset} Removed ${removed} governance plugin${removed === 1 ? '' : 's'} (${gsdPluginNames.join(', ')})`);
+    }
   }
 
-  // Clean up governance hooks and permissions from settings.json
-  const settingsPath = path.join(path.dirname(targetDir), 'settings.json');
-  if (fs.existsSync(settingsPath)) {
+  // Clean up governance hooks from settings.json. Install writes settings to
+  // targetDir/settings.json (fix 2b); scan the legacy parent location too so
+  // pre-fix installs are also cleaned.
+  const settingsPaths = [
+    path.join(targetDir, 'settings.json'),
+    path.join(path.dirname(targetDir), 'settings.json'),
+  ];
+  for (const settingsPath of settingsPaths) {
+    if (!fs.existsSync(settingsPath)) continue;
     let settings = readSettings(settingsPath);
     let settingsModified = false;
 
@@ -4638,7 +4718,12 @@ function install(isGlobal, runtime = 'claude') {
 
   // Install governance layer (Claude runtime only, default on, --no-governance to skip)
   if (runtime === 'claude' && !hasNoGovernance) {
-    installGovernance(targetDir, src, isGlobal);
+    const govMissing = installGovernance(targetDir, src, isGlobal);
+    // Fail loud, not open: a partial governance install must not report overall
+    // success — surface each missing piece in the installer's failures summary.
+    for (const m of (govMissing || [])) {
+      failures.push('governance: ' + m);
+    }
     if (hasPlugins) {
       installGovernancePlugins(targetDir, src);
     }

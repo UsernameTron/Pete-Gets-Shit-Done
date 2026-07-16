@@ -184,15 +184,24 @@ describe('uninstallGovernance', () => {
     assert.ok(fs.existsSync(contextDir), 'non-empty context dir should remain');
   });
 
-  test('removes plugins directory', () => {
+  test('removes only GSD-owned plugin subdirs, preserving the native plugin store (fix 1)', () => {
+    // For a global install targetDir is ~/.claude, so plugins/ is Claude Code's
+    // own store (repos/, config.json, other marketplaces). Uninstall must remove
+    // only GSD's own plugin subdirs and leave everything else untouched.
     const targetDir = path.join(tmpDir, '.claude');
     const pluginsDir = path.join(targetDir, 'plugins');
-    fs.mkdirSync(pluginsDir, { recursive: true });
-    fs.writeFileSync(path.join(pluginsDir, 'plugin.json'), '{}');
+    fs.mkdirSync(path.join(pluginsDir, 'claude-code-factory'), { recursive: true });
+    fs.writeFileSync(path.join(pluginsDir, 'claude-code-factory', 'plugin.json'), '{}');
+    fs.mkdirSync(path.join(pluginsDir, 'user-marketplace'), { recursive: true });
+    fs.writeFileSync(path.join(pluginsDir, 'user-marketplace', 'keep.json'), '{}');
+    fs.writeFileSync(path.join(pluginsDir, 'config.json'), '{}');
 
     uninstallGovernance(targetDir);
 
-    assert.ok(!fs.existsSync(pluginsDir), 'plugins dir should be removed');
+    assert.ok(!fs.existsSync(path.join(pluginsDir, 'claude-code-factory')), 'GSD plugin subdir should be removed');
+    assert.ok(fs.existsSync(path.join(pluginsDir, 'user-marketplace', 'keep.json')), 'foreign marketplace must be preserved');
+    assert.ok(fs.existsSync(path.join(pluginsDir, 'config.json')), 'native plugin store config.json must be preserved');
+    assert.ok(fs.existsSync(pluginsDir), 'plugins/ dir itself must survive');
   });
 
   test('removes governance hooks from settings.json', () => {

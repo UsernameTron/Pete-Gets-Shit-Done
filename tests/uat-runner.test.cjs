@@ -227,3 +227,46 @@ describe('formatUATResults', () => {
     );
   });
 });
+
+// ─── shell-injection regression ────────────────────────────────────────────────
+
+describe('runAutomatedUAT: no shell injection from PLAN.md content', () => {
+  // Sentinel paths contain no spaces so the whole payload is one \S+ capture
+  // (file_exists) and needs no embedded quotes (which would collide with the
+  // plan's YAML quoting). $IFS supplies the space touch needs at shell time.
+  test('a $(...) payload in a must_have is treated as data, never executed', () => {
+    const sentinel = path.join(os.tmpdir(), `uat-inj-cmdsub-${process.pid}-${Number(process.hrtime.bigint())}`);
+    try { fs.rmSync(sentinel, { force: true }); } catch { /* ignore */ }
+
+    // Under the old shell-string runner this was `test -f "<payload>"`, so the
+    // command substitution ran touch. With the argv contract it is literal data.
+    const truth = `$(touch$IFS${sentinel})x exists`;
+    const { planPath, tmpDir } = createTempPlan([truth], 'uat-inj-');
+    try {
+      const results = runAutomatedUAT([planPath]);
+      assert.strictEqual(results.total, 1, 'the crafted truth should be counted');
+      assert.ok(
+        !fs.existsSync(sentinel),
+        'injected `touch` must NOT have executed — argv contract passes the payload as data'
+      );
+    } finally {
+      cleanup(tmpDir);
+      try { fs.rmSync(sentinel, { force: true }); } catch { /* ignore */ }
+    }
+  });
+
+  test('a backtick payload in a must_have is treated as data, never executed', () => {
+    const sentinel = path.join(os.tmpdir(), `uat-inj-bt-${process.pid}-${Number(process.hrtime.bigint())}`);
+    try { fs.rmSync(sentinel, { force: true }); } catch { /* ignore */ }
+
+    const truth = `\`touch$IFS${sentinel}\`x exists`;
+    const { planPath, tmpDir } = createTempPlan([truth], 'uat-inj-bt-');
+    try {
+      runAutomatedUAT([planPath]);
+      assert.ok(!fs.existsSync(sentinel), 'injected backtick command must NOT have executed');
+    } finally {
+      cleanup(tmpDir);
+      try { fs.rmSync(sentinel, { force: true }); } catch { /* ignore */ }
+    }
+  });
+});

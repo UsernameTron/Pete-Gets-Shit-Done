@@ -147,35 +147,65 @@ describe('installGovernance', () => {
     cleanup(tmpDir);
   });
 
-  test('copies CLAUDE.md and context docs', () => {
-    // installGovernance expects targetDir to be .claude dir, with CLAUDE.md going to parent
+  test('global: CLAUDE.md and context land under targetDir (~/.claude), not its parent', () => {
+    // Fix 2b: for a global install targetDir is ~/.claude, and Claude Code reads
+    // ~/.claude/CLAUDE.md — so memory files must live under targetDir, not ~/.
     const claudeDir = path.join(tmpDir, '.claude');
     fs.mkdirSync(claudeDir, { recursive: true });
 
     installGovernance(claudeDir, REPO_ROOT, true);
 
-    // CLAUDE.md should be in tmpDir (parent of .claude)
-    const claudeMdPath = path.join(tmpDir, 'CLAUDE.md');
-    assert.ok(fs.existsSync(claudeMdPath), 'CLAUDE.md should be installed');
+    const claudeMdPath = path.join(claudeDir, 'CLAUDE.md');
+    assert.ok(fs.existsSync(claudeMdPath), 'CLAUDE.md should be installed under targetDir');
+    assert.ok(!fs.existsSync(path.join(tmpDir, 'CLAUDE.md')), 'CLAUDE.md must NOT land in the parent for a global install');
 
-    // Context docs should be in tmpDir/context/
-    const contextDir = path.join(tmpDir, 'context');
-    assert.ok(fs.existsSync(contextDir), 'context/ directory should exist');
+    const contextDir = path.join(claudeDir, 'context');
+    assert.ok(fs.existsSync(contextDir), 'context/ should exist under targetDir');
     assert.ok(fs.existsSync(path.join(contextDir, 'cli-reference.md')), 'cli-reference.md should be copied');
+
+    // settings.json always lives inside the config dir (targetDir), never parent
+    assert.ok(fs.existsSync(path.join(claudeDir, 'settings.json')), 'settings.json should be under targetDir');
+    assert.ok(!fs.existsSync(path.join(tmpDir, 'settings.json')), 'settings.json must NOT land in the parent');
+  });
+
+  test('local: CLAUDE.md/context land at the project root (parent of .claude)', () => {
+    // For a local/project install, ./CLAUDE.md at the repo root is the correct
+    // project-memory convention, so memory files stay at the parent.
+    const claudeDir = path.join(tmpDir, '.claude');
+    fs.mkdirSync(claudeDir, { recursive: true });
+
+    installGovernance(claudeDir, REPO_ROOT, false);
+
+    assert.ok(fs.existsSync(path.join(tmpDir, 'CLAUDE.md')), 'CLAUDE.md should land at the project root');
+    assert.ok(fs.existsSync(path.join(tmpDir, 'context', 'cli-reference.md')), 'context should land at the project root');
+    // settings still goes under .claude/ even for local installs
+    assert.ok(fs.existsSync(path.join(claudeDir, 'settings.json')), 'settings.json should be under .claude/ for local installs too');
+  });
+
+  test('reports missing governance pieces instead of failing open', () => {
+    // Fix 2a: a package with no governance/ dir must return a non-empty missing
+    // list, not silently claim success.
+    const claudeDir = path.join(tmpDir, '.claude');
+    fs.mkdirSync(claudeDir, { recursive: true });
+    const emptySrc = path.join(tmpDir, 'empty-src');
+    fs.mkdirSync(emptySrc, { recursive: true });
+
+    const missing = installGovernance(claudeDir, emptySrc, true);
+    assert.ok(Array.isArray(missing) && missing.length > 0, 'missing governance source must be reported');
   });
 
   test('backs up existing CLAUDE.md', () => {
     const claudeDir = path.join(tmpDir, '.claude');
     fs.mkdirSync(claudeDir, { recursive: true });
 
-    // Create an existing CLAUDE.md
-    const claudeMdPath = path.join(tmpDir, 'CLAUDE.md');
+    // Create an existing CLAUDE.md where a global install will write it (targetDir)
+    const claudeMdPath = path.join(claudeDir, 'CLAUDE.md');
     fs.writeFileSync(claudeMdPath, '# Original content');
 
     installGovernance(claudeDir, REPO_ROOT, true);
 
-    // The backup should exist
-    const files = fs.readdirSync(tmpDir);
+    // The backup should exist beside it
+    const files = fs.readdirSync(claudeDir);
     const backups = files.filter(f => f.startsWith('CLAUDE.md.backup.'));
     assert.ok(backups.length >= 1, 'At least one backup should be created');
 
