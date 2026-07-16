@@ -11,18 +11,18 @@ Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop:
 - [x] **Phase E** — PR #40: `/gsd:do` routes the three built flows via `workflow:` targets (+9-assertion routing test); ecosystem map regenerated at 241 components (drift-history row 3 appended; stale 75-command line fixed); living docs synced.
 - ~~SHELVED: `ship-milestone`~~ BUILT (Phase 59, 2026-07-15) after finalize repairs + Phase 58 re-verification. Second pass (`quick-change`, `bug-to-branch`) also shipped.
 
-## Current Status: v2.8 Archived — Ready for v2.9
+## Current Status: v3.0 Archived — Between Milestones
 
-18 milestones shipped (v1.0 through v2.8). 57 phases executed. 15 phase directories archived (12 prior + 3 from v2.8). Branch protection on main now enforces 5 required status checks (3 test matrix + governance + docs-integrity).
+20 milestones shipped (v1.0 through v3.0). 59 phases executed. Branch protection on main enforces 5 required status checks (3 test matrix + governance + docs-integrity).
 
-- **Tests**: 2,845 passing, 0 failures (563 suites)
-- **Coverage**: 91.63% lines (local) / 91.69% (CI ubuntu-22), 83.47% branches, 97.22% functions
+- **Tests**: 2,921 passing, 0 failures (593 suites)
+- **Coverage**: 91.73% lines, 83.27% branches, 97.62% functions
 - **Branch**: `main` clean, healthy (`/gsd:health` returns `healthy`)
-- **Tag**: v2.8 (2026-05-08)
+- **Tag**: v3.0 (2026-07-16)
 
 ## Deferred Items (v2.9+ candidates)
 
-- [ ] Stop-hook sentinel for human-review gates — source: `tasks/lessons.md` 2026-04-10 [Hook Design]
+- [x] Stop-hook sentinel for human-review gates — shipped (review-pending Stop sentinel + lesson-capture gate registration; used live 2026-07-16). Source: `tasks/lessons.md` 2026-04-10 [Hook Design]
 - [ ] Resume `everything-claude-code-clean` scan — prior recon in `.extraction-staging/FINDINGS.md` (gitignored)
 - [ ] Investigate duplicate v1.0/v1.1 tag pointers on origin — repo archaeology, low priority
 - [ ] `npm audit --audit-level=moderate` step in test.yml
@@ -37,6 +37,9 @@ Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop:
 
 ## Completed
 
+- [x] Project finalized via /gsd:finalize (2026-07-16)
+- [x] v3.0 Milestone-Close Hardening shipped + archived + tagged (2026-07-16) — PRs #60 (protected-main merge path), #61 (versioned hook registration); post-ship hygiene #64/#65/#66; tag v3.0 @ a06b513
+- [x] v2.9 Autonomous Workflows Completion shipped + archived + tagged (2026-07-15) — PRs #51-55; ship-milestone unshelved (W5), first live ship-milestone close-out; tag v2.9 @ c4b6a2e
 - [x] esbuild dev-dependency upgraded 0.25.12 → 0.28.1 via Dependabot PR #30 (2026-07-11) — clears the deferred audit-deps FLAG; picks up upstream security-advisory fixes (GHSA-g7r4-m6w7-qqqr, GHSA-gv7w-rqvm-qjhr). All 5 required checks green pre-merge; squash-merged to main (6406b0e).
 - [x] v2.8 Documentation Integrity shipped + archived + tagged (2026-05-08) — PRs #22, #23, #24, #25
 - [x] Backfill cross-refs to relocated docs (`docs/health-reports/full-audit-2026-04-11.md`, `.planning/codebase/STRUCTURE.md`) — Phase 57-01 closure-via-clarification per D-03 (2026-05-08)
