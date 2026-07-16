@@ -138,4 +138,4 @@
 | 58. Finalize Hardening & Re-verification | v2.9 | 3/3 | Complete | 2026-07-15 |
 | 59. Ship-Milestone Workflow | v2.9 | 3/3 | Complete | 2026-07-15 |
 | 60. Protected-Main Merge Path | v3.0 | 1/1 | Complete | 2026-07-15 |
-| 61. Versioned Hook Registration | v3.0 | 1/1 | Complete   | 2026-07-16 |
+| 61. Versioned Hook Registration | v3.0 | 1/1 | Complete    | 2026-07-16 |

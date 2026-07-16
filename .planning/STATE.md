@@ -2,9 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Milestone-Close Hardening
-status: in_progress
-last_updated: "2026-07-15T23:30:00.000Z"
-last_activity: "2026-07-15 -- Phase 60 complete (MERGE-01..04): protected-main PR-merge path in complete-milestone, 13 contract tests, all gates green"
+status: phases_complete
+last_updated: "2026-07-16T02:58:18.636Z"
+last_activity: "2026-07-16 -- Phase 61 complete (HOOKREG-01..03): versioned hook-registration template + filesystem-derived contract test, verification passed 4/4"
+progress:
+  total_phases: 2
+  completed_phases: 2
+  total_plans: 1
+  completed_plans: 1
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,10 +23,10 @@ See: .planning/PROJECT.md (updated 2026-07-15 at v3.0 start)
 
 ## Current Position
 
-Phase: 60 (Protected-Main Merge Path) — COMPLETE on branch `feat/phase-60-protected-main-merge` (MERGE-01..04 done; ship pending). Next: Phase 61 (Versioned Hook Registration).
-Plan: Approved plan at ~/.claude/plans/60-jolly-marble.md
-Status: Phase 60 done — detection (`gh api ... --jq .protected`) + PR-merge arm (push → `gh pr create` → `gh pr checks --watch` → `gh pr merge --squash --delete-branch` → lingering-branch cleanup → local main sync) in complete-milestone's handle_branches; local path preserved verbatim for unprotected repos; ship-milestone inherits via delegation (zero merge logic, locked by test). Suite 2,897/582 green, coverage 91.78%, drift + links gates pass.
-Last activity: 2026-07-15 — Phase 60 executed end-to-end (TDD: 13 contract tests in tests/complete-milestone.test.cjs)
+Phase: 61 (Versioned Hook Registration) — COMPLETE on branch `feat/phase-61-versioned-hook-registration` (HOOKREG-01..03 done; ship pending). Both v3.0 phases complete — milestone ready for ship/close.
+Plan: 1/1 complete (61-01, verification passed 4/4 criteria)
+Status: Phase 61 done — versioned registry `governance/templates/global/settings-gsd-hooks.json` (8 shipped hook sources, version 1.30.0 === package.json) + `tests/hook-registration-contract.test.cjs` (4 groups, 7 tests: filesystem↔template coverage, repo-local Stop wiring, installer agreement via GSD_TEST_MODE child process, version marker). Suite 2,904/586 green, coverage 91.78%, drift 23/23 + links 288/288 pass.
+Last activity: 2026-07-16 — Phase 61 executed end-to-end (TDD RED→GREEN; verification passed, no gaps)
 
 **v3.0 goal:** Teach `complete-milestone`/`ship-milestone` a protected-main merge path (`gh pr merge` instead of local squash+push), and version the hook registrations (settings template + installer contract test) so a fresh clone gets the full runtime hook set. Phase numbering continues from 59 (v3.0 starts at phase 60).
 
@@ -32,9 +37,9 @@ Last activity: 2026-07-15 — Phase 60 executed end-to-end (TDD: 13 contract tes
 | Phase | Name | Requirements | Depends On | Status |
 |-------|------|--------------|------------|--------|
 | 60 | Protected-Main Merge Path | MERGE-01..04 | Nothing | Complete (2026-07-15) |
-| 61 | Versioned Hook Registration | HOOKREG-01..03 | Nothing | Not started |
+| 61 | Versioned Hook Registration | HOOKREG-01..03 | Nothing | Complete (2026-07-16) |
 
-**v3.0 status:** Roadmap created 2026-07-15. 7/7 requirements mapped across 2 phases, 0 orphans. Next: `/gsd:plan-phase 60`.
+**v3.0 status:** All phases complete (7/7 requirements). Next: ship Phase 61 branch, then milestone close.
 
 ## Accumulated Context
 
@@ -42,7 +47,7 @@ Last activity: 2026-07-15 — Phase 60 executed end-to-end (TDD: 13 contract tes
 - Protected-main gap (v2.9 audit item 6): `complete-milestone.md` squash-merge path does `git checkout main; git merge --squash; git commit` + push — impossible against this repo's PR-only `main` (5 required checks). v2.9 close-out routed around it by PR-merging first and answering "already merged."
 - HOOKREG gap (ecosystem map top gap): 17 baseline runtime hooks; repo registers 2 live; 6 wired only by installer; `lesson-capture-gate.cjs` unwired. Fresh clone loses the runtime safety net.
 - Post-v2.9 hygiene already done (PRs #56-58): stale `.continue-here.md` pointers removed + gitignored; `HANDOFF.json`/`CHECKPOINT.json` untracked + gitignored; stale remote branches pruned.
-- Tests: 2,884 assertions / 577 suites. Coverage 91.78% lines (2026-07-15). 13 routable named workflows.
+- Tests: 2,904 assertions / 586 suites. Coverage 91.78% lines (2026-07-16). 13 routable named workflows.
 - Env gotchas: `gh auth switch -u UsernameTron` before any push/PR; verify branch deletion with `git ls-remote` after `gh pr merge --delete-branch`.
 - Branch protection on `main`: 5 required checks (3 test matrix legs + governance + docs-integrity). Doc gates before doc/count changes: `check-doc-drift.cjs` (needs fresh coverage run) + `validate-doc-links.cjs`.
 
