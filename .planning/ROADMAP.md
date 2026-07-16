@@ -58,7 +58,7 @@
 **Milestone Goal:** Close the two runtime-safety gaps the v2.9 close-out surfaced — milestone close-out that works on a protected `main`, and hook enforcement reproducible from a fresh clone.
 
 - [x] **Phase 60: Protected-Main Merge Path** - complete-milestone (and ship-milestone via delegation) route through `gh pr merge` when main is branch-protected, preserving the local squash path unchanged when it isn't
-- [ ] **Phase 61: Versioned Hook Registration** - A versioned settings template + installer contract test guarantee a fresh clone registers every hook source the repo ships (7 `hooks/` sources + `lesson-capture-gate.cjs`), with none left unwired
+- [x] **Phase 61: Versioned Hook Registration** - A versioned settings template + installer contract test guarantee a fresh clone registers every hook source the repo ships (7 `hooks/` sources + `lesson-capture-gate.cjs`), with none left unwired (completed 2026-07-16)
 
 ## Phase Details
 
@@ -119,7 +119,7 @@
   3. Deleting or omitting any shipped hook source from the registration causes the installer contract test to fail — drift is caught before it reaches a user's clone.
   4. The settings template carries a version marker so future hook additions can be diffed against what's registered, preventing this gap from recurring silently.
 **Plans**: 1 plan
-- [ ] 61-01-PLAN.md — Versioned hook-registration template (settings-gsd-hooks.json) + filesystem-derived contract test (tests/hook-registration-contract.test.cjs) locking all 8 shipped sources to the registry, with installer agreement and version marker
+- [x] 61-01-PLAN.md — Versioned hook-registration template (settings-gsd-hooks.json) + filesystem-derived contract test (tests/hook-registration-contract.test.cjs) locking all 8 shipped sources to the registry, with installer agreement and version marker
 
 ## Progress
 
@@ -138,4 +138,4 @@
 | 58. Finalize Hardening & Re-verification | v2.9 | 3/3 | Complete | 2026-07-15 |
 | 59. Ship-Milestone Workflow | v2.9 | 3/3 | Complete | 2026-07-15 |
 | 60. Protected-Main Merge Path | v3.0 | 1/1 | Complete | 2026-07-15 |
-| 61. Versioned Hook Registration | v3.0 | 0/? | Not started | - |
+| 61. Versioned Hook Registration | v3.0 | 1/1 | Complete   | 2026-07-16 |
