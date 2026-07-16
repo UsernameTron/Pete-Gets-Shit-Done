@@ -3267,3 +3267,130 @@ describe('detectTruncation', () => {
     assert.strictEqual(GSD_TRUNCATED_SENTINEL, '__GSD_TRUNCATED__');
   });
 });
+
+// ─── Stale-milestone regression (2026-07-16) ──────────────────────────────────
+// STATE.md frontmatter writers stamped the previous milestone (v2.9) while v3.0
+// was active. Two root causes in core.cjs:
+//   (a) getMilestoneInfo's heading regex was unanchored — "### v2.9 … — SHIPPED"
+//       matched via the "## " substring, and shipped-but-uncollapsed sections
+//       were never skipped, so the OLDEST version heading won.
+//   (b) getMilestonePhaseFilter scoped phases via extractCurrentMilestone, whose
+//       section only ends at the next VERSION heading — a shared "## Phase
+//       Details" section leaked prior-milestone phase headings into the count.
+
+describe('milestone derivation — stale-milestone regression', () => {
+  let tmpDir;
+
+  // Mirrors this repo's ROADMAP.md shape at corruption time: list-format
+  // Milestones index, an uncollapsed SHIPPED v2.9 heading section, an ACTIVE
+  // v3.0 heading section with bold phase bullets, and a shared "## Phase
+  // Details" section holding headings from BOTH milestones.
+  const REPO_SHAPE_ROADMAP = [
+    '# Roadmap — get-shit-done',
+    '',
+    '## Milestones',
+    '',
+    '- v2.8 Documentation Integrity — Phases 55-57 (shipped 2026-05-08) — [archive](milestones/v2.8-ROADMAP.md)',
+    '- v2.9 Autonomous Workflows Completion — Phases 57.1, 58-59 (shipped 2026-07-15)',
+    '- v3.0 Milestone-Close Hardening — Phases 60-61 (active, started 2026-07-15)',
+    '',
+    '## Phases',
+    '',
+    '<details>',
+    '<summary>v2.8 Documentation Integrity (Phases 55-57) — SHIPPED 2026-05-08</summary>',
+    '',
+    '- [x] **Phase 55: Internal Link Validator** (3/3 plans)',
+    '',
+    '</details>',
+    '',
+    '### v2.9 Autonomous Workflows Completion (Phases 57.1, 58-59) — SHIPPED 2026-07-15',
+    '',
+    '**Milestone Goal:** Harden finalize and build ship-milestone.',
+    '',
+    '- [x] **Phase 58: Finalize Hardening & Re-verification** - Gate 5.5 degrades gracefully',
+    '- [x] **Phase 59: Ship-Milestone Workflow** - 2-gate close-out',
+    '',
+    '### v3.0 Milestone-Close Hardening (Phases 60-61) — ACTIVE (started 2026-07-15)',
+    '',
+    '**Milestone Goal:** Close the two runtime-safety gaps.',
+    '',
+    '- [x] **Phase 60: Protected-Main Merge Path** - PR-merge on protected main',
+    '- [ ] **Phase 61: Versioned Hook Registration** - versioned template + contract test',
+    '',
+    '## Phase Details',
+    '',
+    '### Phase 57.1: Bitter Lesson Surgery',
+    '**Goal**: Strip judgment scaffolding.',
+    '',
+    '### Phase 58: Finalize Hardening & Re-verification',
+    '**Goal**: Gate 5.5 graceful skip.',
+    '',
+    '### Phase 59: Ship-Milestone Workflow',
+    '**Goal**: 2-gate close-out.',
+    '',
+    '### Phase 60: Protected-Main Merge Path',
+    '**Goal**: PR-merge path.',
+    '',
+    '### Phase 61: Versioned Hook Registration',
+    '**Goal**: Versioned registry.',
+    '',
+    '## Progress',
+    '',
+    '| Phase | Milestone | Status |',
+    '|-------|-----------|--------|',
+    '| 58. Finalize | v2.9 | Complete |',
+    '| 60. Merge Path | v3.0 | Complete |',
+  ].join('\n');
+
+  beforeEach(() => {
+    tmpDir = createTempProject();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('getMilestoneInfo returns the ACTIVE milestone, not the first shipped heading', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), REPO_SHAPE_ROADMAP);
+    const info = getMilestoneInfo(tmpDir);
+    assert.strictEqual(info.version, 'v3.0');
+    assert.strictEqual(info.name, 'Milestone-Close Hardening');
+  });
+
+  test('getMilestoneInfo skips a SHIPPED heading even without an active marker', () => {
+    // Same shape minus every "active" marker — first NON-shipped heading wins.
+    const roadmap = REPO_SHAPE_ROADMAP
+      .replace(' (active, started 2026-07-15)', '')
+      .replace(' — ACTIVE (started 2026-07-15)', '');
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), roadmap);
+    const info = getMilestoneInfo(tmpDir);
+    assert.strictEqual(info.version, 'v3.0');
+    assert.strictEqual(info.name, 'Milestone-Close Hardening');
+  });
+
+  test('getMilestoneInfo falls back to STATE.md frontmatter when roadmap is underivable', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'ROADMAP.md'),
+      '# Roadmap\n\nNo version headings here.\n'
+    );
+    fs.writeFileSync(
+      path.join(tmpDir, '.planning', 'STATE.md'),
+      '---\nmilestone: v4.2\nmilestone_name: Custom Thing\n---\n\n# State\n'
+    );
+    const info = getMilestoneInfo(tmpDir);
+    assert.strictEqual(info.version, 'v4.2');
+    assert.strictEqual(info.name, 'Custom Thing');
+  });
+
+  test('getMilestonePhaseFilter scopes to the active milestone bullets, not shared Phase Details', () => {
+    fs.writeFileSync(path.join(tmpDir, '.planning', 'ROADMAP.md'), REPO_SHAPE_ROADMAP);
+    const filter = getMilestonePhaseFilter(tmpDir);
+
+    assert.strictEqual(filter('60-protected-main-merge'), true, 'phase 60 in milestone');
+    assert.strictEqual(filter('61-versioned-hook-registration'), true, 'phase 61 in milestone');
+    assert.strictEqual(filter('58-finalize-hardening'), false, 'phase 58 belongs to v2.9');
+    assert.strictEqual(filter('59-ship-milestone'), false, 'phase 59 belongs to v2.9');
+    assert.strictEqual(filter('57.1-bitter-lesson'), false, 'phase 57.1 belongs to v2.9');
+    assert.strictEqual(filter.phaseCount, 2, 'exactly the 2 active-milestone phases counted');
+  });
+});
