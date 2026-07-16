@@ -64,6 +64,8 @@ analysis/
 TO-DOS.md
 /research.claude/
 commands.html
+# Generated dashboard artifact (external status tool; regenerate on demand)
+/STATUS.md
 
 # Layer 2 fixture tooling (regenerate on demand)
 scripts/build-layer1-fixture.cjs
