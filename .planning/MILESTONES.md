@@ -1,5 +1,24 @@
 # Milestones
 
+## v3.0 Milestone-Close Hardening (Shipped: 2026-07-16)
+
+**Phases completed:** 2 phases (60-61), 2 plans, 7 requirements satisfied (MERGE-01..04, HOOKREG-01..03). Scope: the two runtime-safety gaps from the v2.9 close-out, by operator decision — nothing else.
+
+**Key accomplishments:**
+
+- Protected-Main Merge Path (60, PR #60): `complete-milestone` detects branch protection (`gh api repos/{owner}/{repo}/branches/main --jq .protected`) and routes close-out through a CI-gated PR (push → `gh pr create` → `gh pr checks --watch` → `gh pr merge --squash --delete-branch` → lingering-branch cleanup → local main sync); local squash path preserved verbatim for unprotected repos; `ship-milestone` inherits via delegation (zero divergent merge logic, locked by test). 13 contract tests in `tests/complete-milestone.test.cjs`.
+- Versioned Hook Registration (61, PR #61): declarative registry `governance/templates/global/settings-gsd-hooks.json` of all 8 shipped hook sources (7 installer `hooks/*.js` + repo-local `lesson-capture-gate.cjs`; event, matcher, timeout, gemini/antigravity aliases), version-stamped === package.json; `tests/hook-registration-contract.test.cjs` (4 groups, 7 tests) derives the source list from the filesystem and fails CI on any unregistered hook, stale entry, installer disagreement, or version drift. Verification passed 4/4 with drift-failure empirically proven.
+- Post-v2.9 hygiene rode in the same window (PRs #56-59): stale resume pointers removed + gitignored, checkpoint/handoff runtime state untracked, 13 eval-obsolete skills retired to `_absorbed/`.
+
+**Shipped via:** PR #60 (Phase 60), PR #61 (Phase 61). Window: 2026-07-15 18:01 → 2026-07-16 00:44 (~7h), 41 files, +546/−263 in the phase range. 2,904/2,904 tests at Phase-61 ship; main moved to 2,916 assertions / 591 suites / 91.71% coverage immediately after via adjacent PR #62 (critical data-loss/injection remediation, outside milestone scope).
+
+**Known gaps (acknowledged, not blockers):**
+
+- No formal `/gsd:audit-milestone` run for v3.0 — both phases individually verified (Phase 60: 13 contract tests; Phase 61: VERIFICATION.md passed 4/4), all 7 requirements traceable Complete; operator directed close.
+- Phase 60's local phase directory (PLAN/SUMMARY) lived in its executing session and is not in this archive; its record is ROADMAP/STATE + PR #60.
+
+---
+
 ## v2.9 Autonomous Workflows Completion (Shipped: 2026-07-15)
 
 **Phases completed:** 3 phases (57.1, 58, 59), 6 requirements satisfied (FIN-01/02, SHIP-01..04). Verdict: `tech_debt` — only the explicitly-deferred HOOK-01 carries forward.
@@ -24,6 +43,7 @@
 **Shipped via:** PR #22 (Phases 55+56), PR #23 (Phase 57 + spec-vs-reality fixes + drift epsilon widening), PR #24 (state cleanup). 2,845 / 2,845 tests pass at ship. 91.63% line coverage local / 91.69% on CI ubuntu/22.
 
 **Known gaps (acknowledged, not blockers):**
+
 - Phase 57 lacks separate VERIFICATION.md (verification embedded in 57-03-SUMMARY.md).
 - Phase 55 + 56 have `nyquist_compliant: false`; Phase 57 lacks VALIDATION.md. Optional `/gsd:validate-phase {N}` to backfill.
 - Description-trigger gaps on 3 unified agents (gsd-research-orchestrator, gsd-validator-hub, gsd-verifier).
