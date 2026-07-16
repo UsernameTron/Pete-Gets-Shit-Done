@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Milestone-Close Hardening
-status: roadmap_created
-last_updated: "2026-07-15T22:30:00.000Z"
-last_activity: "2026-07-15 -- v3.0 roadmap created: 2 phases (60-61), 7/7 requirements mapped, 0 orphans"
+status: in_progress
+last_updated: "2026-07-15T23:30:00.000Z"
+last_activity: "2026-07-15 -- Phase 60 complete (MERGE-01..04): protected-main PR-merge path in complete-milestone, 13 contract tests, all gates green"
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
@@ -18,10 +18,10 @@ See: .planning/PROJECT.md (updated 2026-07-15 at v3.0 start)
 
 ## Current Position
 
-Phase: Not started (next: Phase 60)
-Plan: —
-Status: Roadmap created — ready for `/gsd:plan-phase 60`
-Last activity: 2026-07-15 — v3.0 roadmap created (Phases 60-61)
+Phase: 60 (Protected-Main Merge Path) — COMPLETE on branch `feat/phase-60-protected-main-merge` (MERGE-01..04 done; ship pending). Next: Phase 61 (Versioned Hook Registration).
+Plan: Approved plan at ~/.claude/plans/60-jolly-marble.md
+Status: Phase 60 done — detection (`gh api ... --jq .protected`) + PR-merge arm (push → `gh pr create` → `gh pr checks --watch` → `gh pr merge --squash --delete-branch` → lingering-branch cleanup → local main sync) in complete-milestone's handle_branches; local path preserved verbatim for unprotected repos; ship-milestone inherits via delegation (zero merge logic, locked by test). Suite 2,897/582 green, coverage 91.78%, drift + links gates pass.
+Last activity: 2026-07-15 — Phase 60 executed end-to-end (TDD: 13 contract tests in tests/complete-milestone.test.cjs)
 
 **v3.0 goal:** Teach `complete-milestone`/`ship-milestone` a protected-main merge path (`gh pr merge` instead of local squash+push), and version the hook registrations (settings template + installer contract test) so a fresh clone gets the full runtime hook set. Phase numbering continues from 59 (v3.0 starts at phase 60).
 
@@ -31,7 +31,7 @@ Last activity: 2026-07-15 — v3.0 roadmap created (Phases 60-61)
 
 | Phase | Name | Requirements | Depends On | Status |
 |-------|------|--------------|------------|--------|
-| 60 | Protected-Main Merge Path | MERGE-01..04 | Nothing | Not started |
+| 60 | Protected-Main Merge Path | MERGE-01..04 | Nothing | Complete (2026-07-15) |
 | 61 | Versioned Hook Registration | HOOKREG-01..03 | Nothing | Not started |
 
 **v3.0 status:** Roadmap created 2026-07-15. 7/7 requirements mapped across 2 phases, 0 orphans. Next: `/gsd:plan-phase 60`.

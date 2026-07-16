@@ -57,7 +57,7 @@
 
 **Milestone Goal:** Close the two runtime-safety gaps the v2.9 close-out surfaced — milestone close-out that works on a protected `main`, and hook enforcement reproducible from a fresh clone.
 
-- [ ] **Phase 60: Protected-Main Merge Path** - complete-milestone (and ship-milestone via delegation) route through `gh pr merge` when main is branch-protected, preserving the local squash path unchanged when it isn't
+- [x] **Phase 60: Protected-Main Merge Path** - complete-milestone (and ship-milestone via delegation) route through `gh pr merge` when main is branch-protected, preserving the local squash path unchanged when it isn't
 - [ ] **Phase 61: Versioned Hook Registration** - A versioned settings template + installer contract test guarantee a fresh clone registers every hook source the repo ships (7 `hooks/` sources + `lesson-capture-gate.cjs`), with none left unwired
 
 ## Phase Details
@@ -107,7 +107,7 @@
   2. Running the same step against an unprotected `main` still performs the existing local squash/merge-with-history/delete/keep flow, behaviorally unchanged from today (same options, same commands, same outcomes).
   3. Running `ship-milestone` through its `complete-milestone` delegation on a protected repo exercises the same PR-merge path — `ship-milestone.md` contains no separate or divergent merge logic of its own.
   4. A test suite asserts both branch decisions (protected main → PR-merge path, unprotected main → local path) and fails if either regresses.
-**Plans**: TBD
+**Plans**: Executed 2026-07-15 from approved plan (~/.claude/plans/60-jolly-marble.md) — detection + PR-merge arm in complete-milestone.md handle_branches, tests/complete-milestone.test.cjs (13 tests), ship-milestone enumeration touch-up
 
 ### Phase 61: Versioned Hook Registration
 **Goal**: A fresh clone of the repo registers the full runtime hook set out of the box — matching the maintainer's workstation — with no shipped hook left silently unwired.
@@ -136,5 +136,5 @@
 | 57.1. Bitter Lesson Surgery | v2.9 (insert) | 1/1 | Complete | 2026-07-15 |
 | 58. Finalize Hardening & Re-verification | v2.9 | 3/3 | Complete | 2026-07-15 |
 | 59. Ship-Milestone Workflow | v2.9 | 3/3 | Complete | 2026-07-15 |
-| 60. Protected-Main Merge Path | v3.0 | 0/? | Not started | - |
+| 60. Protected-Main Merge Path | v3.0 | 1/1 | Complete | 2026-07-15 |
 | 61. Versioned Hook Registration | v3.0 | 0/? | Not started | - |

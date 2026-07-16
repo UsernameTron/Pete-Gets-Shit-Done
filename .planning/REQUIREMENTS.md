@@ -10,10 +10,10 @@
 
 ### MERGE — protected-main close-out path (v2.9 audit item 6)
 
-- [ ] **MERGE-01**: When `main` is branch-protected (PR-only), `complete-milestone`'s branch-handling step merges the close-out branch via `gh pr merge` (CI-gated squash) instead of the local `git checkout main; git merge --squash; git push` path that protection rejects.
-- [ ] **MERGE-02**: When `main` is unprotected, the existing local squash/merge-with-history/delete/keep options are preserved unchanged — zero behavior change for repos without protection.
-- [ ] **MERGE-03**: `ship-milestone` inherits the protected-main path through its `complete-milestone` delegation — no divergent merge logic in the workflow file.
-- [ ] **MERGE-04**: Tests assert the branch decision: protected `main` routes to PR-merge, unprotected routes to the local path.
+- [x] **MERGE-01**: When `main` is branch-protected (PR-only), `complete-milestone`'s branch-handling step merges the close-out branch via `gh pr merge` (CI-gated squash) instead of the local `git checkout main; git merge --squash; git push` path that protection rejects.
+- [x] **MERGE-02**: When `main` is unprotected, the existing local squash/merge-with-history/delete/keep options are preserved unchanged — zero behavior change for repos without protection.
+- [x] **MERGE-03**: `ship-milestone` inherits the protected-main path through its `complete-milestone` delegation — no divergent merge logic in the workflow file.
+- [x] **MERGE-04**: Tests assert the branch decision: protected `main` routes to PR-merge, unprotected routes to the local path.
 
 ### HOOKREG — versioned hook registration (the v2.9-deferred "HOOK-01")
 
@@ -44,10 +44,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MERGE-01 | Phase 60 | Pending |
-| MERGE-02 | Phase 60 | Pending |
-| MERGE-03 | Phase 60 | Pending |
-| MERGE-04 | Phase 60 | Pending |
+| MERGE-01 | Phase 60 | Complete (2026-07-15) |
+| MERGE-02 | Phase 60 | Complete (2026-07-15) |
+| MERGE-03 | Phase 60 | Complete (2026-07-15) |
+| MERGE-04 | Phase 60 | Complete (2026-07-15) |
 | HOOKREG-01 | Phase 61 | Pending |
 | HOOKREG-02 | Phase 61 | Pending |
 | HOOKREG-03 | Phase 61 | Pending |
@@ -59,4 +59,4 @@
 
 ---
 *Requirements defined: 2026-07-15*
-*Last updated: 2026-07-15 — roadmap created, 7/7 requirements mapped across 2 phases (60-61), 0 orphans.*
+*Last updated: 2026-07-15 — Phase 60 complete (MERGE-01..04); HOOKREG-01..03 remain (Phase 61).*

@@ -226,7 +226,7 @@ pre-answers and no auto-flags; `complete-milestone`'s three internal prompts rem
 prompts, answered by the operator in the moment:
 
 1. **Archive phases** — "Archive phase directories to milestones/?"
-2. **Branch handling** — squash merge / merge with history / delete / keep
+2. **Branch handling** — squash merge / merge with history / delete / keep (PR-merge path replaces the local merges when `main` is branch-protected)
 3. **Tag push** — "Push tag to remote? (y/n)"
 
 Never auto-answer, suppress, or pre-approve any of them. If a future flag could bypass them, do
