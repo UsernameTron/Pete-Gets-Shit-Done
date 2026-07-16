@@ -9,8 +9,8 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 **Current milestone:** None — v3.0 shipped 2026-07-16; next milestone not scoped (`/gsd:new-milestone`)
 **Previous:** v3.0 Milestone-Close Hardening (shipped 2026-07-16, 2 phases, 7 requirements, tag v3.0)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,916 assertions / 591 suites, all passing
-**Coverage:** 91.71% lines (2026-07-16 run, post-PR #62 remediation)
+**Tests:** 2,921 assertions / 593 suites, all passing
+**Coverage:** 91.73% lines (2026-07-16 run)
 **Post-v2.8, pre-v2.9:** the named-workflows suite (W1–W6, then W8–W13 via PR #47) shipped as standalone PRs outside the phase counter
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
