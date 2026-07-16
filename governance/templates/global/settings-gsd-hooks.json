@@ -1,0 +1,13 @@
+{
+  "version": "1.30.0",
+  "hooks": [
+    { "source": "hooks/gsd-check-update.js", "distribution": "installer", "event": "SessionStart", "matcher": null, "timeout": null },
+    { "source": "hooks/gsd-context-monitor.js", "distribution": "installer", "event": "PostToolUse", "eventAliases": { "gemini": "AfterTool", "antigravity": "AfterTool" }, "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task", "timeout": 10 },
+    { "source": "hooks/gsd-cost-tracker.js", "distribution": "installer", "event": "PostToolUse", "eventAliases": { "gemini": "AfterTool", "antigravity": "AfterTool" }, "matcher": null, "timeout": 10 },
+    { "source": "hooks/gsd-prompt-guard.js", "distribution": "installer", "event": "PreToolUse", "eventAliases": { "gemini": "BeforeTool", "antigravity": "BeforeTool" }, "matcher": "Write|Edit", "timeout": 5 },
+    { "source": "hooks/gsd-config-protection.js", "distribution": "installer", "event": "PreToolUse", "eventAliases": { "gemini": "BeforeTool", "antigravity": "BeforeTool" }, "matcher": "Write|Edit", "timeout": 5 },
+    { "source": "hooks/gsd-spawn-tracker.js", "distribution": "installer", "event": "PreToolUse", "eventAliases": { "gemini": "BeforeTool", "antigravity": "BeforeTool" }, "matcher": "Task|Agent", "timeout": 5 },
+    { "source": "hooks/gsd-statusline.js", "distribution": "installer", "event": "statusLine", "matcher": null, "timeout": null },
+    { "source": ".claude/hooks/lesson-capture-gate.cjs", "distribution": "repo-local", "event": "Stop", "matcher": null, "timeout": null }
+  ]
+}
