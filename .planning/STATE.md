@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Milestone-Close Hardening
 status: phases_complete
-last_updated: "2026-07-16T02:58:18.636Z"
-last_activity: "2026-07-16 -- Phase 61 complete (HOOKREG-01..03): versioned hook-registration template + filesystem-derived contract test, verification passed 4/4"
+last_updated: "2026-07-16T04:26:52.534Z"
+last_activity: "2026-07-16 -- Phase 61 shipped as PR #61 (CI pending); v3.0 phases 60+61 both complete"
 progress:
   total_phases: 2
   completed_phases: 2
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-07-15 at v3.0 start)
 
 ## Current Position
 
-Phase: 61 (Versioned Hook Registration) — COMPLETE on branch `feat/phase-61-versioned-hook-registration` (HOOKREG-01..03 done; ship pending). Both v3.0 phases complete — milestone ready for ship/close.
+Phase: 61 (Versioned Hook Registration) — SHIPPED as PR #61 (https://github.com/UsernameTron/Pete-Gets-Shit-Done/pull/61, CI pending). Both v3.0 phases complete — milestone ready for close after merge.
 Plan: 1/1 complete (61-01, verification passed 4/4 criteria)
 Status: Phase 61 done — versioned registry `governance/templates/global/settings-gsd-hooks.json` (8 shipped hook sources, version 1.30.0 === package.json) + `tests/hook-registration-contract.test.cjs` (4 groups, 7 tests: filesystem↔template coverage, repo-local Stop wiring, installer agreement via GSD_TEST_MODE child process, version marker). Suite 2,904/586 green, coverage 91.78%, drift 23/23 + links 288/288 pass.
 Last activity: 2026-07-16 — Phase 61 executed end-to-end (TDD RED→GREEN; verification passed, no gaps)
@@ -39,7 +39,7 @@ Last activity: 2026-07-16 — Phase 61 executed end-to-end (TDD RED→GREEN; ver
 | 60 | Protected-Main Merge Path | MERGE-01..04 | Nothing | Complete (2026-07-15) |
 | 61 | Versioned Hook Registration | HOOKREG-01..03 | Nothing | Complete (2026-07-16) |
 
-**v3.0 status:** All phases complete (7/7 requirements). Next: ship Phase 61 branch, then milestone close.
+**v3.0 status:** All phases complete (7/7 requirements). Phase 61 PR #61 open (CI pending). Next: merge PR #61, then `/gsd:complete-milestone`.
 
 ## Accumulated Context
 
