@@ -1,63 +1,41 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.9
-milestone_name: Autonomous Workflows Completion
-status: archived
-last_updated: "2026-07-15T21:00:00.000Z"
-last_activity: "2026-07-15 -- v2.9 COMPLETE + ARCHIVED via first live ship-milestone run (PRs #51-54); phases archived to milestones/v2.9-phases/, tag v2.9"
+milestone: v3.0
+milestone_name: Milestone-Close Hardening
+status: defining_requirements
+last_updated: "2026-07-15T22:00:00.000Z"
+last_activity: "2026-07-15 -- Milestone v3.0 started (protected-main merge path + versioned hook registration)"
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-08 after v2.8 milestone)
+See: .planning/PROJECT.md (updated 2026-07-15 at v3.0 start)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** v2.9 Autonomous Workflows Completion — COMPLETE + ARCHIVED 2026-07-15 (tag v2.9). Next: start a new milestone (`/gsd:new-milestone`) or pick up HOOK-01 + the two logged hygiene follow-ups.
+**Current focus:** v3.0 Milestone-Close Hardening — the two runtime-safety gaps from the v2.9 close-out: complete-milestone's local-merge path vs protected `main` (audit item 6), and versioned hook registration (HOOKREG, the deferred "HOOK-01").
 
 ## Current Position
 
-Phase: 59 (Ship-Milestone Workflow) — COMPLETE on branch `feat/phase-59-ship-milestone` (SHIP-01..04 done; ship pending operator go). Phase 58 shipped earlier same day as PR #52 (main @ 1307be0); Phase 57.1 as PR #51.
-Plan: Approved plan at ~/.claude/plans/58-load-the-entire-eventual-hare.md (Phase 59 version)
-Status: Done — ship-milestone.md built to the W5 spec (2 gates, verbatim prompts, complete-milestone prompts stay live), registry-routable (13 workflows; blind spot-check 3/3), tests/ship-milestone.test.cjs + do-routing flip, shelved status lifted everywhere. Suite 2,884/577 green, drift + links gates pass.
-Next: v2.9 milestone close-out — the first live ship-milestone run (also delivers finalize's live confirmation from Phase 58).
-Last activity: 2026-07-15 — Phase 59 executed end-to-end; v2.9 phases all complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-07-15 — Milestone v3.0 started
 
-**v2.9 goal:** Harden the last `/gsd:finalize` fragility (Gate 5.5 cross-plugin spawn) and build the previously-shelved `ship-milestone` workflow (W5 — earlier notes misnumbered it W7; built Phase 59, 2026-07-15). The two ungated finalize pushes and the `allowed-tools` mismatch were already resolved by the `finalize-push-consent` blueprint (2026-07-12); the cross-plugin `repo-doc-architect` spawn + one end-to-end re-verification are the remaining unshelve preconditions. Phase numbering continues from 57 (v2.9 starts at phase 58) — the named-workflows suite shipped as standalone PRs outside the phase counter.
+**v3.0 goal:** Teach `complete-milestone`/`ship-milestone` a protected-main merge path (`gh pr merge` instead of local squash+push), and version the hook registrations (settings template + installer contract test) so a fresh clone gets the full runtime hook set. Phase numbering continues from 59 (v3.0 starts at phase 60).
 
-**Roadmap:** Phase 58 — Finalize Hardening & Re-verification (FIN-01, FIN-02). Phase 59 — Ship-Milestone Workflow (SHIP-01..04), depends on Phase 58. Next: `/gsd:plan-phase 58`.
+**Scope decision (operator, 2026-07-15):** the two items with teeth only. BITTER_LESSON_LOG DEFERRED cleanups are a lightweight follow-on, not milestone scope.
 
-Prior context: v2.8 Documentation Integrity SHIPPED + ARCHIVED 2026-05-08. Named autonomous-workflows suite W1–W6 (build-out) + W8–W13 (PR #47, 2026-07-13) shipped post-v2.8 as standalone PRs. Branch protection on `main` enforces 5 required status checks.
-Tests: 2,872 assertions, 573 suites. Coverage: 91.78% lines (2026-07-15 run).
+## Accumulated Context
 
-Key decisions from ship/merge:
-
-- PR #22 shipped both Phase 55 (DOCLINK-01..04) and Phase 56 (DOCDRIFT-01..05) together (milestone-level branch)
-- Cross-AI review (Gemini + Codex) caught 5 hardening edits before execution; CodeQL caught 1 security vuln during CI; security fix landed in-flight before merge
-- Squash-merged via `gh pr merge --squash --delete-branch` — clean main history with one merge commit (c1063a2) representing v2.8 phases 55+56
-- Phase 57 cross-AI review (Gemini + Codex) produced REVIEWS.md; replanned via `/gsd:plan-phase 57 --reviews` and applied 4 must-fix + 5 should-fix edits across the three plans before execution
-
-**Next action:** v2.9 roadmap created (2026-07-13) — 2 phases, 6/6 requirements mapped, 0 orphans. Run `/gsd:plan-phase 58` to begin Phase 58 (Finalize Hardening & Re-verification).
-
-## v2.9 Phase Summary
-
-| Phase | Name | Requirements | Depends On | Status |
-|-------|------|--------------|------------|--------|
-| 58 | Finalize Hardening & Re-verification | FIN-01, FIN-02 | Nothing | Not started |
-| 59 | Ship-Milestone Workflow | SHIP-01..04 | Phase 58 | Not started |
-
-**v2.9 status:** Roadmap created 2026-07-13. 6/6 requirements mapped across 2 phases, 0 orphans. Next: `/gsd:plan-phase 58`.
-
-## v2.8 Phase Summary
-
-| Phase | Name | Requirements | Depends On | Status |
-|-------|------|--------------|------------|--------|
-| 55 | Internal Link Validator | DOCLINK-01..04 | Nothing | Complete (shipped 2026-05-07) |
-| 56 | Doc Drift Detector | DOCDRIFT-01..05 | Nothing | Complete (shipped 2026-05-08) |
-| 57 | Backfill and CI Integration | DOCREF-01..02, DOCCI-01..03 | 55 + 56 | Complete (shipped 2026-05-08, PR #23) |
-
-**v2.8 status:** Milestone shipped. All 12 requirements closed in code, docs, and CI gates. Branch protection now requires 5 status checks including the new `docs-integrity` gate.
+- v2.9 Autonomous Workflows Completion SHIPPED + ARCHIVED + TAGGED 2026-07-15 (tag v2.9 @ c4b6a2e, PRs #51-55), closed via the FIRST LIVE `workflow:ship-milestone` run — both gates fired, complete-milestone's 3 prompts stayed live. Audit verdict `tech_debt`; sole carry-forward is HOOKREG (v3.0 scope).
+- Protected-main gap (v2.9 audit item 6): `complete-milestone.md` squash-merge path does `git checkout main; git merge --squash; git commit` + push — impossible against this repo's PR-only `main` (5 required checks). v2.9 close-out routed around it by PR-merging first and answering "already merged."
+- HOOKREG gap (ecosystem map top gap): 17 baseline runtime hooks; repo registers 2 live; 6 wired only by installer; `lesson-capture-gate.cjs` unwired. Fresh clone loses the runtime safety net.
+- Post-v2.9 hygiene already done (PRs #56-58): stale `.continue-here.md` pointers removed + gitignored; `HANDOFF.json`/`CHECKPOINT.json` untracked + gitignored; stale remote branches pruned.
+- Tests: 2,884 assertions / 577 suites. Coverage 91.78% lines (2026-07-15). 13 routable named workflows.
+- Env gotchas: `gh auth switch -u UsernameTron` before any push/PR; verify branch deletion with `git ls-remote` after `gh pr merge --delete-branch`.
+- Branch protection on `main`: 5 required checks (3 test matrix legs + governance + docs-integrity). Doc gates before doc/count changes: `check-doc-drift.cjs` (needs fresh coverage run) + `validate-doc-links.cjs`.
 
 ## Milestone History
 
@@ -82,3 +60,4 @@ Key decisions from ship/merge:
 | v2.6 | Developer Experience | 3 | 5 | 2026-04-18 |
 | v2.7 | Session Continuity | 3 | 7 | 2026-04-18 |
 | v2.8 | Documentation Integrity | 3 | 9 | 2026-05-08 |
+| v2.9 | Autonomous Workflows Completion | 3 | — | 2026-07-15 |

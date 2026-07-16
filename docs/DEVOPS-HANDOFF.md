@@ -48,7 +48,7 @@ The installer (`bin/install.js`) copies the following into the user's Claude Cod
 | Hooks | `~/.claude/get-shit-done/hooks/` | 7 execution hooks (bundled JS) |
 | Workflows | `~/.claude/get-shit-done/workflows/` | Orchestration templates |
 | Governance | `~/.claude/get-shit-done/governance/` | CLAUDE.md template, 10 governance hooks |
-| Plugins | Respective plugin directories | 45 skills, 10 subagents, 6 reference docs |
+| Plugins | Respective plugin directories | 33 skills, 10 subagents, 6 reference docs |
 | Scripts | `~/.claude/get-shit-done/scripts/` | Utility scripts |
 
 The installer is idempotent. Running it again overwrites with the latest version.

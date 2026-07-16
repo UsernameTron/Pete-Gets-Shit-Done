@@ -6,11 +6,11 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** v2.9 Autonomous Workflows Completion (started 2026-07-13 — defining requirements)
-**Previous:** v2.8 Documentation Integrity (shipped 2026-05-08, 3 phases, 14 requirements)
+**Current milestone:** v3.0 Milestone-Close Hardening (started 2026-07-15 — defining requirements)
+**Previous:** v2.9 Autonomous Workflows Completion (shipped 2026-07-15, 3 phases, 6 requirements, tag v2.9)
 **Package:** `get-shit-done-cc` v1.30.0
-**Tests:** 2,969 total, all passing
-**Coverage:** 91.76% lines, 83.53% branches, 97.62% functions
+**Tests:** 2,884 assertions / 577 suites, all passing
+**Coverage:** 91.78% lines (2026-07-15 run)
 **Post-v2.8, pre-v2.9:** the named-workflows suite (W1–W6, then W8–W13 via PR #47) shipped as standalone PRs outside the phase counter
 **Agents:** 17 active, 7 archived, 3 specialist — all tiered and quality-gated
 **Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
@@ -23,30 +23,32 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 GSD delivers disciplined, reproducible software delivery inside Claude Code by enforcing a 5-phase lifecycle (discuss → plan → execute → verify → ship) with wave-based parallelization, quality gates, and adaptive task routing. The core value is **predictable, high-quality execution at scale** — turning ambiguous prompts into shipped, tested, documented code without skipped steps.
 
-## Current Milestone: v2.9 Autonomous Workflows Completion
+## Current Milestone: v3.0 Milestone-Close Hardening
 
-**Goal:** Harden the last `/gsd:finalize` fragility and build the shelved `ship-milestone` workflow (W7) that depends on it — closing the autonomous-workflows suite.
+**Goal:** Close the two runtime-safety gaps the v2.9 close-out surfaced — so milestone close-out works on a protected `main` and hook enforcement is reproducible from a fresh clone.
 
 **Target features:**
-- Make `/gsd:finalize`'s Gate 5.5 `repo-doc-architect` spawn degrade gracefully when the agent/plugin is unavailable (the last of the three original finalize issues; the two ungated pushes and `allowed-tools` mismatch were already resolved by the `finalize-push-consent` blueprint, 2026-07-12)
-- Re-verify `/gsd:finalize` end-to-end on a real close-out (the verification the design doc lists as still-open before unshelving)
-- Build `ship-milestone` (W7): compose the proven finalizer critical path with 2 gates, routing through the now-gated finalize; unshelve and route it via `/gsd:do`
+- Protected-`main` merge path: `complete-milestone`/`ship-milestone` merge the close-out branch via `gh pr merge` (CI-gated) when `main` is branch-protected, instead of the local squash-merge + direct push that PR-only protection rejects (audit item 6, first live ship-milestone run)
+- Versioned hook registration: settings template + installer contract test so a fresh clone gets the full runtime hook set — 17 baseline hooks, only 2 registered live in-repo today, `lesson-capture-gate.cjs` unwired (the v2.9-deferred "HOOK-01", renamed HOOKREG to avoid colliding with shipped v2.3/v2.4 HOOK-* IDs)
 
-**Key context:** W1–W6 and W8–W13 already shipped. `ship-milestone` was shelved by operator decision (2026-07-12) explicitly until finalize's pushes were gated — that precondition is now met. Internal-tooling milestone: no external-domain research required.
+**Key context:** Both items came out of the v2.9 close-out with teeth: the protected-main gap forced a manual route-around during the first live `ship-milestone` run; HOOKREG is the ecosystem map's flagged top gap. The BITTER_LESSON_LOG DEFERRED cleanups are explicitly a lightweight follow-on, not this milestone. Internal-tooling milestone: no external-domain research.
 
 ## Requirements
 
 ### Active
 
-v2.9 Autonomous Workflows Completion (scoped 2026-07-13):
-- **FIN-01**: `/gsd:finalize` Gate 5.5 spawns `repo-doc-architect` only when it resolves; otherwise it skips with a logged notice instead of dangling
-- **FIN-02**: `/gsd:finalize` is re-verified end-to-end on a real milestone close-out
-- **SHIP-01**: `ship-milestone` workflow composes the finalizer critical path with exactly 2 gates (conditional audit verdict + complete-milestone authorization)
-- **SHIP-02**: `ship-milestone` is routed via `/gsd:do` (`workflow:ship-milestone`) and unshelved
-- **SHIP-03**: `complete-milestone`'s 3 internal prompts (archive, branch, tag push) stay human — never auto-answered by the workflow
-- **SHIP-04**: structural test coverage for `ship-milestone` (routing contract + gate ceiling)
+v3.0 Milestone-Close Hardening (scoped 2026-07-15):
+- **MERGE-01**: with `main` branch-protected, `complete-milestone` merges the close-out branch via `gh pr merge` (CI-gated), never local squash+push
+- **MERGE-02**: with `main` unprotected, existing local squash/merge/delete/keep behavior is preserved unchanged
+- **MERGE-03**: `ship-milestone` inherits the protected-main path via `complete-milestone` delegation — no divergent merge logic
+- **MERGE-04**: tests assert the branch decision (protected → PR-merge, unprotected → local)
+- **HOOKREG-01**: versioned settings template registers the full runtime hook set from a fresh clone
+- **HOOKREG-02**: `lesson-capture-gate.cjs` is registered — no shipped hook source left unwired
+- **HOOKREG-03**: installer contract test fails if any shipped hook source is unregistered
 
 ### Validated
+
+- Autonomous Workflows Completion (FIN-01, FIN-02, SHIP-01 through SHIP-04) — v2.9 Phases 58-59 (validated 2026-07-15, audit verdict `tech_debt` with only HOOK-01/HOOKREG deferred by design)
 
 - Cross-Reference Backfill (DOCREF-01, DOCREF-02) — v2.8 Phase 57 (validated 2026-05-08)
 - CI Integration (DOCCI-01, DOCCI-02, DOCCI-03) — v2.8 Phase 57 (validated 2026-05-08)
@@ -64,7 +66,16 @@ v2.9 Autonomous Workflows Completion (scoped 2026-07-13):
 - GUI installer — CLI-only project, no graphical installer needed
 - CI provider abstraction — GitHub Actions only, no Jenkins/GitLab/Circle support
 
-## Most Recent: v2.8 Documentation Integrity (shipped 2026-05-08)
+## Most Recent: v2.9 Autonomous Workflows Completion (shipped 2026-07-15)
+
+Three phases closing the autonomous-workflows suite:
+- Bitter Lesson Surgery (Phase 57.1, PR #51) — `/gsd:do` routes from a model-readable registry (`gsd-tools do-registry`), routing table + `classify.cjs` deleted, net −4,119 lines
+- Finalize Hardening (Phase 58, PR #52) — Gate 5.5 degrades gracefully when `repo-doc-architect` is unavailable; full 8-gate chain re-verified end-to-end in sandbox
+- Ship-Milestone Workflow (Phase 59, PR #53) — `workflow:ship-milestone` composes the finalizer critical path behind exactly 2 gates; unshelved, registry-routable (13th named flow)
+
+Closed via the first live `ship-milestone` run (PRs #51-55, tag v2.9 @ c4b6a2e). Audit verdict `tech_debt` — sole carry-forward is HOOK-01/HOOKREG, now v3.0 scope.
+
+## Previous: v2.8 Documentation Integrity (shipped 2026-05-08)
 
 Three phases turning documentation accuracy from manually-maintained to CI-enforced:
 - Internal Link Validator — `scripts/validate-doc-links.cjs` scans tracked .md files for broken refs; gitignore-style `--exclude <glob>` flag; 296 links / 723 files in v2.8 corpus
@@ -73,7 +84,7 @@ Three phases turning documentation accuracy from manually-maintained to CI-enfor
 
 3 phases (55-57), 9 plans, 14 requirements complete. PR #22, PR #23, PR #24 merged.
 
-## Previous: v2.7 Session Continuity (shipped 2026-04-18)
+## Earlier: v2.7 Session Continuity (shipped 2026-04-18)
 
 Three operational-friction fixes — context loss on /clear, slow session starts, and manual UAT checks:
 - Checkpoint Engine — `lib/checkpoint.cjs` writes `.planning/CHECKPOINT.json` before context resets; `/gsd:resume-work` and `/prime` consume it to skip completed work
@@ -373,4 +384,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-13 — v2.9 Autonomous Workflows Completion started; 6 requirements scoped (FIN-01..02, SHIP-01..04); named-workflows suite W1–W13 shipped post-v2.8 as standalone PRs; 18 milestones shipped to date.*
+*Last updated: 2026-07-15 — v3.0 Milestone-Close Hardening started; 7 requirements scoped (MERGE-01..04, HOOKREG-01..03); v2.9 shipped same day via first live ship-milestone run; 19 milestones shipped to date.*

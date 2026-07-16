@@ -109,8 +109,7 @@ jobs:
         run: |
           node scripts/validate-doc-links.cjs \
             --exclude 'tests/fixtures/doc-links/**' \
-            --exclude '.claude/skills/SKILL.md' \
-            --exclude '.claude/skills/dream-memory-consolidation/SKILL.md' \
+            --exclude '_absorbed/**' \
             --exclude '.planning/REQUIREMENTS.md' \
             --exclude '.planning/milestones/v*-REQUIREMENTS.md' \
             --exclude '.planning/milestones/v*-phases/**'
