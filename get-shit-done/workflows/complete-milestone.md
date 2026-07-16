@@ -555,7 +555,60 @@ MILESTONE_BRANCH=$(git branch --list "${BRANCH_PREFIX}*" 2>/dev/null | sed 's/^\
 
 **If no branches found:** Skip to git_tag.
 
-**If branches exist:**
+**If branches exist**, detect branch protection on `main` first — a protected (PR-only) `main` rejects direct pushes, so a local merge could never be synced and would leave local `main` permanently diverged:
+
+```bash
+# Plain read access — the .protected boolean is visible to non-admins
+# (unlike /branches/main/protection, which 403s without admin).
+# Any gh failure (missing, unauthenticated, offline) degrades to "false" → existing local flow.
+PROTECTED=$(gh api "repos/{owner}/{repo}/branches/main" --jq .protected 2>/dev/null || echo "false")
+```
+
+**If `PROTECTED` is `true` (protected main — PR-merge path):**
+
+```
+## Git Branches Detected (main is branch-protected)
+
+Branching strategy: {phase/milestone}
+Branches: {list}
+
+main is PR-only — a local merge could never be pushed. Merge via a CI-gated PR instead.
+
+Options:
+1. **PR merge** — Push branch, open PR, wait for required checks, squash-merge via gh
+2. **Delete without merging** — Already merged or not needed
+3. **Keep branches** — Leave for manual handling
+```
+
+AskUserQuestion with options: PR merge (Recommended), Delete without merging, Keep branches.
+
+Note in the PR merge option description: with `commit_docs=false`, the PR merges the branch as-is (no `.planning/` strip is possible mid-merge) — pre-filter with `/gsd:pr-branch` if `.planning/` commits must stay off main.
+
+**PR merge** (loop over `$PHASE_BRANCHES` for "phase" strategy; single `$MILESTONE_BRANCH` for "milestone"):
+
+```bash
+for branch in $BRANCHES_TO_MERGE; do
+  git push -u origin "$branch"
+  gh pr create --base main --head "$branch" \
+    --title "feat: $branch for v[X.Y]" \
+    --body "Milestone v[X.Y] close-out — merged via complete-milestone protected-main path"
+  # Blocks until required checks resolve; exits non-zero on failure
+  gh pr checks "$branch" --watch
+  gh pr merge "$branch" --squash --delete-branch
+  # gh has been observed leaving the remote branch behind — verify and clean up
+  if git ls-remote --heads origin "$branch" | grep -q .; then
+    git push origin --delete "$branch"
+  fi
+done
+# Sync local main to the merged result
+git fetch origin main:main 2>/dev/null || git pull --ff-only origin main
+```
+
+If `gh pr checks` fails or the merge is rejected: stop this step, surface the `gh` error verbatim, and leave the branch and open PR untouched for manual resolution — never retry with an admin flag or any protection bypass.
+
+**Delete without merging** and **Keep branches**: same handling as the unprotected arm below.
+
+**If `PROTECTED` is `false` (unprotected main — local path, unchanged):**
 
 ```
 ## Git Branches Detected

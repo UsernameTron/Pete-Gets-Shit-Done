@@ -6,6 +6,7 @@
 - v2.7 Session Continuity — Phases 52-54 (shipped 2026-04-18) — [archive](milestones/v2.7-ROADMAP.md)
 - v2.8 Documentation Integrity — Phases 55-57 (shipped 2026-05-08) — [archive](milestones/v2.8-ROADMAP.md)
 - v2.9 Autonomous Workflows Completion — Phases 57.1, 58-59 (shipped 2026-07-15)
+- v3.0 Milestone-Close Hardening — Phases 60-61 (active, started 2026-07-15)
 
 ## Phases
 
@@ -52,6 +53,13 @@
 - [x] **Phase 58: Finalize Hardening & Re-verification** - Gate 5.5 degrades gracefully without repo-doc-architect; finalize re-verified end-to-end in sandbox (operator-ratified FIN-02 vehicle, 2026-07-15)
 - [x] **Phase 59: Ship-Milestone Workflow** - Composes the finalizer critical path behind exactly 2 gates, routed via /gsd:do, unshelved (shipped 2026-07-15)
 
+### v3.0 Milestone-Close Hardening (Phases 60-61) — ACTIVE (started 2026-07-15)
+
+**Milestone Goal:** Close the two runtime-safety gaps the v2.9 close-out surfaced — milestone close-out that works on a protected `main`, and hook enforcement reproducible from a fresh clone.
+
+- [x] **Phase 60: Protected-Main Merge Path** - complete-milestone (and ship-milestone via delegation) route through `gh pr merge` when main is branch-protected, preserving the local squash path unchanged when it isn't
+- [ ] **Phase 61: Versioned Hook Registration** - A versioned settings template + installer contract test guarantee a fresh clone registers every hook source the repo ships (7 `hooks/` sources + `lesson-capture-gate.cjs`), with none left unwired
+
 ## Phase Details
 
 (All v2.6, v2.7, and v2.8 phase details archived to milestones/v2.6-ROADMAP.md, milestones/v2.7-ROADMAP.md, milestones/v2.8-ROADMAP.md respectively.)
@@ -90,6 +98,28 @@
   4. A structural test suite asserts the do-registry includes `workflow:ship-milestone`, every `/gsd:` command the workflow references resolves to a real command file, and the workflow holds no more than 2 gates. *(Re-pointed 2026-07-15: "routing table" → do-registry, per Phase 57.1.)*
 **Plans**: Executed 2026-07-15 from approved plan (~/.claude/plans/58-load-the-entire-eventual-hare.md, Phase 59 version) — 59-01 ship-milestone.md + audit-milestone filename fix, 59-02 tests (ship-milestone.test.cjs, do-routing flip, golden id 26, blind spot-check 3/3), 59-03 registry re-pointing + shelved-flag lift
 
+### Phase 60: Protected-Main Merge Path
+**Goal**: `complete-milestone`'s branch-handling step (and `ship-milestone` through its delegation) closes out a milestone correctly whether `main` is branch-protected or not — never attempting a local push that protection will reject.
+**Depends on**: Nothing (first phase of v3.0)
+**Requirements**: MERGE-01, MERGE-02, MERGE-03, MERGE-04
+**Success Criteria** (what must be TRUE):
+  1. Running `complete-milestone`'s branch-handling step against a branch-protected `main` detects the protection and merges the close-out branch via `gh pr merge` (CI-gated squash) instead of attempting `git checkout main; git merge --squash; git push`.
+  2. Running the same step against an unprotected `main` still performs the existing local squash/merge-with-history/delete/keep flow, behaviorally unchanged from today (same options, same commands, same outcomes).
+  3. Running `ship-milestone` through its `complete-milestone` delegation on a protected repo exercises the same PR-merge path — `ship-milestone.md` contains no separate or divergent merge logic of its own.
+  4. A test suite asserts both branch decisions (protected main → PR-merge path, unprotected main → local path) and fails if either regresses.
+**Plans**: Executed 2026-07-15 from approved plan (~/.claude/plans/60-jolly-marble.md) — detection + PR-merge arm in complete-milestone.md handle_branches, tests/complete-milestone.test.cjs (13 tests), ship-milestone enumeration touch-up
+
+### Phase 61: Versioned Hook Registration
+**Goal**: A fresh clone of the repo registers the full runtime hook set out of the box — matching the maintainer's workstation — with no shipped hook left silently unwired.
+**Depends on**: Nothing (independent of Phase 60 — runtime-safety fix on a different subsystem)
+**Requirements**: HOOKREG-01, HOOKREG-02, HOOKREG-03
+**Success Criteria** (what must be TRUE):
+  1. Installing from a fresh clone results in every hook source the repo ships (7 `hooks/` sources + `lesson-capture-gate.cjs` — 8 today; the contract test derives the list from the filesystem, not a hardcoded count) present in the versioned settings template's registrations. *(The ecosystem map's "17 baseline hooks" counts workstation-wide hooks including other plugins — out of this repo's control; the repo-shipped set is the fixable scope.)*
+  2. `lesson-capture-gate.cjs` appears in the versioned registrations and fires when its event occurs in a live session, confirming it is wired rather than orphaned.
+  3. Deleting or omitting any shipped hook source from the registration causes the installer contract test to fail — drift is caught before it reaches a user's clone.
+  4. The settings template carries a version marker so future hook additions can be diffed against what's registered, preventing this gap from recurring silently.
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -106,3 +136,5 @@
 | 57.1. Bitter Lesson Surgery | v2.9 (insert) | 1/1 | Complete | 2026-07-15 |
 | 58. Finalize Hardening & Re-verification | v2.9 | 3/3 | Complete | 2026-07-15 |
 | 59. Ship-Milestone Workflow | v2.9 | 3/3 | Complete | 2026-07-15 |
+| 60. Protected-Main Merge Path | v3.0 | 1/1 | Complete | 2026-07-15 |
+| 61. Versioned Hook Registration | v3.0 | 0/? | Not started | - |
