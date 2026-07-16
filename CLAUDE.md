@@ -13,7 +13,7 @@ You are working with Pete Connor — AI transformation leader, MS in AI, CCXP/CC
 Key capabilities:
 - **67 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
 - **17 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-validator-hub, and others) handling quality, planning, and execution roles
-- **45 Claude Code skills** covering command implementations, utilities, and governance workflows
+- **33 Claude Code skills** covering command implementations, utilities, and governance workflows
 - **Wave-based parallel execution** — independent tasks run concurrently in waves; dependent tasks respect ordering automatically
 - **5-phase delivery lifecycle**: discuss → plan → execute → verify → ship, with explicit phase gates that cannot be skipped
 
