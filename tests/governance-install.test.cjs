@@ -194,24 +194,40 @@ describe('installGovernance', () => {
     assert.ok(Array.isArray(missing) && missing.length > 0, 'missing governance source must be reported');
   });
 
-  test('backs up existing CLAUDE.md', () => {
+  test('preserves existing customized CLAUDE.md (no clobber, no backup litter)', () => {
     const claudeDir = path.join(tmpDir, '.claude');
     fs.mkdirSync(claudeDir, { recursive: true });
 
-    // Create an existing CLAUDE.md where a global install will write it (targetDir)
+    // Create an existing customized CLAUDE.md where a global install writes it
     const claudeMdPath = path.join(claudeDir, 'CLAUDE.md');
     fs.writeFileSync(claudeMdPath, '# Original content');
 
     installGovernance(claudeDir, REPO_ROOT, true);
 
-    // The backup should exist beside it
+    // The customized file must survive untouched — reruns used to overwrite it
+    // with the template and mint a .backup.<ts> file per run (122 on 2026-07-16)
+    const content = fs.readFileSync(claudeMdPath, 'utf8');
+    assert.equal(content, '# Original content', 'Existing CLAUDE.md must be preserved');
+
     const files = fs.readdirSync(claudeDir);
     const backups = files.filter(f => f.startsWith('CLAUDE.md.backup.'));
-    assert.ok(backups.length >= 1, 'At least one backup should be created');
+    assert.equal(backups.length, 0, 'No backup files should be created');
+  });
 
-    // The new CLAUDE.md should be the governance version
+  test('installs template CLAUDE.md when none exists, no-ops when identical', () => {
+    const claudeDir = path.join(tmpDir, '.claude');
+    fs.mkdirSync(claudeDir, { recursive: true });
+
+    installGovernance(claudeDir, REPO_ROOT, true);
+    const claudeMdPath = path.join(claudeDir, 'CLAUDE.md');
     const content = fs.readFileSync(claudeMdPath, 'utf8');
-    assert.ok(content.includes('Global Claude Code Configuration'), 'Should install governance CLAUDE.md');
+    assert.ok(content.includes('Global Claude Code Configuration'), 'Fresh install should write the governance CLAUDE.md');
+
+    // Rerun with the file identical to the template: no backup, content unchanged
+    installGovernance(claudeDir, REPO_ROOT, true);
+    assert.equal(fs.readFileSync(claudeMdPath, 'utf8'), content, 'Identical file must be left as-is');
+    const backups = fs.readdirSync(claudeDir).filter(f => f.startsWith('CLAUDE.md.backup.'));
+    assert.equal(backups.length, 0, 'Rerun must not create backups');
   });
 });
 
