@@ -45,10 +45,16 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 
 ---
 
+## Status
+
+> Last verified: 2026-07-17 <!-- refresh via /gsd:sync-docs; guarded by ~/.claude/hooks/claude-md-staleness.js (warns >14d at SessionStart) -->
+
+- **Now:** live state in [.planning/STATE.md](.planning/STATE.md), history in [.planning/MILESTONES.md](.planning/MILESTONES.md), todos in [tasks/todo.md](tasks/todo.md).
+
 ## Tests and Coverage
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
-- **Scale**: 593 test suites, 2,921 assertions, 91.73% line coverage
+- **Current counts**: never inlined — run `npm test` for suite/assertion/coverage numbers.
 - **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
 - **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
 
@@ -69,7 +75,7 @@ Do not treat overall coverage as passing if any individual module is below its t
 
 ## Deployed Agents
 
-Three project-scoped specialists live in `.claude/agents/`:
+Project-scoped specialists live in `.claude/agents/`:
 
 | Agent | File | Role |
 |-------|------|------|
@@ -77,9 +83,7 @@ Three project-scoped specialists live in `.claude/agents/`:
 | test-runner | `test-runner.md` | Runs test suites, diagnoses failures, writes coverage |
 | docs-sync | `docs-sync.md` | Keeps CLAUDE.md, README.md, and DEVOPS-HANDOFF.md current |
 
-GSD also ships 17 built-in agents activated by the execution engine:
-
-`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-codebase-mapper`, `gsd-debugger`, `gsd-dependency-auditor`, `gsd-ecosystem-auditor`, `gsd-executor`, `gsd-planner`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-roadmapper`, `gsd-ui-auditor`, `gsd-ui-checker`, `gsd-ui-researcher`, `gsd-user-profiler`, `gsd-validator-hub`, `gsd-verifier`
+GSD also ships built-in execution agents — run `/gsd:crew` for the live roster.
 
 ---
 
