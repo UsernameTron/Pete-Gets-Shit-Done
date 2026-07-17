@@ -36,6 +36,10 @@ const cacheFile = path.join(cacheDir, 'gsd-update-check.json');
 const projectVersionFile = path.join(projectConfigDir, 'get-shit-done', 'VERSION');
 const globalVersionFile = path.join(globalConfigDir, 'get-shit-done', 'VERSION');
 
+// Local fork checkout (this repo) — the truthful update source for
+// clone-based installs. See fork-aware lookup in the child script below.
+const forkPkgDefault = path.join(homeDir, 'projects', 'Pete-Gets-Shit-Done', 'package.json');
+
 // Ensure cache directory exists
 if (!fs.existsSync(cacheDir)) {
   fs.mkdirSync(cacheDir, { recursive: true });
@@ -91,15 +95,32 @@ const child = spawn(process.execPath, ['-e', `
     } catch (e) {}
   }
 
+  // Fork-aware update source: this install comes from a local clone, not
+  // upstream npm — upstream version numbers are a different lineage, and
+  // nagging against them invites an update that overwrites the fork.
+  // Compare against the clone's package.json when present; fall back to
+  // npm only when no fork checkout exists. Override via GSD_UPDATE_SOURCE
+  // (path to a package.json).
   let latest = null;
+  let source = 'npm';
+  const forkPkg = process.env.GSD_UPDATE_SOURCE || ${JSON.stringify(forkPkgDefault)};
   try {
-    latest = execSync('npm view get-shit-done-cc version', { encoding: 'utf8', timeout: 10000, windowsHide: true }).trim();
+    if (forkPkg && fs.existsSync(forkPkg)) {
+      const v = JSON.parse(fs.readFileSync(forkPkg, 'utf8')).version;
+      if (v) { latest = String(v).trim(); source = 'fork'; }
+    }
   } catch (e) {}
+  if (!latest) {
+    try {
+      latest = execSync('npm view get-shit-done-cc version', { encoding: 'utf8', timeout: 10000, windowsHide: true }).trim();
+    } catch (e) {}
+  }
 
   const result = {
     update_available: latest && installed !== latest,
     installed,
     latest: latest || 'unknown',
+    source,
     checked: Math.floor(Date.now() / 1000),
     stale_hooks: staleHooks.length > 0 ? staleHooks : undefined
   };

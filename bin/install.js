@@ -4119,18 +4119,25 @@ function installGovernance(targetDir, src, isGlobal) {
   const settingsPath = path.join(targetDir, 'settings.json');
   const missing = [];
 
-  // 1. Copy CLAUDE.md (backup existing — preserved for both global and local)
+  // 1. Copy CLAUDE.md — never clobber an existing customized file.
+  //    The old backup-then-overwrite contract replaced the user's global
+  //    CLAUDE.md with the template on EVERY install run and minted unbounded
+  //    CLAUDE.md.backup.<ts> files (2026-07-16: 122 of them, 20 install
+  //    bursts). New contract: no file → install template; file identical to
+  //    template → no-op; file differs → preserve it and say so. Template
+  //    changes are adopted deliberately by diffing, not by force.
   const claudeMdSrc = path.join(governanceSrc, 'templates', 'global', 'CLAUDE.md');
   const claudeMdDest = path.join(memoryBase, 'CLAUDE.md');
   if (fs.existsSync(claudeMdSrc)) {
     fs.mkdirSync(memoryBase, { recursive: true });
-    if (fs.existsSync(claudeMdDest)) {
-      const backupPath = claudeMdDest + '.backup.' + Date.now();
-      fs.copyFileSync(claudeMdDest, backupPath);
-      console.log(`  ${green}✓${reset} Backed up existing CLAUDE.md to ${path.basename(backupPath)}`);
+    if (!fs.existsSync(claudeMdDest)) {
+      fs.copyFileSync(claudeMdSrc, claudeMdDest);
+      console.log(`  ${green}✓${reset} Installed CLAUDE.md`);
+    } else if (fs.readFileSync(claudeMdDest, 'utf8') === fs.readFileSync(claudeMdSrc, 'utf8')) {
+      console.log(`  ${dim}  CLAUDE.md already matches template — skipped${reset}`);
+    } else {
+      console.log(`  ${yellow}⚠${reset}  Existing CLAUDE.md preserved (differs from template). Adopt template changes manually: diff "${claudeMdDest}" "${claudeMdSrc}"`);
     }
-    fs.copyFileSync(claudeMdSrc, claudeMdDest);
-    console.log(`  ${green}✓${reset} Installed CLAUDE.md`);
   } else {
     missing.push('governance CLAUDE.md template');
   }
