@@ -46,6 +46,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Pruned stale v2.9 phase-detail blocks from ROADMAP.md** — the 57.1/58/59 `### Phase` detail blocks lingered after their directories were archived, tripping `/gsd:health` W006; removed to restore HEALTHY (09b09e2, #66)
 - **Verified counts:** 67 commands, 17 agents, 33 skills, 593 test suites, 2,921 assertions, 91.73% statement / 83.27% branch / 97.62% function coverage
 
+### Changed
+- **CLAUDE.md staleness guard** — status block converted to a dated `> Last verified:` stub; drift-prone counts point to `npm test` (49d45e3, #68)
+- **v3.0 close-out doc sync** — living docs + todo reconciled at milestone close (c9f6e5d, #67)
+- **Roadmap pruning** — removed stale v2.9 phase-detail blocks flagged by health W006 (09b09e2, #66)
+- **Generated `STATUS.md` dashboard artifact** — now gitignored (450549c, #65)
+
 ### Fixed
 - **`lesson-capture-gate` subdirectory resolution** — `resolveLessonsPath()` walks upward from cwd so the Stop gate finds `tasks/lessons.md` when run from a subdirectory (b2b6327)
 - **Package metadata** — `repository`/`homepage`/`bugs` now point at the actual origin (4de89d7)
