@@ -7,6 +7,21 @@
 - v2.8 Documentation Integrity — Phases 55-57 (shipped 2026-05-08) — [archive](milestones/v2.8-ROADMAP.md)
 - v2.9 Autonomous Workflows Completion — Phases 57.1, 58-59 (shipped 2026-07-15)
 - v3.0 Milestone-Close Hardening — Phases 60-61 (shipped 2026-07-16) — [archive](milestones/v3.0-ROADMAP.md)
+- 🚧 **v3.1 CONDUCTOR** — Multi-harness orchestration (M06, Extension Factory Phase 6); phase-01 PLANNED (started 2026-07-17)
+
+## Active Milestone
+
+### v3.1 CONDUCTOR (M06 — Extension Factory Phase 6) — ACTIVE (started 2026-07-17)
+
+**Goal:** Multi-harness orchestration — Claude Code as sole writer and approved processor of record; Grok Build (local) and Gemini as structurally read-only delegates; the Codex lane arrives in phase-02. Governance is Option A (approved-cloud); "air-gapped" applies to the Grok-local lane only. Architecture of record: `conductor-phase6-proposal.md` as amended by its supersession notice — on conflict, `phase-01-PLAN.md` (v2) wins.
+
+Plans and reference docs live in `.planning/milestones/M06-conductor/` (M-index codename retained; versioned `v3.1` for tooling/roadmap continuity).
+
+- [ ] **phase-01: Contracts & Local Lane (v2)** — PHASE_PLANNED — probe, contracts, lib, both adapters, first logged delegation (Session 1); router, fixtures, all eight gates (Session 2); benchmark smoke report
+- [ ] **phase-02: Frontier Review Lane** — stub (Codex lane; stratified benchmark set + threshold decision)
+- [ ] **phase-03: Autonomy & Integration** — stub
+- [ ] **phase-04: Repo Migration** — stub
+- [ ] **phase-05: Visual Intelligence Lane** — stub
 
 ## Phases
 

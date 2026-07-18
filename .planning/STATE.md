@@ -1,48 +1,53 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: Milestone-Close Hardening
-status: shipped
-last_updated: "2026-07-16T08:57:10.229Z"
-last_activity: "2026-07-16 -- v3.0 SHIPPED and archived: Phase 60 (PR #60) + Phase 61 (PR #61), 7/7 requirements; next milestone not scoped"
+milestone: v3.1
+milestone_name: CONDUCTOR
+status: planning
+last_updated: "2026-07-18T00:53:44.881Z"
+last_activity: 2026-07-17 — M06/CONDUCTOR reconciled into planning docs as v3.1; phase-01 v2 PHASE_PLANNED
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 1
-  completed_plans: 1
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE -- Pete-Gets-Shit-Done Workspace
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-15 at v3.0 start)
+See: .planning/PROJECT.md (updated 2026-07-17 at v3.1 start)
 
 **Core value:** Predictable, high-quality execution at scale
-**Current focus:** Between milestones — v3.0 shipped 2026-07-16; next milestone not scoped (`/gsd:new-milestone`).
+**Current focus:** v3.1 CONDUCTOR (M06) — multi-harness orchestration; phase-01 (Contracts & Local Lane, v2) PHASE_PLANNED. Accepted 2026-07-17.
 
 ## Current Position
 
-Phase: None active — v3.0 SHIPPED 2026-07-16 (Phase 60 PR #60, Phase 61 PR #61; both verified, 7/7 requirements Complete). Archived to milestones/v3.0-*.
-Plan: None — next milestone not scoped
-Status: Between milestones. v3.0 delivered the protected-main PR-merge path in complete-milestone/ship-milestone and the versioned hook registry (`governance/templates/global/settings-gsd-hooks.json` + filesystem-derived contract test). Next: `/gsd:new-milestone`.
-Last activity: 2026-07-16 — v3.0 closed via complete-milestone (archive + tag)
+Phase: phase-01 — Contracts & Local Lane (v2) — PHASE_PLANNED. Plans in `.planning/milestones/M06-conductor/`.
+Plan: phase-01-PLAN.md (v2) — not started
+Status: Planning — v3.1 CONDUCTOR (M06) active; phase-01 PHASE_PLANNED, awaiting Session 1 execution.
+Last activity: 2026-07-17 — M06/CONDUCTOR reconciled into planning docs as v3.1; phase-01 v2 PHASE_PLANNED
 
-**v3.0 goal:** Teach `complete-milestone`/`ship-milestone` a protected-main merge path (`gh pr merge` instead of local squash+push), and version the hook registrations (settings template + installer contract test) so a fresh clone gets the full runtime hook set. Phase numbering continues from 59 (v3.0 starts at phase 60).
+**Next action:** execute `phase-01-PLAN.md` Session 1 (probe, contracts, lib, both adapters, first logged delegation); advance to PHASE_EXECUTING on first commit. Session 2 covers router, fixtures, and all eight gates; deliver the benchmark smoke report (10 seeded + 5 clean), with the threshold decision deferred to the phase-02 stratified set.
 
-**Scope decision (operator, 2026-07-15):** the two items with teeth only. BITTER_LESSON_LOG DEFERRED cleanups are a lightweight follow-on, not milestone scope.
+**v3.1 architecture of record:** `conductor-phase6-proposal.md` as amended by its supersession notice; on conflict, `phase-01-PLAN.md` (v2) wins. Governance Option A (approved-cloud); "air-gapped" applies to the Grok-local lane only.
 
-## v3.0 Phase Summary
+## v3.1 Phase Summary (M06 — CONDUCTOR)
 
-| Phase | Name | Requirements | Depends On | Status |
-|-------|------|--------------|------------|--------|
-| 60 | Protected-Main Merge Path | MERGE-01..04 | Nothing | Complete (2026-07-15) |
-| 61 | Versioned Hook Registration | HOOKREG-01..03 | Nothing | Complete (2026-07-16) |
+| Phase | Name | Status | Notes |
+|-------|------|--------|-------|
+| phase-01 | Contracts & Local Lane (v2) | PHASE_PLANNED | Full runbook; Sessions 1–2 + benchmark smoke |
+| phase-02 | Frontier Review Lane | Stub | Codex lane; stratified benchmark + threshold decision |
+| phase-03 | Autonomy & Integration | Stub | — |
+| phase-04 | Repo Migration | Stub | — |
+| phase-05 | Visual Intelligence Lane | Stub | — |
 
-**v3.0 status:** SHIPPED 2026-07-16 — archived to milestones/v3.0-ROADMAP.md + v3.0-REQUIREMENTS.md, tagged v3.0. Next: `/gsd:new-milestone`.
+**v3.1 status:** ACTIVE (started 2026-07-17). phase-01 PHASE_PLANNED; plans + reference docs in `.planning/milestones/M06-conductor/`. Previous: v3.0 SHIPPED 2026-07-16 (archived + tagged).
 
 ## Accumulated Context
 
+- v3.1 CONDUCTOR (M06) opened 2026-07-17 — Extension Factory Phase 6, re-homed from the archived factory repo (commit `ddc76fa`). The M-index codename `M06-conductor` is retained for the committed plan set; the milestone is versioned `v3.1` because `getMilestoneInfo`/ROADMAP tooling only resolves `vX.Y` (a bare M-index has no matcher). phase-01 v2 PHASE_PLANNED. Reconciled on branch `gsd/v3.1-conductor`; unpushed.
+- Pre-M06 doc-sync (v3.0 post-ship) landed via PR #70 (merge commit `0475e55`) in a parallel session — PROJECT.md 2,922 assertions / 91.8% lines, CHANGELOG #65–#68 backfill, DEVOPS-HANDOFF date bump; `.review-pending` sentinel cleared.
 - v2.9 Autonomous Workflows Completion SHIPPED + ARCHIVED + TAGGED 2026-07-15 (tag v2.9 @ c4b6a2e, PRs #51-55), closed via the FIRST LIVE `workflow:ship-milestone` run — both gates fired, complete-milestone's 3 prompts stayed live. Audit verdict `tech_debt`; sole carry-forward is HOOKREG (v3.0 scope).
 - v3.0 Milestone-Close Hardening SHIPPED 2026-07-16 (PRs #60-61): both v2.9 carry-forward gaps closed — complete-milestone now PR-merges on protected main (local path preserved for unprotected), and the shipped hook set is locked by a versioned registry template + filesystem-derived contract test.
 - Adjacent PR #62 (parallel session, outside milestone scope): critical data-loss/injection remediation; main now 2,916 assertions / 591 suites / 91.71% coverage.
