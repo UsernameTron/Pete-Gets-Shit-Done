@@ -1,5 +1,13 @@
 # Todo
 
+## ACTIVE: v3.1 CONDUCTOR (M06) — phase-01 PLANNED
+
+Plans + reference docs: `.planning/milestones/M06-conductor/`. Architecture of record: `conductor-phase6-proposal.md` (as amended); on conflict `phase-01-PLAN.md` v2 wins. Branch: `gsd/v3.1-conductor` (unpushed).
+
+- [ ] M06/phase-01 — execute Session 1 per phase-01-PLAN v2 (probe, contracts, lib, both adapters, first logged delegation)
+- [ ] M06/phase-01 — Session 2: router, fixtures, all eight gates
+- [ ] M06/phase-01 — deliver benchmark smoke report (10 seeded + 5 clean); threshold decision deferred to phase-02 stratified set
+
 ## COMPLETED PROGRAM: Autonomous Workflows Build-Out (2026-07-12, operator-approved order)
 
 Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop: plan → execute → verify → merge on full-green CI → next. Operator away; merge-on-green explicitly delegated.
@@ -11,9 +19,9 @@ Source design: `.planning/GSD-AUTONOMOUS-WORKFLOWS.md` (PR #36). Per-phase loop:
 - [x] **Phase E** — PR #40: `/gsd:do` routes the three built flows via `workflow:` targets (+9-assertion routing test); ecosystem map regenerated at 241 components (drift-history row 3 appended; stale 75-command line fixed); living docs synced.
 - ~~SHELVED: `ship-milestone`~~ BUILT (Phase 59, 2026-07-15) after finalize repairs + Phase 58 re-verification. Second pass (`quick-change`, `bug-to-branch`) also shipped.
 
-## Current Status: v3.0 Archived — Between Milestones
+## Current Status: v3.1 CONDUCTOR (M06) — phase-01 PLANNED
 
-20 milestones shipped (v1.0 through v3.0). 59 phases executed. Branch protection on main enforces 5 required status checks (3 test matrix + governance + docs-integrity).
+v3.0 archived + tagged 2026-07-16 (20 milestones shipped, v1.0–v3.0; 59 phases executed). v3.1 CONDUCTOR opened 2026-07-17; phase-01 v2 PHASE_PLANNED on branch `gsd/v3.1-conductor` (unpushed). Branch protection on main enforces 5 required status checks (3 test matrix + governance + docs-integrity).
 
 - **Tests**: 2,921 passing, 0 failures (593 suites)
 - **Coverage**: 91.73% lines, 83.27% branches, 97.62% functions

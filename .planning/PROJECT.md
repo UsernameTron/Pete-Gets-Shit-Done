@@ -6,7 +6,7 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 ## Current State
 
-**Current milestone:** None — v3.0 shipped 2026-07-16; next milestone not scoped (`/gsd:new-milestone`)
+**Current milestone:** v3.1 CONDUCTOR — multi-harness orchestration (M06, Extension Factory Phase 6; accepted 2026-07-17, plan v2)
 **Previous:** v3.0 Milestone-Close Hardening (shipped 2026-07-16, 2 phases, 7 requirements, tag v3.0)
 **Package:** `get-shit-done-cc` v1.30.0
 **Tests:** 2,922 assertions / 593 suites, all passing
@@ -23,15 +23,25 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 
 GSD delivers disciplined, reproducible software delivery inside Claude Code by enforcing a 5-phase lifecycle (discuss → plan → execute → verify → ship) with wave-based parallelization, quality gates, and adaptive task routing. The core value is **predictable, high-quality execution at scale** — turning ambiguous prompts into shipped, tested, documented code without skipped steps.
 
-## Current Milestone: v3.0 Milestone-Close Hardening
+## Current Milestone: v3.1 CONDUCTOR (M06 — Extension Factory Phase 6)
+
+Phase 6 — CONDUCTOR multi-harness orchestration (M06; accepted 2026-07-17; plan v2).
+
+**Goal:** Multi-harness orchestration with Claude Code as sole writer and approved processor of record; Grok Build (local) and Gemini as structurally read-only delegates; the Codex lane arrives in phase-02. Governance is Option A (approved-cloud); "air-gapped" applies to the Grok-local lane only.
+
+**Architecture of record:** `conductor-phase6-proposal.md` as amended by its supersession notice; on conflict, `phase-01-PLAN.md` (v2) wins.
+
+**Phases** (plans + reference docs in `.planning/milestones/M06-conductor/`): phase-01 Contracts & Local Lane (v2, full runbook — PHASE_PLANNED) · phase-02 Frontier Review Lane · phase-03 Autonomy & Integration · phase-04 Repo Migration · phase-05 Visual Intelligence Lane.
+
+**Naming:** the M-index codename `M06-conductor` is retained for the committed plan set; the milestone is versioned `v3.1` so ROADMAP / `getMilestoneInfo` tooling resolves the active milestone (a bare M-index has no matcher).
+
+## Previous Milestone: v3.0 Milestone-Close Hardening (shipped 2026-07-16)
 
 **Goal:** Close the two runtime-safety gaps the v2.9 close-out surfaced — so milestone close-out works on a protected `main` and hook enforcement is reproducible from a fresh clone.
 
-**Target features:**
+**Delivered:**
 - Protected-`main` merge path: `complete-milestone`/`ship-milestone` merge the close-out branch via `gh pr merge` (CI-gated) when `main` is branch-protected, instead of the local squash-merge + direct push that PR-only protection rejects (audit item 6, first live ship-milestone run)
-- Versioned hook registration: settings template + installer contract test so a fresh clone gets the full runtime hook set — 17 baseline hooks, only 2 registered live in-repo today, `lesson-capture-gate.cjs` unwired (the v2.9-deferred "HOOK-01", renamed HOOKREG to avoid colliding with shipped v2.3/v2.4 HOOK-* IDs)
-
-**Key context:** Both items came out of the v2.9 close-out with teeth: the protected-main gap forced a manual route-around during the first live `ship-milestone` run; HOOKREG is the ecosystem map's flagged top gap. The BITTER_LESSON_LOG DEFERRED cleanups are explicitly a lightweight follow-on, not this milestone. Internal-tooling milestone: no external-domain research.
+- Versioned hook registration: settings template + installer contract test so a fresh clone gets the full runtime hook set (the v2.9-deferred HOOKREG, the ecosystem map's flagged top gap)
 
 ## Requirements
 
@@ -382,4 +392,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-16 after v3.0 milestone — Milestone-Close Hardening shipped (protected-main PR-merge path + versioned hook registration); 20 milestones shipped to date.*
+*Last updated: 2026-07-17 — v3.1 CONDUCTOR (M06) milestone opened, phase-01 v2 PHASE_PLANNED. Prior: v3.0 Milestone-Close Hardening shipped 2026-07-16; 20 milestones shipped to date.*
