@@ -157,6 +157,30 @@ Use `--global` (`-g`) or `--local` (`-l`) to skip the location prompt. Use `--cl
 
 </details>
 
+## Runtime Auth (API keys vs. subscription login)
+
+<details>
+<summary>Using an API key with Gemini or Codex</summary>
+
+GSD's commands run under each runtime's own authentication. If you are **not** signed in with an interactive/subscription login, set the key explicitly:
+
+- **Gemini CLI** — export `GEMINI_API_KEY` (an AI Studio key) to use API-key auth instead of the Google OAuth login. No config needed.
+- **Codex CLI** — by default Codex uses your ChatGPT login and **ignores `OPENAI_API_KEY`**. To drive GSD with an OpenAI **API key**, add an env-key provider to `config.toml` (recent Codex rejects `wire_api = "chat"` — use `"responses"`):
+
+  ```toml
+  model = "gpt-4o-mini"          # any model your API account can access
+  model_provider = "openai_env"
+
+  [model_providers.openai_env]
+  base_url = "https://api.openai.com/v1"
+  env_key = "OPENAI_API_KEY"
+  wire_api = "responses"
+  ```
+
+  Then run with the key in the environment (`OPENAI_API_KEY=... codex`). Verified against Gemini CLI 0.13.0 and Codex CLI 0.144.5.
+
+</details>
+
 ## Development Installation
 
 <details>
