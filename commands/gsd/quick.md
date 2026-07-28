@@ -1,7 +1,7 @@
 ---
 name: gsd:quick
-description: Execute a quick task with GSD guarantees (atomic commits, state tracking) but skip optional agents
-argument-hint: "[--full] [--discuss] [--research]"
+description: Execute a quick task with GSD guarantees (atomic commits, state tracking) but skip optional agents. --inline runs trivial tasks directly with no subagents (same behavior as /gsd:fast)
+argument-hint: "[--inline] [--full] [--discuss] [--research]"
 allowed-tools:
   - Read
   - Write
@@ -29,6 +29,12 @@ Quick mode is the same system with a shorter path:
 **`--research` flag:** Spawns a focused research agent before planning. Investigates implementation approaches, library options, and pitfalls for the task. Use when you're unsure of the best approach.
 
 Flags are composable: `--discuss --research --full` gives discussion + research + plan-checking + verification.
+
+**`--inline` flag:** For tasks you could describe in one sentence and execute in under
+2 minutes (typo fixes, config values, forgotten commits). Execute directly in the
+current context — no subagents, no PLAN.md, no `.planning/quick/` artifacts. Just do
+the task and make one atomic commit. Same behavior as `/gsd:fast`. Not composable with
+the other flags; if the task turns out to need planning, fall back to plain `/gsd:quick`.
 </objective>
 
 <execution_context>
@@ -42,6 +48,9 @@ Context files are resolved inside the workflow (`init quick`) and delegated via 
 </context>
 
 <process>
-Execute the quick workflow from @~/.claude/get-shit-done/workflows/quick.md end-to-end.
+If `--inline` was passed: skip the workflow entirely — execute the task directly in
+the current context per the `--inline` objective above, then make one atomic commit.
+
+Otherwise execute the quick workflow from @~/.claude/get-shit-done/workflows/quick.md end-to-end.
 Preserve all workflow gates (validation, task description, planning, execution, state updates, commits).
 </process>

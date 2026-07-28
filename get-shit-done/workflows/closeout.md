@@ -258,23 +258,11 @@ Skill(skill="gsd:verify-work")
 
 **2b. Automated build/test/lint**
 
-Replicate finalize.md Gate 2 inline so failures surface before Gate 5 ship rather than after. Reading CLAUDE.md and extracting the project's build/test/lint commands keeps closeout project-agnostic — no hardcoded `npm test` or `make`.
+Run the shared build-verification procedure from
+@~/.claude/get-shit-done/references/build-verification.md end-to-end, so failures
+surface before Gate 5 ship rather than after.
 
-1. Read `CLAUDE.md`. Look for `## Tests`, `## Commands`, or fenced `bash` blocks listing build/test/lint commands.
-2. Identify candidate commands: scaffold/structure check, type check (tsc, mypy), lint (biome, ruff, eslint), test suite (`npm test`, `bun test`, `pytest`, `make test-all`).
-3. For each command that maps to a tool installed in this project (probe with `command -v` or check `package.json`/`pyproject.toml`/`Makefile` for the script), execute it and record `PASS` / `FAIL` / `SKIPPED`.
-4. Present a verification table identical in shape to finalize.md Gate 2:
-
-   ```
-   | Check        | Result | Detail            |
-   |--------------|--------|-------------------|
-   | scaffold     | PASS   | 43/43             |
-   | type-check   | PASS   | 0 errors          |
-   | lint         | PASS   | clean             |
-   | tests        | PASS   | 2,644 passed      |
-   ```
-
-5. If any row is `FAIL`, route via `handle_blocker` with description `Gate 2 verify: <check> FAIL` and the captured stderr. Do not proceed.
+If its verdict line is `FAIL`, route via `handle_blocker` with description `Gate 2 verify: <check> FAIL` and the captured stderr. Do not proceed.
 
 When closeout completes Gate 7, finalize will re-run the same checks at its own Gate 2 — that is an intentional double-check, not duplication.
 

@@ -15,7 +15,13 @@ allowed-tools:
 <!-- workflow-exemption: inline — orchestrates existing commands (complete-milestone, cleanup, stats, session-report) inline -->
 
 <objective>
-Close out a completed project or milestone in a single pass. Runs the full verification → archive → report → push → confirm loop so nothing is left dangling.
+<!-- estate-slim Phase 5 (updated feat/confidence-sweep): /gsd:complete-milestone remains
+     absorbed here — milestone archival runs inline at Gate 3 via
+     @~/.claude/get-shit-done/workflows/complete-milestone.md (path reference is
+     load-bearing — it keeps that workflow alive through reapply-slim's orphan check).
+     /gsd:closeout is restored as the full pre-close chain; finalize stays the back half. -->
+
+Close out a completed project or milestone in a single pass. Runs the full verification → archive → report → push → confirm loop so nothing is left dangling. Absorbs the retired `/gsd:complete-milestone` (estate-slim Phase 5).
 
 This command is project-agnostic. It reads the project's own CLAUDE.md, .planning/STATE.md, and tasks/todo.md to understand what "done" means for this specific project, then executes the finalization sequence.
 
@@ -84,29 +90,18 @@ When consent is pre-approved, do not ask — print the receipt line `[auto-push]
 
 ## Gate 2: Verify Build Health
 
-1. Extract build/test/lint commands from CLAUDE.md (look for ```bash blocks or ## Commands section)
-2. Run each command that exists in this project:
-   - Scaffold/structure check (if project has one)
-   - Type check (tsc, mypy, etc.)
-   - Lint (biome, ruff, eslint, etc.)
-   - Test suite (bun test, pytest, npm test, etc.)
-3. For each command, report: PASS / FAIL / SKIPPED (not available)
-4. If any FAIL: stop and report. Do not proceed past this gate with failures.
-5. Present verification table:
-   ```
-   | Check        | Result | Detail           |
-   |--------------|--------|------------------|
-   | scaffold     | PASS   | 43/43            |
-   | type-check   | PASS   | 39/39, 0 errors  |
-   | lint         | PASS   | clean            |
-   | tests        | PASS   | 567 passed       |
-   ```
+Run the shared build-verification procedure from
+@~/.claude/get-shit-done/references/build-verification.md end-to-end.
+
+If its verdict line is `FAIL`: stop and report. Do not proceed past this gate with failures.
 
 ## Gate 3: Archive Milestone (if not already archived)
 
 1. Check .planning/STATE.md status field
 2. If status is NOT `archived`:
-   - Run `/gsd:complete-milestone $ARGUMENTS` workflow inline
+   - Run the milestone-archive workflow inline: execute
+     @~/.claude/get-shit-done/workflows/complete-milestone.md end-to-end
+     (the retired /gsd:complete-milestone command's workflow — absorbed here)
    - This archives phases, updates STATE.md, creates milestone record
 3. If status IS `archived`:
    - Confirm archive exists in .planning/milestones/
