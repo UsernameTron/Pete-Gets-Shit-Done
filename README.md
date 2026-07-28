@@ -56,7 +56,7 @@ GSD is two layers in one install:
 
 | Layer | What it does | Components |
 |-------|-------------|------------|
-| Execution Engine | discuss → plan → execute → verify → ship | 67 commands, 17 agents, 7 hooks, wave-based parallel execution |
+| Execution Engine | discuss → plan → execute → verify → ship | 68 commands, 17 agents, 7 hooks, wave-based parallel execution |
 | Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (33 skills, 10 subagents), 7 reference docs |
 | Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | classify.cjs, model-profiles.cjs, history.cjs — all opt-in, off by default |
 
@@ -66,7 +66,7 @@ The full inventory:
 
 | Metric | Count |
 |--------|-------|
-| GSD commands | 67 |
+| GSD commands | 68 |
 | Specialized agents | 17 |
 | Runtime hooks | 17 (7 execution + 10 governance, 1 shared) |
 | Plugin skills | 33 (26 code factory + 7 MCP ecosystem) |

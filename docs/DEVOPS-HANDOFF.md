@@ -43,7 +43,7 @@ The installer (`bin/install.js`) copies the following into the user's Claude Cod
 
 | Component | Destination | Contents |
 |-----------|-------------|----------|
-| Commands | `~/.claude/get-shit-done/commands/` | 67 GSD slash commands |
+| Commands | `~/.claude/get-shit-done/commands/` | 68 GSD slash commands |
 | Agents | `~/.claude/get-shit-done/agents/` | 17 specialized agent definitions |
 | Hooks | `~/.claude/get-shit-done/hooks/` | 7 execution hooks (bundled JS) |
 | Workflows | `~/.claude/get-shit-done/workflows/` | Orchestration templates |

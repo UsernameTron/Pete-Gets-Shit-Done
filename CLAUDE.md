@@ -11,7 +11,7 @@ You are working with Pete Connor — AI transformation leader, MS in AI, CCXP/CC
 **get-shit-done** (GSD) is an execution engine and governance framework plugin for Claude Code. It wraps the full software delivery lifecycle — from ideation to merged PR — in a structured, repeatable pipeline with quality gates enforced at every phase.
 
 Key capabilities:
-- **67 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
+- **68 slash commands** spanning discuss, plan, execute, verify, ship, milestone management, workstream isolation, research, and session lifecycle
 - **17 built-in agents** (gsd-verifier, gsd-planner, gsd-executor, gsd-debugger, gsd-codebase-mapper, gsd-validator-hub, and others) handling quality, planning, and execution roles
 - **33 Claude Code skills** covering command implementations, utilities, and governance workflows
 - **Wave-based parallel execution** — independent tasks run concurrently in waves; dependent tasks respect ordering automatically
