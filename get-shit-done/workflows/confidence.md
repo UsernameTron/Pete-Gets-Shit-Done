@@ -101,7 +101,6 @@ Skill(skill="gsd:map-codebase")
 ```
 Take the Refresh path if maps exist. Post-condition:
 ```bash
-STALE_MAPS=$(find .planning/codebase -name '*.md' -newer .git/FETCH_HEAD 2>/dev/null | wc -l)
 ls .planning/codebase/*.md >/dev/null 2>&1
 ```
 Record `LEG4=PASS` if `.planning/codebase/` has ≥1 doc updated this run, else `WARN`.
@@ -122,7 +121,7 @@ Inline bash — the leg no other GSD surface covers:
 ```bash
 UNTRACKED=$(git status --porcelain | grep -c '^??' || true)
 GONE_BRANCHES=$(git branch -vv | grep -c ': gone]' || true)
-BIG_FILES=$(git ls-files -z | xargs -0 -I{} sh -c 'test -f "{}" && test $(stat -f%z "{}" 2>/dev/null || stat -c%s "{}") -gt 5242880 && echo "{}"' 2>/dev/null | wc -l | tr -d ' ')
+BIG_FILES=$(git ls-files -z | xargs -0 du -k 2>/dev/null | awk '$1>5120' | wc -l | tr -d ' ')
 ORPHANS=$(ls -d .planning/_absorbed 2>/dev/null | wc -l | tr -d ' ')
 DEBUG_LEFT=$(ls .planning/debug/*.md 2>/dev/null | wc -l | tr -d ' ')
 TODO_COUNT=$(grep -rIn --exclude-dir={.git,node_modules,.planning} -E 'TODO|FIXME|XXX' . 2>/dev/null | wc -l | tr -d ' ')
