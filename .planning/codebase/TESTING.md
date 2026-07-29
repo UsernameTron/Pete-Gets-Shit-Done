@@ -30,11 +30,11 @@ npm run test:e2e:smoke                # Run only *.smoke.test.cjs E2E files
 
 ```
 tests/
-  *.test.cjs              # Unit and integration tests (89 files)
+  *.test.cjs              # Unit and integration tests (95 files)
   helpers.cjs              # Shared test utilities for gsd-tools CLI
   hook-helpers.cjs         # Shared test utilities for hook scripts
   e2e/
-    *.test.cjs             # End-to-end pipeline tests (12 files)
+    *.test.cjs             # End-to-end pipeline tests (11 files)
     *.smoke.test.cjs        # Smoke subset (1 file)
     assertions.cjs          # Custom E2E assertion helpers
     mock-layer.cjs           # Deterministic mock factories
@@ -53,7 +53,7 @@ All node:test files use the `.cjs` extension and `.test.cjs` suffix. Governance 
 
 ## Test Categories
 
-### Unit / Integration Tests (2,932 tests across 573 `describe` suites, 89 files)
+### Unit / Integration Tests (2,939 tests across 594 `describe` suites, 95 files)
 
 Test individual modules by requiring source files directly and calling functions, or by round-tripping the real CLI/hook binary as a child process against a temp directory. Numbers below are from an actual `npm test` run against the current tree (0 failures, ~41–53s).
 
@@ -127,7 +127,7 @@ it('exits 0 for clean content', () => {
 
 **Workflow-contract test files** (see "Workflow Contract Tests" under Common Patterns): `tests/wrap-and-sync.test.cjs`, `tests/daily-startup.test.cjs`, `tests/closeout.test.cjs`, `tests/do-routing.test.cjs`, `tests/quick-branching.test.cjs`, `tests/quick-research.test.cjs`, `tests/idea-to-shipped.test.cjs`, `tests/execute-phase-wave.test.cjs`, `tests/ecosystem-map.test.cjs`, `tests/forensics.test.cjs`, `tests/milestone-summary.test.cjs`, `tests/workspace.test.cjs`, `tests/phase.test.cjs`, `tests/antigravity-install.test.cjs` (14 files total)
 
-### E2E Tests (143 tests across 57 suites, 12 files)
+### E2E Tests (133 tests across 56 suites, 11 files)
 
 Full pipeline tests that scaffold realistic projects and run multi-step GSD workflows against the real CLI. Confirmed via live run: 0 failures, ~5s.
 
@@ -251,7 +251,7 @@ open coverage/lcov-report/index.html
 **Unit Tests:**
 - Either require a `lib/` module directly and call its exports in-process, or spawn the real `gsd-tools.cjs`/hook script as a child process against a disposable temp directory
 - Every test creates and tears down its own temp directory — no shared mutable fixtures
-- Fast: the full 2,932-test unit/integration run completes in ~41–53s
+- Fast: the full 2,939-test unit/integration run completes in ~41–53s
 
 **Integration Tests:**
 - `integ-*.test.cjs` files exercise multi-command sequences against one temp project (e.g. init → plan → execute → verify state transitions)
@@ -262,7 +262,7 @@ open coverage/lcov-report/index.html
 
 ## Common Patterns
 
-**Suite Organization:** `describe()` grouped by exported symbol or command, `test()` (dominant — 77 files) or `it()` (minority alias — 12 files) for individual cases, separated by the same Unicode-box-drawing section comments used in source files:
+**Suite Organization:** `describe()` grouped by exported symbol or command, `test()` (dominant — 82 files) or `it()` (minority alias — 13 files) for individual cases, separated by the same Unicode-box-drawing section comments used in source files:
 ```javascript
 // ─── COMPLEXITY_LEVELS ───────────────────────────────────────────────────────
 describe('COMPLEXITY_LEVELS', () => {
@@ -317,7 +317,7 @@ test('steps run in contract order: coverage -> drift-check -> gate', () => {
 | Metric | Value |
 |--------|-------|
 | Unit/integration test files | 89 |
-| Unit/integration suites (`describe`) / tests | 573 / 2,932 |
+| Unit/integration suites (`describe`) / tests | 594 / 2,939 |
 | E2E test files (incl. 1 smoke) | 12 |
 | E2E suites / tests | 57 / 143 |
 | Performance test files | 1 |
