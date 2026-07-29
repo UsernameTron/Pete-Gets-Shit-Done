@@ -48,7 +48,11 @@ animation/
 # checkpoint/handoff runtime state — tests already treat these as RUNTIME_ARTIFACT_EXCEPTIONS
 # ("not shipped as tracked repo files"); keep them session-local like state/
 /.planning/HANDOFF.json
+/.planning/HANDOFF.md
 /.planning/CHECKPOINT.json
+# Stop-hook deferral sentinel — records "commit deferred pending review" intent
+# for one session; never a tracked artifact.
+/.planning/.review-pending
 reports/
 analysis/
 
