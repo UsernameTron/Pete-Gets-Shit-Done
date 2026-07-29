@@ -38,7 +38,10 @@ prints `[skipped]`, never errors):
 
 ```bash
 probe_plugin() {
-  jq -e --arg p "$1" 'to_entries[] | .value | keys[] | select(startswith($p))' \
+  # Scope to .plugins — the file also has a top-level numeric `version` key, and
+  # `to_entries[] | .value | keys[]` aborts on it ("number has no keys"), which
+  # would make every probe report "skipped". Same expression closeout.md uses.
+  jq -e --arg n "$1" '.plugins | keys | map(select(startswith($n + "@") or . == $n)) | length > 0' \
     "$HOME/.claude/plugins/installed_plugins.json" >/dev/null 2>&1 \
     && echo "available" || echo "skipped"
 }

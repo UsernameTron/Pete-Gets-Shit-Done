@@ -149,6 +149,18 @@ describe('confidence workflow contract', () => {
     assert.match(wf, /never errors|\[skipped\]/, 'graceful degradation wording missing');
   });
 
+  test('plugin probe scopes to .plugins and cannot always-skip', () => {
+    // installed_plugins.json has a top-level numeric `version` key. Walking every
+    // top-level value with keys[] throws "number has no keys", aborting the filter
+    // so every probe reports "skipped" and cross-plugin steps silently never run.
+    // Ignore comment lines — the fix documents the broken form in prose.
+    const live = wf.split('\n').filter((l) => !/^\s*#/.test(l)).join('\n');
+    assert.ok(!/to_entries\[\]\s*\|\s*\.value\s*\|\s*keys\[\]/.test(live),
+      'probe must not walk all top-level values (aborts on the numeric version key)');
+    assert.match(wf, /jq [^\n]*'\.plugins \| keys/,
+      'probe must scope its jq query to .plugins');
+  });
+
   test('every repo file path referenced in inline code spans resolves on disk', () => {
     const stripped = wf.replace(/```[\s\S]*?```/g, '');
     const spans = [...stripped.matchAll(/`([^`\n]+)`/g)].map((m) => m[1]);
