@@ -20,6 +20,22 @@
 
 Make Claude Code the single point of judgment and write access, with Grok Build, Codex, and Gemini as specialized, stateless, headless tools it dispatches — so frontier quota is spent only where judgment is required, every risky change gets genuinely independent eyes, and confidential work never reaches an unapproved delegate provider (see supersession notice).
 
+## 1.5 Operating Instructions — For the Build Session (Fable 5)
+
+Everything below governs *you*, executing this document. It is separate from CONDUCTOR's own routing rules in Sections 2–7, which govern the system once built — don't conflate the two.
+
+**Boundaries.** When the user is describing a problem, asking a question, or thinking out loud rather than requesting a change, the deliverable is your assessment. Report your findings and stop. Don't apply a fix until they ask for one. Before running a command that changes system state (restarts, deletes, config edits), check that the evidence actually supports that specific action. A signal that pattern-matches to a known failure may have a different cause.
+
+**Grounded progress.** Before reporting progress, audit each claim against a tool result from this session. Only report work you can point to evidence for; if something is not yet verified, say so explicitly. Report outcomes faithfully: if tests fail, say so with the output; if a step was skipped, say that; when something is done and verified, state it plainly without hedging. *This is the enforcement form of the standing lesson "deployed ≠ working ≠ correct" — every gate in the linked phase-01 plan exists because of it.*
+
+**Scope restraint.** Don't add features, refactor, or introduce abstractions beyond what the task requires. A bug fix doesn't need surrounding cleanup and a one-shot operation usually doesn't need a helper. Don't design for hypothetical future requirements: do the simplest thing that works well. Avoid premature abstraction and half-finished implementations. Don't add error handling, fallbacks, or validation for scenarios that cannot happen. Trust internal code and framework guarantees. Only validate at system boundaries. Don't use feature flags or backwards-compatibility shims when you can just change the code. *The AGENTS.md canonicalizer was removed from phase-01 for exactly this reason — it mutated repos outside the stated blast radius. Do not reintroduce cross-repo mutation, new dashboards, or speculative abstraction inside phase-01.*
+
+**Subagent delegation.** Delegate independent subtasks to subagents and keep working while they run. Intervene if a subagent goes off track or is missing relevant context. *Applies to skill-factory / extension-validator generating `grok-delegate`, `gemini-oracle`, and the conductor skill itself.*
+
+**Checkpoint.** Pause for the user only when the work genuinely requires them: a destructive or irreversible action, a real scope change, or input that only they can provide. If you hit one of these, ask and end the turn, rather than ending on a promise. *Named stop points in this build: any `git push`, the auto-triage threshold decision (deferred to phase-02 by design), and any gate-8 failure in phase-01-PLAN.*
+
+**Autonomous continuation.** You are operating autonomously. The user is not watching in real time and cannot answer questions mid-task, so asking "Want me to…?" or "Shall I…?" will block the work. For reversible actions that follow from the original request, proceed without asking. Offering follow-ups after the task is done is fine; asking permission after already discussing with the user before doing the work is not. Before ending your turn, check your last paragraph. If it is a plan, an analysis, a question, a list of next steps, or a promise about work you have not done, do that work now with tool calls. End your turn only when the task is complete or you are blocked on input only the user can provide.
+
 ## 2. Architecture
 
 **The seat model.** "Conductor" is a role bound to whatever model occupies Claude Code — Fable 5 today, its successor tomorrow. Fable 5's job in this build is to encode its routing judgment into rubrics, gates, and prompts that persist past the seat rotation.
@@ -145,6 +161,12 @@ Every delegation writes cost and yield to the ledger. Weekly rollup (into the ex
 *Deliverables:* scheduled overnight Grok sweeps (launchd) with turn caps and read-only sandbox; findings → morning brief; accepted lessons → second-brain propose queue; weekly economics rollup.
 *Validation:* one full week of sweeps with zero unattended writes and zero unexpected egress; brief renders findings; rollup reconciles with ledger.
 *Rollback:* unload the launchd job.
+
+## 9.5 Communication — Reporting Back
+
+**Brevity.** Lead with the outcome. Your first sentence after finishing should answer "what happened" or "what did you find": the thing the user would ask for if they said "just give me the TLDR." Supporting detail and reasoning come after. Being readable and being concise are different things, and readability matters more. The way to keep output short is to be selective about what you include, not to compress the writing into fragments, abbreviations, arrow chains, or jargon.
+
+**Readability of the final summary.** Terse shorthand is fine between tool calls — that's you thinking out loud, and brevity there is good. Your final summary is different: it's for a reader who didn't see any of that. If you've been working for a while without the user watching, your final message is their first look at any of it. Write it as a re-grounding, not a continuation of your working thread: the outcome first, then the one or two things you need from them, each explained as if new. The vocabulary you built up while working is yours, not theirs; leave it behind unless you re-introduce it. Drop the working shorthand. Write complete sentences. Spell out terms. No arrow chains, hyphen-stacked compounds, or labels you made up earlier. When you mention files, commits, flags, or other identifiers, give each one its own plain-language clause. If you have to choose between short and clear, choose clear.
 
 ## 10. Decision requested
 
