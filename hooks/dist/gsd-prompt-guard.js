@@ -43,6 +43,13 @@ const INJECTION_PATTERNS = [
 ];
 // --- END_INJECTION_PATTERNS ---
 
+// Files that legitimately document injection patterns (security docs describing an
+// attack must be able to quote it). Mirrors ALLOWLIST in tests/prompt-injection-scan.test.cjs.
+// Exact repo-relative paths only — never globs; a broad entry silently disarms the guard.
+const ALLOWLIST = [
+  '.planning/milestones/M06-conductor/conductor-phase6-proposal.md',
+];
+
 let input = '';
 const stdinTimeout = setTimeout(() => process.exit(0), 3000);
 process.stdin.setEncoding('utf8');
@@ -62,6 +69,14 @@ process.stdin.on('end', () => {
 
     // Only scan files going into .planning/ (agent context files)
     if (!filePath.includes('.planning/') && !filePath.includes('.planning\\')) {
+      process.exit(0);
+    }
+
+    // Allowlisted security docs may quote injection patterns verbatim.
+    // Match on a path boundary — a bare endsWith() lets `evil.planning/...`
+    // and any other unanchored suffix collision inherit the exemption.
+    const normalized = filePath.replace(/\\/g, '/');
+    if (ALLOWLIST.some(allowed => normalized === allowed || normalized.endsWith('/' + allowed))) {
       process.exit(0);
     }
 
@@ -97,7 +112,7 @@ process.stdin.on('end', () => {
           `triggered ${findings.length} injection detection pattern(s): ${findings.join(', ')}. ` +
           'This content appears to contain embedded instructions that could manipulate agent behavior. ' +
           'Tool call blocked. If the content is legitimate (e.g., documentation about prompt injection), ' +
-          'disable the prompt-guard hook temporarily.',
+          'add its exact repo-relative path to ALLOWLIST in hooks/gsd-prompt-guard.js — do not disable the hook.',
       },
     };
 

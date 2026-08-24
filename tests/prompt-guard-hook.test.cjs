@@ -284,4 +284,49 @@ describe('gsd-prompt-guard hook', () => {
     assert.equal(result.exitCode, 0);
     assert.equal(result.stdout.trim(), '');
   });
+  // ── Allowlisted security docs ─────────────────────────
+
+  it('allows an allowlisted security doc to quote an injection pattern', () => {
+    const result = runHook(HOOK_PATH, {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: '/project/.planning/milestones/M06-conductor/conductor-phase6-proposal.md',
+        content: 'Phase A ships an explicit injection test: a planted "ignore previous instructions" string must survive as inert data.',
+      },
+    });
+    assert.equal(result.exitCode, 0);
+    assert.equal(result.stdout.trim(), '', 'allowlisted path should not be blocked');
+  });
+
+  it('still blocks the same content at a non-allowlisted .planning/ path', () => {
+    const result = runHook(HOOK_PATH, {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: '/project/.planning/STATE.md',
+        content: 'Phase A ships an explicit injection test: a planted "ignore previous instructions" string must survive as inert data.',
+      },
+    });
+    assert.equal(result.exitCode, 2, 'allowlist must not disarm the guard elsewhere');
+  });
+
+  it('does not allowlist by suffix collision on a different directory', () => {
+    const result = runHook(HOOK_PATH, {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: '/project/.planning/evil-conductor-phase6-proposal.md',
+        content: 'Phase A ships an explicit injection test: a planted "ignore previous instructions" string must survive as inert data.',
+      },
+    });
+    assert.equal(result.exitCode, 2, 'partial filename match must not pass the allowlist');
+  });
+  it('does not allowlist an unanchored suffix collision on the directory', () => {
+    const result = runHook(HOOK_PATH, {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: '/project/evil.planning/milestones/M06-conductor/conductor-phase6-proposal.md',
+        content: 'Phase A ships an explicit injection test: a planted "ignore previous instructions" string must survive as inert data.',
+      },
+    });
+    assert.equal(result.exitCode, 2, 'suffix match must be anchored at a path boundary');
+  });
 });
