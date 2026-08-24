@@ -79,6 +79,7 @@ ALLOWLIST=(
   'tests/integ-governance-hooks.test.cjs'
   'SECURITY.md'
   '.planning/research/security-reviews/2026-04-07-hooks-review.md'
+  '.planning/milestones/M06-conductor/conductor-phase6-proposal.md'
   '.planning/REQUIREMENTS.md'
   'get-shit-done/references/agent-threat-model.md'
   '.planning/milestones/FOUNDATION-AUDIT-20260416.md'
@@ -93,9 +94,18 @@ ALLOWLIST=(
 is_allowlisted() {
   local file="$1"
   for allowed in "${ALLOWLIST[@]}"; do
-    # Suffix match for files, substring match for directory prefixes
-    if [[ "$file" == *"$allowed"* ]]; then
-      return 0
+    if [[ "$allowed" == */ ]]; then
+      # Directory prefix — must start a path segment, not appear mid-name.
+      if [[ "$file" == "$allowed"* || "$file" == *"/$allowed"* ]]; then
+        return 0
+      fi
+    else
+      # Exact file — anchored at a path boundary. A bare *substring* match let
+      # any path merely containing an allowlisted name (evil-SECURITY.md.md)
+      # inherit the exemption and skip the scan entirely.
+      if [[ "$file" == "$allowed" || "$file" == *"/$allowed" ]]; then
+        return 0
+      fi
     fi
   done
   return 1
