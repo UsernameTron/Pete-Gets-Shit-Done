@@ -73,7 +73,7 @@ The full inventory:
 | Plugin subagents | 10 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
 | Test suites | 595 |
-| Test assertions | 2,948 |
+| Test assertions | 2,946 |
 | Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
