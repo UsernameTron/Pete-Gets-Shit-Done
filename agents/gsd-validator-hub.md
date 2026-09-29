@@ -218,7 +218,7 @@ For every .md file in `.claude/agents/`:
 - `name` field is present and non-empty
 - `description` field is present and non-empty
 - `name` value matches the filename (strip .md, compare kebab-case)
-- If `model` is present, value is one of: sonnet, haiku, opus, inherit
+- If `model` is present, value is one of: sonnet, haiku, opus, inherit, or a full model ID
 - If `tools` is present, format is comma-separated (not YAML array)
 - If `permissionMode` is present, value is one of: default, acceptEdits, plan, bypassPermissions
 - If `maxTurns` is present, value is a positive integer
