@@ -121,29 +121,17 @@ process.stdin.on('end', () => {
 
     // Build advisory warning message (never use imperative commands that
     // override user preferences — see #884)
-    let message;
-    if (isCritical) {
-      message = isGsdActive
-        ? `CONTEXT CRITICAL: Usage at ${usedPct}%. Remaining: ${remaining}%. ` +
-          'Context is nearly exhausted. Do NOT start new complex work or write handoff files — ' +
-          'GSD state is already tracked in STATE.md. Finish the current atomic step and commit; ' +
-          'the Stop hook auto-commits session work at the next natural stopping point.'
-        : `CONTEXT CRITICAL: Usage at ${usedPct}%. Remaining: ${remaining}%. ` +
-          'Context is nearly exhausted. Inform the user that context is low and ask how they ' +
-          'want to proceed. Do NOT autonomously save state or write handoff files unless the user asks.';
-    } else {
-      message = isGsdActive
-        ? `CONTEXT WARNING: Usage at ${usedPct}%. Remaining: ${remaining}%. ` +
-          'Context is getting limited. Avoid starting new complex work. If not between ' +
-          'defined plan steps, inform the user so they can prepare to pause.'
-        : `CONTEXT WARNING: Usage at ${usedPct}%. Remaining: ${remaining}%. ` +
-          'Be aware that context is getting limited. Avoid unnecessary exploration or ' +
-          'starting new complex work.';
-    }
+    // No usage percentages or stop-work directives: the harness auto-compacts, and a
+    // countdown in context makes the model wrap up early. Only the GSD fact remains.
+    if (!(isCritical && isGsdActive)) process.exit(0);
+    const message =
+      'GSD state is tracked in STATE.md and the Stop hook auto-commits session work, ' +
+      'so no handoff files are needed if context compacts.';
 
     const output = {
       hookSpecificOutput: {
-        hookEventName: process.env.GEMINI_API_KEY ? "AfterTool" : "PostToolUse",
+        // Claude Code sets CLAUDE_PROJECT_DIR for hooks; a Gemini API key alone does not mean Gemini CLI
+        hookEventName: !process.env.CLAUDE_PROJECT_DIR && process.env.GEMINI_API_KEY ? "AfterTool" : "PostToolUse",
         additionalContext: message
       }
     };

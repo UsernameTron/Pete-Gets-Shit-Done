@@ -62,111 +62,80 @@ describe('gsd-context-monitor hook', () => {
     assert.equal(result.stdout.trim(), '', 'no warning at 50% remaining');
   });
 
-  // ── WARNING threshold (<=35%) ──────────────────────────────
+  // ── Thresholds: no usage countdowns ────────────────────────
+  // The harness auto-compacts; injecting remaining-% makes the model wrap up
+  // early. Only a GSD session at CRITICAL gets a note, and it carries no numbers.
 
-  it('emits WARNING when remaining is 35%', () => {
+  function gsdDir() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-ctx-test-'));
+    fs.mkdirSync(path.join(dir, '.planning'), { recursive: true });
+    fs.writeFileSync(path.join(dir, '.planning', 'STATE.md'), '# State');
+    return dir;
+  }
+
+  function bridge(remaining) {
     writeBridgeFile(sessionId, {
-      remaining_percentage: 35,
-      used_pct: 65,
+      remaining_percentage: remaining,
+      used_pct: 100 - remaining,
       timestamp: Math.floor(Date.now() / 1000),
     });
-    const result = runHook(HOOK_PATH, { session_id: sessionId });
+  }
+
+  it('stays silent at WARNING level (35%)', () => {
+    const dir = gsdDir();
+    bridge(35);
+    const result = runHook(HOOK_PATH, { session_id: sessionId, cwd: dir });
     assert.equal(result.exitCode, 0);
-    const output = JSON.parse(result.stdout);
-    assert.ok(output.hookSpecificOutput?.additionalContext, 'should have additionalContext');
-    assert.ok(
-      output.hookSpecificOutput.additionalContext.includes('CONTEXT WARNING'),
-      'should include WARNING level'
-    );
-    assert.ok(
-      output.hookSpecificOutput.additionalContext.includes('65%'),
-      'should include used percentage'
-    );
+    assert.equal(result.stdout.trim(), '', 'no countdown at WARNING');
+    cleanup(dir);
   });
 
-  // ── CRITICAL threshold (<=25%) ─────────────────────────────
-
-  it('emits CRITICAL when remaining is 25%', () => {
-    writeBridgeFile(sessionId, {
-      remaining_percentage: 25,
-      used_pct: 75,
-      timestamp: Math.floor(Date.now() / 1000),
-    });
-    const result = runHook(HOOK_PATH, { session_id: sessionId });
+  it('GSD session at CRITICAL gets the STATE.md note with no percentages', () => {
+    const dir = gsdDir();
+    bridge(25);
+    const result = runHook(HOOK_PATH, { session_id: sessionId, cwd: dir });
     assert.equal(result.exitCode, 0);
-    const output = JSON.parse(result.stdout);
-    assert.ok(
-      output.hookSpecificOutput.additionalContext.includes('CONTEXT CRITICAL'),
-      'should include CRITICAL level'
-    );
+    const ctx = JSON.parse(result.stdout).hookSpecificOutput.additionalContext;
+    assert.ok(ctx.includes('STATE.md'), 'mentions STATE.md');
+    assert.ok(!/\d+%/.test(ctx), 'no usage percentages');
+    cleanup(dir);
   });
 
-  it('emits CRITICAL when remaining is 10%', () => {
-    writeBridgeFile(sessionId, {
-      remaining_percentage: 10,
-      used_pct: 90,
-      timestamp: Math.floor(Date.now() / 1000),
-    });
-    const result = runHook(HOOK_PATH, { session_id: sessionId });
+  it('stays silent at CRITICAL outside a GSD project', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-ctx-test-'));
+    bridge(10);
+    const result = runHook(HOOK_PATH, { session_id: sessionId, cwd: dir });
     assert.equal(result.exitCode, 0);
-    const output = JSON.parse(result.stdout);
-    assert.ok(
-      output.hookSpecificOutput.additionalContext.includes('CONTEXT CRITICAL'),
-      'should include CRITICAL at 10%'
-    );
+    assert.equal(result.stdout.trim(), '', 'no countdown for non-GSD sessions');
+    cleanup(dir);
   });
 
   // ── Debounce ───────────────────────────────────────────────
 
-  it('debounces repeated warnings within DEBOUNCE_CALLS', () => {
-    writeBridgeFile(sessionId, {
-      remaining_percentage: 30,
-      used_pct: 70,
-      timestamp: Math.floor(Date.now() / 1000),
-    });
-
-    // First call: should warn
-    const first = runHook(HOOK_PATH, { session_id: sessionId });
-    assert.equal(first.exitCode, 0);
-    assert.ok(first.stdout.includes('CONTEXT WARNING'), 'first call should warn');
-
-    // Calls 2-5: should be debounced (within DEBOUNCE_CALLS=5)
+  it('debounces repeated CRITICAL notes within DEBOUNCE_CALLS', () => {
+    const dir = gsdDir();
+    bridge(20);
+    const first = runHook(HOOK_PATH, { session_id: sessionId, cwd: dir });
+    assert.ok(first.stdout.includes('STATE.md'), 'first call should note');
     for (let i = 2; i <= 5; i++) {
-      const r = runHook(HOOK_PATH, { session_id: sessionId });
+      const r = runHook(HOOK_PATH, { session_id: sessionId, cwd: dir });
       assert.equal(r.exitCode, 0);
       assert.equal(r.stdout.trim(), '', `call ${i} should be debounced`);
     }
-
-    // Call 6: should warn again (debounce counter reset at 5)
-    const sixth = runHook(HOOK_PATH, { session_id: sessionId });
-    assert.equal(sixth.exitCode, 0);
-    assert.ok(sixth.stdout.includes('CONTEXT WARNING'), 'call after debounce should warn');
+    const sixth = runHook(HOOK_PATH, { session_id: sessionId, cwd: dir });
+    assert.ok(sixth.stdout.includes('STATE.md'), 'call after debounce should note');
+    cleanup(dir);
   });
 
-  // ── Severity escalation bypasses debounce ──────────────────
-
   it('severity escalation from WARNING to CRITICAL bypasses debounce', () => {
-    // First call at WARNING level
-    writeBridgeFile(sessionId, {
-      remaining_percentage: 30,
-      used_pct: 70,
-      timestamp: Math.floor(Date.now() / 1000),
-    });
-    const first = runHook(HOOK_PATH, { session_id: sessionId });
-    assert.ok(first.stdout.includes('CONTEXT WARNING'), 'first call should warn');
-
-    // Second call — escalate to CRITICAL (should bypass debounce)
-    writeBridgeFile(sessionId, {
-      remaining_percentage: 20,
-      used_pct: 80,
-      timestamp: Math.floor(Date.now() / 1000),
-    });
-    const second = runHook(HOOK_PATH, { session_id: sessionId });
-    assert.equal(second.exitCode, 0);
-    assert.ok(
-      second.stdout.includes('CONTEXT CRITICAL'),
-      'severity escalation should bypass debounce'
-    );
+    const dir = gsdDir();
+    bridge(30);
+    const first = runHook(HOOK_PATH, { session_id: sessionId, cwd: dir });
+    assert.equal(first.stdout.trim(), '', 'WARNING is silent');
+    bridge(20);
+    const second = runHook(HOOK_PATH, { session_id: sessionId, cwd: dir });
+    assert.ok(second.stdout.includes('STATE.md'), 'escalation should bypass debounce');
+    cleanup(dir);
   });
 
   // ── Stale bridge file ──────────────────────────────────────
@@ -180,52 +149,6 @@ describe('gsd-context-monitor hook', () => {
     const result = runHook(HOOK_PATH, { session_id: sessionId });
     assert.equal(result.exitCode, 0);
     assert.equal(result.stdout.trim(), '', 'should ignore stale metrics');
-  });
-
-  // ── GSD-active vs not-active ───────────────────────────────
-
-  it('includes GSD-specific guidance when .planning/STATE.md exists', () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-ctx-test-'));
-    const planningDir = path.join(tmpDir, '.planning');
-    fs.mkdirSync(planningDir, { recursive: true });
-    fs.writeFileSync(path.join(planningDir, 'STATE.md'), '# State');
-
-    writeBridgeFile(sessionId, {
-      remaining_percentage: 20,
-      used_pct: 80,
-      timestamp: Math.floor(Date.now() / 1000),
-    });
-
-    const result = runHook(HOOK_PATH, { session_id: sessionId, cwd: tmpDir });
-    assert.equal(result.exitCode, 0);
-    const output = JSON.parse(result.stdout);
-    // CRITICAL + GSD-active message references STATE.md
-    assert.ok(
-      output.hookSpecificOutput.additionalContext.includes('STATE.md'),
-      'GSD-active CRITICAL warning should mention STATE.md'
-    );
-
-    cleanup(tmpDir);
-  });
-
-  it('uses generic guidance when .planning/STATE.md does not exist', () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-ctx-test-'));
-
-    writeBridgeFile(sessionId, {
-      remaining_percentage: 20,
-      used_pct: 80,
-      timestamp: Math.floor(Date.now() / 1000),
-    });
-
-    const result = runHook(HOOK_PATH, { session_id: sessionId, cwd: tmpDir });
-    assert.equal(result.exitCode, 0);
-    const output = JSON.parse(result.stdout);
-    assert.ok(
-      !output.hookSpecificOutput.additionalContext.includes('STATE.md'),
-      'non-GSD CRITICAL warning should not mention STATE.md'
-    );
-
-    cleanup(tmpDir);
   });
 
   // ── Invalid JSON bridge file ───────────────────────────────

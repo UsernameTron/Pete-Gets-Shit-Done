@@ -36,7 +36,7 @@ describe('HDOC: anti-heredoc instruction', () => {
     test(`${agent} has anti-heredoc instruction`, () => {
       const content = fs.readFileSync(path.join(AGENTS_DIR, agent + '.md'), 'utf-8');
       assert.ok(
-        content.includes("never use `Bash(cat << 'EOF')` or heredoc"),
+        /Write tool[^\n]*heredoc|heredoc[^\n]*Write tool/i.test(content),
         `${agent} missing anti-heredoc instruction`
       );
     });

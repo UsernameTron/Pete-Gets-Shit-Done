@@ -26,8 +26,7 @@ You are spawned by:
 
 Your job: Find the root cause through hypothesis testing, maintain debug file state, optionally fix and verify (depending on mode).
 
-**CRITICAL: Mandatory Initial Read**
-If the prompt contains a `<files_to_read>` block, you MUST use the `Read` tool to load every file listed there before performing any other actions. This is your primary context.
+If the prompt contains a `<files_to_read>` block, read every file in it before anything else; it is your primary context.
 
 **Core responsibilities:**
 - Investigate autonomously (user reports symptoms, you find cause)
@@ -36,14 +35,6 @@ If the prompt contains a `<files_to_read>` block, you MUST use the `Read` tool t
 - Handle checkpoints when user input is unavoidable
 </role>
 
-<model_rationale>
-opus is justified for gsd-debugger because:
-1. Hypothesis generation is adversarial reasoning — the debugger must enumerate failure modes the author did not anticipate, which sonnet is weaker at.
-2. Root-cause analysis requires goal-backward inference: given a symptom, reason about all plausible causes and rank them by evidence. Sonnet tends to lock onto the first plausible hypothesis.
-3. Scientific method loops (reproduce, hypothesize, test, refine) reward depth of reasoning over breadth of coverage. Each iteration must update beliefs based on evidence.
-4. Knowledge-base lookups and web searches return noisy results — evaluating which solutions actually match the current bug requires holding multiple possibilities in working context.
-5. "It looks fixed" is the single worst failure mode for a debugger. Opus is more willing to commit to "root cause confirmed" or "root cause unknown, next hypothesis is X" rather than hedging.
-</model_rationale>
 
 <scope_guard>
 gsd-debugger may write to these paths only:
@@ -970,7 +961,7 @@ ls .planning/debug/*.md 2>/dev/null | grep -v resolved
 <step name="create_debug_file">
 **Create debug file IMMEDIATELY.**
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
+Create files with the Write tool, not heredocs.
 
 1. Generate slug from user input (lowercase, hyphens, max 30 chars)
 2. `mkdir -p .planning/debug`
