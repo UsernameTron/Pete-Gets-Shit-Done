@@ -12,7 +12,10 @@
 
 ## Known Bugs
 
-None open.
+**P3 - `parseTomlKeyPath` accepts a trailing dot (`bin/lib/toml.js`):**
+- Issue: `[a.]` parses as table `a` and `a. = 1` as key `a`; both are invalid TOML.
+- Impact: Low — only affects how the installer reads already-invalid user `config.toml` lines; GSD never writes such keys.
+- Fix approach: return null for an empty trailing segment, with a test; confirm callers leave unparseable lines untouched.
 
 ## Security Considerations
 
