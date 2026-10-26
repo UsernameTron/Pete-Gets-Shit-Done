@@ -1,6 +1,6 @@
 # Uninstall leaves orphaned hook registrations in settings.json
 
-- **Status:** open (pre-existing bug, found 2026-10-26 during the install split; not fixed — out of scope for a no-behavior-change refactor)
+- **Status:** FIXED 2026-10-26 (`fix/reliability-sweep-2026-10-26`) — three entries added to `GSD_HOOK_REMOVALS` in `bin/lib/uninstall-steps.js`; `tests/install-cli-matrix.test.cjs` now asserts no `gsd-*` registration survives uninstall in any settings.json runtime
 - **Owner:** unassigned
 - **Earliest pickup:** after `refactor/install-split` merges (fix it in `bin/lib/uninstall-steps.js` there, not in the old monolith)
 

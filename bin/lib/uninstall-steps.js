@@ -124,6 +124,9 @@ const GSD_HOOK_REMOVALS = [
   { events: ['SessionStart'], markers: ['gsd-check-update', 'gsd-statusline'], message: 'Removed GSD hooks from settings' },
   { events: ['PostToolUse', 'AfterTool'], markers: ['gsd-context-monitor'], message: 'Removed context monitor hook from settings' },
   { events: ['PreToolUse', 'BeforeTool'], markers: ['gsd-prompt-guard'], message: 'Removed prompt injection guard hook from settings' },
+  { events: ['PostToolUse', 'AfterTool'], markers: ['gsd-cost-tracker'], message: 'Removed cost tracker hook from settings' },
+  { events: ['PreToolUse', 'BeforeTool'], markers: ['gsd-config-protection'], message: 'Removed config protection hook from settings' },
+  { events: ['PreToolUse', 'BeforeTool'], markers: ['gsd-spawn-tracker'], message: 'Removed spawn tracker hook from settings' },
 ];
 
 /**

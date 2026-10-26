@@ -160,12 +160,14 @@ describe('install.js --all --local install and uninstall', () => {
     if (fs.existsSync(settingsPath)) {
       const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
       assert.ok(!settings.statusLine, 'statusline should be removed');
-      // ponytail: cost-tracker/config-protection/spawn-tracker entries are a known
-      // pre-existing uninstall gap; only assert the events uninstall-steps.js covers.
-      for (const ev of ['SessionStart', 'PostToolUse', 'PreToolUse']) {
-        const entries = (settings.hooks && settings.hooks[ev]) || [];
-        assert.ok(!entries.some(e => (e.hooks || []).some(h => /gsd-(check-update|statusline|context-monitor|prompt-guard)/.test(h.command || ''))), `${ev} still has gsd hooks`);
-      }
+    }
+    // Every settings.json-based runtime must lose every gsd-* hook registration,
+    // including cost-tracker, config-protection, and spawn-tracker.
+    for (const rt of ['claude', 'gemini', 'antigravity']) {
+      const sp = path.join(cwd, DIR_NAMES[rt], 'settings.json');
+      if (!fs.existsSync(sp)) continue;
+      const s = JSON.parse(fs.readFileSync(sp, 'utf8'));
+      assert.ok(!hasGsdHookEntries(s), `${rt}: settings.json still registers gsd hooks: ${JSON.stringify(s.hooks)}`);
     }
     const ocPath = path.join(cwd, '.opencode', 'opencode.json');
     if (fs.existsSync(ocPath)) {
