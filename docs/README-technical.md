@@ -818,10 +818,11 @@ At milestone completion, GSD offers squash merge (recommended) or merge with his
 
 ```
 get-shit-done/
-├── bin/install.js              # Multi-runtime installer
-├── commands/gsd/               # 57 GSD slash commands
-├── agents/                     # 18 specialized agents
-├── hooks/                      # 5 runtime hooks
+├── bin/install.js              # Multi-runtime installer entry point
+├── bin/lib/                    # Installer modules (runtimes/, converters/, install-core)
+├── commands/gsd/               # 68 GSD slash commands
+├── agents/                     # 17 specialized agents
+├── hooks/                      # 7 runtime hooks
 ├── get-shit-done/              # Core skill (templates, workflows, references)
 ├── governance/                 # Governance layer
 │   ├── templates/

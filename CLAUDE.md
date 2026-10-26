@@ -47,7 +47,7 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 
 ## Status
 
-> Last verified: 2026-07-17 <!-- refresh via /gsd:sync-docs; guarded by ~/.claude/hooks/claude-md-staleness.js (warns >14d at SessionStart) -->
+> Last verified: 2026-10-26 <!-- refresh via /gsd:sync-docs; guarded by ~/.claude/hooks/claude-md-staleness.js (warns >14d at SessionStart) -->
 
 - **Now:** live state in [.planning/STATE.md](.planning/STATE.md), history in [.planning/MILESTONES.md](.planning/MILESTONES.md), todos in [tasks/todo.md](tasks/todo.md).
 
