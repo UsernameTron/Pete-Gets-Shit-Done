@@ -23,21 +23,29 @@ GSD is consumed as a Claude Code plugin. It is not a standalone application — 
 
 ## Architecture
 
-GSD is organized in three layers:
+GSD is organized in four areas:
 
 ```
-bin/          CLI entry points and installer scripts
-lib/          Core runtime
-  core.cjs          Phase orchestration and command routing
-  security.cjs      Secrets scanning and input validation
-  governance.cjs    Hook enforcement and quality gates
-  classify.cjs      v2.0 Intelligence Layer — task classification
-  model-profiles.cjs  v2.0 — model selection heuristics
-  history.cjs       v2.0 — session history and state persistence
-skills/       Command implementations (one file per GSD command)
+bin/                    Installer
+  install.js              Entry point: arg parsing, prompts, main (thin orchestrator)
+  lib/                    install-core.js routes to runtimes/<name>.js ({ install, uninstall })
+                          for 8 runtimes; converters/, install-steps.js, uninstall-steps.js,
+                          manifest, settings, toml, governance helpers
+get-shit-done/          Core payload installed to ~/.claude/get-shit-done/
+  bin/gsd-tools.cjs       CLI router (dispatch table) used by every workflow
+  bin/lib/*.cjs           Runtime modules: core, state, phase, roadmap, verify, config, init,
+                          security (input validation, injection scanning), model-profiles,
+                          history, uat*, checkpoint, harden-repo, workstream, ...
+  workflows/ references/ templates/
+commands/gsd/           Slash-command definitions (one .md per GSD command)
+agents/                 gsd-* subagent definitions
+hooks/                  Execution hooks (bundled to hooks/dist/)
+governance/             CLAUDE.md template, governance hooks, permissions, context guides
+plugins/                claude-code-factory + claude-mcp-ecosystem (skills, subagents)
+lib/                    Data only: injection-patterns.json, ci-patterns.json
 ```
 
-The **v2.0 Intelligence Layer** (`classify.cjs`, `model-profiles.cjs`, `history.cjs`) adds adaptive task routing — GSD classifies incoming tasks and selects execution strategies based on complexity, history, and available resources.
+`model-profiles.cjs` and `history.cjs` remain from the v2.0 Intelligence Layer; its task classifier (`classify.cjs`) and dynamic routing were removed in v2.9 — model selection is user config (`model_profile`, `model_overrides`).
 
 The **v2.3 Quality Infrastructure** extends the verifier with a 4D scoring rubric (security 35%, performance 25%, correctness 25%, maintainability 15%), adds a three-part necessity gate for subagent creation decisions, and introduces two-mode verification (compliance + schema) in the verify-work workflow. Three new execution hooks provide runtime security: prompt injection detection (18 patterns in v2.3, expanded to 23 in v2.4), config file protection (32 files), and cost tracking (JSONL metrics).
 
@@ -55,8 +63,8 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
 - **Current counts**: never inlined — run `npm test` for suite/assertion/coverage numbers.
-- **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
-- **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
+- **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules — enforced in CI by `npm run coverage:check`
+- **Key directories**: `tests/*.test.cjs` (unit + integration, flat), `tests/e2e/`, `tests/routing/`, `tests/fixtures/`
 
 Run the full suite before any commit:
 
@@ -69,7 +77,7 @@ Do not treat overall coverage as passing if any individual module is below its t
 
 - `node scripts/validate-doc-links.cjs` — validate internal Markdown links across tracked `.md` files; exits non-zero on broken refs. Use `--json` for machine-readable output. Use `--exclude <glob>` (multi-value, gitignore-style) to suppress intentional fixtures or template examples. Wired into CI as the `docs-integrity` job (blocking gate).
 - `node scripts/check-doc-drift.cjs` — validate that numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md match live measured values; exits non-zero on drift. Use `--json` for machine-readable output. Requires `npm run test:coverage` to have been run within the last hour. Wired into CI as a step inside the `test` job (single-leg, ubuntu/22 only; blocking gate).
-- Branch protection on `main` now requires **5 passing status checks** before merge: `test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity` (added in v2.8 Phase 57). The third matrix value is the `full_suite` flag.
+- Branch protection on `main` now requires **6 passing status checks** before merge: `test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity` (added in v2.8 Phase 57), `security` (`security-scan.yml`, added 2026-10-26). The third matrix value is the `full_suite` flag.
 
 ---
 
@@ -209,7 +217,7 @@ Know which filesystem you are operating on at all times and be explicit about it
 
 ### GitHub Repository Security
 
-The GitHub remote enforces security independently of local GSD hooks. Branch protection requires a PR and 5 passing status checks (`test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity`) before any merge to `main`. Force pushes are blocked. Dependabot monitors for CVEs with auto-PRs enabled. Secret scanning with push protection blocks commits containing detected secrets. CodeQL scans JavaScript/TypeScript and GitHub Actions on every push and PR. These are remote-level gates — they cannot be bypassed by local configuration or hook changes.
+The GitHub remote enforces security independently of local GSD hooks. Branch protection requires a PR and 6 passing status checks (`test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity`, `security`) before any merge to `main`. Force pushes are blocked. Dependabot monitors for CVEs with auto-PRs enabled. Secret scanning with push protection blocks commits containing detected secrets. CodeQL scans JavaScript/TypeScript and GitHub Actions on every push and PR. These are remote-level gates — they cannot be bypassed by local configuration or hook changes.
 
 ### Hooks and Lifecycle Events
 

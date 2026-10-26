@@ -8,8 +8,11 @@
 
 'use strict';
 
-const { test, describe } = require('node:test');
+const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { runGsdTools } = require('./helpers.cjs');
 const {
   STANDARD_POLICY,
@@ -503,5 +506,198 @@ describe('harden-repo dispatch', () => {
       result.error.includes('gh') || result.error.includes('Error'),
       `error should mention gh or be a clear error message, got: ${result.error}`,
     );
+  });
+});
+
+// ─── Fake gh CLI (no network, no real branch protection mutation) ─────────────
+
+describe('harden-repo with stubbed gh', () => {
+  let dir;
+  let env;
+
+  // Fake `gh` driven by files in FAKE_GH_DIR: view.json, get.json, get_after.json,
+  // get_err, auth_fail, view_fail, put_fail. PUT bodies are captured to put.json.
+  const FAKE_GH = `#!/bin/sh
+D="$FAKE_GH_DIR"
+case "$1 $2" in
+  "auth status") [ -f "$D/auth_fail" ] && { echo "not logged in" >&2; exit 1; }; exit 0 ;;
+  "repo view") [ -f "$D/view_fail" ] && { echo "no remote" >&2; exit 1; }; cat "$D/view.json"; exit 0 ;;
+  "api -X") cat > "$D/put.json"; [ -f "$D/put_fail" ] && { echo "HTTP 403 forbidden" >&2; exit 1; }; exit 0 ;;
+  "api repos/"*)
+    if [ -f "$D/put.json" ] && [ -f "$D/get_after.json" ]; then cat "$D/get_after.json"; exit 0; fi
+    [ -f "$D/get_err" ] && { cat "$D/get_err" >&2; exit 1; }
+    cat "$D/get.json"; exit 0 ;;
+esac
+exit 2
+`;
+
+  before(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-fake-gh-'));
+    fs.mkdirSync(path.join(dir, 'bin'));
+    fs.writeFileSync(path.join(dir, 'bin', 'gh'), FAKE_GH, { mode: 0o755 });
+    env = { PATH: `${path.join(dir, 'bin')}${path.delimiter}${process.env.PATH}`, FAKE_GH_DIR: dir };
+  });
+
+  after(() => fs.rmSync(dir, { recursive: true, force: true }));
+
+  function reset(files = {}) {
+    for (const f of fs.readdirSync(dir)) if (f !== 'bin') fs.rmSync(path.join(dir, f));
+    const base = { 'view.json': { owner: { login: 'acme' }, name: 'widgets' } };
+    for (const [f, c] of Object.entries({ ...base, ...files })) {
+      fs.writeFileSync(path.join(dir, f), typeof c === 'string' ? c : JSON.stringify(c));
+    }
+  }
+
+  function run(args) {
+    return runGsdTools(['harden-repo', ...args], process.cwd(), env);
+  }
+
+  test('audit of compliant repo reports allPass and never PUTs', () => {
+    reset({ 'get.json': makeCompliantResponse() });
+    const r = run([]);
+    assert.strictEqual(r.success, true, r.error);
+    const out = JSON.parse(r.output);
+    assert.strictEqual(out.owner, 'acme');
+    assert.strictEqual(out.repo, 'widgets');
+    assert.strictEqual(out.allPass, true);
+    assert.strictEqual(out.noProtection, false);
+    assert.strictEqual(fs.existsSync(path.join(dir, 'put.json')), false);
+  });
+
+  test('404 from protection endpoint is treated as no protection', () => {
+    reset({ get_err: 'gh: Not Found (HTTP 404)' });
+    const out = JSON.parse(run([]).output);
+    assert.strictEqual(out.noProtection, true);
+    assert.strictEqual(out.allPass, false);
+  });
+
+  test('non-404 read failure exits with error', () => {
+    reset({ get_err: 'HTTP 500 server exploded' });
+    const r = run([]);
+    assert.strictEqual(r.success, false);
+    assert.ok(r.error.includes('Failed to read branch protection'), r.error);
+  });
+
+  test('unparseable protection response exits with error', () => {
+    reset({ 'get.json': 'not-json{' });
+    const r = run([]);
+    assert.strictEqual(r.success, false);
+    assert.ok(r.error.includes('Failed to parse branch protection response'), r.error);
+  });
+
+  test('unauthenticated gh exits with login hint', () => {
+    reset({ auth_fail: '' });
+    const r = run([]);
+    assert.strictEqual(r.success, false);
+    assert.ok(r.error.includes('gh auth login'), r.error);
+  });
+
+  test('repo detection failure exits with error', () => {
+    reset({ view_fail: '' });
+    const r = run([]);
+    assert.strictEqual(r.success, false);
+    assert.ok(r.error.includes('Could not detect repo'), r.error);
+  });
+
+  test('unparseable repo view output exits with error', () => {
+    reset({ 'view.json': 'garbage' });
+    const r = run([]);
+    assert.strictEqual(r.success, false);
+    assert.ok(r.error.includes('Failed to parse gh repo view output'), r.error);
+  });
+
+  test('repo view missing name exits with error', () => {
+    reset({ 'view.json': { owner: { login: 'acme' } } });
+    const r = run([]);
+    assert.strictEqual(r.success, false);
+    assert.ok(r.error.includes('Could not determine owner/repo'), r.error);
+  });
+
+  test('string owner (no login object) is accepted', () => {
+    reset({ 'view.json': { owner: 'solo', name: 'tool' }, 'get.json': makeCompliantResponse() });
+    const out = JSON.parse(run([]).output);
+    assert.strictEqual(out.owner, 'solo');
+  });
+
+  test('unsafe branch name is rejected before any PUT', () => {
+    reset({ 'get.json': makeCompliantResponse() });
+    const r = run(['--fix', '--branch', 'main;rm -rf x']);
+    assert.strictEqual(r.success, false);
+    assert.strictEqual(fs.existsSync(path.join(dir, 'put.json')), false);
+  });
+
+  test('--fix --dry-run returns merged payload without PUT', () => {
+    reset({ 'get.json': makeNonCompliantResponse() });
+    const out = JSON.parse(run(['--fix', '--dry-run']).output);
+    assert.strictEqual(out.applied, false);
+    assert.strictEqual(out.dryRun, true);
+    assert.deepStrictEqual(out.payload.required_status_checks.contexts, ['ci/build']);
+    assert.strictEqual(fs.existsSync(path.join(dir, 'put.json')), false);
+  });
+
+  test('--fix PUTs full payload and verifies post-fix state', () => {
+    reset({ 'get.json': makeNonCompliantResponse(), 'get_after.json': makeCompliantResponse() });
+    const out = JSON.parse(run(['--fix']).output);
+    assert.strictEqual(out.applied, true);
+    assert.strictEqual(out.fixSuccess, true);
+    assert.strictEqual(out.fixError, null);
+    assert.strictEqual(out.verified, true);
+    assert.strictEqual(out.verifiedPassCount, out.verifiedGaps.length);
+    const put = JSON.parse(fs.readFileSync(path.join(dir, 'put.json'), 'utf-8'));
+    assert.strictEqual(put.required_pull_request_reviews.required_approving_review_count, 0);
+    assert.deepStrictEqual(put.required_status_checks.contexts, ['ci/build']);
+  });
+
+  test('--fix reports PUT failure and skips verification', () => {
+    reset({ 'get.json': makeNonCompliantResponse(), put_fail: '' });
+    const out = JSON.parse(run(['--fix']).output);
+    assert.strictEqual(out.applied, true);
+    assert.strictEqual(out.fixSuccess, false);
+    assert.ok(out.fixError.includes('403'), out.fixError);
+    assert.strictEqual('verified' in out, false);
+  });
+
+  test('--fix on unprotected branch warns about missing contexts', () => {
+    reset({ get_err: 'HTTP 404 Branch not protected' });
+    const out = JSON.parse(run(['--fix', '--dry-run']).output);
+    assert.strictEqual(out.noProtection, true);
+    assert.strictEqual(out.mergeWarnings.length, 1);
+    assert.deepStrictEqual(out.payload.required_status_checks.contexts, []);
+  });
+
+  test('--raw prints the human gap table', () => {
+    reset({ 'get.json': makeCompliantResponse() });
+    const r = runGsdTools(['harden-repo', '--raw'], process.cwd(), env);
+    assert.ok(r.output.includes('Branch Protection Audit: acme/widgets (main)'), r.output);
+  });
+
+  test('applyFix real path PUTs payload and surfaces success/failure', () => {
+    reset();
+    const savedPath = process.env.PATH;
+    Object.assign(process.env, env);
+    try {
+      const ok = applyFix('acme', 'widgets', 'main', { a: 1 }, false);
+      assert.deepStrictEqual(ok, { applied: true, payload: { a: 1 }, success: true });
+      assert.deepStrictEqual(JSON.parse(fs.readFileSync(path.join(dir, 'put.json'), 'utf-8')), { a: 1 });
+      fs.writeFileSync(path.join(dir, 'put_fail'), '');
+      const bad = applyFix('acme', 'widgets', 'main', { a: 1 }, false);
+      assert.strictEqual(bad.success, false);
+      assert.ok(bad.error.includes('403'));
+    } finally {
+      process.env.PATH = savedPath;
+      delete process.env.FAKE_GH_DIR;
+    }
+  });
+
+  test('buildGapTable accepts bare-boolean enforce_admins', () => {
+    const flat = makeCompliantResponse();
+    flat.enforce_admins = false;
+    assert.strictEqual(buildGapTable(flat, STANDARD_POLICY).allPass, true);
+  });
+
+  test('mergePolicy converts newer checks format into contexts', () => {
+    const cur = makeCompliantResponse();
+    cur.required_status_checks = { strict: true, contexts: [], checks: [{ context: 'a' }, 'b'] };
+    assert.deepStrictEqual(mergePolicy(cur, STANDARD_POLICY).payload.required_status_checks.contexts, ['a', 'b']);
   });
 });

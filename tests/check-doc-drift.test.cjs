@@ -33,6 +33,10 @@ const {
   measureCommandCount,
   measureSkillCount,
   measureHookCount,
+  measureTotalHookCount,
+  measurePluginSkillCount,
+  measurePluginSubagentCount,
+  checkSkillTables,
 } = require('../scripts/check-doc-drift.cjs');
 
 const SCRIPT = path.join(__dirname, '..', 'scripts', 'check-doc-drift.cjs');
@@ -69,8 +73,8 @@ describe('METRICS registry', () => {
     assert.ok(Array.isArray(METRICS));
   });
 
-  test('METRICS.length === 9', () => {
-    assert.strictEqual(METRICS.length, 9, `expected 9 entries, got ${METRICS.length}`);
+  test('METRICS.length === 13', () => {
+    assert.strictEqual(METRICS.length, 13, `expected 13 entries, got ${METRICS.length}`);
   });
 
   test('every entry has id, label, claims properties', () => {
@@ -93,16 +97,24 @@ describe('METRICS registry', () => {
     assert.strictEqual(m.claims.length, 4);
   });
 
-  test('agent_count has 5 claims', () => {
+  test('agent_count has 6 claims', () => {
     const m = METRICS.find(m => m.id === 'agent_count');
     assert.ok(m, 'agent_count not found');
-    assert.strictEqual(m.claims.length, 5);
+    assert.strictEqual(m.claims.length, 6);
   });
 
-  test('command_count has 4 claims', () => {
+  test('command_count has 6 claims', () => {
     const m = METRICS.find(m => m.id === 'command_count');
     assert.ok(m, 'command_count not found');
-    assert.strictEqual(m.claims.length, 4);
+    assert.strictEqual(m.claims.length, 6);
+  });
+
+  test('hook_count_total, code_factory_skill_count, mcp_skill_count, plugin_subagent_count have 3 claims each', () => {
+    for (const id of ['hook_count_total', 'code_factory_skill_count', 'mcp_skill_count', 'plugin_subagent_count']) {
+      const m = METRICS.find(m => m.id === id);
+      assert.ok(m, `${id} not found`);
+      assert.strictEqual(m.claims.length, 3, id);
+    }
   });
 
   test('skill_count has 4 claims', () => {
@@ -747,6 +759,64 @@ describe('measure filesystem (agent/command/skill/hook)', () => {
     assert.strictEqual(measureCommandCount(tmpDir), 0);
     assert.strictEqual(measureSkillCount(tmpDir), 0);
     assert.strictEqual(measureHookCount(tmpDir), 0);
+    assert.strictEqual(measureTotalHookCount(tmpDir), 0);
+    assert.strictEqual(measurePluginSkillCount(tmpDir, 'foo'), 0);
+    assert.strictEqual(measurePluginSubagentCount(tmpDir), 0);
+    assert.deepStrictEqual(checkSkillTables(tmpDir), []);
+  });
+
+  test('measurePluginSkillCount counts one plugin only', () => {
+    fs.mkdirSync(path.join(tmpDir, 'plugins', 'foo', 'skills', 'a'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, 'plugins', 'foo', 'skills', 'b'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, 'plugins', 'bar', 'skills', 'c'), { recursive: true });
+    assert.strictEqual(measurePluginSkillCount(tmpDir, 'foo'), 2);
+    assert.strictEqual(measurePluginSkillCount(tmpDir, 'bar'), 1);
+  });
+
+  test('measurePluginSubagentCount counts .md files in any agents/ dir under plugins/', () => {
+    const a = path.join(tmpDir, 'plugins', 'foo', 'agents');
+    const b = path.join(tmpDir, 'plugins', 'bar', 'nested', 'agents');
+    fs.mkdirSync(a, { recursive: true });
+    fs.mkdirSync(b, { recursive: true });
+    fs.writeFileSync(path.join(a, 'one.md'), '');
+    fs.writeFileSync(path.join(b, 'two.md'), '');
+    fs.writeFileSync(path.join(b, 'notes.txt'), '');
+    fs.writeFileSync(path.join(tmpDir, 'plugins', 'foo', 'README.md'), '');
+    assert.strictEqual(measurePluginSubagentCount(tmpDir), 2);
+  });
+
+  test('measureTotalHookCount sums dist hooks, governance hooks, and plugin hooks.json', () => {
+    fs.mkdirSync(path.join(tmpDir, 'hooks', 'dist'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'hooks', 'dist', 'a.js'), '');
+    const gov = path.join(tmpDir, 'governance', 'templates', 'global');
+    fs.mkdirSync(gov, { recursive: true });
+    fs.writeFileSync(path.join(gov, 'settings-hooks.json'), JSON.stringify({ hooks: {
+      PreToolUse: [{ hooks: [{ command: 'x' }, { command: 'y' }] }],
+      Stop: [{ hooks: [{ command: 'z' }] }],
+    } }));
+    const ph = path.join(tmpDir, 'plugins', 'p', 'ops', 'hooks');
+    fs.mkdirSync(ph, { recursive: true });
+    fs.writeFileSync(path.join(ph, 'hooks.json'), JSON.stringify({ hooks: { SessionStart: [{ hooks: [{ command: 'h' }] }] } }));
+    assert.strictEqual(measureTotalHookCount(tmpDir), 5);
+  });
+
+  test('checkSkillTables flags rows missing on disk and skills missing from the table', () => {
+    fs.mkdirSync(path.join(tmpDir, 'plugins', 'claude-code-factory', 'skills', 'real-skill'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, 'plugins', 'claude-code-factory', 'skills', 'unlisted-skill'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'README.md'), [
+      '## Code Factory Skills (2)',
+      '',
+      '| Skill | Description |',
+      '|-------|-------------|',
+      '| real-skill | exists |',
+      '| ghost-skill | absorbed long ago |',
+      '',
+      '## Author',
+      '| not-a-skill | outside the section |',
+    ].join('\n'));
+    const drift = checkSkillTables(tmpDir);
+    assert.deepStrictEqual(drift.map(d => [d.line, d.claimed]), [[6, 'ghost-skill'], [1, '(unlisted)']]);
+    assert.match(drift[1].actual, /unlisted-skill/);
   });
 });
 
@@ -862,7 +932,7 @@ describe('main() --json output (DOCDRIFT-04, DOCDRIFT-05)', () => {
     assert.strictEqual(typeof obj.checked, 'number', 'checked should be a number');
     assert.strictEqual(typeof obj.files, 'number', 'files should be a number');
     assert.strictEqual(typeof obj.metrics, 'number', 'metrics should be a number');
-    assert.strictEqual(obj.metrics, 9, `expected metrics=9, got ${obj.metrics}`);
+    assert.strictEqual(obj.metrics, 13, `expected metrics=13, got ${obj.metrics}`);
   });
 
   test('drift fixture --json returns valid JSON with status=drift, at least 1 record with proper shape', () => {

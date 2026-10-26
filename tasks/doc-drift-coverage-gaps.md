@@ -1,6 +1,6 @@
 # check-doc-drift guards too few README claims
 
-- **Status:** open
+- **Status:** FIXED 2026-10-26 (`fix/reliability-sweep-2026-10-26`) — 4 new metrics (hook_count_total, code_factory_skill_count, mcp_skill_count, plugin_subagent_count), 3 new claims on existing metrics, and a two-way README skill-table check; replayed against the pre-#90 README it flags 22 of the 27 stale claims
 - **Owner:** unassigned
 - **Earliest pickup:** any time
 

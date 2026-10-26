@@ -76,8 +76,8 @@ For each agent file, parse the YAML frontmatter (between the opening `---` and t
 - `model` (string, one of `haiku | sonnet | opus`)
 
 Recommended fields (FLAG if missing on any non-trivial agent):
-- `disallowedTools` (string, comma-separated)
 - `color` (string)
+- `disallowedTools` (string, comma-separated) — recommended only when the agent is NOT granted `Edit` (or `Write`) in `tools`, so the omission is explicit. An agent whose `tools` grants both `Write` and `Edit` uses them for its job; a missing `disallowedTools` there is not a finding.
 
 Defense-in-depth fields (FLAG if missing on agents that Write or Edit):
 - `permissionMode` (string)
@@ -95,9 +95,9 @@ For each agent, compare the `tools` list against `disallowedTools` and against t
 
 **Emit findings for:**
 - **BLOCK:** same tool appears in both `tools` and `disallowedTools` (contradictory)
-- **BLOCK:** agent's role explicitly states "read-only" or "does not modify files" but `tools` includes `Edit` or `Write` without `disallowedTools` to cancel it
-- **FLAG:** agent uses `Bash` without `disallowedTools: Edit` (Bash can overwrite files via `cat > file`, circumventing Edit restrictions — defense-in-depth gap)
-- **FLAG:** agent has `tools: *` or wildcard tool grant (too permissive)
+- **BLOCK:** agent's role states it never writes or modifies any file, yet `tools` includes `Edit` or `Write` without `disallowedTools` to cancel it. A role that writes its own outputs (reports, test files, plans) and only forbids modifying source or implementation files is scope-limited, not read-only — not a finding.
+- **FLAG:** agent uses `Bash`, is NOT granted `Edit` in `tools`, and lacks `disallowedTools: Edit` (Bash can overwrite files via `cat > file`, circumventing the missing Edit grant — defense-in-depth gap). An agent whose `tools` grants `Edit` needs it for its job; do not flag it here.
+- **FLAG:** agent has `tools: *` or an unscoped wildcard grant (too permissive). A server-scoped MCP grant such as `mcp__context7__*` is the standard way to grant one MCP server and is not a finding.
 - **FLAG:** agent declares `isolation: worktree` but `tools` does not include `Write` (worktree without write capability is pointless)
 
 ## Step 4: Hygiene compliance check
@@ -141,14 +141,14 @@ Use Bash to list every agent name (filename without extension) and every `name:`
 
 For each agent file in `./agents/`, compare it against `~/.claude/agents/<filename>`. **Do NOT use a raw `diff -q`** — the installer deliberately rewrites path references (`~/.claude/` → `$HOME/.claude/`) when it writes the installed copy, so a byte-comparison reports every agent that mentions a home-relative path as "drift" even when the content is functionally identical. That is a false positive, not stale install.
 
-Normalize the installer's path transform on both sides first, then diff. For example:
+Normalize the installer's path transform on both sides first, then diff. (The replacement is written as `~\/.claude\/` on purpose: the installer rewrites every literal tilde-`.claude` path in this file too, and an unescaped replacement would turn this command into a no-op in the installed copy.) For example:
 
 ```bash
-diff <(sed 's#\$HOME/\.claude/#~/.claude/#g' "$HOME/.claude/agents/<filename>") \
-     <(sed 's#\$HOME/\.claude/#~/.claude/#g' "./agents/<filename>")
+diff <(sed 's#\$HOME/\.claude/#~\/.claude\/#g' "$HOME/.claude/agents/<filename>") \
+     <(sed 's#\$HOME/\.claude/#~\/.claude\/#g' "./agents/<filename>")
 ```
 
-Only differences that survive this normalization are real drift.
+This normalization covers every occurrence — `@~/.claude/` and bare `~/.claude/` alike. Only differences that survive it are real drift.
 
 **Emit findings for:**
 - **BLOCK:** installed file is MISSING (repo has agent, install does not — the installed roster is incomplete)

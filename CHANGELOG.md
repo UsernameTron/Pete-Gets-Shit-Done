@@ -50,6 +50,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Verified counts:** 67 commands, 17 agents, 33 skills, 593 test suites, 2,921 assertions, 91.73% statement / 83.27% branch / 97.62% function coverage
 
 ### Changed
+- **Branch-coverage tests** — 90 tests for `harden-repo.cjs` (fake `gh`, no network), `profile-pipeline.cjs`, `install-steps.js`, `attribution.js`, `toml.js`; overall 95.71% lines / 86.48% branches
+- **CI enforces coverage floors** — new `npm run coverage:check` (90% overall / 80% per file / 95% `security.cjs`) runs on the full-suite legs; `test:coverage:full` now emits `json-summary`, so the "Generate coverage report" job summary finally renders (it always skipped for lack of `coverage-summary.json`)
+- **Doc-drift checker widened** — 4 new metrics (total hooks, Code Factory skills, MCP skills, plugin subagents), 3 new claims on existing metrics, and a two-way README skill-table check (every listed skill exists on disk, every skill on disk is listed); 36 claims checked, up from 19
+- **Agent audit rules sharpened** — `gsd-ecosystem-auditor` no longer flags agents that are granted `Edit` for lacking `disallowedTools: Edit`, or server-scoped MCP grants (`mcp__<server>__*`) as wildcards; install-drift normalization explicitly covers bare `~/.claude/`
+- **CLAUDE.md architecture** rewritten to the real tree (`bin/lib/` installer, `get-shit-done/bin/lib/` runtime, no `classify.cjs`, no `skills/`)
+- **Coverage gap/baseline docs regenerated**; gap analysis classifies `bin/lib/` installer modules as Operational; the baseline's hardcoded "1,547 tests" is gone
 - **Installer split** — `bin/install.js` (5,414 lines) becomes a ~360-line entry point over `bin/lib/` modules: `install-core.js` routes to `runtimes/<name>.js` (`{ install, uninstall }`) built from shared install/uninstall steps, plus converters, manifest, settings, TOML, and governance modules. `install` complexity 119 → 1, `uninstall` 109 → 3, `writeManifest` 33 → 5. Behavior identical (29-scenario old-vs-new install matrix clean); `tests/install-cli-matrix.test.cjs` covers per-runtime uninstall, CLI error paths, and prompts (118e671, #87)
 - **`gsd-tools.cjs` dispatch table** — `runCommand` switch replaced by a command table; complexity 185 → 2 (657804f, #86)
 - **`cmdValidateHealth` health checks extracted** into focused functions (2540294, #88)
@@ -62,6 +68,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Generated `STATUS.md` dashboard artifact** — now gitignored (450549c, #65)
 
 ### Fixed
+- **Uninstall left dead hook registrations** — `--uninstall` deleted `gsd-cost-tracker.js`, `gsd-config-protection.js`, and `gsd-spawn-tracker.js` but left their `settings.json` entries pointing at missing files; all three are now removed, with a regression assertion across every settings.json runtime
+- **`gsd-dependency-auditor` contradiction** — its rules claimed `disallowedTools: Write, Edit` while it must Write its report; reworded to the real contract (ecosystem audit BLOCK)
+- **brace-expansion 5.0.12** — clears 3 high + 1 moderate advisories on the dev-only `c8` path
+- **`.gitignore`** — dropped ignore entries for tracked `.planning/PROJECT.md` and `.planning/research/`; ignores local `_code_audit/` / `_radon_audit/` snapshots
 - **Prompt-injection guard false positives on security docs** — security docs allowlisted and injection-scan matching anchored (0f93e29, #79; f20ea2e, #81)
 - **brace-expansion 5.0.8** — resolves 3 high-severity DoS advisories (749a3c7, #75)
 - **`lesson-capture-gate` subdirectory resolution** — `resolveLessonsPath()` walks upward from cwd so the Stop gate finds `tasks/lessons.md` when run from a subdirectory (b2b6327)

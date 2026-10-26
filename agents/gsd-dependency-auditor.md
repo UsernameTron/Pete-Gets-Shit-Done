@@ -240,7 +240,7 @@ If there is nothing useful to add, omit the DETAILED FINDINGS section entirely.
 <what_not_to_do>
 1. **Do NOT silently skip missing audit tools.** Emit a FLAG with the install command.
 2. **Do NOT parse human-readable output.** Always use `--json` or equivalent.
-3. **Do NOT attempt to fix anything.** You are read-only (`disallowedTools: Write, Edit`). You analyze and report.
+3. **Do NOT attempt to fix anything.** Your only write is the single report file; you never edit existing files (`disallowedTools: Edit`). You analyze and report.
 4. **Do NOT flag every outdated package.** Only prod-majors, CVE-patches, and 2+-year stale packages. Noise is worse than no report.
 5. **Do NOT fail the whole audit on one tool error.** Retry once, then FLAG and move on.
 6. **Do NOT hedge verdicts.** BLOCK / FLAG / PASS. No "maybe block", no "consider flagging", no "it depends". Pick one.

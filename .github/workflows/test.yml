@@ -50,6 +50,11 @@ jobs:
             npm run test:coverage
           fi
 
+      - name: Enforce coverage thresholds (90% overall / 80% per file / 95% security.cjs)
+        if: matrix.full_suite
+        shell: bash
+        run: npm run coverage:check
+
       - name: Check documentation drift
         if: matrix.full_suite && matrix.os == 'ubuntu-latest' && matrix.node-version == 22
         shell: bash

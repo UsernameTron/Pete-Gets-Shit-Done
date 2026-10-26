@@ -567,3 +567,201 @@ describe('scan-sessions with sessions-index', () => {
     assert.ok(out[0].sessions[0].summary === 'Did some work', 'should include session summary from index');
   });
 });
+
+// ─── Malformed input, unreadable sessions, and output formatting ──────────────
+
+describe('profile-pipeline robustness', () => {
+  let tmpDir;
+  let sessionsDir;
+
+  const userMsg = (content, extra = {}) =>
+    JSON.stringify({ type: 'user', userType: 'external', message: { content }, timestamp: 1, ...extra });
+
+  function makeProject(name, files = {}) {
+    const dir = path.join(sessionsDir, name);
+    fs.mkdirSync(dir, { recursive: true });
+    for (const [file, body] of Object.entries(files)) fs.writeFileSync(path.join(dir, file), body);
+    return dir;
+  }
+
+  beforeEach(() => {
+    tmpDir = createTempDir('gsd-profile-robust-');
+    sessionsDir = path.join(tmpDir, 'projects');
+    fs.mkdirSync(sessionsDir, { recursive: true });
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  test('no sessions at default location fails with install hint', () => {
+    for (const cmd of ['scan-sessions', 'extract-messages x', 'profile-sample']) {
+      const result = runGsdTools(`${cmd} --raw`, tmpDir, { HOME: tmpDir, USERPROFILE: tmpDir });
+      assert.ok(!result.success, `${cmd} should fail`);
+      assert.ok(result.error.includes('Is Claude Code installed?'), `${cmd}: ${result.error}`);
+    }
+  });
+
+  test('sessions path that is a file fails with unreadable-directory error', () => {
+    const file = path.join(tmpDir, 'not-a-dir');
+    fs.writeFileSync(file, 'x');
+    for (const cmd of ['scan-sessions', 'extract-messages x', 'profile-sample']) {
+      const result = runGsdTools(`${cmd} --path ${file} --raw`, tmpDir);
+      assert.ok(!result.success, `${cmd} should fail`);
+      assert.ok(result.error.includes('Cannot read sessions directory'), `${cmd}: ${result.error}`);
+    }
+  });
+
+  test('dangling symlink in sessions dir is skipped, not fatal', () => {
+    makeProject('real', { 's1.jsonl': userMsg('hello') + '\n' });
+    fs.symlinkSync(path.join(tmpDir, 'gone'), path.join(sessionsDir, 'dangling'));
+    for (const cmd of ['scan-sessions', 'profile-sample']) {
+      const result = runGsdTools(`${cmd} --path ${sessionsDir} --raw`, tmpDir);
+      assert.ok(result.success, `${cmd}: ${result.error}`);
+    }
+    const ext = runGsdTools(`extract-messages real --path ${sessionsDir} --raw`, tmpDir);
+    assert.ok(ext.success, ext.error);
+    assert.strictEqual(JSON.parse(ext.output).messages_extracted, 1);
+  });
+
+  test('malformed JSONL lines are skipped and valid ones extracted', () => {
+    makeProject('messy', {
+      's1.jsonl': ['{not json', userMsg('first'), '', '}}}', userMsg('second')].join('\n'),
+    });
+    const result = runGsdTools(`extract-messages messy --path ${sessionsDir} --raw`, tmpDir);
+    assert.ok(result.success, result.error);
+    const out = JSON.parse(result.output);
+    assert.strictEqual(out.messages_extracted, 2);
+    const lines = fs.readFileSync(out.output_file, 'utf-8').trim().split('\n').map(l => JSON.parse(l));
+    assert.deepStrictEqual(lines.map(l => l.content), ['first', 'second']);
+    assert.strictEqual(lines[0].projectPath, null, 'missing cwd becomes null');
+  });
+
+  test('only genuine user messages are extracted', () => {
+    makeProject('filters', {
+      's1.jsonl': [
+        userMsg('keep me', { cwd: '/work/dir' }),
+        userMsg('side', { isSidechain: true }),
+        userMsg(''),
+        userMsg('<command-name>x'),
+        userMsg('<task-notification>x'),
+        JSON.stringify({ type: 'user', userType: 'external', message: { content: ['array'] } }),
+      ].join('\n'),
+    });
+    const out = JSON.parse(runGsdTools(`extract-messages filters --path ${sessionsDir} --raw`, tmpDir).output);
+    assert.strictEqual(out.messages_extracted, 1);
+    const rec = JSON.parse(fs.readFileSync(out.output_file, 'utf-8').trim());
+    assert.strictEqual(rec.projectPath, '/work/dir');
+  });
+
+  test('over-long messages are truncated and counted', () => {
+    makeProject('long', { 's1.jsonl': userMsg('x'.repeat(2500)) + '\n' });
+    const out = JSON.parse(runGsdTools(`extract-messages long --path ${sessionsDir} --raw`, tmpDir).output);
+    assert.strictEqual(out.messages_truncated, 1);
+    const rec = JSON.parse(fs.readFileSync(out.output_file, 'utf-8').trim());
+    assert.ok(rec.content.endsWith('... [truncated]'));
+    assert.strictEqual(rec.content.length, 2000 + '... [truncated]'.length);
+  });
+
+  test('ambiguous project match lists candidates and fails', () => {
+    makeProject('-me-app-one', { 's1.jsonl': userMsg('a') + '\n' });
+    makeProject('-me-app-two', { 's1.jsonl': userMsg('b') + '\n' });
+    const result = runGsdTools(`extract-messages app --path ${sessionsDir} --raw`, tmpDir);
+    assert.ok(!result.success);
+    assert.ok(result.error.includes('Multiple projects match "app"'), result.error);
+    assert.ok(result.error.includes('-me-app-one') && result.error.includes('-me-app-two'), result.error);
+  });
+
+  test('ambiguous match resolves when one index name matches exactly', () => {
+    makeProject('-me-app-one', {
+      's1.jsonl': userMsg('a') + '\n',
+      'sessions-index.json': JSON.stringify({ originalPath: '/me/app' }),
+    });
+    makeProject('-me-app-two', { 's1.jsonl': userMsg('b') + '\n' });
+    const out = JSON.parse(runGsdTools(`extract-messages app --path ${sessionsDir} --raw`, tmpDir).output);
+    assert.strictEqual(out.project, 'app');
+    assert.strictEqual(out.messages_extracted, 1);
+  });
+
+  test('unknown --session id fails with not-found error', () => {
+    makeProject('proj', { 's1.jsonl': userMsg('a') + '\n' });
+    const result = runGsdTools(`extract-messages proj --session nope --path ${sessionsDir} --raw`, tmpDir);
+    assert.ok(!result.success);
+    assert.ok(result.error.includes('Session "nope" not found'), result.error);
+  });
+
+  test('unreadable session among good ones exits 2 with partial result', () => {
+    const dir = makeProject('mixed', { 'good.jsonl': userMsg('ok') + '\n' });
+    fs.mkdirSync(path.join(dir, 'bad.jsonl')); // directory named like a session: stream read fails
+    const result = runGsdTools(`extract-messages mixed --path ${sessionsDir} --raw`, tmpDir);
+    assert.ok(!result.success);
+    const out = JSON.parse(result.output);
+    assert.strictEqual(out.sessions_processed, 1);
+    assert.strictEqual(out.sessions_skipped, 1);
+    assert.strictEqual(out.messages_extracted, 1);
+    assert.ok(result.error.includes('Skipped session bad'), result.error);
+  });
+
+  test('all sessions unreadable exits 1', () => {
+    const dir = makeProject('allbad');
+    fs.mkdirSync(path.join(dir, 'bad.jsonl'));
+    const result = runGsdTools(`extract-messages allbad --path ${sessionsDir} --raw`, tmpDir);
+    assert.ok(!result.success);
+    const out = JSON.parse(result.output);
+    assert.strictEqual(out.sessions_processed, 0);
+    assert.strictEqual(out.sessions_skipped, 1);
+  });
+
+  test('profile-sample skips unreadable sessions and keeps good ones', () => {
+    const dir = makeProject('mixed', { 'good.jsonl': userMsg('ok') + '\n' });
+    fs.mkdirSync(path.join(dir, 'bad.jsonl'));
+    const result = runGsdTools(`profile-sample --path ${sessionsDir} --raw`, tmpDir);
+    assert.ok(result.success, result.error);
+    assert.strictEqual(JSON.parse(result.output).messages_sampled, 1);
+  });
+
+  test('profile-sample caps old sessions at 3 messages', () => {
+    const dir = makeProject('old', { 's1.jsonl': Array.from({ length: 6 }, (_, i) => userMsg(`m${i}`)).join('\n') });
+    const old = new Date('2020-01-01');
+    fs.utimesSync(path.join(dir, 's1.jsonl'), old, old);
+    const out = JSON.parse(runGsdTools(`profile-sample --path ${sessionsDir} --raw`, tmpDir).output);
+    assert.strictEqual(out.messages_sampled, 3);
+  });
+
+  test('profile-sample stops at --limit across projects', () => {
+    makeProject('a', { 's1.jsonl': [userMsg('a1'), userMsg('a2')].join('\n') });
+    makeProject('b', { 's1.jsonl': [userMsg('b1'), userMsg('b2')].join('\n') });
+    const out = JSON.parse(runGsdTools(`profile-sample --path ${sessionsDir} --limit 3 --raw`, tmpDir).output);
+    assert.strictEqual(out.messages_sampled, 3);
+  });
+
+  test('malformed or sparse sessions-index.json falls back; empty projects are omitted', () => {
+    makeProject('broken-index', {
+      's1.jsonl': userMsg('a') + '\n',
+      'sessions-index.json': '{oops',
+    });
+    makeProject('sparse-index', {
+      's1.jsonl': userMsg('a') + '\n',
+      'sessions-index.json': JSON.stringify({ entries: [{ summary: 'no id' }, { sessionId: 's1', summary: 'ok' }] }),
+    });
+    makeProject('no-sessions');
+    const out = JSON.parse(runGsdTools(`scan-sessions --path ${sessionsDir} --raw`, tmpDir).output);
+    assert.deepStrictEqual(out.map(p => p.name).sort(), ['broken-index', 'sparse-index']);
+  });
+
+  test('scan-sessions human table shows sizes and truncates long names', () => {
+    const dir = makeProject('p'.repeat(40), { 'kb.jsonl': 'x'.repeat(2048) });
+    fs.writeFileSync(path.join(dir, 'mb.jsonl'), Buffer.alloc(2 * 1048576));
+    fs.writeFileSync(path.join(dir, 'gb.jsonl'), '');
+    fs.truncateSync(path.join(dir, 'gb.jsonl'), 2 * 1073741824); // sparse
+    fs.writeFileSync(path.join(dir, 'an-extremely-long-session-id-that-exceeds-the-column.jsonl'), 'x');
+    const result = runGsdTools(`scan-sessions --path ${sessionsDir} --verbose`, tmpDir);
+    assert.ok(result.success, result.error);
+    assert.ok(result.output.includes('p'.repeat(30) + '...'), 'long project name truncated');
+    assert.ok(result.output.includes('2.0 KB'), 'KB shown');
+    assert.ok(result.output.includes('2.0 MB'), 'MB shown');
+    assert.ok(result.output.includes('2.0 GB'), 'GB shown');
+    assert.ok(result.output.includes('an-extremely-long-session-id-that-e...'), 'long session id truncated');
+    assert.ok(result.output.includes('Total: 1 projects'), result.output);
+  });
+});
