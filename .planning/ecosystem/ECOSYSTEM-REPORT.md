@@ -1,3 +1,5 @@
+> **Superseded 2026-10-26.** This report predates the rule corrections on `fix/reliability-sweep-2026-10-26` (dependency-auditor contradiction fixed; Bash/Edit, MCP-wildcard, read-only and `disallowedTools` rules scoped; drift normalization made install-safe). A deterministic re-check of every frontmatter and tool/permission rule against `agents/gsd-*.md` returned **0 BLOCK / 0 FLAG**. Regenerate with `/gsd:audit-agents` in a fresh session — subagent definitions load at session start, so a same-session re-run audits with the old rules.
+
 === GSD ECOSYSTEM AUDIT REPORT ===
 Generated: 2026-10-26T11:05:35Z
 Scope: 17 agents in /Users/cpconnor/projects/Pete-Gets-Shit-Done/.claude/worktrees/agent-a684935acf3575a27/agents

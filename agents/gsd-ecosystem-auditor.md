@@ -76,8 +76,8 @@ For each agent file, parse the YAML frontmatter (between the opening `---` and t
 - `model` (string, one of `haiku | sonnet | opus`)
 
 Recommended fields (FLAG if missing on any non-trivial agent):
-- `disallowedTools` (string, comma-separated)
 - `color` (string)
+- `disallowedTools` (string, comma-separated) — recommended only when the agent is NOT granted `Edit` (or `Write`) in `tools`, so the omission is explicit. An agent whose `tools` grants both `Write` and `Edit` uses them for its job; a missing `disallowedTools` there is not a finding.
 
 Defense-in-depth fields (FLAG if missing on agents that Write or Edit):
 - `permissionMode` (string)
