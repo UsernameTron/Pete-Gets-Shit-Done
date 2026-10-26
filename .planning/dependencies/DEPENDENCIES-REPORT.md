@@ -1,105 +1,87 @@
 === GSD DEPENDENCY AUDIT REPORT ===
-Generated: 2026-05-08T00:00:00Z
-Scope: npm
-Project root: /Users/cpconnor/projects/Pete-Gets-Shit-Done
+Generated: 2026-10-26T11:04:53Z
+Scope: npm (package.json + package-lock.json, lockfileVersion 3)
+Project root: /Users/cpconnor/projects/Pete-Gets-Shit-Done/.claude/worktrees/agent-a2250bd29e1d639b6
 
 --- SUMMARY ---
 Overall verdict: FLAG
-Security: PASS — 0 critical, 0 high, 0 moderate, 0 low
-Staleness: FLAG — 1 package flagged
+Security: FLAG — 0 critical, 3 high, 1 moderate, 0 low (4 advisories, all on brace-expansion@5.0.8, dev-only path)
+Staleness: FLAG — 1 packages flagged
 Licenses:  PASS — 0 packages flagged
 
 --- SECURITY FINDINGS ---
-(none)
+HIGH brace-expansion@5.0.8 → 5.0.12
+  CVE: not provided by audit output (GHSA only)
+  Advisory: https://github.com/advisories/GHSA-rgw5-rvv9-x895 (DoS, unbounded intermediate arrays; vulnerable <5.0.9)
+  Path: via minimatch@10.2.3 (dev-only: c8@11.0.0 → test-exclude@8.0.0 → minimatch@10.2.3)
+  Fix: upgrade brace-expansion to >=5.0.12 (transitive, see RECOMMENDATIONS 1)
+
+HIGH brace-expansion@5.0.8 → 5.0.12
+  CVE: not provided by audit output (GHSA only)
+  Advisory: https://github.com/advisories/GHSA-qhr7-859c-m2p7 (stack exhaustion, nested brace groups; vulnerable <5.0.11)
+  Path: via minimatch@10.2.3 (dev-only: c8@11.0.0 → test-exclude@8.0.0 → minimatch@10.2.3)
+  Fix: upgrade brace-expansion to >=5.0.12 (transitive, see RECOMMENDATIONS 1)
+
+HIGH brace-expansion@5.0.8 → 5.0.12
+  CVE: not provided by audit output (GHSA only)
+  Advisory: https://github.com/advisories/GHSA-6j4f-fj2g-mc7p (stack exhaustion, parseCommaParts; vulnerable <5.0.10)
+  Path: via minimatch@10.2.3 (dev-only: c8@11.0.0 → test-exclude@8.0.0 → minimatch@10.2.3)
+  Fix: upgrade brace-expansion to >=5.0.12 (transitive, see RECOMMENDATIONS 1)
+
+MODERATE brace-expansion@5.0.8 → 5.0.12
+  CVE: not provided by audit output (GHSA only)
+  Advisory: https://github.com/advisories/GHSA-q2hr-2g5m-vwhr (quadratic-time expansion, CPU DoS; vulnerable <5.0.12)
+  Path: via minimatch@10.2.3 (dev-only: c8@11.0.0 → test-exclude@8.0.0 → minimatch@10.2.3)
+  Fix: upgrade brace-expansion to >=5.0.12 (transitive, see RECOMMENDATIONS 1)
 
 --- STALENESS FINDINGS ---
-esbuild@0.25.12 → 0.28.0 (minor) — dev dep, 3 minor versions behind latest
-  Last release: 2026-04-02
+brace-expansion@5.0.8 → 5.0.12 (patch) — patch release fixes the four CVE-bearing advisories listed above
+  Last release: 2026-09-14
   Prod/Dev: dev
 
 --- LICENSE FINDINGS ---
 (none)
 
 --- TOOL STATUS ---
-(all tools present)
+npm: audit ran cleanly against the lockfile (npm audit exits 1 when vulnerabilities exist; output parsed as JSON)
+npm: outdated returned an empty result in --package-lock-only mode (no node_modules present, so "current" versions are unknown). Staleness was checked instead by querying the registry (npm view) for each direct dependency.
+Network: registry reachable; no retries needed.
+Lockfile: present (package-lock.json, lockfileVersion 3). No node_modules installed; nothing was installed or modified.
 
 --- RECOMMENDATIONS ---
-1. Update esbuild from 0.25.12 to 0.28.0 (dev dep only, no blocking concerns). Run `npm install --save-dev esbuild@0.28.0` and verify hook build pipeline with `npm run build:hooks && npm test`.
+1. Raise brace-expansion to >=5.0.12 (all four advisories are cleared at 5.0.12). It is a transitive dev dependency, so the published CLI is unaffected at runtime. Options, both of which change the lockfile and need your approval first: (a) add `"overrides": { "brace-expansion": "^5.0.12" }` to package.json and run `npm install --package-lock-only`; or (b) run `npm update brace-expansion --package-lock-only`. Do not run `npm audit fix --force`.
+2. After the change, re-run `npm audit --json --package-lock-only` and confirm 0 vulnerabilities. Staleness and license verdicts need no action.
 
 === END REPORT ===
 
 ## DETAILED FINDINGS
 
-### Project Structure
-- **Framework**: npm (Node.js 20+)
-- **Type**: CommonJS plugin for Claude Code (v1.30.0)
-- **Manifest**: `package.json`, `package-lock.json` (v3)
-- **Lockfile present**: Yes (accurate, reliable audit)
-- **Production dependencies**: 0 external runtime dependencies
-- **Development dependencies**: 2 direct (`c8@11.0.0`, `esbuild@0.25.12`), 82 total including transitive
-- **Dependency scope**: dev-only project — all external dependencies are development/build tools
+Project structure
+- Manifest type: npm. package.json declares only `devDependencies` (c8@^11.0.0, esbuild@^0.28.1) and no `dependencies`, `peerDependencies`, or `optionalDependencies`. Production: 0 (dev-only project). The published package (get-shit-done-cc@1.30.0) has no runtime npm dependencies.
+- Lockfile: 82 installed packages (dev: 82, prod: 0, optional: 26 esbuild platform binaries). Node engine requirement: >=20.0.0.
+- No other supported manifests at the project root (no pyproject.toml, Cargo.toml, go.mod, Gemfile, composer.json, or pnpm/yarn lockfiles).
 
-### Security Status
-**npm audit result**: 0 vulnerabilities across all 82 packages (including transitives).
-- No critical, high, moderate, or low CVEs detected
-- All transitive dependencies are clean
-- Audit performed against current npm registry (2026-05-08)
+Version currency (direct dependencies, registry lookup 2026-10-26)
+- c8: installed 11.0.0 (released 2026-02-22). Latest 12.0.0 (released 2026-07-14). Major version behind, dev dependency: noted here only, not flagged, per policy. Upgrade is a separate initiative and is not part of the security fix.
+- esbuild: installed 0.28.1 (released 2026-06-11). Latest 0.28.2 (released 2026-08-08). Patch-level, no CVE: silent per policy.
+- Neither direct dependency has gone 2+ years without a release.
 
-**Supply chain confidence**: High. All dependencies (direct and transitive) maintain active upstream maintenance, no abandoned packages, no unusual hosting patterns.
+Transitive note on the advisory
+- The audit's bundled range for brace-expansion is 4.0.0 through 5.0.11. Installed 5.0.8 is inside all four advisory ranges.
+- npm audit reports one package-level record (high: 1). Counted per advisory, the figure is 3 high and 1 moderate, which is the basis of the SUMMARY count.
+- Verdict note: the staleness criteria say a patch that fixes a CVE is a BLOCK. The verdict rules say BLOCK requires a high or critical CVE in the production path. This package is dev-only, so the verdict rules were applied: the security dimension is FLAG, and the staleness dimension is FLAG rather than BLOCK. The overall verdict is FLAG either way.
 
-### Staleness Analysis
+Licenses (from package-lock.json `license` fields, 82 packages)
+- MIT: 62. ISC: 12. BlueOak-1.0.0: 5. BSD-3-Clause: 3. No missing or UNLICENSED entries.
+- BlueOak-1.0.0 is an OSI-approved permissive license. It is not on the enumerated default list, but it is not unclear or custom, so it is classified PASS.
+- The project has no license policy file (no LICENSE-POLICY.md or dependencies-policy.yml), so default rules apply. The root project is MIT, and LICENSE is present.
 
-**c8@11.0.0** (test coverage tool)
-- Current: 11.0.0
-- Latest: 11.0.0 (matches latest)
-- Last release: 2026-02-25 (recent, ~2 months)
-- Status: Current, no flag
+Optional peer note
+- npm ls reports c8 with an optional peer `monocart-coverage-reports` that is not installed and not in the lockfile. Optional, dev-only, and not a finding.
 
-**esbuild@0.25.12** (hook bundler)
-- Current: 0.25.12
-- Latest: 0.28.0 (minor version lag)
-- Last release of latest: 2026-04-02 (~1 month ago)
-- Status: FLAGGED (minor version lag, but not critical)
-- Rationale: esbuild maintains rapid release cadence. The gap from 0.25 to 0.28 represents 3 minor versions with enhancements and stability improvements. Patch-level staleness is not flagged (per policy), but the minor gap warrants a note since build tools should track upstream closely. No security advisories for any 0.25.x version. Recommend upgrade as maintenance hygiene, not urgent.
+Audit confidence
+- Security: high. The audit ran against the lockfile and returned structured JSON with advisory URLs. CVE IDs were not included, so none are listed.
+- Staleness: medium. npm outdated could not run meaningfully without node_modules, so direct-dependency currency was checked against the registry.
+- Licenses: high for all 82 locked packages, read directly from the lockfile.
 
-### License Summary
-All 84 packages (direct + transitive) use permissive licenses:
-- `c8@11.0.0` — ISC (permissive)
-- `esbuild@0.25.12` — MIT (permissive)
-- Transitive packages include MIT, ISC, Apache-2.0, BSD-* — all permissive
-
-**No GPL, AGPL, SSPL, BSL, or proprietary licenses detected.**
-**No custom/unclear UNLICENSED entries in dependency tree.**
-
-License policy: Project has no `LICENSE-POLICY.md` or `dependencies-policy.yml`. Defaults applied: all detected licenses pass, no violations.
-
-### Transitive Dependency Tree (Key Packages)
-Coverage and instrumentation layer (c8 deps):
-- `istanbul-lib-coverage@3.2.2`, `istanbul-lib-report@3.0.1`, `v8-to-istanbul@9.3.0` (MIT)
-- `@bcoe/v8-coverage@1.0.2`, `@istanbuljs/schema@0.1.3` (MIT)
-
-CLI and utilities (shared):
-- `yargs@17.7.2`, `yargs-parser@21.1.1` (MIT)
-- `cliui@8.0.1`, `escalade@3.2.0` (MIT)
-
-Globbing and path utilities:
-- `glob@13.0.6`, `minimatch@10.2.3`, `path-scurry@2.0.2` (ISC/MIT)
-- `lru-cache@11.2.6`, `minipass@7.1.3` (ISC)
-
-Platform-specific esbuild binaries (all optional, MIT):
-- `@esbuild/darwin-arm64@0.25.12` and 26 other platform variants
-- Only loaded on matching OS; not executed on other platforms
-
-### Audit Confidence
-- **Lockfile status**: Present, pinned, current (npm install would not change anything)
-- **Network status**: Stable (all registry queries succeeded first attempt)
-- **Tool availability**: `npm audit`, `npm outdated`, `npm ls` all functional
-- **Coverage**: 100% of npm ecosystem (no undetected dependencies)
-
-### Closeout Status (v2.8 Phase 57)
-- No blocking security issues (PASS)
-- One minor dev-dependency version lag (FLAG, low priority)
-- No license violations (PASS)
-- All code coverage validators green (c8, check-doc-drift, validate-doc-links)
-
-Recommendation for release: Safe to ship. Optional: update esbuild before next development cycle to maintain build-tool freshness, but not a release blocker.
+=== END DETAILED FINDINGS ===

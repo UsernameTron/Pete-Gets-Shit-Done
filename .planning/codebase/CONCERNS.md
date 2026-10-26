@@ -1,170 +1,128 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-07-12
+**Analysis Date:** 2026-10-26
 
 ## Tech Debt
 
-**P1 — CLAUDE.md's own Architecture section describes a `lib/` layout that does not exist:**
-- Issue: CLAUDE.md documents `lib/core.cjs`, `lib/security.cjs`, `lib/governance.cjs`, `lib/classify.cjs`, `lib/model-profiles.cjs`, `lib/history.cjs` as "Core runtime." None of these files live in `lib/`. `lib/` (repo root) contains exactly two files — `ci-patterns.json` and `injection-patterns.json` (build-time pattern sources, not runtime code). The actual modules live under `get-shit-done/bin/lib/`. `governance.cjs` does not exist anywhere in the repository — governance is implemented as bash scripts (`governance/scripts/*.sh`) plus PreToolUse/PostToolUse hooks (`hooks/*.js`), not a `.cjs` module.
-- Files: `CLAUDE.md` (Architecture section), `lib/` (actual contents), `get-shit-done/bin/lib/core.cjs`, `get-shit-done/bin/lib/security.cjs`, `get-shit-done/bin/lib/classify.cjs`, `get-shit-done/bin/lib/model-profiles.cjs`, `get-shit-done/bin/lib/history.cjs`
-- Why: `scripts/check-doc-drift.cjs` (the CI-enforced doc-accuracy gate) only validates 9 *numeric* claims (test/suite/coverage/agent/command/skill/hook counts) via regex — it has no mechanism to verify that a file path mentioned in prose actually exists. `scripts/validate-doc-links.cjs` only parses Markdown link syntax (bracketed label + parenthesized target), not backtick code-spans inside a fenced tree diagram. Both CI-blocking validators structurally cannot catch this class of drift.
-- Impact: Every session (including this one) receives this architecture block as authoritative system-prompt context and will misdirect file edits or explanations toward `lib/` and a nonexistent `governance.cjs`.
-- Fix approach: Correct the Architecture section to point at `get-shit-done/bin/lib/` and describe governance as bash + hooks, not a `.cjs` module. If path-accuracy enforcement is wanted going forward, extend `check-doc-drift.cjs` (or a new lightweight check) to assert that backtick-quoted paths in CLAUDE.md's architecture block resolve on disk.
+**P1 - CLAUDE.md Architecture section describes modules that do not exist:**
+- Issue: `CLAUDE.md` (Architecture block, lines ~28-40) lists `lib/core.cjs`, `lib/security.cjs`, `lib/governance.cjs`, `lib/classify.cjs`, `lib/model-profiles.cjs`, `lib/history.cjs`. Repo-root `lib/` holds only `lib/ci-patterns.json` and `lib/injection-patterns.json`. Real modules live in `get-shit-done/bin/lib/` (`core.cjs`, `security.cjs`, `model-profiles.cjs`, `history.cjs`, ...). `classify.cjs` and `governance.cjs` do not exist under `get-shit-done/bin/lib/`; installer governance logic is `bin/lib/governance.js`, and enforcement is `governance/scripts/*.sh` plus `hooks/*.js`.
+- Files: `CLAUDE.md`, `lib/`, `get-shit-done/bin/lib/`, `bin/lib/governance.js`
+- Impact: CLAUDE.md is loaded as authoritative context every session and misdirects edits and explanations.
+- Fix approach: Rewrite the Architecture block to match disk. Optionally extend `scripts/check-doc-drift.cjs` to assert backtick-quoted paths in CLAUDE.md resolve.
 
-**P1 — `bin/install.js` is a 5,300-line monolith:**
-- Issue: Single file contains all installer logic for 6+ runtimes (Claude Code, Copilot, Cursor, Windsurf, Codex, Gemini, OpenCode, Antigravity). 26 `convert*` functions (`convertToolName`, `convertGeminiToolName`, `convertClaudeToCopilotContent`, `convertClaudeAgentToAntigravityAgent`, etc., spanning lines 516–1087 and 2335–2450) follow near-identical patterns with per-runtime tool-name mappings and content transformations. The top-level `install(isGlobal, runtime)` function alone is 605 lines (from line 4336).
-- Files: `bin/install.js`
-- Impact: High maintenance burden when adding a runtime or changing cross-runtime behavior. Bug fixes must be applied to each runtime's converter independently; a missed one silently produces wrong output for that platform only.
-- Fix approach: Extract a runtime-adapter pattern — one base converter driven by a per-runtime config object (tool-name map, frontmatter format, content transforms). Decompose `install()` into `installHooks()`, `installAgents()`, `installCommands()`, `installGovernance()` helpers.
+**P2 - Doc-drift checker guards few documentation claims (open ticket `tasks/doc-drift-coverage-gaps.md`):**
+- Issue: Still true. The 2026-10-26 README audit found 27 stale claims; `scripts/check-doc-drift.cjs` (821 lines) guarded 2 of them, so the `docs-integrity` and drift CI gates stayed green. Unguarded: README skill-section headers vs `plugins/claude-code-factory/skills/`, plugin-inventory Skills/Subagents columns, `### GSD Commands (N)` vs `commands/gsd/*.md`, hook total (`### The N Hooks`) vs `hooks/*.js`, and skill-table rows vs files on disk.
+- Files: `scripts/check-doc-drift.cjs`, `README.md`, `tasks/doc-drift-coverage-gaps.md`
+- Impact: README and CLAUDE.md counts and inventories rot silently.
+- Fix approach: Add the metrics listed in the ticket; add a path-existence check for skill table rows.
 
-**P2 — `get-shit-done/bin/lib/init.cjs` is 2,101 lines:**
-- Issue: 30+ `cmdInit*` functions covering every GSD subcommand's initialization logic, mixing project-state reading, plan-inventory scanning, context assembly, and skill-metadata operations in one file.
-- Files: `get-shit-done/bin/lib/init.cjs`
-- Impact: Adding a command requires touching this file. Skill-related functions (`parseSkillMetadata`, `discoverSkills`, `resolveSkillComposition`, `auditSkills`, `checkSkillVersions`) are a distinct concern from command initialization.
-- Fix approach: Extract skill operations into `get-shit-done/bin/lib/skills.cjs`. Group remaining `cmdInit*` functions into logical submodules or add clear section banners if extraction cost is too high.
+**P2 - `scripts/generate-gap-analysis.cjs` ignores the split installer (open ticket `tasks/install-split-followups.md` item 3):**
+- Issue: Still true. `OPERATIONAL_PATTERNS` (line 21 onward) lists `.cjs` names (`core.cjs`, `commands.cjs`, `state.cjs`, ...) and matches paths by substring (`lower.includes(pat)`, line ~103). The installer now lives in `bin/install.js` (359 lines) plus `bin/lib/**`, so those files classify as `Utility`, not `Operational`, in coverage-gap priority.
+- Files: `scripts/generate-gap-analysis.cjs`, `bin/lib/`
+- Impact: Coverage-gap reports under-prioritise installer modules.
+- Fix approach: Add `bin/lib/` (and `install.js`) to `OPERATIONAL_PATTERNS`.
 
-**P2 — `scripts/ci-coverage-report.sh` cannot produce output — its required input is never generated:**
-- Issue: The script hard-requires `coverage/coverage-summary.json` (its own comment: "Requires: coverage/coverage-summary.json (from c8 --reporter json)"). But `c8`'s `json` reporter writes `coverage-final.json`, not `coverage-summary.json` — that filename is only produced by the separate `json-summary` reporter. Neither `npm run test:coverage` nor `test:coverage:full` (`package.json`) nor `.c8rc.json` ever passes `--reporter json-summary`. A repo-wide grep for `json-summary` returns zero hits outside this script's own comments.
-- Files: `scripts/ci-coverage-report.sh`, `package.json` (scripts section), `.c8rc.json`, `.github/workflows/test.yml` (lines 58–63, "Generate coverage report" step)
-- Impact: Every CI run hits the `[[ ! -f "$COVERAGE_JSON" ]]` branch, prints `"WARNING: ... not found. Skipping coverage report."`, and exits 0. The GitHub Actions job-summary coverage table this script exists to produce has never actually rendered. It is dead tooling that looks like a working step in a green CI run.
-- Fix approach: Add `--reporter json-summary` alongside the existing `--reporter json` in the `test:coverage` / `test:coverage:full` scripts (c8 accepts multiple `--reporter` flags), or rewrite the script to derive its table from the already-produced `coverage-final.json`.
+**P2 - `scripts/ci-coverage-report.sh` cannot render its report:**
+- Issue: Requires `coverage/coverage-summary.json` (produced only by c8's `json-summary` reporter). `package.json` scripts `test:coverage` and `test:coverage:full` pass `--reporter text|lcov|json` only; no `json-summary` anywhere in `scripts/`, `package.json`, or `.github/`. The script hits `[[ ! -f ... ]]`, prints a warning, and exits 0.
+- Files: `scripts/ci-coverage-report.sh`, `package.json`, `.github/workflows/test.yml` (step "Generate coverage report")
+- Impact: The Actions job-summary coverage table never renders; green CI hides a dead step.
+- Fix approach: Add `--reporter json-summary` to both coverage scripts.
 
-**P2 — Coverage thresholds stated in CLAUDE.md are not enforced anywhere:**
-- Issue: CLAUDE.md states "90% overall / 80% per module / 95% security-critical modules" as a hard rule ("Do not treat overall coverage as passing if any individual module is below its threshold"). `.c8rc.json` sets `include`/`exclude`/`all` only — no `lines`/`branches`/`check-coverage` keys. No script passes `--check-coverage` on any threshold. The one script that reads a coverage percentage for a pass/fail judgment (`ci-coverage-report.sh`, see above) uses a hardcoded 80% overall warning threshold — not 90% — and always `exit 0` regardless ("Advisory only — never fail the build (D-12)").
+**P2 - Documented coverage thresholds are not enforced:**
+- Issue: `CLAUDE.md` states 90% overall / 80% per module / 95% security-critical. `.c8rc.json` has `include`, `exclude`, `all` only; no `check-coverage`, `lines`, or `branches`. `ci-coverage-report.sh` is advisory and uses a hardcoded 80%.
 - Files: `.c8rc.json`, `package.json`, `scripts/ci-coverage-report.sh`
-- Impact: `scripts/check-doc-drift.cjs` keeps the *stated numbers* in CLAUDE.md honest (it fails CI if the written percentage disagrees with measured reality), but nothing stops the measured number itself from dropping below the documented policy floor — a regression just needs its CLAUDE.md number updated to match, and CI stays green.
-- Fix approach: Add `lines`/`branches`/`functions` threshold keys (with `check-coverage: true`) to `.c8rc.json`, or pass `--check-coverage --lines 90` in the CI-only `test:coverage:full` invocation, so a real coverage regression fails the `test` job independent of documentation accuracy.
+- Impact: A regression passes CI as long as CLAUDE.md's stated number is updated to match.
+- Fix approach: Add `check-coverage: true` with `lines`/`branches` thresholds to `.c8rc.json`, or `--check-coverage` in `test:coverage:full`.
 
-**P3 — `.gitignore` lists `.planning/PROJECT.md` and `.planning/research/` as "local," but both are tracked and actively committed:**
-- Issue: `.gitignore`'s "Internal planning documents (STATE.md is committed; everything else is local)" block lists `.planning/PROJECT.md` and `.planning/research/`. `git ls-files` shows both are tracked, and `git log -- .planning/PROJECT.md` shows 8+ deliberate commits including recent ones explicitly titled "sync PROJECT/DEVOPS/CHANGELOG to live state" (7a43f87). `.planning/config.json` and `.planning/phases/`, listed in the same block, are correctly untracked — only these two entries are stale.
-- Files: `.gitignore` (lines ~40–45), `.planning/PROJECT.md`, `.planning/research/`
-- Impact: Low — no evidence this exposes anything unintended (PROJECT.md is deliberately synced), but the ignore rule now misrepresents actual practice and could mislead a future contributor into thinking these files are local-only.
-- Fix approach: Remove `.planning/PROJECT.md` and `.planning/research/` from the ignore block, or add an explicit comment noting they are intentionally force-tracked exceptions.
+**P3 - `get-shit-done/bin/lib/init.cjs` is 1,973 lines:**
+- Issue: 30+ `cmdInit*` functions plus skill-metadata operations (`parseSkillMetadata`, `discoverSkills`, `auditSkills`, ...) in one file. `core.cjs` is 1,753 lines.
+- Files: `get-shit-done/bin/lib/init.cjs`, `get-shit-done/bin/lib/core.cjs`
+- Impact: Every new command touches the same file.
+- Fix approach: Extract skill operations to `get-shit-done/bin/lib/skills.cjs`.
 
-**P3 — `prepublishOnly` still does not run tests:**
-- Issue: `"prepublishOnly": "npm run build:hooks"` (`package.json`) — no test step. Unchanged from prior audits.
-- Files: `package.json` (scripts section)
-- Impact: Reduced since CI now gates `main` (5 required status checks on PRs), but a local `npm publish` run from a branch with a passing build and failing tests would still succeed.
-- Fix approach: Add `npm test` to `prepublishOnly`.
+**P3 - `.gitignore` misstates tracking of planning files and has no secret-file patterns:**
+- Issue: Lines 42 and 44 list `.planning/PROJECT.md` and `.planning/research/` as local, but `.planning/PROJECT.md` is tracked (`git ls-files .planning`). `.gitignore` has no `.env*`, `*.pem`, or `*.key` patterns.
+- Files: `.gitignore`
+- Impact: Misleading rule; no defensive backstop for accidental secret files (CI `scripts/secret-scan.sh` is content-based only).
+- Fix approach: Remove or annotate the stale entries; add `.env*`, `*.pem`, `*.key`.
+
+**P3 - `prepublishOnly` does not run tests:**
+- Issue: `"prepublishOnly": "npm run build:hooks"` (`package.json` line 50).
+- Files: `package.json`
+- Impact: Local `npm publish` can ship with failing tests (CI gates `main`, not publish).
+- Fix approach: Prefix with `npm test`.
 
 ## Known Bugs
 
-**`lesson-capture-gate.cjs` (the Stop-event self-improvement gate) is not registered to fire in this repository:**
-- Symptoms: `tasks/lessons.md` is updated only when a session manually chooses to (per CLAUDE.md's "Self-Improvement Loop" instruction), never enforced by the hook whose entire purpose is to block `Stop` until a correction is logged.
-- Files: `.claude/hooks/lesson-capture-gate.cjs` (605 lines, its own docstring: "Fires on Stop event"), `.claude/settings.json`
-- Trigger: `.claude/settings.json` registers only a `SubagentStop` hook (`scripts/gsd-agent-health-check.sh`). It has no `Stop` key at all. `bin/install.js` — the installer that wires hooks into a user's `settings.json` — contains zero references to `lesson-capture-gate`, confirming this hook was never intended to be installer-managed; it is meant to be registered directly in this repo's own `.claude/settings.json` (it is deliberately excluded from `package.json`'s `files` list, same as the three project-scoped agents). `$HOME/.claude/settings.json` in this environment also has no matching entry.
-- Workaround: None currently in effect; lesson capture relies entirely on the operating instructions in CLAUDE.md being followed voluntarily each session.
-- Root cause: This is not a new failure mode — `tasks/lessons.md` already documents this exact defect once: "[2026-04-13] [Integration]: lesson-capture-gate.cjs shipped in PR #34 with code + tests but was never registered in settings.json Stop hooks. Hook was inert for 3 days." Current on-disk state shows the same gap persists (or has recurred) with no `Stop` entry anywhere in scope.
-- Fix approach: Add a `Stop` hook entry to `.claude/settings.json` invoking `node .claude/hooks/lesson-capture-gate.cjs`, then verify by triggering an actual Stop event and confirming the block fires (per the project's own 2026-04-24 lesson: "acceptance criteria that claim enforcement must be tested by attempting the blocked action, not by confirming the setting appears").
-
-No TODO/FIXME/HACK/XXX markers exist in any `.cjs`/`.js` source file (repo-wide grep, zero hits) and no tests carry `.skip()`/`.todo()` markers other than one environment-conditional skip in `tests/validate-doc-links.test.cjs` (git unavailable). Inline debt markers are not how issues surface in this codebase — they surface as gaps between documented behavior and actual wiring, as above.
+**Uninstall leaves three orphaned hook registrations in settings.json (open ticket `tasks/uninstall-orphaned-hook-registrations.md`):**
+- Symptoms: After `--uninstall`, `settings.json` still registers `gsd-cost-tracker`, `gsd-config-protection`, and `gsd-spawn-tracker` pointing at deleted files; every matching tool call runs a missing-file hook.
+- Files: `bin/lib/uninstall-steps.js`, `bin/lib/settings-hooks.js`
+- Trigger: Still true. `removeHooks()` (line 87) deletes all eight hook files including the three above, but `GSD_HOOK_REMOVALS` (lines 123-127) only has marker entries for `gsd-check-update`, `gsd-statusline`, `gsd-context-monitor`, and `gsd-prompt-guard`. `bin/lib/settings-hooks.js` lines 15-18 register the three missing ones (PostToolUse cost tracker; PreToolUse config protection with matcher `Write|Edit`; PreToolUse spawn tracker with matcher `Task|Agent`).
+- Workaround: Hand-edit `settings.json`.
+- Fix approach: Add `{ events: ['PostToolUse','AfterTool'], markers: ['gsd-cost-tracker'] }` and `{ events: ['PreToolUse','BeforeTool'], markers: ['gsd-config-protection','gsd-spawn-tracker'] }` to `GSD_HOOK_REMOVALS`; add an uninstall test asserting no `gsd-*` command remains in `settings.json`. Coverage of `bin/lib/uninstall-steps.js` is the reason this went unnoticed.
 
 ## Security Considerations
 
-**P1 — `uat-patterns.cjs` builds shell command strings by unsanitized regex-capture interpolation, then `uat-runner.cjs` runs them with `execSync`:**
-- Risk: Every `generate()` function in the pattern registry splices a regex capture group (`\S+`, which matches any non-whitespace run — including `$(...)`, backticks, and other shell metacharacters) directly into a template string: `` `test -f "${match[1]}" && echo "present" || echo "absent"` `` (line 74), `` `grep -c "${match[2]}" "${match[1]}" 2>/dev/null || echo "0"` `` (line 129), and four more sites (lines 46, 60, 87, 142). `uat-runner.cjs` line 76 then passes the fully-built string to `execSync(matched.assertion.command, ...)`, which shells out via `/bin/sh -c`. Double-quoting does not stop `$()` command substitution. The captured values originate from `must_haves.truths` strings in `PLAN.md` frontmatter — content authored by the `gsd-planner` agent (an LLM), not a human-reviewed literal.
-- Files: `get-shit-done/bin/lib/uat-patterns.cjs` (lines 45–142), `get-shit-done/bin/lib/uat-runner.cjs` (line 76)
-- Current mitigation: None implemented, despite being claimed. `uat-runner.cjs`'s own header comment asserts: "All commands are structurally verified to contain no write operators" — no such verification exists in either file; `generate()` performs no validation on its inputs at all. `get-shit-done/bin/lib/security.cjs` already exports `validateShellArg(value, label)` — which rejects `` $ ` ``, `;|&><`, newlines, and null bytes, exactly the shape of check this call site needs — but `uat-patterns.cjs` never imports it (its own docstring declares it "a pure function module... no intra-project imports — Layer 0 leaf node," which is presumably why the existing safe-arg helper was never wired in). This is the one `execSync`-with-a-template-string call site in the codebase; every other `child_process` call (`core.cjs`, `harden-repo.cjs`) uses `execFileSync` with an argv array, which is immune to this class of injection.
-- Recommendations: Apply `validateShellArg()` (or an equivalent inline check) to every regex-captured value before template interpolation. This is the automated verification engine invoked by `/gsd:verify-work` and the unattended `idea-to-shipped` autonomous flow — it should not trust planner-generated text with unsanitized shell interpolation, independent of how likely a malicious `PLAN.md` is in practice.
+**`security-scan.yml` job is not in the documented required-checks list:**
+- Risk: `.github/workflows/security-scan.yml` job `security` runs injection, base64, and secret scans on PRs, but `CLAUDE.md` lists only five required checks (`test` x3, `governance`, `docs-integrity`). No in-repo source of truth for branch protection; `get-shit-done/bin/lib/harden-repo.cjs` preserves existing contexts.
+- Files: `.github/workflows/security-scan.yml`, `CLAUDE.md`, `get-shit-done/bin/lib/harden-repo.cjs`
+- Current mitigation: Failures are visible on the PR.
+- Recommendations: Either require it or document it as advisory.
 
-**P2 — `security-scan.yml`'s `security` job is not among the branch-protection-required checks CLAUDE.md documents:**
-- Risk: `.github/workflows/security-scan.yml` runs prompt-injection, base64-obfuscation, and secret scanning (`scripts/prompt-injection-scan.sh`, `scripts/base64-scan.sh`, `scripts/secret-scan.sh`) on every PR to `main`. CLAUDE.md enumerates exactly five required status checks for merge: `test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity`. The `security` job is not in that list. There is no `.github/settings.yml` or other in-repo source of truth for branch protection — `get-shit-done/bin/lib/harden-repo.cjs`'s `STANDARD_POLICY` deliberately preserves whatever `required_status_checks.contexts` are already live on GitHub (`'__PRESERVE_EXISTING__'`) rather than asserting a list, so nothing in the repo can confirm or deny whether `security` is actually required.
-- Files: `.github/workflows/security-scan.yml`, `CLAUDE.md` (GitHub Repository Security section), `get-shit-done/bin/lib/harden-repo.cjs` (`STANDARD_POLICY`)
-- Current mitigation: The scan runs and would be visible as a failed check on any PR; a maintainer would very likely notice before merging.
-- Recommendations: Either add `security` to the documented and enforced required-checks list, or state explicitly in CLAUDE.md that it is advisory-only if that is the intent — the current state is ambiguous rather than deliberately one or the other.
-
-**P3 — `.gitignore` has no generic secret-file patterns:**
-- Risk: No `.env*`, `*.key`, `*.pem`, or `credentials.*` glob in `.gitignore`. The project currently has zero `.env` files and zero runtime secrets by design, so there is no active exposure, but there is also no defensive backstop if a fork or contributor adds one.
-- Files: `.gitignore`
-- Current mitigation: `.secretscanignore`-driven CI scanning (`scripts/secret-scan.sh` in `security-scan.yml`) catches secret-shaped strings in diffs regardless of `.gitignore`; that is a content scan, not a path exclusion.
-- Recommendations: Add standard patterns (`.env*`, `*.key`, `*.pem`) as defense-in-depth.
+**UAT shell injection is mitigated (no longer a concern):**
+- `get-shit-done/bin/lib/uat-patterns.cjs` now emits argv assertions run through `safeExec` (no shell); only the two static pipeline patterns are `shell: true` and run via `execSync` in `get-shit-done/bin/lib/uat-runner.cjs`. Keep the invariant test that those are the only `shell: true` patterns.
 
 ## Performance Bottlenecks
 
-**P3 — File-based planning lock uses busy-wait polling:**
-- Problem: `withPlanningLock()` spins in a loop calling `spawnSync('sleep', ['0.1'])` while the lock is held, up to a 10-second timeout (100 iterations at 100ms).
-- Files: `get-shit-done/bin/lib/core.cjs` (lines 769–820)
-- Cause: Node.js has no native "wait for file change" primitive for synchronous CommonJS code; the implementation spawns a `sleep` process per retry instead.
-- Improvement path: Low priority — lock contention is rare (single-user, sequential command execution). No action needed unless parallel subagent/workstream execution starts causing measurable contention.
+**Planning lock busy-wait:**
+- Problem: `withPlanningLock()` polls with `spawnSync('sleep', ['0.1'])` (`get-shit-done/bin/lib/core.cjs` line 792).
+- Files: `get-shit-done/bin/lib/core.cjs`
+- Cause: No synchronous file-watch primitive in CommonJS.
+- Improvement path: Low priority; revisit only if parallel workstreams show contention.
 
 ## Fragile Areas
 
-**P2 — Multi-runtime converter functions in `bin/install.js`:**
-- Files: `bin/install.js` (lines 516–1087, 2335–2450)
-- Why fragile: Adding or changing a tool-name mapping requires updating all 26 `convert*` functions in parallel. Each runtime has subtly different frontmatter/tool-name/content-transform rules; missing one during a change silently produces wrong output for only that platform.
-- Safe modification: When touching tool mappings or content transforms, grep for every `convert*ToolName` / `convert*Content` function and update each; run `npm run test:e2e` to exercise installation flows end to end.
-- Test coverage: 81.98% statement / 82.08% branch — the lowest of any large module in the repo (see Test Coverage Gaps).
+**Per-runtime installer modules and converters:**
+- Files: `bin/lib/runtimes/*.js` (8 runtimes), `bin/lib/converters/`, `bin/lib/install-steps.js`, `bin/lib/uninstall-steps.js`, `bin/lib/settings-hooks.js`
+- Why fragile: Install and uninstall registration tables are separate lists (`settings-hooks.js` vs `GSD_HOOK_REMOVALS`) and drifted (see Known Bugs). Tool-name and content conversions are per-runtime.
+- Safe modification: When adding a hook, update the install table in `bin/lib/settings-hooks.js`, the delete list in `removeHooks()`, and `GSD_HOOK_REMOVALS` together; run `npm run test:e2e`.
+- Test coverage: See Test Coverage Gaps.
 
-**P2 — `harden-repo.cjs` mutates live GitHub branch-protection settings with the weakest branch coverage in the security-relevant surface:**
+**`harden-repo.cjs` mutates live GitHub branch protection:**
 - Files: `get-shit-done/bin/lib/harden-repo.cjs`
-- Why fragile: `applyFix()` performs a read-current → merge → PUT-full-object cycle against the GitHub API via the `gh` CLI (`execFileSync('gh', args, ...)`, line 68) — a real, external, stateful side effect, not a local file write. Branch coverage is 71.62% (53/74); the untested branches are concentrated in the gap-detection `check()` helper's null-coalescing paths (lines ~198–236) for when GitHub's API response is missing an expected field entirely (e.g., `required_pull_request_reviews` absent) — exactly the shape of response most likely from a repo whose protection was only partially configured, which is a realistic real-world input this tool exists to handle correctly.
-- Common failures: An unexercised null-handling branch misjudging "already correct" vs "needs fix" would either skip a needed fix or, per the read-merge-PUT contract, submit a merge built from an incompletely-understood current state.
-- Safe modification: Add fixture-driven tests for a GitHub API response with each top-level protection field individually absent (not just falsy) before changing `check()` or `mergePolicy()`.
-- Test coverage: 83.33% statement / 71.62% branch (`tests/harden-repo.test.cjs`).
-
-**P2 — UAT pattern-registry command generation (see Security Considerations):**
-- Files: `get-shit-done/bin/lib/uat-patterns.cjs`, `get-shit-done/bin/lib/uat-runner.cjs`
-- Why fragile: Independent of adversarial intent, any legitimate `must_have` truth string whose captured substring happens to contain a shell metacharacter (e.g., a file path or grep pattern with `$`, `` ` ``, or unbalanced quotes) will either break the generated command's syntax or silently change its meaning. There is no test fixture exercising a truth string with shell-special characters in the captured groups.
-- Safe modification: Add the input-validation fix described above before extending the pattern registry with new `generate()` templates.
+- Why fragile: Read-merge-PUT through `gh` against a real repo; absent-field API responses are poorly covered (83.33% statements, 70.66% branches).
+- Safe modification: Add fixtures with each protection field individually absent before changing `check()` or `mergePolicy()`.
 
 ## Scaling Limits
 
-**Execution history JSONL rotation:**
-- Current capacity: 1,000 records before auto-rotation trims to the latest 500 (`ROTATION_THRESHOLD` / `ROTATION_KEEP`, unchanged from prior audits).
+**Execution history JSONL:**
+- Current capacity: 1,000 records, rotated to the newest 500 (`ROTATION_THRESHOLD` / `ROTATION_KEEP`).
 - Files: `get-shit-done/bin/lib/history.cjs`
-- Scaling path: Current limits are appropriate for single-user CLI usage; no action needed.
+- Scaling path: Adequate for single-user CLI use.
 
 ## Dependencies at Risk
 
-**P0 — Zero runtime dependencies (strength, not risk):**
-- The project has zero production dependencies (`package.json` has no `dependencies` key, only 2 `devDependencies`: `c8@^11.0.0`, `esbuild@^0.28.1`). This eliminates supply-chain risk entirely. Maintain this.
-
-**P3 — `.planning/dependencies/DEPENDENCIES-REPORT.md` is two months stale:**
-- Risk: Last generated 2026-05-08; its only flagged finding (esbuild 0.25.12 lag) was already resolved in `package.json` (now 0.28.1, per commit 6406b0e / PR #30) without the report being regenerated. No new CVE or staleness scan has run since, so a real new finding could exist undetected.
+**Dependency audit report is stale:**
+- Risk: `.planning/dependencies/DEPENDENCIES-REPORT.md` was generated 2026-05-08.
 - Files: `.planning/dependencies/DEPENDENCIES-REPORT.md`
-- Migration plan: Re-run `/gsd:audit-deps` to refresh the report; low urgency given the zero-runtime-dependency surface.
-
-## Missing Critical Features
-
-No missing feature was found that blocks a documented GSD workflow. The gaps identified this pass are all *existing* mechanisms that don't fire or verify as documented (coverage enforcement, the coverage-report script, the lesson-capture Stop hook) rather than absent capability — see Tech Debt and Known Bugs.
+- Migration plan: Re-run `/gsd:audit-deps`. Surface is small: no runtime `dependencies`; dev deps `c8` and `esbuild` only.
 
 ## Test Coverage Gaps
 
-**P2 — `bin/install.js`: 81.98% statement / 82.08% branch — the largest, most complex file in the repo sitting just above the documented 80% per-module floor:**
-- What's not tested: Not independently reported per-`convert*` function; given the file's size (5,300 lines) and the CI branch-protection matrix testing macOS/ubuntu × Node 20/22, thin margin above the floor leaves little room before a routine change silently trips it — and nothing would fail CI if it did (see Tech Debt: coverage thresholds unenforced).
-- Files: `bin/install.js`
-- Risk: This is the actual `bin` entry point (`get-shit-done-cc`) every new user runs.
-- Priority: Medium-High
+**Branch coverage below 70-85% in several modules (measured 2026-10-26 via `npx c8 --reporter text node scripts/run-tests.cjs`; overall 94.39% statements / 84.56% branches):**
+- `get-shit-done/bin/lib/harden-repo.cjs`: 83.33% stmt / 70.66% branch. Priority: High (live GitHub PUT).
+- `get-shit-done/bin/lib/profile-pipeline.cjs`: 83.67% stmt / 70.13% branch. Malformed session JSONL and permission-error paths. Priority: Medium.
+- `bin/lib/install-steps.js`: 83.99% stmt / 65.43% branch. Priority: Medium.
+- `bin/lib/attribution.js`: 81.81% stmt / 65% branch. Priority: Low.
+- `bin/lib/toml.js`: 81.02% stmt / 81.2% branch. Priority: Low.
+- Risk: Statement coverage sits just above the 80% per-module floor, which nothing enforces (see Tech Debt).
 
-**P2 — `harden-repo.cjs`: 71.62% branch coverage on a module that PUTs live GitHub branch-protection state:**
-- What's not tested: Null/absent-field paths in the GitHub API response merge logic (see Fragile Areas).
-- Files: `get-shit-done/bin/lib/harden-repo.cjs`
-- Risk: Misconfigured branch protection with no test to catch it before a live `gh api ... PUT`.
+**`bin/lib/uninstall-steps.js` hook-registration cleanup:**
+- What's not tested: Absence of `gsd-*` commands in `settings.json` after uninstall.
+- Files: `bin/lib/uninstall-steps.js`
+- Risk: The orphaned-registration bug above.
 - Priority: High
-
-**P2 — `profile-pipeline.cjs`: 83.67% statement / 70.14% branch — the weakest branch coverage in the repo:**
-- What's not tested: Edge cases in session-JSONL scanning/sampling (`scanProjectDir`, message extraction, recency-weighted sampling) — malformed lines, empty sessions, permission errors. Reads real `~/.claude/projects/*.jsonl` session history.
-- Files: `get-shit-done/bin/lib/profile-pipeline.cjs`
-- Risk: Silent garbling of behavioral-profiling output; low severity (UX only, no destructive writes) but currently the single lowest-branch-coverage module measured.
-- Priority: Medium
-
-**P3 — `smart-discuss.md` (306-line workflow, called from both `/gsd:autonomous` and `idea-to-shipped`) has no dedicated contract test:**
-- What's not tested: `smart-discuss.md`'s own step logic in isolation. It is only incidentally exercised through `tests/idea-to-shipped.test.cjs`'s exercise of the caller path — unlike its sibling new workflows (`daily-startup.md`, `wrap-and-sync.md`, `idea-to-shipped.md`), each of which has its own dedicated test file (`tests/daily-startup.test.cjs`, `tests/wrap-and-sync.test.cjs`, `tests/idea-to-shipped.test.cjs`).
-- Files: `get-shit-done/workflows/smart-discuss.md`
-- Risk: A regression in `smart-discuss.md` reachable only from the `/gsd:autonomous` entry point (not via `idea-to-shipped`) could pass CI undetected.
-- Priority: Low-Medium
-
-## Summary Priority Matrix
-
-| Priority | Count | Description |
-|----------|-------|-------------|
-| P0 | 1 | Zero runtime dependencies (strength, not a risk) |
-| P1 | 3 | CLAUDE.md architecture section describes a nonexistent `lib/` layout and a fictional `governance.cjs`; `bin/install.js` 5,300-line monolith; unsanitized shell interpolation in the UAT pattern registry |
-| P2 | 9 | `init.cjs` size; broken `ci-coverage-report.sh`; unenforced coverage thresholds; security-scan not in documented required checks; `install.js`/`harden-repo.cjs`/`profile-pipeline.cjs` coverage gaps; multi-runtime converter fragility; UAT pattern-registry fragility |
-| P3 | 6 | Stale `.gitignore` planning-doc entries; `prepublishOnly` skips tests; missing generic secret patterns in `.gitignore`; busy-wait lock; stale dependency report; untested `smart-discuss.md` |
-| Bug | 1 | `lesson-capture-gate.cjs` Stop hook not registered — self-improvement loop is not enforced (recurrence of a previously logged-and-presumed-fixed defect) |
 
 ---
 
-*Concerns audit: 2026-07-12*
-*Update as issues are fixed or new ones discovered*
+*Concerns audit: 2026-10-26*
