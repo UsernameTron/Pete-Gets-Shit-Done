@@ -364,7 +364,7 @@ describe('workspace routing in gsd-tools', () => {
       path.join(__dirname, '..', 'get-shit-done', 'bin', 'gsd-tools.cjs'),
       'utf8'
     );
-    assert.ok(toolsContent.includes("case 'new-workspace'"));
+    assert.ok(toolsContent.includes("'new-workspace':"));
     assert.ok(toolsContent.includes('cmdInitNewWorkspace'));
   });
 
@@ -373,7 +373,7 @@ describe('workspace routing in gsd-tools', () => {
       path.join(__dirname, '..', 'get-shit-done', 'bin', 'gsd-tools.cjs'),
       'utf8'
     );
-    assert.ok(toolsContent.includes("case 'list-workspaces'"));
+    assert.ok(toolsContent.includes("'list-workspaces':"));
     assert.ok(toolsContent.includes('cmdInitListWorkspaces'));
   });
 
@@ -382,7 +382,7 @@ describe('workspace routing in gsd-tools', () => {
       path.join(__dirname, '..', 'get-shit-done', 'bin', 'gsd-tools.cjs'),
       'utf8'
     );
-    assert.ok(toolsContent.includes("case 'remove-workspace'"));
+    assert.ok(toolsContent.includes("'remove-workspace':"));
     assert.ok(toolsContent.includes('cmdInitRemoveWorkspace'));
   });
 });
