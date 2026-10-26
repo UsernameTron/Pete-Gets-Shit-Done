@@ -117,6 +117,7 @@ describe('getConfigDirFromHome (Copilot)', () => {
 
 describe('Source code integration (Copilot)', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'bin', 'install.js'), 'utf8');
+  const coreSrc = fs.readFileSync(path.join(__dirname, '..', 'bin', 'lib', 'install-core.js'), 'utf8');
 
   test('CLI-01: --copilot flag parsing exists', () => {
     assert.ok(src.includes("args.includes('--copilot')"), '--copilot flag parsed');
@@ -147,11 +148,11 @@ describe('Source code integration (Copilot)', () => {
   });
 
   test('isCopilot variable exists in install function', () => {
-    assert.ok(src.includes("const isCopilot = runtime === 'copilot'"), 'isCopilot defined');
+    assert.ok(coreSrc.includes("const isCopilot = runtime === 'copilot'"), 'isCopilot defined');
   });
 
   test('hooks are skipped for Copilot', () => {
-    assert.ok(src.includes('!isCodex && !isCopilot'), 'hooks skip check includes copilot');
+    assert.ok(coreSrc.includes('!isCodex && !isCopilot'), 'hooks skip check includes copilot');
   });
 
   test('--both flag unchanged (still claude + opencode only)', () => {
