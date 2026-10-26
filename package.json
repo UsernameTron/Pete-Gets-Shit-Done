@@ -50,7 +50,8 @@
     "prepublishOnly": "npm run build:hooks",
     "test": "node scripts/run-tests.cjs",
     "test:coverage": "c8 --reporter text --reporter json node scripts/run-tests.cjs",
-    "test:coverage:full": "c8 --reporter text --reporter lcov --reporter json node scripts/run-tests.cjs",
+    "test:coverage:full": "c8 --reporter text --reporter lcov --reporter json --reporter json-summary node scripts/run-tests.cjs",
+    "coverage:check": "c8 check-coverage --lines 90 && c8 check-coverage --per-file --lines 80 && c8 check-coverage --per-file --lines 95 --include get-shit-done/bin/lib/security.cjs",
     "test:e2e": "node scripts/run-e2e-tests.cjs",
     "test:e2e:smoke": "node scripts/run-e2e-tests.cjs --smoke"
   }

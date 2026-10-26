@@ -69,11 +69,12 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Script | Purpose |
 |--------|---------|
-| `npm test` | Run 2,977 unit tests via `scripts/run-tests.cjs` |
+| `npm test` | Run 2,982 unit tests via `scripts/run-tests.cjs` |
 | `npm run test:e2e` | Run 143 E2E integration tests via `scripts/run-e2e-tests.cjs` |
 | `npm run test:e2e:smoke` | Run E2E smoke subset (12 tests) |
 | `npm run test:coverage` | Unit tests with text + JSON coverage report |
-| `npm run test:coverage:full` | Unit tests with text + lcov + JSON coverage report |
+| `npm run test:coverage:full` | Unit tests with text + lcov + JSON + JSON-summary coverage report |
+| `npm run coverage:check` | Enforce coverage floors on the last coverage run: 90% overall, 80% per file, 95% `security.cjs`. Runs in CI on the full-suite legs (blocking). |
 | `npm run build:hooks` | Bundle hook source files via esbuild |
 | `npm run prepublishOnly` | Runs `build:hooks` before npm publish |
 | `node scripts/validate-doc-links.cjs` | Internal Markdown link validator — exits 0 on clean, 1 on broken. Use `--json` for machine-readable output. Use `--exclude <glob>` (multi-value, gitignore-style) to suppress intentional fixtures or template examples. Wired into `.github/workflows/test.yml` as the `docs-integrity` job (blocking gate). |
@@ -85,7 +86,7 @@ The installer is idempotent. Running it again overwrites with the latest version
 
 | Metric | Count |
 |--------|-------|
-| Unit tests | 2,977 |
+| Unit tests | 2,982 |
 | E2E tests | 143 |
 | **Total tests** | **3,065** |
 | Unit test files | 82 |
