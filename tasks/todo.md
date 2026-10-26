@@ -1,5 +1,19 @@
 # Todo
 
+## ACTIVE: Reliability sweep 2026-10-26 (operator-approved, branch `fix/reliability-sweep-2026-10-26`)
+
+Source: `.planning/CONFIDENCE.md` (BLOCKED) + `.planning/codebase/CONCERNS.md`. Goal: `/gsd:confidence` → SHIP-READY, with CI enforcing what the docs promise.
+
+- [x] Agents: fix `gsd-dependency-auditor` read-only contradiction (BLOCK); sharpen `gsd-ecosystem-auditor` rules (Bash/Edit, MCP server wildcards, bare-tilde path rewrite)
+- [x] Deps: bump `brace-expansion` to >= 5.0.12 in the lockfile; `npm audit` clean
+- [x] CLAUDE.md: Architecture section matches the real tree (`get-shit-done/bin/lib/`, no `classify.cjs`, no `skills/`)
+- [x] Uninstall: strip cost-tracker / config-protection / spawn-tracker registrations from settings.json; regression test
+- [x] `scripts/generate-gap-analysis.cjs`: classify `bin/lib/` modules
+- [x] Doc drift: guard README skill-section headers, plugin-inventory counts, command headers, hook total, and skill-row existence; tests
+- [x] CI: enforce coverage thresholds (90% overall / 80% per file / 95% security.cjs); fix the coverage summary step that never rendered
+- [x] `.gitignore`: drop ignore entries for tracked `.planning/PROJECT.md` and `.planning/research/`; gitignore `_code_audit/` + `_radon_audit/` (stash@{0})
+- [ ] Re-run `/gsd:confidence` → SHIP-READY; PR on full-green CI
+
 ## ACTIVE: v3.1 CONDUCTOR (M06) — phase-01 PLANNED
 
 Plans + reference docs: `.planning/milestones/M06-conductor/`. Architecture of record: `conductor-phase6-proposal.md` (as amended); on conflict `phase-01-PLAN.md` v2 wins. Branch: `gsd/v3.1-conductor` (unpushed).

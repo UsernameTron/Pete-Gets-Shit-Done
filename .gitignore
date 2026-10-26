@@ -37,11 +37,9 @@ animation/
 .claude/state/
 .claude/scheduled_tasks.lock
 
-# Internal planning documents (STATE.md is committed; everything else is local)
+# Internal planning documents (local-only; PROJECT.md, STATE.md and research/ are committed)
 .planning/phases/
-.planning/PROJECT.md
 .planning/config.json
-.planning/research/
 # pause-work resume pointers are session-local — never commit them
 /.continue-here.md
 /.planning/.continue-here.md
@@ -76,3 +74,7 @@ scripts/build-layer1-fixture.cjs
 .extraction-staging/
 Petes-Get-Shit-Done-Coding-Automation/
 .planning/agent-health.log
+
+# Local code-health / radon audit snapshots
+_code_audit/
+_radon_audit/

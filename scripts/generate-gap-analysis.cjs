@@ -99,6 +99,8 @@ function classifyTier(shortPath) {
   for (const pat of SECURITY_CRITICAL_PATTERNS) {
     if (lower.includes(pat.toLowerCase())) return 'Security-Critical';
   }
+  // Installer modules split out of install.js (#87)
+  if (lower.startsWith('bin/lib/')) return 'Operational';
   for (const pat of OPERATIONAL_PATTERNS) {
     if (lower.includes(pat.toLowerCase())) return 'Operational';
   }
@@ -233,7 +235,7 @@ function generateBaseline(modules, shellScripts) {
 
   let md = `# Coverage Baseline\n\n`;
   md += `**Captured:** ${now}\n`;
-  md += `**Test count:** 1,547 passing\n`;
+  md += `**Test count:** run \`npm test\` (never inlined — see CLAUDE.md)\n`;
   md += `**Tool:** c8 v11.0.0 wrapping Node.js built-in test runner\n`;
   md += `**Scope:** All JavaScript/CJS source files (expanded from lib-only)\n\n`;
 

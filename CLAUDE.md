@@ -23,21 +23,29 @@ GSD is consumed as a Claude Code plugin. It is not a standalone application — 
 
 ## Architecture
 
-GSD is organized in three layers:
+GSD is organized in four areas:
 
 ```
-bin/          CLI entry points and installer scripts
-lib/          Core runtime
-  core.cjs          Phase orchestration and command routing
-  security.cjs      Secrets scanning and input validation
-  governance.cjs    Hook enforcement and quality gates
-  classify.cjs      v2.0 Intelligence Layer — task classification
-  model-profiles.cjs  v2.0 — model selection heuristics
-  history.cjs       v2.0 — session history and state persistence
-skills/       Command implementations (one file per GSD command)
+bin/                    Installer
+  install.js              Entry point: arg parsing, prompts, main (thin orchestrator)
+  lib/                    install-core.js routes to runtimes/<name>.js ({ install, uninstall })
+                          for 8 runtimes; converters/, install-steps.js, uninstall-steps.js,
+                          manifest, settings, toml, governance helpers
+get-shit-done/          Core payload installed to ~/.claude/get-shit-done/
+  bin/gsd-tools.cjs       CLI router (dispatch table) used by every workflow
+  bin/lib/*.cjs           Runtime modules: core, state, phase, roadmap, verify, config, init,
+                          security (input validation, injection scanning), model-profiles,
+                          history, uat*, checkpoint, harden-repo, workstream, ...
+  workflows/ references/ templates/
+commands/gsd/           Slash-command definitions (one .md per GSD command)
+agents/                 gsd-* subagent definitions
+hooks/                  Execution hooks (bundled to hooks/dist/)
+governance/             CLAUDE.md template, governance hooks, permissions, context guides
+plugins/                claude-code-factory + claude-mcp-ecosystem (skills, subagents)
+lib/                    Data only: injection-patterns.json, ci-patterns.json
 ```
 
-The **v2.0 Intelligence Layer** (`classify.cjs`, `model-profiles.cjs`, `history.cjs`) adds adaptive task routing — GSD classifies incoming tasks and selects execution strategies based on complexity, history, and available resources.
+`model-profiles.cjs` and `history.cjs` remain from the v2.0 Intelligence Layer; its task classifier (`classify.cjs`) and dynamic routing were removed in v2.9 — model selection is user config (`model_profile`, `model_overrides`).
 
 The **v2.3 Quality Infrastructure** extends the verifier with a 4D scoring rubric (security 35%, performance 25%, correctness 25%, maintainability 15%), adds a three-part necessity gate for subagent creation decisions, and introduces two-mode verification (compliance + schema) in the verify-work workflow. Three new execution hooks provide runtime security: prompt injection detection (18 patterns in v2.3, expanded to 23 in v2.4), config file protection (32 files), and cost tracking (JSONL metrics).
 
@@ -55,8 +63,8 @@ For the full codebase mapping see `.planning/codebase/ARCHITECTURE.md`.
 
 - **Framework**: Node.js built-in test runner (`node:test`) with `c8` coverage
 - **Current counts**: never inlined — run `npm test` for suite/assertion/coverage numbers.
-- **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules
-- **Key directories**: `tests/unit/`, `tests/integration/`, `tests/coverage/`
+- **Coverage thresholds**: 90% overall / 80% per module / 95% security-critical modules — enforced in CI by `npm run coverage:check`
+- **Key directories**: `tests/*.test.cjs` (unit + integration, flat), `tests/e2e/`, `tests/routing/`, `tests/fixtures/`
 
 Run the full suite before any commit:
 
