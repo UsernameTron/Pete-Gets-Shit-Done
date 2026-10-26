@@ -12,7 +12,8 @@ Source: `.planning/CONFIDENCE.md` (BLOCKED) + `.planning/codebase/CONCERNS.md`. 
 - [x] Doc drift: guard README skill-section headers, plugin-inventory counts, command headers, hook total, and skill-row existence; tests
 - [x] CI: enforce coverage thresholds (90% overall / 80% per file / 95% security.cjs); fix the coverage summary step that never rendered
 - [x] `.gitignore`: drop ignore entries for tracked `.planning/PROJECT.md` and `.planning/research/`; gitignore `_code_audit/` + `_radon_audit/` (stash@{0})
-- [ ] Re-run `/gsd:confidence` → SHIP-READY; PR on full-green CI
+- [x] Re-run `/gsd:confidence` → SHIP-READY (`.planning/CONFIDENCE.md`); PR on full-green CI
+- [x] Extra: `security` required check; 90 branch-coverage tests; ecosystem-auditor drift normalization made install-safe; `.gitignore` secret backstop; `prepublishOnly` runs tests
 
 ## ACTIVE: v3.1 CONDUCTOR (M06) — phase-01 PLANNED
 
