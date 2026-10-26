@@ -96,8 +96,8 @@ For each agent, compare the `tools` list against `disallowedTools` and against t
 **Emit findings for:**
 - **BLOCK:** same tool appears in both `tools` and `disallowedTools` (contradictory)
 - **BLOCK:** agent's role explicitly states "read-only" or "does not modify files" but `tools` includes `Edit` or `Write` without `disallowedTools` to cancel it
-- **FLAG:** agent uses `Bash` without `disallowedTools: Edit` (Bash can overwrite files via `cat > file`, circumventing Edit restrictions — defense-in-depth gap)
-- **FLAG:** agent has `tools: *` or wildcard tool grant (too permissive)
+- **FLAG:** agent uses `Bash`, is NOT granted `Edit` in `tools`, and lacks `disallowedTools: Edit` (Bash can overwrite files via `cat > file`, circumventing the missing Edit grant — defense-in-depth gap). An agent whose `tools` grants `Edit` needs it for its job; do not flag it here.
+- **FLAG:** agent has `tools: *` or an unscoped wildcard grant (too permissive). A server-scoped MCP grant such as `mcp__context7__*` is the standard way to grant one MCP server and is not a finding.
 - **FLAG:** agent declares `isolation: worktree` but `tools` does not include `Write` (worktree without write capability is pointless)
 
 ## Step 4: Hygiene compliance check
@@ -148,7 +148,7 @@ diff <(sed 's#\$HOME/\.claude/#~/.claude/#g' "$HOME/.claude/agents/<filename>") 
      <(sed 's#\$HOME/\.claude/#~/.claude/#g' "./agents/<filename>")
 ```
 
-Only differences that survive this normalization are real drift.
+This normalization covers every occurrence — `@~/.claude/` and bare `~/.claude/` alike. Only differences that survive it are real drift.
 
 **Emit findings for:**
 - **BLOCK:** installed file is MISSING (repo has agent, install does not — the installed roster is incomplete)
