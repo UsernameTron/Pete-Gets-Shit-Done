@@ -47,7 +47,7 @@
   "scripts": {
     "setup": "node bin/setup-from-clone.js",
     "build:hooks": "node scripts/build-hooks.js",
-    "prepublishOnly": "npm run build:hooks",
+    "prepublishOnly": "npm test && npm run build:hooks",
     "test": "node scripts/run-tests.cjs",
     "test:coverage": "c8 --reporter text --reporter json node scripts/run-tests.cjs",
     "test:coverage:full": "c8 --reporter text --reporter lcov --reporter json --reporter json-summary node scripts/run-tests.cjs",

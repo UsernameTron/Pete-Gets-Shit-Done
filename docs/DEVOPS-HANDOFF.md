@@ -171,7 +171,7 @@ Configured 2026-04-18 on the GitHub remote. These protections are enforced at th
 | Rule | Setting |
 |------|---------|
 | Require pull request before merging | Enabled |
-| Required status checks | 5 required: `test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity` (added v2.8 Phase 57; operator runs `gh api repos/:owner/:repo/branches/main/protection -X PATCH` at ship time — see Phase 57-03 SUMMARY for the exact command). The third matrix value is the `full_suite` flag. |
+| Required status checks | 6 required: `test (macos-latest, 22, false)`, `test (ubuntu-latest, 20, true)`, `test (ubuntu-latest, 22, true)`, `governance`, `docs-integrity` (added v2.8 Phase 57), `security` (`security-scan.yml`, added 2026-10-26 via `POST .../protection/required_status_checks/contexts`; operator runs `gh api repos/:owner/:repo/branches/main/protection -X PATCH` at ship time — see Phase 57-03 SUMMARY for the exact command). The third matrix value is the `full_suite` flag. |
 | Require branches to be up to date | Enabled |
 | Block force pushes | Enabled |
 

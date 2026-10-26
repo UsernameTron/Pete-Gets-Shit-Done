@@ -16,7 +16,7 @@ A zero-dependency CommonJS plugin providing meta-prompting, context engineering,
 **Remote:** `git@github.com:UsernameTron/Pete-Gets-Shit-Done.git`
 **Config version:** 2 (migration chain: 0 -> 1 -> 2)
 **Milestones shipped:** 20 (v1.0 through v3.0)
-**Branch protection:** 5 required status checks on `main` (3 test matrix legs + governance + docs-integrity)
+**Branch protection:** 6 required status checks on `main` (3 test matrix legs + governance + docs-integrity + security)
 **Total phases executed:** 59
 
 ## Core Value

@@ -78,3 +78,10 @@ Petes-Get-Shit-Done-Coding-Automation/
 # Local code-health / radon audit snapshots
 _code_audit/
 _radon_audit/
+
+# Secret-file backstop (CI secret-scan is content-based only)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
