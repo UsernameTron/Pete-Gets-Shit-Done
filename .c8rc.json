@@ -3,6 +3,7 @@
     "get-shit-done/bin/lib/*.cjs",
     "get-shit-done/bin/gsd-tools.cjs",
     "bin/install.js",
+    "bin/lib/**/*.js",
     "hooks/*.js",
     "scripts/build-hooks.js",
     ".claude/hooks/lesson-capture-gate.cjs",
