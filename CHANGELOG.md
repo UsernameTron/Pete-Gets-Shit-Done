@@ -50,6 +50,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Verified counts:** 67 commands, 17 agents, 33 skills, 593 test suites, 2,921 assertions, 91.73% statement / 83.27% branch / 97.62% function coverage
 
 ### Changed
+- **Branch-coverage tests** — 90 tests for `harden-repo.cjs` (fake `gh`, no network), `profile-pipeline.cjs`, `install-steps.js`, `attribution.js`, `toml.js`; overall 95.71% lines / 86.48% branches
 - **CI enforces coverage floors** — new `npm run coverage:check` (90% overall / 80% per file / 95% `security.cjs`) runs on the full-suite legs; `test:coverage:full` now emits `json-summary`, so the "Generate coverage report" job summary finally renders (it always skipped for lack of `coverage-summary.json`)
 - **Doc-drift checker widened** — 4 new metrics (total hooks, Code Factory skills, MCP skills, plugin subagents), 3 new claims on existing metrics, and a two-way README skill-table check (every listed skill exists on disk, every skill on disk is listed); 36 claims checked, up from 19
 - **Agent audit rules sharpened** — `gsd-ecosystem-auditor` no longer flags agents that are granted `Edit` for lacking `disallowedTools: Edit`, or server-scoped MCP grants (`mcp__<server>__*`) as wildcards; install-drift normalization explicitly covers bare `~/.claude/`

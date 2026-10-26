@@ -20,12 +20,9 @@ Priority: Security-Critical > Operational > Utility.
 
 | Module | Lines | Branches | Functions | Gap Priority |
 |--------|-------|----------|-----------|-------------|
-| toml.js | 81.02% | 81.20% | 100.00% | LOW |
-| attribution.js | 81.82% | 65.00% | 100.00% | LOW |
-| install-steps.js | 83.99% | 65.43% | 100.00% | LOW |
-| toml-lexer.js | 86.11% | 89.04% | 100.00% | LOW |
+| toml-lexer.js | 88.43% | 92.11% | 100.00% | LOW |
 | gemini.js | 88.54% | 80.00% | 100.00% | LOW |
-| copy.js | 90.43% | 79.57% | 100.00% | LOW |
+| copy.js | 90.43% | 80.85% | 100.00% | LOW |
 | cursor.js | 90.98% | 72.73% | 83.33% | LOW |
 | opencode.js | 91.15% | 96.55% | 85.71% | LOW |
 | windsurf.js | 91.20% | 72.73% | 83.33% | LOW |
@@ -33,25 +30,28 @@ Priority: Security-Critical > Operational > Utility.
 | phase.cjs | 92.56% | 74.74% | 100.00% | LOW |
 | state.cjs | 92.93% | 80.22% | 96.15% | LOW |
 | copilot.js | 92.98% | 88.89% | 100.00% | LOW |
-| gsd-tools.cjs | 93.33% | 88.44% | 99.17% | LOW |
+| gsd-tools.cjs | 93.33% | 88.50% | 99.17% | LOW |
 | commands.cjs | 93.49% | 73.57% | 100.00% | LOW |
 | verify.cjs | 93.68% | 80.67% | 100.00% | LOW |
 | codex-hooks-feature.js | 94.12% | 85.00% | 100.00% | LOW |
-| governance.js | 95.07% | 88.71% | 100.00% | LOW |
-| core.cjs | 95.72% | 91.37% | 100.00% | LOW |
+| governance.js | 95.07% | 88.98% | 100.00% | LOW |
+| core.cjs | 95.72% | 91.40% | 100.00% | LOW |
+| install-steps.js | 95.81% | 90.09% | 100.00% | LOW |
 | init.cjs | 96.55% | 85.38% | 100.00% | LOW |
 | install.js | 96.66% | 92.68% | 100.00% | LOW |
 | install-core.js | 96.84% | 91.67% | 100.00% | LOW |
+| toml.js | 97.57% | 96.91% | 100.00% | LOW |
 | shared.js | 97.70% | 94.12% | 100.00% | LOW |
 | codex.js | 97.87% | 85.71% | 100.00% | LOW |
 | codex-config.js | 98.51% | 91.38% | 100.00% | LOW |
 | uninstall-steps.js | 98.57% | 93.33% | 100.00% | LOW |
 | opencode.js | 98.90% | 86.84% | 100.00% | LOW |
+| attribution.js | 100.00% | 100.00% | 100.00% | LOW |
 | cli-options.js | 100.00% | 100.00% | 0.00% | LOW |
 | colors.js | 100.00% | 100.00% | 0.00% | LOW |
 | copilot-instructions.js | 100.00% | 100.00% | 100.00% | LOW |
-| manifest.js | 100.00% | 93.44% | 100.00% | LOW |
-| paths.js | 100.00% | 99.12% | 100.00% | LOW |
+| manifest.js | 100.00% | 93.55% | 100.00% | LOW |
+| paths.js | 100.00% | 99.14% | 100.00% | LOW |
 | settings.js | 100.00% | 98.77% | 100.00% | LOW |
 | antigravity.js | 100.00% | 61.11% | 100.00% | LOW |
 | codex.js | 100.00% | 78.57% | 100.00% | LOW |
@@ -67,8 +67,6 @@ Priority: Security-Critical > Operational > Utility.
 
 | Module | Lines | Branches | Functions | Gap Priority |
 |--------|-------|----------|-----------|-------------|
-| harden-repo.cjs | 83.33% | 70.67% | 90.91% | LOW |
-| profile-pipeline.cjs | 83.67% | 70.14% | 84.62% | LOW |
 | uat-runner.cjs | 88.48% | 75.00% | 100.00% | LOW |
 | uat.cjs | 92.20% | 78.21% | 100.00% | LOW |
 | profile-output.cjs | 92.33% | 71.66% | 94.74% | LOW |
@@ -87,6 +85,8 @@ Priority: Security-Critical > Operational > Utility.
 | roadmap.cjs | 98.78% | 88.66% | 100.00% | LOW |
 | workstream.cjs | 99.01% | 86.71% | 100.00% | LOW |
 | template.cjs | 99.10% | 74.29% | 100.00% | LOW |
+| profile-pipeline.cjs | 99.63% | 93.30% | 100.00% | LOW |
+| harden-repo.cjs | 100.00% | 88.57% | 100.00% | LOW |
 | model-profiles.cjs | 100.00% | 100.00% | 100.00% | LOW |
 | uat-patterns.cjs | 100.00% | 100.00% | 100.00% | LOW |
 | gsd-check-update.js | 100.00% | 100.00% | 100.00% | LOW |
@@ -112,31 +112,26 @@ Per D-02: binary tested/untested status only. No line-coverage numbers for bash.
 - **Modules below 80% line coverage:** None
 - **Security-critical gaps:** 0 module(s) below 95% target
 - **Recommended Phase 3 priority order:**
-  1. toml.js (Operational, 81.02% lines)
-  2. attribution.js (Operational, 81.82% lines)
-  3. install-steps.js (Operational, 83.99% lines)
-  4. toml-lexer.js (Operational, 86.11% lines)
-  5. gemini.js (Operational, 88.54% lines)
-  6. copy.js (Operational, 90.43% lines)
-  7. cursor.js (Operational, 90.98% lines)
-  8. opencode.js (Operational, 91.15% lines)
-  9. windsurf.js (Operational, 91.20% lines)
-  10. settings-hooks.js (Operational, 91.84% lines)
-  11. phase.cjs (Operational, 92.56% lines)
-  12. state.cjs (Operational, 92.93% lines)
-  13. copilot.js (Operational, 92.98% lines)
-  14. gsd-tools.cjs (Operational, 93.33% lines)
-  15. commands.cjs (Operational, 93.49% lines)
-  16. verify.cjs (Operational, 93.68% lines)
-  17. codex-hooks-feature.js (Operational, 94.12% lines)
-  18. harden-repo.cjs (Utility, 83.33% lines)
-  19. profile-pipeline.cjs (Utility, 83.67% lines)
-  20. uat-runner.cjs (Utility, 88.48% lines)
-  21. uat.cjs (Utility, 92.20% lines)
-  22. profile-output.cjs (Utility, 92.33% lines)
-  23. milestone.cjs (Utility, 93.63% lines)
-  24. frontmatter.cjs (Utility, 93.96% lines)
-  25. config.cjs (Utility, 94.87% lines)
+  1. toml-lexer.js (Operational, 88.43% lines)
+  2. gemini.js (Operational, 88.54% lines)
+  3. copy.js (Operational, 90.43% lines)
+  4. cursor.js (Operational, 90.98% lines)
+  5. opencode.js (Operational, 91.15% lines)
+  6. windsurf.js (Operational, 91.20% lines)
+  7. settings-hooks.js (Operational, 91.84% lines)
+  8. phase.cjs (Operational, 92.56% lines)
+  9. state.cjs (Operational, 92.93% lines)
+  10. copilot.js (Operational, 92.98% lines)
+  11. gsd-tools.cjs (Operational, 93.33% lines)
+  12. commands.cjs (Operational, 93.49% lines)
+  13. verify.cjs (Operational, 93.68% lines)
+  14. codex-hooks-feature.js (Operational, 94.12% lines)
+  15. uat-runner.cjs (Utility, 88.48% lines)
+  16. uat.cjs (Utility, 92.20% lines)
+  17. profile-output.cjs (Utility, 92.33% lines)
+  18. milestone.cjs (Utility, 93.63% lines)
+  19. frontmatter.cjs (Utility, 93.96% lines)
+  20. config.cjs (Utility, 94.87% lines)
 
 ## Baseline Reference
 

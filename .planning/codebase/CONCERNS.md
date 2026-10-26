@@ -56,13 +56,7 @@ None. `npm audit`: 0 vulnerabilities (brace-expansion 5.0.12); `.planning/depend
 
 ## Test Coverage Gaps
 
-**Branch coverage below 70-85% in several modules (measured 2026-10-26 via `npx c8 --reporter text node scripts/run-tests.cjs`; overall 94.39% statements / 84.56% branches):**
-- `get-shit-done/bin/lib/harden-repo.cjs`: 83.33% stmt / 70.66% branch. Priority: High (live GitHub PUT).
-- `get-shit-done/bin/lib/profile-pipeline.cjs`: 83.67% stmt / 70.13% branch. Malformed session JSONL and permission-error paths. Priority: Medium.
-- `bin/lib/install-steps.js`: 83.99% stmt / 65.43% branch. Priority: Medium.
-- `bin/lib/attribution.js`: 81.81% stmt / 65% branch. Priority: Low.
-- `bin/lib/toml.js`: 81.02% stmt / 81.2% branch. Priority: Low.
-- Risk: Statement coverage sits just above the 80% per-module floor; CI now enforces that floor (`npm run coverage:check`), so a regression in these modules fails the build. Branch coverage is not gated.
+**Branch coverage is not gated (line floors are):** overall 95.71% lines / 86.48% branches after the 2026-10-26 sweep; every module ≥ 80% lines (CI-enforced). Lowest branch coverage: `daily.cjs` 60%, runtime converters `antigravity.js` 61% / `cursor.js` and `windsurf.js` 73%, `profile-output.cjs` 72%, `commands.cjs` 74%, `phase.cjs` 75%. Priority: Low — statement coverage on all of them is ≥ 88%.
 
 ## Resolved 2026-10-26 (reliability sweep, `fix/reliability-sweep-2026-10-26`)
 
@@ -75,6 +69,7 @@ None. `npm audit`: 0 vulnerabilities (brace-expansion 5.0.12); `.planning/depend
 - Uninstall removes cost-tracker / config-protection / spawn-tracker registrations; regression-tested across settings.json runtimes.
 - `security` (security-scan.yml) is now a required status check (6 total).
 - Dependency advisories cleared (brace-expansion 5.0.12).
+- Branch-coverage gaps closed: `harden-repo.cjs` 71% → 89%, `profile-pipeline.cjs` 70% → 93%, `install-steps.js` 65% → 90%, `attribution.js` 65% → 100%, `toml.js` 81% → 97% (90 new tests).
 
 ---
 
