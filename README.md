@@ -4,7 +4,7 @@
 
 The complete AI coding system: execution engine + governance framework + extension factory.
 
-Meta-prompting, context engineering, spec-driven development, safety hooks, and session management — for Claude Code, OpenCode, Gemini CLI, Codex, Copilot, and Antigravity.
+Meta-prompting, context engineering, spec-driven development, safety hooks, and session management — for Claude Code, OpenCode, Gemini CLI, Codex, Copilot, Cursor, Windsurf, and Antigravity.
 
 Technical deep-dive: see [docs/README-technical.md](docs/README-technical.md).
 
@@ -57,8 +57,8 @@ GSD is two layers in one install:
 | Layer | What it does | Components |
 |-------|-------------|------------|
 | Execution Engine | discuss → plan → execute → verify → ship | 68 commands, 17 agents, 7 hooks, wave-based parallel execution |
-| Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (33 skills, 10 subagents), 7 reference docs |
-| Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | classify.cjs, model-profiles.cjs, history.cjs — all opt-in, off by default |
+| Governance Framework | Session management, safety guardrails, project standards, extension generation | CLAUDE.md template, 10 hooks, permission rules, 2 plugin engines (33 skills, 7 subagents), 8 reference docs |
+| Intelligence Layer (v2.0) | Dynamic model routing, task classification, execution history, adaptive workflows | model-profiles.cjs, history.cjs — all opt-in, off by default |
 
 The execution engine handles *how* your code gets built. The governance framework handles *what rules it follows* while building it. The intelligence layer makes the engine *smarter over time* — routing tasks to the right model tier and adapting workflow gates based on complexity and history.
 
@@ -68,9 +68,9 @@ The full inventory:
 |--------|-------|
 | GSD commands | 68 |
 | Specialized agents | 17 |
-| Runtime hooks | 17 (7 execution + 10 governance, 1 shared) |
+| Runtime hooks | 18 (7 execution + 10 governance + 1 MCP health check) |
 | Plugin skills | 33 (26 code factory + 7 MCP ecosystem) |
-| Plugin subagents | 10 |
+| Plugin subagents | 7 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
 | Test suites | 602 |
 | Test assertions | 2,977 |
@@ -84,7 +84,7 @@ npx get-shit-done-cc@latest
 
 The installer asks two questions. That's it.
 
-**Runtime** — Claude Code, OpenCode, Gemini, Codex, Copilot, Cursor, Antigravity, or all. Interactive multi-select, so you can pick multiple runtimes in a single install session.
+**Runtime** — Claude Code, OpenCode, Gemini, Codex, Copilot, Cursor, Windsurf, Antigravity, or all. Interactive multi-select, so you can pick multiple runtimes in a single install session.
 
 **Location** — Global (all projects) or local (current project only).
 
@@ -97,8 +97,7 @@ Verify it worked:
 | Claude Code / Gemini | `/gsd:help` |
 | OpenCode | `/gsd-help` |
 | Codex | `$gsd-help` |
-| Copilot | `/gsd:help` |
-| Antigravity | `/gsd:help` |
+| Copilot / Cursor / Windsurf / Antigravity | `/gsd-help` |
 
 > **Note:** Codex installation uses skills (`skills/gsd-*/SKILL.md`) rather than custom prompts.
 
@@ -145,6 +144,10 @@ npx get-shit-done-cc --copilot --local   # Install to ./.github/
 npx get-shit-done-cc --cursor --global   # Install to ~/.cursor/
 npx get-shit-done-cc --cursor --local    # Install to ./.cursor/
 
+# Windsurf
+npx get-shit-done-cc --windsurf --global # Install to ~/.windsurf/
+npx get-shit-done-cc --windsurf --local  # Install to ./.windsurf/
+
 # Antigravity (Google, skills-first, Gemini-based)
 npx get-shit-done-cc --antigravity --global # Install to ~/.gemini/antigravity/
 npx get-shit-done-cc --antigravity --local  # Install to ./.agent/
@@ -153,7 +156,7 @@ npx get-shit-done-cc --antigravity --local  # Install to ./.agent/
 npx get-shit-done-cc --all --global      # Install to all directories
 ```
 
-Use `--global` (`-g`) or `--local` (`-l`) to skip the location prompt. Use `--claude`, `--opencode`, `--gemini`, `--codex`, `--copilot`, `--cursor`, `--antigravity`, or `--all` to skip the runtime prompt.
+Use `--global` (`-g`) or `--local` (`-l`) to skip the location prompt. Use `--claude`, `--opencode`, `--gemini`, `--codex`, `--copilot`, `--cursor`, `--windsurf`, `--antigravity`, or `--all` to skip the runtime prompt.
 
 </details>
 
@@ -189,8 +192,8 @@ GSD's commands run under each runtime's own authentication. If you are **not** s
 Clone the repository and run the installer locally:
 
 ```bash
-git clone https://github.com/UsernameTron/Petes-Get-Shit-Done-Coding-Automation.git
-cd Petes-Get-Shit-Done-Coding-Automation
+git clone https://github.com/UsernameTron/Pete-Gets-Shit-Done.git
+cd Pete-Gets-Shit-Done
 node bin/install.js --claude --local
 ```
 
@@ -246,12 +249,12 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 
 ## Command Syntax
 
-Before we get into the 67 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
+Before we get into the 68 commands that make this thing work, the syntax varies by runtime — because apparently standardization is too much to ask of the AI tooling ecosystem:
 
 | Runtime | Pattern | Example |
 |---------|---------|---------|
-| Claude Code / Gemini / Copilot | `/gsd:command-name [args]` | `/gsd:plan-phase 3` |
-| OpenCode | `/gsd-command-name [args]` | `/gsd-plan-phase 3` |
+| Claude Code / Gemini | `/gsd:command-name [args]` | `/gsd:plan-phase 3` |
+| OpenCode / Copilot / Cursor / Windsurf / Antigravity | `/gsd-command-name [args]` | `/gsd-plan-phase 3` |
 | Codex | `$gsd-command-name [args]` | `$gsd-plan-phase 3` |
 
 Every command below uses the Claude Code syntax. Translate accordingly if you're running a different runtime. The commands are identical — only the prefix changes.
@@ -566,6 +569,24 @@ Creates phases to close gaps identified by the milestone audit. The audit finds 
 
 ---
 
+#### `/gsd:closeout`
+
+End-to-end project closeout. A superset of `/gsd:finalize`: adds pre-flight orientation, full audit gates with BLOCK/FLAG resolution, conversational UAT, milestone summary capture, and a ship-or-freeze branch. Use `/gsd:finalize` directly when audits already passed and you only need the archive/ship/push back half.
+
+| Flag | What it does |
+|------|-------------|
+| `--mode ship\|freeze` | Ship the milestone or freeze it in place |
+| `--no-audits` / `--no-verify` / `--no-ship` | Skip that stage |
+| `--wrap` | Run the session wrap at the end |
+| `--dry-run` | Show the plan without changing anything |
+
+```
+/gsd:closeout
+/gsd:closeout v3.1 --mode freeze
+```
+
+---
+
 ### Phase Management — Surgery on the Roadmap
 
 For when the roadmap needs to change mid-flight. Which is always. Because roadmaps are fiction that becomes less fictional one phase at a time.
@@ -837,7 +858,7 @@ Generates a developer behavioral profile from Claude Code session analysis acros
 | `--questionnaire` | Use interactive questionnaire instead of session analysis |
 | `--refresh` | Re-analyze sessions and regenerate profile |
 
-**Produces:** `USER-PROFILE.md`, `/gsd:dev-preferences` command, `CLAUDE.md` profile section
+**Produces:** `USER-PROFILE.md`, a generated `/gsd:dev-preferences` command, `CLAUDE.md` profile section
 
 ```
 /gsd:profile-user                   # Analyze sessions and build profile
@@ -885,6 +906,41 @@ Not a replacement for `/gsd:quick` — use `/gsd:quick` for anything that needs 
 ```
 /gsd:fast "fix typo in README"
 /gsd:fast "add .env to gitignore"
+```
+
+---
+
+#### `/gsd:sync-docs`
+
+Rewrites README.md, CLAUDE.md, `.planning/PROJECT.md`, `docs/DEVOPS-HANDOFF.md`, and CHANGELOG.md from live measurements — command, agent, and skill counts, test stats, coverage, milestone state — then prints a diff-style report of every change.
+
+| Flag | What it does |
+|------|-------------|
+| `--dry-run` | Report what would change without writing |
+
+```
+/gsd:sync-docs
+/gsd:sync-docs --dry-run
+```
+
+---
+
+#### `/gsd:ecosystem-map`
+
+Builds a lifecycle-organized map of every GSD component (commands, workflows, agents, skills, hooks, plugins) from the live filesystem, reconciles counts against the previous run, and appends to a drift-history table.
+
+**Produces:** `.planning/GSD-ECOSYSTEM-MAP.md` (plus `.planning/GSD-ECOSYSTEM-MAP-EXEC.md` with `--exec`)
+
+| Flag | What it does |
+|------|-------------|
+| `--exec` | Also regenerate the one-screen executive pager |
+| `--dry-run` | Scan and report drift; write nothing |
+| `--review` | Second-model review of the cluster assignments |
+| `--baseline <path>` | Override the reconciliation baseline |
+
+```
+/gsd:ecosystem-map
+/gsd:ecosystem-map --exec --review
 ```
 
 ---
@@ -1025,6 +1081,38 @@ Creates a clean PR branch by filtering out `.planning/` commits. Reviewers see o
 
 ---
 
+#### `/gsd:confidence`
+
+Answers "can I be confident everything works?" with evidence. Runs seven reversible legs — planning health, quality audits, real build/test/lint, codebase-map refresh, doc sync, repo cleanliness — and ends in one weighted scorecard: SHIP-READY, FIX-FIRST, or BLOCKED. Stops at a single gate before the only irreversible step (ship).
+
+| Flag | What it does |
+|------|-------------|
+| `--dry-run` | Print the leg plan; change nothing |
+| `--deep` | Add crew self-assessment, agent status, ecosystem map, and stats |
+| `--yes-ship` | Pre-approve the ship gate when the verdict is SHIP-READY |
+
+```
+/gsd:confidence
+/gsd:confidence --deep
+```
+
+---
+
+#### `/gsd:ci-watch`
+
+Polls GitHub Actions for the current branch until every run finishes. On failure, pulls the logs, diagnoses the root cause, and suggests a fix.
+
+| Flag | What it does |
+|------|-------------|
+| `--interval <seconds>` | Override the 15-second polling interval |
+
+```
+/gsd:ci-watch
+/gsd:ci-watch --interval 30
+```
+
+---
+
 ### Backlog & Threads — Ideas That Aren't Ready Yet
 
 #### `/gsd:add-backlog`
@@ -1131,7 +1219,7 @@ Three things, in order of importance:
 
 1. **Session lifecycle** — Every session starts with `/prime` (load context, check state, detect continuity) and ends with `/wrap` (log work, record decisions, note next steps). This prevents the "who am I and what was I doing" problem across sessions.
 
-2. **Safety hooks** — 15 hooks fire automatically during Claude Code's lifecycle events. They block dangerous operations before they happen and enforce documentation standards on every commit.
+2. **Safety hooks** — 18 hooks fire automatically during Claude Code's lifecycle events. They block dangerous operations before they happen and enforce documentation standards on every commit.
 
 3. **CLAUDE.md template** — A comprehensive project governance file that defines identity, workflow rules, code standards, phase gates, and plugin inventory. It is the operating system for every session.
 
@@ -1149,7 +1237,7 @@ Every session executes this sequence before any work begins (automated by `/prim
 8. Report initialization summary
 9. Resume or await instructions
 
-### The 15 Hooks
+### The 18 Hooks
 
 Hooks are shell commands that fire automatically at lifecycle events. They enforce rules without requiring the AI (or the developer) to remember them.
 
@@ -1170,17 +1258,19 @@ Installed via `governance/templates/global/settings-hooks.json`:
 | Stop | Uncommitted files blocker | Blocks session stop when dirty working tree detected |
 | PreCompact | Task state preservation | Reminds about preserving task state files before context compaction |
 
-#### GSD Runtime Hooks (5)
+#### GSD Execution Hooks (7)
 
-Built into the execution engine itself:
+Bundled JS in `hooks/`, installed by the GSD installer:
 
-| Hook | What It Does |
-|------|-------------|
-| Plan validation gate | Blocks execution until plan is approved |
-| Wave dependency checker | Ensures parallel tasks respect dependency ordering |
-| State checkpoint writer | Auto-saves progress to `.planning/STATE.md` after each step |
-| Test suite runner | Runs tests before marking phases complete |
-| Handoff note generator | Creates session handoff on context window boundaries |
+| Event | Hook | What It Does |
+|-------|------|-------------|
+| SessionStart | `gsd-check-update.js` | Checks for GSD updates in the background and caches the result |
+| PreToolUse | `gsd-config-protection.js` | Blocks edits to linter/formatter config files so agents fix code instead of loosening checks |
+| PreToolUse | `gsd-prompt-guard.js` | Scans content written to `.planning/` for prompt-injection patterns |
+| PreToolUse | `gsd-spawn-tracker.js` | Logs each subagent spawn to `~/.claude/metrics/spawns.jsonl` |
+| PostToolUse | `gsd-context-monitor.js` | Warns the agent when context usage runs high |
+| PostToolUse | `gsd-cost-tracker.js` | Logs per-tool-call token usage and estimated cost to `~/.claude/metrics/costs.jsonl` |
+| Statusline | `gsd-statusline.js` | Shows model, current task, directory, and context usage |
 
 #### MCP Ecosystem Hook (1)
 
@@ -1197,9 +1287,9 @@ The governance layer enforces sequential gates on every feature:
 | Gate | Rule | Enforced By |
 |------|------|-------------|
 | Phase 0 → 1 | No planning until bootstrap complete (CLAUDE.md scored, hooks installed, GSD initialized) | Session init check |
-| Phase 1 → 2 | No code until plan approved | Plan validation hook |
+| Phase 1 → 2 | No code until plan approved | `/gsd:plan-phase` plan check (gsd-verifier) |
 | Phase 2 → 3 | No ship until verification passes | `/gsd:verify-work` |
-| Phase 3 → 4 | No merge without passing quality gates | Required docs check + test runner |
+| Phase 3 → 4 | No merge without passing quality gates | Required docs check + CI required status checks |
 | Phase 4 → 5 | No session close without `/wrap` | Uncommitted files blocker |
 
 ### CLAUDE.md Template
@@ -1207,7 +1297,7 @@ The governance layer enforces sequential gates on every feature:
 The governance template (`governance/templates/global/CLAUDE.md`) defines:
 
 - **Identity and communication protocol** — how the AI should interact
-- **Session commands table** — 30 commands across GSD, MCP ecosystem, and utilities
+- **Session commands table** — 31 commands across GSD, MCP ecosystem, and utilities
 - **Development lifecycle** — 5-phase pipeline from bootstrap to session close
 - **Workflow rules** — autonomy decision tree, rollback protocol, context management
 - **Code standards** — simplicity, coverage thresholds (90% overall, 80% per module, 95% security-critical), documentation requirements
@@ -1221,7 +1311,7 @@ The governance template (`governance/templates/global/CLAUDE.md`) defines:
 
 All slash commands available across the three plugin systems.
 
-### GSD Commands (63)
+### GSD Commands (68)
 
 | Command | Description |
 |---------|-------------|
@@ -1235,17 +1325,20 @@ All slash commands available across the three plugin systems.
 | `/gsd:audit-uat` | Cross-phase audit of all outstanding UAT and verification items |
 | `/gsd:autonomous` | Run all remaining phases autonomously — discuss, plan, execute per phase |
 | `/gsd:check-todos` | List pending todos and select one to work on |
+| `/gsd:ci-watch` | Poll GitHub Actions for the current branch, stream live status, diagnose failures, and suggest fixes |
 | `/gsd:cleanup` | Archive accumulated phase directories from completed milestones |
+| `/gsd:closeout` | Comprehensive project closeout — orient, audit, verify, capture, ship, finalize, polish |
 | `/gsd:complete-milestone` | Archive completed milestone and prepare for next version |
+| `/gsd:confidence` | Chained sweep (health, audits, build/test/lint, map refresh, doc sync, cleanliness) ending in one SHIP-READY / FIX-FIRST / BLOCKED scorecard |
 | `/gsd:crew` | Agent roster, capability map, and self-assessment with improvement plans |
 | `/gsd:debug` | Systematic debugging with persistent state across context resets |
 | `/gsd:discuss-phase` | Gather phase context through adaptive questioning before planning |
 | `/gsd:do` | Route freeform text to the right GSD command automatically |
+| `/gsd:ecosystem-map` | Regenerate the GSD ecosystem map — live scan, baseline reconciliation, lifecycle clustering, drift history |
 | `/gsd:execute-phase` | Execute all plans in a phase with wave-based parallelization |
 | `/gsd:fast` | Execute a trivial task inline — no subagents, no planning overhead |
 | `/gsd:finalize` | End-to-end project finalization — verify, archive, report, push, confirm clean |
 | `/gsd:forensics` | Post-mortem investigation for failed GSD workflows |
-| `/gsd:harden-repo` | Audit and enforce GitHub branch protection against standard policy |
 | `/gsd:health` | Diagnose planning directory health and optionally repair issues |
 | `/gsd:help` | Show available GSD commands and usage guide |
 | `/gsd:insert-phase` | Insert urgent work as decimal phase (e.g., 72.1) between existing phases |
@@ -1282,6 +1375,7 @@ All slash commands available across the three plugin systems.
 | `/gsd:settings` | Configure GSD workflow toggles and model profile |
 | `/gsd:ship` | Create PR, run review, and prepare for merge after verification passes |
 | `/gsd:stats` | Display project statistics — phases, plans, requirements, git metrics |
+| `/gsd:sync-docs` | Audit and rewrite project documentation from live codebase state, then report what changed |
 | `/gsd:thread` | Manage persistent context threads for cross-session work |
 | `/gsd:ui-phase` | Generate UI design contract (UI-SPEC.md) for frontend phases |
 | `/gsd:ui-review` | Retroactive 6-pillar visual audit of implemented frontend code |
@@ -1325,9 +1419,9 @@ GSD ships with a modular plugin architecture. Three core plugins provide the pri
 
 | Plugin | Skills | Subagents | Role |
 |--------|--------|-----------|------|
-| **get-shit-done** | — | 18 | Execution engine: discuss → plan → execute → verify → ship pipeline with wave-based parallelization |
-| **claude-mcp-ecosystem** v2.0.0 | 7 | — | Session commands (`/prime`, `/wrap`), agent 3-layer routing, workspace governance |
-| **claude-code-factory** v1.0.0 | 38 | 10 | Extension generation: skills, hooks, agents, plugins, MCP configs, CI/CD pipelines, dev team recipes |
+| **get-shit-done** | — | 17 | Execution engine: discuss → plan → execute → verify → ship pipeline with wave-based parallelization |
+| **claude-mcp-ecosystem** v2.0.0 | 7 | 6 | Session commands (`/prime`, `/wrap`), agent 3-layer routing, workspace governance |
+| **claude-code-factory** v1.0.0 | 26 | 1 | Extension generation: skills, agents, plugins, output styles, CI/CD pipelines, dev team recipes |
 
 ### Bootstrap and Configuration (Phase 0)
 
@@ -1372,11 +1466,11 @@ GSD ships with a modular plugin architecture. Three core plugins provide the pri
 
 ---
 
-## Code Factory Skills (38)
+## Code Factory Skills (26)
 
 The Claude Code Factory plugin provides extension generation and dev team management across three tiers: reference skills (background knowledge), generator skills (artifact creation), and routing skills (traffic direction).
 
-### Reference Library (13 skills)
+### Reference Library (10 skills)
 
 | Skill | Description |
 |-------|-------------|
@@ -1384,28 +1478,22 @@ The Claude Code Factory plugin provides extension generation and dev team manage
 | cc-ref-agent-workflows | Workflow patterns and reusable system prompt fragments for agent design |
 | cc-ref-cicd | Claude Code CI/CD reference — GitHub Actions, GitLab CI, Docker patterns |
 | cc-ref-hooks | Claude Code hooks reference — lifecycle events, matchers, exit codes |
-| cc-ref-mcp | Claude Code MCP reference — transport types, auth, configuration |
 | cc-ref-multi-agent | Multi-agent system design reference — orchestration, routing, memory |
 | cc-ref-output-styles | Claude Code output styles reference — frontmatter, formatting, tone |
-| cc-ref-permissions | Claude Code permissions reference — permission rules, scoping, patterns |
 | cc-ref-plugins | Claude Code plugins reference — plugin.json schema, packaging, marketplace |
-| cc-ref-settings | Claude Code settings.json reference — configuration keys, scopes, defaults |
 | cc-ref-skills | Claude Code skills reference — SKILL.md structure, triggers, tool restrictions |
 | cc-ref-subagents | Claude Code subagents reference — agent frontmatter, models, tool access |
 | scenario-library | Browseable cookbook of 40 pre-built Claude Code extension scenarios |
 
-### Generator Skills (14 skills)
+### Generator Skills (11 skills)
 
 | Skill | Description |
 |-------|-------------|
 | agent-factory | Generates Claude Code agent .md files for application development specialists |
 | cc-factory | Direct-access generator for Claude Code extensions from natural language |
 | cicd-generator | Generates CI/CD pipeline configurations for Claude Code projects |
-| hook-factory | Generates complete Claude Code hook configurations from descriptions |
-| mcp-configurator | Generates correct MCP server configurations for common services |
 | output-style-creator | Creates custom Claude Code output style files from descriptions |
 | plugin-packager | Packages Claude Code components into distributable plugins |
-| settings-architect | Generates complete Claude Code settings.json configurations |
 | skill-factory | Generates complete Claude Code SKILL.md files from descriptions |
 | dev-recipes | Browse and execute 86 pre-built recipes for application development agents |
 | dev-team-concierge | Orchestrates application development agent team setup from project analysis |
@@ -1413,20 +1501,14 @@ The Claude Code Factory plugin provides extension generation and dev team manage
 | team-configurator | Auto-detects project tech stack and recommends optimal agent team composition |
 | upgrade-scanner | Scans installed extensions for available upgrades and improvements |
 
-### Routing and Diagnostic Skills (11 skills)
+### Routing and Diagnostic Skills (5 skills)
 
 | Skill | Description |
 |-------|-------------|
 | dev-team-guide | Invisible router for application development agent requests |
 | doc-sync | Fetches live documentation and checks for drift against reference skills |
-| extension-auditor | Audits installed Claude Code extensions for quality and compliance |
 | extension-combo-engine | Detects when a request requires multiple components and coordinates generation |
-| extension-concierge | Orchestrator that turns natural language requests into complete extensions |
-| extension-fixer | Diagnoses and repairs broken Claude Code extensions |
-| extension-guide | Invisible router for Claude Code extension requests |
 | extension-installer | Installs generated extensions into the correct project locations |
-| intent-engine | Behavioral classification engine for Claude Code extension requests |
-| setup-explainer | Explains your current Claude Code setup in plain language |
 | smart-scaffold | Merged conversational scaffolding and progressive disclosure for extension creation |
 
 ---
@@ -1437,7 +1519,7 @@ The MCP Ecosystem plugin provides agent lifecycle management and workspace gover
 
 | Skill | Description |
 |-------|-------------|
-| agent-design-patterns | Seven proven archetypes for subagent design — specialist, router, auditor, seeder, scaffolder, concierge, companion |
+| agent-design-patterns | Seven proven archetypes for subagent design — Explorer, Builder, Surgeon, Orchestrator, Specialist, Guardian, Connector |
 | frontmatter-reference | Complete YAML frontmatter schema for Claude Code agent .md files |
 | mcp-catalog | Catalog of available MCP servers mapped to use cases and integration patterns |
 | project-guide | Invisible router for project organization and specialist management — detects complexity, routes to setup or management workflows |

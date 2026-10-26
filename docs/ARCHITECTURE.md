@@ -424,18 +424,19 @@ Equivalent paths for other runtimes:
 
 ## Installer Architecture
 
-The installer (`bin/install.js`, ~3,000 lines) handles:
+The installer is `bin/install.js`, a ~360-line entry point (argument parsing, prompts, main), over modules in `bin/lib/`: `install-core.js` routes each runtime to `bin/lib/runtimes/<name>.js` (`{ install, uninstall }`), which compose shared steps from `install-steps.js` / `uninstall-steps.js`, with converters in `bin/lib/converters/` and manifest, settings, TOML, and governance helpers alongside. It handles:
 
-1. **Runtime detection** — Interactive prompt or CLI flags (`--claude`, `--opencode`, `--gemini`, `--codex`, `--copilot`, `--antigravity`, `--all`)
+1. **Runtime detection** — Interactive prompt or CLI flags (`--claude`, `--opencode`, `--gemini`, `--codex`, `--copilot`, `--antigravity`, `--cursor`, `--windsurf`, `--all`)
 2. **Location selection** — Global (`--global`) or local (`--local`)
 3. **File deployment** — Copies commands, workflows, references, templates, agents, hooks
 4. **Runtime adaptation** — Transforms file content per runtime:
    - Claude Code: Uses as-is
-   - OpenCode: Converts agent frontmatter to `name:`, `model: inherit`, `mode: subagent`
+   - OpenCode: Converts agent frontmatter to `name:` + `mode: subagent` (strips `model:` so OpenCode uses its default)
    - Codex: Generates TOML config + skills from commands
    - Copilot: Maps tool names (Read→read, Bash→execute, etc.)
    - Gemini: Adjusts hook event names (`AfterTool` instead of `PostToolUse`)
    - Antigravity: Skills-first with Google model equivalents
+   - Cursor / Windsurf: Skills-first; commands become `gsd-*` skills, tool names mapped per editor
 5. **Path normalization** — Replaces `~/.claude/` paths with runtime-specific paths
 6. **Settings integration** — Registers hooks in runtime's `settings.json`
 7. **Patch backup** — Since v1.17, backs up locally modified files to `gsd-local-patches/` for `/gsd:reapply-patches`

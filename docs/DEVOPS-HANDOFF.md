@@ -1,6 +1,6 @@
 # DevOps Handoff — get-shit-done-cc
 
-> Last verified: 2026-07-17 | Version: 1.30.0 | Milestone: Between milestones (v3.0 shipped)
+> Last verified: 2026-10-26 | Version: 1.30.0 | Milestone: v3.1 CONDUCTOR (in progress)
 
 ---
 
@@ -39,7 +39,7 @@ No database, no Docker, no cloud services required. The package installs entirel
 npx get-shit-done-cc@latest
 ```
 
-The installer (`bin/install.js`) copies the following into the user's Claude Code config:
+The installer (`bin/install.js`, a thin orchestrator over per-concern and per-runtime modules in `bin/lib/`) copies the following into the user's Claude Code config:
 
 | Component | Destination | Contents |
 |-----------|-------------|----------|
@@ -48,7 +48,7 @@ The installer (`bin/install.js`) copies the following into the user's Claude Cod
 | Hooks | `~/.claude/get-shit-done/hooks/` | 7 execution hooks (bundled JS) |
 | Workflows | `~/.claude/get-shit-done/workflows/` | Orchestration templates |
 | Governance | `~/.claude/get-shit-done/governance/` | CLAUDE.md template, 10 governance hooks |
-| Plugins | Respective plugin directories | 33 skills, 10 subagents, 6 reference docs |
+| Plugins | Respective plugin directories | 33 skills, 7 subagents, 6 reference docs |
 | Scripts | `~/.claude/get-shit-done/scripts/` | Utility scripts |
 
 The installer is idempotent. Running it again overwrites with the latest version.
@@ -128,10 +128,9 @@ Coverage is collected via `c8` with configuration in `.c8rc.json`.
 
 | Module | Line Coverage | Branch Coverage |
 |--------|--------------|-----------------|
-| `core.cjs` | 95.60% | 90.84% |
-| `classify.cjs` | 98.20% | 85.43% |
-| `history.cjs` | 96.13% | 90.82% |
-| `model-profiles.cjs` | 100.00% | 92.30% |
+| `core.cjs` | 95.72% | 91.37% |
+| `history.cjs` | 96.13% | 90.74% |
+| `model-profiles.cjs` | 100.00% | 100.00% |
 | `security.cjs` | 100.00% | 100.00% |
 
 ### Coverage Standards

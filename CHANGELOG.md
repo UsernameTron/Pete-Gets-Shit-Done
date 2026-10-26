@@ -7,6 +7,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **`/gsd:confidence` chained sweep** — health, quality audits, real build/test/lint, codebase-map refresh, doc sync, repo cleanliness, then one weighted SHIP-READY / FIX-FIRST / BLOCKED scorecard with a single gate before ship; shared build-verification reference (3852988, #73; review fixes 20b56e4, #74)
+- **GSD Chain Playbook** — documented command chains; Stop-hook session artifacts gitignored (aa9d2ab, #76)
+- **Codex/Gemini API-key auth** documented in README Runtime Auth (f61c3ee, #72)
 - **`ship-milestone` workflow (W5, unshelved)** — `get-shit-done/workflows/ship-milestone.md`: one intent ("close out the milestone") drives health → audit-agents `--no-commit` → sync-docs → coverage+drift → audit-milestone → conditional GATE 1 (fires only when the audit is not `passed`) → ship/ci-watch → GATE 2 → complete-milestone, whose 3 internal prompts (archive phases, branch handling, tag push) stay live human prompts — GATE 2 authorizes starting the sequence, never answers for it. Registry-routable as `workflow:ship-milestone` (13th named flow); blind routing spot-check 3/3 confirmed description distinctness vs `ship-and-merge` and the bare `complete-milestone` primitive. Contract test `tests/ship-milestone.test.cjs`; golden intent id 26 added to the permanent routing fixture. Shelf lifted after the finalize push-consent repairs and Phase 58's Gate 5.5 hardening + end-to-end re-verification (Phase 59)
 - **`gsd-spawn-tracker` PreToolUse hook** — records every subagent spawn (Task/Agent tool) to `~/.claude/metrics/spawns.jsonl` as `{timestamp, session_id, tool, subagent_type, description}`, giving GSD first-class per-agent spawn attribution. The SubagentStop health hook cannot identify which agent completed, so spawn frequency was previously unmeasurable except by inference. Non-blocking (always exits 0), mirrors the `gsd-cost-tracker` pattern; bundled into `hooks/dist/` and registered as a PreToolUse `Task|Agent` hook by both installers. Contract test `tests/spawn-tracker-hook.test.cjs` (16 cases)
 - **`smart-discuss --auto` grey-area fold** — `get-shit-done/workflows/smart-discuss.md` gains an `AUTO_MODE` path (from `--auto`, `workflow._auto_chain_active`, or `mode: yolo`): grey areas whose recommended answers are all groundable are accepted without `AskUserQuestion` and summarized in an `[auto]` receipt table; only unresolvable areas still ask. `idea-to-shipped` calls it with `--auto` unconditionally (its two-gate contract holds via GATE 1 plan review); `autonomous.md` appends `--auto` only under yolo / an active chain. Interactive runs are byte-identical. Applies audit blueprint `BP-smart-discuss-auto-parity`
@@ -47,12 +50,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Verified counts:** 67 commands, 17 agents, 33 skills, 593 test suites, 2,921 assertions, 91.73% statement / 83.27% branch / 97.62% function coverage
 
 ### Changed
+- **Installer split** — `bin/install.js` (5,414 lines) becomes a ~360-line entry point over `bin/lib/` modules: `install-core.js` routes to `runtimes/<name>.js` (`{ install, uninstall }`) built from shared install/uninstall steps, plus converters, manifest, settings, TOML, and governance modules. `install` complexity 119 → 1, `uninstall` 109 → 3, `writeManifest` 33 → 5. Behavior identical (29-scenario old-vs-new install matrix clean); `tests/install-cli-matrix.test.cjs` covers per-runtime uninstall, CLI error paths, and prompts (118e671, #87)
+- **`gsd-tools.cjs` dispatch table** — `runCommand` switch replaced by a command table; complexity 185 → 2 (657804f, #86)
+- **`cmdValidateHealth` health checks extracted** into focused functions (2540294, #88)
+- **Opus 5.5 prompt-audit cleanup** — caps/pressure boilerplate and copied model-rationale blocks removed from gsd-* agents; context monitor no longer injects usage countdowns (c23177b, #83)
+- **README accuracy pass** — Code Factory tables match the 26 shipped skills (12 absorbed skills removed), 8 runtimes incl. Cursor/Windsurf, the real 7 execution hooks (18 total), 68 commands incl. ci-watch/closeout/confidence/ecosystem-map/sync-docs (c92d52b)
+- **v3.1 CONDUCTOR milestone opened** — phase-01 plans + planning-doc reconciliation (cf20926, #71)
 - **CLAUDE.md staleness guard** — status block converted to a dated `> Last verified:` stub; drift-prone counts point to `npm test` (49d45e3, #68)
 - **v3.0 close-out doc sync** — living docs + todo reconciled at milestone close (c9f6e5d, #67)
 - **Roadmap pruning** — removed stale v2.9 phase-detail blocks flagged by health W006 (09b09e2, #66)
 - **Generated `STATUS.md` dashboard artifact** — now gitignored (450549c, #65)
 
 ### Fixed
+- **Prompt-injection guard false positives on security docs** — security docs allowlisted and injection-scan matching anchored (0f93e29, #79; f20ea2e, #81)
+- **brace-expansion 5.0.8** — resolves 3 high-severity DoS advisories (749a3c7, #75)
 - **`lesson-capture-gate` subdirectory resolution** — `resolveLessonsPath()` walks upward from cwd so the Stop gate finds `tasks/lessons.md` when run from a subdirectory (b2b6327)
 - **Package metadata** — `repository`/`homepage`/`bugs` now point at the actual origin (4de89d7)
 - **Phantom `agent-skills` lookups** — 9 `agent-skills <name>` calls across 8 workflows (`quick`, `verify-work`, `plan-phase`, `research-phase`, `new-project`, `new-milestone`, `discuss-phase`, `ui-review`) referenced non-existent agent names (`gsd-checker`, `gsd-researcher`, `gsd-synthesizer`, `gsd-advisor`, `gsd-ui-reviewer`), so the skills-hint variable resolved empty and a project's configured `agent_skills` never reached those spawns. Realigned each lookup to the real agent it spawns (`gsd-verifier`, `gsd-research-orchestrator`, `gsd-research-synthesizer`, `gsd-advisor-researcher`, `gsd-ui-auditor`), matching the convention already used by the other 12 call sites
