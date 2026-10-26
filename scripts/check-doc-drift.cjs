@@ -185,6 +185,12 @@ const METRICS = [
         captureIndex: 1,
         normalize: asInt,
       },
+      {
+        file: 'README.md',
+        regex: /\|\s*\*\*get-shit-done\*\*\s*\|\s*—\s*\|\s*(\d+)\s*\|/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
     ],
   },
   {
@@ -213,6 +219,18 @@ const METRICS = [
       {
         file: 'docs/DEVOPS-HANDOFF.md',
         regex: /(\d+)\s+GSD slash commands/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /^###\s+GSD Commands\s+\((\d+)\)/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /Before we get into the\s+(\d+)\s+commands/,
         captureIndex: 1,
         normalize: asInt,
       },
@@ -274,6 +292,106 @@ const METRICS = [
       },
     ],
   },
+  {
+    id: 'hook_count_total',
+    label: 'total hooks',
+    measure: null,
+    claims: [
+      {
+        file: 'README.md',
+        regex: /\|\s*Runtime hooks\s*\|\s*(\d+)/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /^###\s+The\s+(\d+)\s+Hooks/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /\*\*Safety hooks\*\*\s+—\s+(\d+)\s+hooks fire/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+    ],
+  },
+  {
+    id: 'code_factory_skill_count',
+    label: 'code factory skills',
+    measure: null,
+    claims: [
+      {
+        file: 'README.md',
+        regex: /^##\s+Code Factory Skills\s+\((\d+)\)/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /\|\s*\*\*claude-code-factory\*\*\s+v[\d.]+\s*\|\s*(\d+)\s*\|/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /\((\d+)\s+code factory\s+\+/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+    ],
+  },
+  {
+    id: 'mcp_skill_count',
+    label: 'MCP ecosystem skills',
+    measure: null,
+    claims: [
+      {
+        file: 'README.md',
+        regex: /^##\s+MCP Ecosystem Skills\s+\((\d+)\)/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /\|\s*\*\*claude-mcp-ecosystem\*\*\s+v[\d.]+\s*\|\s*(\d+)\s*\|/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /\+\s+(\d+)\s+MCP ecosystem\)/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+    ],
+  },
+  {
+    id: 'plugin_subagent_count',
+    label: 'plugin subagents',
+    measure: null,
+    claims: [
+      {
+        file: 'README.md',
+        regex: /\|\s*Plugin subagents\s*\|\s*(\d+)/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'README.md',
+        regex: /\(\d+\s+skills,\s+(\d+)\s+subagents\)/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+      {
+        file: 'docs/DEVOPS-HANDOFF.md',
+        regex: /\d+\s+skills,\s+(\d+)\s+subagents/,
+        captureIndex: 1,
+        normalize: asInt,
+      },
+    ],
+  },
 ];
 
 // ─── Wire measure callbacks onto METRICS ──────────────────────────────────────
@@ -295,6 +413,10 @@ const metricMeasureMap = {
   command_count: (ctx) => measureCommandCount(ctx.repoRoot),
   skill_count: (ctx) => measureSkillCount(ctx.repoRoot),
   hook_count_execution: (ctx) => measureHookCount(ctx.repoRoot),
+  hook_count_total: (ctx) => measureTotalHookCount(ctx.repoRoot),
+  code_factory_skill_count: (ctx) => measurePluginSkillCount(ctx.repoRoot, 'claude-code-factory'),
+  mcp_skill_count: (ctx) => measurePluginSkillCount(ctx.repoRoot, 'claude-mcp-ecosystem'),
+  plugin_subagent_count: (ctx) => measurePluginSubagentCount(ctx.repoRoot),
 };
 
 for (const m of METRICS) {
@@ -480,6 +602,103 @@ function measureHookCount(repoRoot) {
   const dir = path.join(repoRoot, 'hooks', 'dist');
   if (!fs.existsSync(dir)) return 0;
   return fs.readdirSync(dir).filter(f => f.endsWith('.js')).length;
+}
+
+/** Skill directories under plugins/<plugin>/skills/. @returns {string[]} */
+function listPluginSkills(repoRoot, plugin) {
+  const dir = path.join(repoRoot, 'plugins', plugin, 'skills');
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name);
+}
+
+/** @returns {number} */
+function measurePluginSkillCount(repoRoot, plugin) {
+  return listPluginSkills(repoRoot, plugin).length;
+}
+
+/** Every file or directory path under `dir` (recursive). @returns {string[]} */
+function walk(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    out.push(full);
+    if (entry.isDirectory()) out.push(...walk(full));
+  }
+  return out;
+}
+
+/** .md files directly inside any `agents/` directory under plugins/. @returns {number} */
+function measurePluginSubagentCount(repoRoot) {
+  return walk(path.join(repoRoot, 'plugins'))
+    .filter(p => p.endsWith('.md') && path.basename(path.dirname(p)) === 'agents')
+    .length;
+}
+
+/** Hook commands in a Claude Code hooks map ({ Event: [{ hooks: [...] }] }). */
+function countHookCommands(hooksMap) {
+  let n = 0;
+  for (const entries of Object.values(hooksMap || {})) {
+    for (const entry of entries) n += (entry.hooks || []).length;
+  }
+  return n;
+}
+
+/**
+ * Execution hooks (hooks/dist) + governance hooks (settings-hooks.json) +
+ * plugin hooks (plugins/**\/hooks/hooks.json). @returns {number}
+ */
+function measureTotalHookCount(repoRoot) {
+  let total = measureHookCount(repoRoot);
+  const gov = path.join(repoRoot, 'governance', 'templates', 'global', 'settings-hooks.json');
+  if (fs.existsSync(gov)) total += countHookCommands(JSON.parse(fs.readFileSync(gov, 'utf8')).hooks);
+  for (const p of walk(path.join(repoRoot, 'plugins'))) {
+    if (path.basename(p) === 'hooks.json' && path.basename(path.dirname(p)) === 'hooks') {
+      total += countHookCommands(JSON.parse(fs.readFileSync(p, 'utf8')).hooks);
+    }
+  }
+  return total;
+}
+
+// README skill tables: section heading -> plugin whose skills it lists.
+const SKILL_TABLE_SECTIONS = [
+  { heading: /^##\s+Code Factory Skills\b/, plugin: 'claude-code-factory' },
+  { heading: /^##\s+MCP Ecosystem Skills\b/, plugin: 'claude-mcp-ecosystem' },
+];
+
+/**
+ * Check README skill tables against disk in both directions: every listed
+ * skill row must exist under plugins/<plugin>/skills/, and every skill on disk
+ * must be listed. Returns drift records (metric 'skill_table').
+ *
+ * @param {string} repoRoot
+ * @returns {Array<{file: string, line: number, metric: string, claimed: string, actual: string}>}
+ */
+function checkSkillTables(repoRoot) {
+  const readme = path.join(repoRoot, 'README.md');
+  if (!fs.existsSync(readme)) return [];
+  const lines = fs.readFileSync(readme, 'utf8').split('\n');
+  const drift = [];
+  for (const { heading, plugin } of SKILL_TABLE_SECTIONS) {
+    const start = lines.findIndex(l => heading.test(l));
+    if (start === -1) continue;
+    const onDisk = new Set(listPluginSkills(repoRoot, plugin));
+    const listed = new Set();
+    for (let i = start + 1; i < lines.length && !/^##\s/.test(lines[i]); i++) {
+      const m = lines[i].match(/^\|\s*([a-z0-9][a-z0-9-]*)\s*\|/);
+      if (!m) continue;
+      listed.add(m[1]);
+      if (!onDisk.has(m[1])) {
+        drift.push({ file: 'README.md', line: i + 1, metric: 'skill_table', claimed: m[1], actual: `not in plugins/${plugin}/skills/` });
+      }
+    }
+    for (const name of [...onDisk].sort()) {
+      if (!listed.has(name)) {
+        drift.push({ file: 'README.md', line: start + 1, metric: 'skill_table', claimed: '(unlisted)', actual: `${name} missing from table` });
+      }
+    }
+  }
+  return drift;
 }
 
 // ─── Claim Extraction ─────────────────────────────────────────────────────────
@@ -759,6 +978,10 @@ function main(argv) {
     }
   }
 
+  const skillTableDrift = checkSkillTables(repoRoot);
+  checked += SKILL_TABLE_SECTIONS.length;
+  driftRecords.push(...skillTableDrift);
+
   // Sort drift records by canonical doc order then line (D-14)
   const docOrderIdx = (f) => {
     const i = docFiles.indexOf(f);
@@ -812,6 +1035,10 @@ module.exports = {
   measureCommandCount,
   measureSkillCount,
   measureHookCount,
+  measureTotalHookCount,
+  measurePluginSkillCount,
+  measurePluginSubagentCount,
+  checkSkillTables,
 };
 
 // ─── Main guard ───────────────────────────────────────────────────────────────

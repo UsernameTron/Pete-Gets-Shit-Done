@@ -73,7 +73,7 @@ The full inventory:
 | Plugin subagents | 7 |
 | Session commands | 9 (`/prime`, `/wrap`, `/agents`, `/agent-setup`, etc.) |
 | Test suites | 602 |
-| Test assertions | 2,977 |
+| Test assertions | 2,982 |
 | Reference docs | 8 (CLI, skills, hooks, MCP, settings, subagents, threat model, necessity gate) |
 
 ## Getting Started
@@ -106,7 +106,7 @@ Verify it worked:
 | Command | Purpose |
 |---------|---------|
 | `node scripts/validate-doc-links.cjs` | Validates internal Markdown links (relative refs + anchor refs) in tracked `.md` files. Exits non-zero on broken links. Use `--json` for machine output, `--exclude <glob>` to suppress intentional fixtures. Runs in CI as the `docs-integrity` job. |
-| `node scripts/check-doc-drift.cjs` | Validates numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md against live test counts, coverage percentages, and filesystem inventory. Exits non-zero on drift. Use `--json` for machine output. Runs in CI as a step inside the `test` job (ubuntu/22 only). |
+| `node scripts/check-doc-drift.cjs` | Validates numeric claims in CLAUDE.md, README.md, docs/DEVOPS-HANDOFF.md against live test counts, coverage percentages, and filesystem inventory, and checks that every skill named in the README skill tables exists on disk (and vice versa). Exits non-zero on drift. Use `--json` for machine output. Runs in CI as a step inside the `test` job (ubuntu/22 only). |
 
 ## Staying Updated
 
