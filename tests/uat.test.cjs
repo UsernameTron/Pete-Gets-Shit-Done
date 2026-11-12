@@ -33,6 +33,22 @@ describe('audit-uat command', () => {
     assert.deepStrictEqual(output.results, []);
     assert.strictEqual(output.summary.total_items, 0);
     assert.strictEqual(output.summary.total_files, 0);
+    assert.strictEqual(output.skipped, undefined, 'a project with phases/ is audited, not skipped');
+  });
+
+  test('reports skipped, not an error, when there is no phases directory', () => {
+    // Milestone-layout and parked projects have .planning/ but no phases/. A non-zero
+    // exit here made quality-sweep (and so /gsd:confidence) report them BLOCKED.
+    fs.rmSync(path.join(tmpDir, '.planning', 'phases'), { recursive: true });
+
+    const result = runGsdTools('audit-uat --raw', tmpDir);
+    assert.ok(result.success, `Command failed: ${result.error}`);
+
+    const output = JSON.parse(result.output);
+    assert.deepStrictEqual(output.results, []);
+    assert.strictEqual(output.summary.total_items, 0);
+    assert.strictEqual(output.summary.total_files, 0);
+    assert.strictEqual(output.skipped, 'no phases directory');
   });
 
   test('detects UAT with pending items', () => {

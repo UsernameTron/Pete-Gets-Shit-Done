@@ -14,7 +14,14 @@ const { requireSafePath, sanitizeForDisplay } = require('./security.cjs');
 function cmdAuditUat(cwd, raw) {
   const phasesDir = path.join(planningDir(cwd), 'phases');
   if (!fs.existsSync(phasesDir)) {
-    error('No phases directory found in planning directory');
+    // Nothing to audit is not a failure. Milestone-layout and parked projects have no
+    // phases/, and quality-sweep counts a non-zero exit as a blocking finding.
+    output({
+      results: [],
+      summary: { total_files: 0, total_items: 0, by_category: {}, by_phase: {} },
+      skipped: 'no phases directory',
+    }, raw);
+    return;
   }
 
   const isDirInMilestone = getMilestonePhaseFilter(cwd);

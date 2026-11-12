@@ -137,7 +137,9 @@ Parse per `health.md`: `status` (healthy/degraded/broken), `errors[]`, `warnings
 UAT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" audit-uat --raw)
 ```
 
-Parse `summary` and `results`. `summary.total_items` of 0 is a clean PASS for this leg. For
+Parse `summary` and `results`. If the JSON carries `skipped` (the project has no
+`.planning/phases/` directory), record this leg under Skipped legs as `uat: skipped — no phases
+directory`; it is not a finding. `summary.total_items` of 0 is a clean PASS for this leg. For
 non-zero items, apply `audit-uat.md`'s categorization: Testable Now vs Needs Prerequisites vs
 stale (Grep/Read spot-check that referenced features still exist).
 
