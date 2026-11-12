@@ -700,6 +700,40 @@ describe('measureTestCounts', () => {
     assert.strictEqual(result.tests, 0, `expected tests=0 on broken spawn, got ${result.tests}`);
     assert.strictEqual(result.suites, 0, `expected suites=0 on broken spawn, got ${result.suites}`);
   });
+
+  test('spawned suite runs with a throwaway HOME, removed afterwards', () => {
+    // Some real test files exercise the installer. With the caller's HOME this spawn
+    // reinstalled GSD into ~/.claude (2026-11-11), so the child must not inherit it.
+    const testsDir = path.join(tmpDir, 'tests');
+    fs.mkdirSync(testsDir, { recursive: true });
+    fs.writeFileSync(path.join(testsDir, 'home.test.cjs'), [
+      "const { test } = require('node:test');",
+      "const fs = require('fs');",
+      "const os = require('os');",
+      "test('records home', () => {",
+      "  fs.writeFileSync('child-home.json', JSON.stringify({",
+      "    home: os.homedir(), configDir: process.env.CLAUDE_CONFIG_DIR }));",
+      "});",
+    ].join('\n'), 'utf8');
+
+    // The runner marks its children with NODE_TEST_CONTEXT; inherited, it would make the
+    // nested runner report in child mode instead of TAP, so drop it for this call.
+    const ctx = process.env.NODE_TEST_CONTEXT;
+    delete process.env.NODE_TEST_CONTEXT;
+    let result;
+    try {
+      result = measureTestCounts(tmpDir);
+    } finally {
+      if (ctx !== undefined) process.env.NODE_TEST_CONTEXT = ctx;
+    }
+    assert.strictEqual(result.tests, 1, `expected the probe test to run, got ${result.tests}`);
+
+    const child = JSON.parse(fs.readFileSync(path.join(tmpDir, 'child-home.json'), 'utf8'));
+    assert.notStrictEqual(child.home, os.homedir(), 'child must not inherit the caller HOME');
+    assert.ok(path.basename(child.home).startsWith('gsd-test-home-'), `unexpected child HOME: ${child.home}`);
+    assert.strictEqual(child.configDir, '', 'CLAUDE_CONFIG_DIR must be blanked for the child');
+    assert.strictEqual(fs.existsSync(child.home), false, 'throwaway HOME should be removed after the run');
+  });
 });
 
 // ─── measure filesystem (agent/command/skill/hook) ────────────────────────────

@@ -25,6 +25,7 @@
  */
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { execFileSync, spawnSync } = require('child_process');
 
@@ -534,6 +535,10 @@ function measureTestCounts(repoRoot) {
     .map(f => path.join(testsDir, f));
   if (testFiles.length === 0) return { tests: 0, suites: 0 };
   let tap = '';
+  // Same hermetic sandbox as scripts/run-tests.cjs. Several test files exercise the
+  // real installer; with the real HOME this spawn reinstalled GSD into ~/.claude and
+  // rewrote settings.json (2026-11-11). The child gets a throwaway home instead.
+  const sandboxHome = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-test-home-'));
   try {
     // maxBuffer: 16 * 1024 * 1024 hardens against TAP-stdout truncation when the
     // suite grows past Node's default 1MB limit (Codex MEDIUM, REVIEWS.md). Without
@@ -545,6 +550,12 @@ function measureTestCounts(repoRoot) {
       stdio: ['ignore', 'pipe', 'pipe'],
       timeout: 120_000,
       maxBuffer: 16 * 1024 * 1024,
+      env: {
+        ...process.env,
+        HOME: sandboxHome,
+        USERPROFILE: sandboxHome, // Windows: os.homedir() reads USERPROFILE
+        CLAUDE_CONFIG_DIR: '', // don't let a real config dir leak through
+      },
     });
   } catch (err) {
     // node --test exits non-zero when any test fails; we still want the TAP summary.
@@ -557,6 +568,8 @@ function measureTestCounts(repoRoot) {
       return { tests: 0, suites: 0 };
     }
     tap = err.stdout.toString();
+  } finally {
+    try { fs.rmSync(sandboxHome, { recursive: true, force: true }); } catch (e) {}
   }
   return parseTapSummary(tap);
 }
